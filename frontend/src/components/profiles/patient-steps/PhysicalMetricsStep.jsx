@@ -190,8 +190,17 @@ const PhysicalMetricsStep = ({ data = {}, onChange, icon: Icon }) => {
               max="50"
               helpText="If you know your body fat percentage from a scale or test"
             />
-
-            <FormField
+          </div>
+          
+          {/* Body Fat Visual Guide */}
+          <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">
+            <p className="text-sm text-blue-800">
+              <strong>Body Fat Percentage Guide:</strong> Typical healthy ranges vary by age and sex. As a general guide, adults often fall roughly in: 
+              Healthy range approx. 10–22% (men), 20–32% (women). Consult your provider for personalized ranges.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4"
               type="number"
               label="Muscle Mass (kg)"
               value={data.muscle_mass_kg}
