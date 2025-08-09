@@ -100,24 +100,10 @@ export const hasCompleteSections = (profileData) => {
   // Check if at least one section is complete
   const completeSections = Object.entries(profileData).filter(([sectionName, sectionData]) => {
     const validator = validators[sectionName];
-    const isComplete = validator && validator(sectionData);
-    
-    // Debug logging - remove this later
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`Section ${sectionName}: ${isComplete ? 'COMPLETE' : 'INCOMPLETE'}`, sectionData);
-    }
-    
-    return isComplete;
+    return validator && validator(sectionData);
   });
   
-  const hasComplete = completeSections.length > 0;
-  
-  // Debug logging - remove this later
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`hasCompleteSections result: ${hasComplete}`, completeSections.map(([name]) => name));
-  }
-  
-  return hasComplete;
+  return completeSections.length > 0;
 };
 
 // Function to get completion status for each section
