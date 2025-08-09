@@ -551,9 +551,21 @@ class HealthPlatformAPITester:
         # Test 3: Update Provider Profile
         update_data = {
             "preferences": {
+                "consultation_types": ["in_person", "telehealth"],  # Removed group sessions
+                "working_hours": {
+                    "timezone": "America/Los_Angeles",
+                    "schedule": {
+                        "monday": {"start": "08:00", "end": "17:00"},
+                        "tuesday": {"start": "08:00", "end": "17:00"},
+                        "wednesday": {"start": "08:00", "end": "17:00"},
+                        "thursday": {"start": "08:00", "end": "17:00"},
+                        "friday": {"start": "08:00", "end": "15:00"}
+                    }
+                },
                 "max_patients": 175,  # Updated capacity
                 "accepting_new_patients": False,  # No longer accepting
-                "consultation_types": ["in_person", "telehealth"]  # Removed group sessions
+                "specialized_conditions": ["type_2_diabetes", "metabolic_syndrome"],
+                "treatment_philosophies": ["evidence_based", "patient_centered", "holistic"]
             }
         }
         
