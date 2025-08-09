@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Backend completion fix + cross-session editing: Fix backend so profile_completion is persisted on every profile update (patient, provider, family). Enable true profile editing by auto-loading existing profiles when users revisit the wizards using localStorage persistence per role."
+user_problem_statement: "UI Enhancements: Add 'Previous surgeries or medical procedures' to Patient Health History step, wired to backend previous_surgeries field. Add body-fat visual cue/guide in Physical Metrics step. Show section '✓ Saved' badges in ProgressIndicator for Provider and Family wizards with per-section completion checks."
 
   - task: "Backend Profile Completion Persistence Fix"
     implemented: true
