@@ -15,7 +15,7 @@ const roleOptions = [
       'Personalized meal plans',
       'Progress analytics'
     ],
-    buttonText: 'Start Personal Journey',
+    buttonText: 'Start Personal\nJourney',
     route: '/patient-dashboard',
     icon: User,
     image: 'https://images.unsplash.com/photo-1434494878577-86c23bcb06b9',
@@ -32,7 +32,7 @@ const roleOptions = [
       'Diet prescription tools',
       'Evidence-based recommendations'
     ],
-    buttonText: 'Access Professional Portal',
+    buttonText: 'Access Professional\nPortal',
     route: '/provider-dashboard',
     icon: Stethoscope,
     image: 'https://images.unsplash.com/photo-1624727828489-a1e03b79bba8',
@@ -49,7 +49,7 @@ const roleOptions = [
       'Health coordination',
       'Caregiver tools'
     ],
-    buttonText: 'Manage Family Health',
+    buttonText: 'Manage Family\nHealth',
     route: '/family-dashboard',
     icon: Users,
     image: 'https://images.unsplash.com/photo-1576765974102-b756026ecee3',
@@ -66,7 +66,7 @@ const roleOptions = [
       'Temporary tracking',
       'No data storage'
     ],
-    buttonText: 'Try Guest Mode',
+    buttonText: 'Try Guest\nMode',
     route: '/guest-dashboard',
     icon: UserCheck,
     image: 'https://images.unsplash.com/photo-1623658045230-605cb00c80d6',
