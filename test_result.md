@@ -104,6 +104,54 @@
 
 user_problem_statement: "Backend completion fix + cross-session editing: Fix backend so profile_completion is persisted on every profile update (patient, provider, family). Enable true profile editing by auto-loading existing profiles when users revisit the wizards using localStorage persistence per role."
 
+  - task: "Backend Profile Completion Persistence Fix"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "IMPLEMENTED: Fixed update_patient_profile, update_provider_profile, and update_family_profile functions to persist profile_completion value to database. Added update_dict['profile_completion'] = merged_profile['profile_completion'] to ensure calculated completion gets saved. Ready for backend testing."
+
+  - task: "Cross-Session Profile Editing - Patient Wizard"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/components/profiles/PatientProfileWizard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "IMPLEMENTED: Added localStorage persistence for 'patient_user_id' and auto-loading of existing profiles on mount. When wizard loads, checks localStorage -> fetches existing profile via ProfileAPI.getPatientProfile() -> populates wizard state and sets editing mode. Ready for frontend testing."
+
+  - task: "Cross-Session Profile Editing - Provider Wizard"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/components/profiles/ProviderProfileWizard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "IMPLEMENTED: Added localStorage persistence for 'provider_user_id' and auto-loading of existing profiles on mount. Provider wizard now loads previously saved data automatically when revisiting. Ready for frontend testing."
+
+  - task: "Cross-Session Profile Editing - Family Wizard"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/components/profiles/FamilyProfileWizard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "IMPLEMENTED: Added localStorage persistence for 'family_user_id', section completion tracking, and auto-loading of existing profiles on mount. Family wizard now loads previously saved data automatically with proper completion state calculation. Ready for frontend testing."
+
 backend:
   - task: "Role-Specific API Endpoints"
     implemented: true
