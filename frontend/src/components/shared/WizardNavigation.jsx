@@ -34,7 +34,7 @@ const WizardNavigation = ({
 
       {/* Auto-save Indicator */}
       <div className="text-sm text-gray-500">
-        {isLoading && (
+        {showAutoSaveIndicator && isLoading && (
           <div className="flex items-center">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
             Auto-saving...
