@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import uuid
 
 class HealthPlatformAPITester:
-    def __init__(self, base_url="https://9551d62c-5652-43c6-a721-bcc00f5e6e0b.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://16ef3e05-7a87-4d11-9f29-11549f00ad47.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
