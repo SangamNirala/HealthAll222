@@ -498,6 +498,11 @@ metadata:
   created_by: "main_agent"
   version: "1.0"
   test_sequence: 1
+  current_focus:
+    - "Patient Profile Wizard UI"
+  test_all: false
+  test_priority: "high_first"
+
   run_ui: false
 
 test_plan:
