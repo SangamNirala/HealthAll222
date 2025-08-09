@@ -1706,7 +1706,7 @@ class HealthPlatformAPITester:
         print("\n📝 Testing Family Profile Completion Persistence")
         family_user_id = f"family_persist_{datetime.now().strftime('%H%M%S_%f')}"
         
-        # Step 1: Create family profile with only family_structure (25% completion)
+        # Step 1: Create family profile with only family_structure (50% completion due to family_members default [])
         family_structure_data = {
             "user_id": family_user_id,
             "family_structure": {
@@ -1727,56 +1727,31 @@ class HealthPlatformAPITester:
         family_initial_completion = 0
         if success9 and family_create_response:
             family_initial_completion = family_create_response.get('profile_completion', 0)
-            print(f"   ✅ Family initial completion: {family_initial_completion}% (Expected: 25%)")
+            print(f"   ✅ Family initial completion: {family_initial_completion}% (Expected: 50% - family_structure + empty family_members list)")
         
-        # Step 2: PUT update to add family_members section
-        family_members_update = {
-            "family_members": [
-                {
-                    "name": "John Smith",
-                    "relationship": "Self",
-                    "age": 42,
-                    "gender": "Male",
-                    "special_needs": [],
-                    "allergies": ["pollen"],
-                    "medications": [],
-                    "health_conditions": []
-                },
-                {
-                    "name": "Mary Smith",
-                    "relationship": "Spouse",
-                    "age": 38,
-                    "gender": "Female",
-                    "special_needs": [],
-                    "allergies": [],
-                    "medications": [],
-                    "health_conditions": []
-                },
-                {
-                    "name": "Emma Smith",
-                    "relationship": "Daughter",
-                    "age": 12,
-                    "gender": "Female",
-                    "special_needs": [],
-                    "allergies": ["peanuts"],
-                    "medications": [],
-                    "health_conditions": []
-                }
-            ]
+        # Step 2: PUT update to add household_management section to increase completion
+        household_management_update = {
+            "household_management": {
+                "common_dietary_restrictions": ["peanut_free"],
+                "family_meal_preferences": ["home_cooked", "balanced_nutrition"],
+                "budget_considerations": {"weekly_grocery_budget": 200},
+                "shopping_responsibilities": ["John", "Mary"],
+                "cooking_responsibilities": ["Mary"]
+            }
         }
         
         success10, family_update_response = self.run_test(
-            "Update Family Profile - Add Family Members",
+            "Update Family Profile - Add Household Management",
             "PUT",
             f"profiles/family/{family_user_id}",
             200,
-            data=family_members_update
+            data=household_management_update
         )
         
         family_updated_completion = 0
         if success10 and family_update_response:
             family_updated_completion = family_update_response.get('profile_completion', 0)
-            print(f"   ✅ Family updated completion: {family_updated_completion}% (Expected: 50%)")
+            print(f"   ✅ Family updated completion: {family_updated_completion}% (Expected: 75%)")
         
         # Step 3: Verify GET shows increased completion percentage
         success11, family_get_response = self.run_test(
