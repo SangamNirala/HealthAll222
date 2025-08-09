@@ -10,6 +10,11 @@ const useAutoSave = (data, saveFunction, delay = 1000) => {
   // Debounced save function
   const debouncedSave = useCallback(
     debounce(async (dataToSave) => {
+      // Check if we actually have complete sections before setting saving state
+      if (!hasCompleteSections(dataToSave)) {
+        return; // Don't save or show saving state if no complete sections
+      }
+      
       try {
         setIsSaving(true);
         setSaveError(null);
