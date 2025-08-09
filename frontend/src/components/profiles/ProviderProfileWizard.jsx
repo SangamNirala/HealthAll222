@@ -80,6 +80,7 @@ const ProviderProfileWizard = () => {
         
         if (existingProfile) {
           setProfileData(existingProfile);
+          setSectionCompletion(calculateSectionCompletion(existingProfile));
           setIsEditing(true);
         }
       } else if (storedUserId) {
