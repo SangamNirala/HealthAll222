@@ -200,7 +200,8 @@ const PhysicalMetricsStep = ({ data = {}, onChange, icon: Icon }) => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
               type="number"
               label="Muscle Mass (kg)"
               value={data.muscle_mass_kg}
