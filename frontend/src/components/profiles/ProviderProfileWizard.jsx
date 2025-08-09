@@ -23,10 +23,10 @@ const ProviderProfileWizard = () => {
 
   // Profile data state
   const [profileData, setProfileData] = useState({
-    professional_identity: null,
-    credentials: null,
-    practice_info: null,
-    preferences: null,
+    professional_identity: {},
+    credentials: {},
+    practice_info: {},
+    preferences: {},
   });
 
   const totalSteps = 4;
