@@ -25,12 +25,12 @@ const PatientProfileWizard = () => {
 
   // Profile data state
   const [profileData, setProfileData] = useState({
-    basic_info: null,
-    physical_metrics: null,
-    activity_profile: null,
-    health_history: null,
-    dietary_profile: null,
-    goals_preferences: null,
+    basic_info: {},
+    physical_metrics: {},
+    activity_profile: {},
+    health_history: {},
+    dietary_profile: {},
+    goals_preferences: {},
   });
 
   const totalSteps = 6;
