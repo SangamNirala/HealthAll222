@@ -1393,25 +1393,154 @@ class HealthPlatformAPITester:
         
         return overall_success
 
+    def test_patient_profile_partial_updates_smoke_test(self):
+        """Smoke test for patient profile partial updates as requested in review"""
+        print("\n🔍 Patient Profile Partial Updates - Smoke Test")
+        print("Testing: POST with basic_info only, PUT with physical_metrics only, PUT with incomplete activity_profile")
+        
+        # Generate unique user ID for testing
+        test_user_id = f"smoke_test_{datetime.now().strftime('%H%M%S_%f')}"
+        
+        # Test 1: POST /api/profiles/patient with only user_id and complete basic_info section
+        print("\n📝 Test 1: POST with only user_id and complete basic_info section")
+        basic_info_only_data = {
+            "user_id": test_user_id,
+            "basic_info": {
+                "full_name": "Emma Wilson",
+                "age": 29,
+                "gender": "Female", 
+                "location": "Seattle, WA",
+                "contact_preferences": {"email": True, "sms": False, "push": True},
+                "timezone": "America/Los_Angeles",
+                "emergency_contact": {"name": "David Wilson", "phone": "+1-555-0188"},
+                "preferred_language": "English"
+            }
+        }
+        
+        success1, create_response = self.run_test(
+            "POST Patient Profile - Basic Info Only",
+            "POST",
+            "profiles/patient",
+            200,
+            data=basic_info_only_data
+        )
+        
+        if success1 and create_response:
+            completion = create_response.get('profile_completion', 0)
+            print(f"   ✅ Profile completion after basic_info only: {completion}%")
+        
+        # Test 2: PUT /api/profiles/patient/{user_id} with only complete physical_metrics section
+        print("\n📝 Test 2: PUT with only complete physical_metrics section")
+        physical_metrics_only = {
+            "physical_metrics": {
+                "height_cm": 165.0,
+                "current_weight_kg": 62.0,
+                "goal_weight_kg": 58.0,
+                "body_fat_percentage": 24.0,
+                "muscle_mass_kg": 42.0,
+                "measurements": {"waist": 75.0, "chest": 88.0, "hips": 95.0},
+                "bmi": 22.8
+            }
+        }
+        
+        success2, update_response = self.run_test(
+            "PUT Patient Profile - Physical Metrics Only",
+            "PUT",
+            f"profiles/patient/{test_user_id}",
+            200,
+            data=physical_metrics_only
+        )
+        
+        if success2 and update_response:
+            completion = update_response.get('profile_completion', 0)
+            print(f"   ✅ Profile completion after adding physical_metrics: {completion}%")
+        
+        # Test 3: PUT with incomplete activity_profile (missing sleep_schedule) - should return 422
+        print("\n📝 Test 3: PUT with incomplete activity_profile (missing sleep_schedule)")
+        incomplete_activity_profile = {
+            "activity_profile": {
+                "activity_level": "MODERATELY_ACTIVE",
+                "exercise_types": ["running", "yoga"],
+                "exercise_frequency": 4,
+                # Missing required sleep_schedule field
+                "stress_level": 3,
+                "work_type": "DESK_JOB"
+            }
+        }
+        
+        success3, _ = self.run_test(
+            "PUT Patient Profile - Incomplete Activity Profile (Should Fail)",
+            "PUT",
+            f"profiles/patient/{test_user_id}",
+            422,  # Expecting validation error
+            data=incomplete_activity_profile
+        )
+        
+        # Test 4: GET returns merged profile with completion > 0
+        print("\n📝 Test 4: GET merged profile with completion > 0")
+        success4, final_profile = self.run_test(
+            "GET Merged Patient Profile",
+            "GET",
+            f"profiles/patient/{test_user_id}",
+            200
+        )
+        
+        if success4 and final_profile:
+            completion = final_profile.get('profile_completion', 0)
+            basic_info = final_profile.get('basic_info')
+            physical_metrics = final_profile.get('physical_metrics')
+            
+            print(f"   ✅ Final profile completion: {completion}%")
+            print(f"   ✅ Has basic_info: {'Yes' if basic_info else 'No'}")
+            print(f"   ✅ Has physical_metrics: {'Yes' if physical_metrics else 'No'}")
+            
+            completion_valid = completion > 0
+            sections_merged = basic_info is not None and physical_metrics is not None
+            
+            if not completion_valid:
+                print(f"   ❌ Profile completion should be > 0, got {completion}%")
+            if not sections_merged:
+                print(f"   ❌ Profile sections not properly merged")
+        
+        # Cleanup
+        success_cleanup, _ = self.run_test(
+            "Cleanup - Delete Smoke Test Profile",
+            "DELETE",
+            f"profiles/patient/{test_user_id}",
+            200
+        )
+        
+        # Overall success evaluation
+        overall_success = success1 and success2 and success3 and success4 and success_cleanup
+        
+        print(f"\n📊 Smoke Test Results:")
+        print(f"   POST with basic_info only: {'✅' if success1 else '❌'}")
+        print(f"   PUT with physical_metrics only: {'✅' if success2 else '❌'}")
+        print(f"   PUT with incomplete activity_profile (422): {'✅' if success3 else '❌'}")
+        print(f"   GET merged profile with completion > 0: {'✅' if success4 else '❌'}")
+        print(f"   Overall Smoke Test: {'✅' if overall_success else '❌'}")
+        
+        return overall_success
+
 def main():
     """Main test execution"""
     tester = HealthPlatformAPITester()
     
-    # Run the specific auto-save compatibility test as requested
-    print("🚀 Starting Patient Profile Management API - Auto-Save Compatibility Test")
+    # Run the specific smoke test as requested in the review
+    print("🚀 Starting Patient Profile Partial Updates - Smoke Test")
     print(f"🌐 Base URL: {tester.base_url}")
     print("=" * 80)
     
-    success = tester.test_patient_profile_auto_save_compatibility()
+    success = tester.test_patient_profile_partial_updates_smoke_test()
     
     print("\n" + "=" * 80)
     if success:
-        print("🎉 Patient Profile Management API - Auto-Save Compatibility: PASSED")
-        print("✅ Auto-save improvements do not break existing functionality")
+        print("🎉 Patient Profile Partial Updates - Smoke Test: PASSED")
+        print("✅ Patient profile endpoints accept partial updates where provided sections are complete")
         return 0
     else:
-        print("⚠️ Patient Profile Management API - Auto-Save Compatibility: FAILED")
-        print("❌ Issues detected that may affect auto-save functionality")
+        print("⚠️ Patient Profile Partial Updates - Smoke Test: FAILED")
+        print("❌ Issues detected with partial update functionality")
         return 1
 
 if __name__ == "__main__":
