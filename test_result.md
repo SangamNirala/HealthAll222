@@ -372,6 +372,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "BUG FIX VALIDATED: ✅ Original null reference error resolved. Patient profile wizard loads successfully, BasicInfoStep component works properly, form fields are accessible and functional. Full name field accepts input without errors. Minor: Auto-save has backend API validation issues (422 status) but core functionality works."
+      - working: true
+        agent: "main"
+        comment: "MAJOR FIX: Improved auto-save logic to only trigger when complete sections are filled, preventing validation errors when users enter partial data (e.g., only gender field). Added section completion validation, visual indicators for saved sections, and helpful user feedback. Users now won't see errors when filling individual fields - auto-save only triggers when all required fields in a section are complete."
 
   - task: "Provider Profile Wizard UI"
     implemented: true
