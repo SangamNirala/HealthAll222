@@ -23,6 +23,7 @@ const PatientProfileWizard = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [sectionCompletion, setSectionCompletion] = useState({});
 
   // Profile data state
   const [profileData, setProfileData] = useState({
