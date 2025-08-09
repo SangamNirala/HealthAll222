@@ -501,6 +501,19 @@ frontend:
         agent: "main"
         comment: "PHASE 2: Updated routing to include /family-profile and /guest-setup routes. Updated RoleSelection component navigation logic."
 
+
+  - task: "Clickable Help Popovers on Form Fields"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/shared/FormField.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Replaced hover-only Tooltip with click-activated Popover for all FormField help icons. Help question marks are now clickable, show concise context-specific info, and work for inputs, selects, radios, and checkboxes. Accessible via keyboard with proper aria-label."
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
