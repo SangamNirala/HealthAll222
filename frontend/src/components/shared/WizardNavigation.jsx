@@ -12,7 +12,8 @@ const WizardNavigation = ({
   isLoading = false,
   showSave = false,
   nextButtonText = "Next",
-  saveButtonText = "Save Profile"
+  saveButtonText = "Save Profile",
+  showAutoSaveIndicator = true,
 }) => {
   const isFirstStep = currentStep === 1;
   const isLastStep = currentStep === totalSteps;
