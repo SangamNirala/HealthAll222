@@ -493,7 +493,9 @@ test_plan:
 agent_communication:
   - agent: "user"
     message: "ERROR REPORTED: When clicking 'Create Profile' button, getting error 'Cannot read properties of null (reading 'full_name')' in BasicInfoStep component"
+  - agent: "user"
+    message: "NEW ERROR REPORTED: Auto-save showing multiple [object Object] error messages when profile creation wizard loads"
   - agent: "main"
-    message: "FIXED: Root cause identified - profileData sections were initialized as null instead of empty objects. Fixed initialization in PatientProfileWizard, ProviderProfileWizard, and FamilyProfileWizard. Services restarted. Ready for frontend testing to validate fix."
+    message: "FIXED AUTO-SAVE ISSUE: Root cause was auto-save triggering on empty profile data that lacks required backend validation fields. Fixed useAutoSave hook to only save when there's meaningful content. Improved error message handling to display user-friendly messages instead of [object Object]. Ready for testing."
   - agent: "testing"
     message: "BUG FIX VALIDATION COMPLETE: ✅ Original null reference error successfully resolved. All profile wizards (Patient, Provider, Family) now load without errors. Form fields are accessible and functional. BasicInfoStep component works properly. Minor issue: Auto-save has backend API validation errors (422 status) but core functionality works. The profileData initialization fix has successfully resolved the reported bug."
