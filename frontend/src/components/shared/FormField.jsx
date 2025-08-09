@@ -94,6 +94,18 @@ const FormField = ({
             <Label htmlFor={fieldId} className="text-sm font-normal">
               {label}
             </Label>
+            {helpText && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button type="button" aria-label={`Help for ${label}`} className="focus:outline-none">
+                    <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="text-sm leading-snug max-w-xs">
+                  {helpText}
+                </PopoverContent>
+              </Popover>
+            )}
           </div>
         );
 
