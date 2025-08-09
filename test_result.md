@@ -514,6 +514,9 @@ frontend:
         agent: "main"
         comment: "Replaced hover-only Tooltip with click-activated Popover for all FormField help icons. Help question marks are now clickable, show concise context-specific info, and work for inputs, selects, radios, and checkboxes. Accessible via keyboard with proper aria-label."
 
+  current_focus:
+    - "Clickable Help Popovers on Form Fields"
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
