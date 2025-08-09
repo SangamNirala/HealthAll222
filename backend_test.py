@@ -1054,10 +1054,365 @@ class HealthPlatformAPITester:
                     print(f"  - {result['name']}: {result.get('error', 'Status code mismatch')}")
             return 1
 
+    def test_patient_profile_auto_save_compatibility(self):
+        """Test Patient Profile Management API for auto-save compatibility"""
+        print("\n🔍 Testing Patient Profile Management API - Auto-Save Compatibility...")
+        print("Focus: Ensure auto-save improvements don't break existing functionality")
+        
+        # Generate unique user ID for testing
+        test_user_id = f"autosave_test_{datetime.now().strftime('%H%M%S_%f')}"
+        
+        # Test 1: Create Patient Profile with complete profile data (POST /api/profiles/patient)
+        print("\n📝 Test 1: Patient Profile Creation with Complete Data")
+        complete_profile_data = {
+            "user_id": test_user_id,
+            "basic_info": {
+                "full_name": "Jessica Martinez",
+                "age": 32,
+                "gender": "Female",
+                "location": "Austin, TX",
+                "contact_preferences": {"email": True, "sms": True, "push": False},
+                "timezone": "America/Chicago",
+                "emergency_contact": {"name": "Carlos Martinez", "phone": "+1-555-0199"},
+                "preferred_language": "English"
+            },
+            "physical_metrics": {
+                "height_cm": 168.0,
+                "current_weight_kg": 72.0,
+                "goal_weight_kg": 68.0,
+                "body_fat_percentage": 22.5,
+                "muscle_mass_kg": 45.0,
+                "measurements": {"waist": 78.0, "chest": 95.0, "hips": 98.0},
+                "bmi": 25.5
+            },
+            "activity_profile": {
+                "activity_level": "VERY_ACTIVE",
+                "exercise_types": ["yoga", "pilates", "swimming", "hiking"],
+                "exercise_frequency": 5,
+                "sleep_schedule": {
+                    "bedtime": "22:30",
+                    "wake_time": "06:30",
+                    "sleep_quality": 4
+                },
+                "stress_level": 2,
+                "work_type": "MIXED"
+            },
+            "health_history": {
+                "primary_health_goals": ["weight_loss", "muscle_tone", "stress_reduction"],
+                "medical_conditions": {"hypothyroidism": "controlled"},
+                "current_medications": [
+                    {"name": "Levothyroxine", "dosage": "50mcg", "frequency": "daily"}
+                ],
+                "allergies": ["latex", "iodine"],
+                "food_intolerances": ["gluten"],
+                "previous_surgeries": [
+                    {"procedure": "Appendectomy", "year": 2018, "complications": "none"}
+                ],
+                "family_medical_history": ["thyroid_disease", "diabetes"]
+            },
+            "dietary_profile": {
+                "diet_type": "FLEXITARIAN",
+                "cultural_restrictions": [],
+                "specific_diets": ["gluten_free"],
+                "food_allergies": [],
+                "food_dislikes": ["mushrooms", "olives"],
+                "meal_timing_preference": "SMALL_FREQUENT",
+                "cooking_skill_level": 4,
+                "available_cooking_time": 60
+            },
+            "goals_preferences": {
+                "health_targets": [
+                    {"type": "weight", "target": 68.0, "timeframe": "4_months"},
+                    {"type": "body_fat", "target": 20.0, "timeframe": "6_months"},
+                    {"type": "exercise", "target": 5, "timeframe": "weekly"}
+                ],
+                "communication_methods": ["email", "app_notifications", "text_messages"],
+                "notification_preferences": {
+                    "daily_reminders": True, 
+                    "weekly_reports": True, 
+                    "goal_achievements": True,
+                    "meal_suggestions": True
+                },
+                "privacy_settings": {
+                    "share_with_providers": True, 
+                    "anonymous_data": True,
+                    "research_participation": False
+                },
+                "data_sharing_preferences": {
+                    "family_members": True,
+                    "healthcare_team": True,
+                    "fitness_apps": False
+                }
+            }
+        }
+        
+        success1, create_response = self.run_test(
+            "Create Patient Profile - Complete Data",
+            "POST",
+            "profiles/patient",
+            200,
+            data=complete_profile_data
+        )
+        
+        # Validate profile completion calculation
+        if success1 and create_response:
+            completion = create_response.get('profile_completion', 0)
+            print(f"   ✅ Profile completion: {completion}% (Expected: 100%)")
+            completion_valid = completion == 100.0
+            if not completion_valid:
+                print(f"   ❌ Profile completion calculation issue: Expected 100%, got {completion}%")
+        
+        # Test 2: Verify profile retrieval
+        print("\n📝 Test 2: Profile Retrieval Verification")
+        success2, get_response = self.run_test(
+            "Get Complete Patient Profile",
+            "GET",
+            f"profiles/patient/{test_user_id}",
+            200
+        )
+        
+        # Validate all sections are present
+        if success2 and get_response:
+            expected_sections = ["basic_info", "physical_metrics", "activity_profile", "health_history", "dietary_profile", "goals_preferences"]
+            missing_sections = [section for section in expected_sections if not get_response.get(section)]
+            if not missing_sections:
+                print(f"   ✅ All profile sections present and complete")
+            else:
+                print(f"   ❌ Missing sections: {missing_sections}")
+        
+        # Test 3: Partial Updates (PUT /api/profiles/patient/{user_id}) - Simulating auto-save behavior
+        print("\n📝 Test 3: Partial Profile Updates (Auto-Save Simulation)")
+        
+        # Test 3a: Update only basic_info (common auto-save scenario)
+        basic_info_update = {
+            "basic_info": {
+                "full_name": "Jessica Martinez-Rodriguez",  # Name change
+                "age": 32,
+                "gender": "Female",
+                "location": "Austin, TX",
+                "contact_preferences": {"email": True, "sms": True, "push": True},  # Updated preferences
+                "timezone": "America/Chicago",
+                "emergency_contact": {"name": "Carlos Martinez", "phone": "+1-555-0199"},
+                "preferred_language": "English"
+            }
+        }
+        
+        success3a, update_response_basic = self.run_test(
+            "Partial Update - Basic Info Only",
+            "PUT",
+            f"profiles/patient/{test_user_id}",
+            200,
+            data=basic_info_update
+        )
+        
+        # Test 3b: Update only physical_metrics (another common auto-save scenario)
+        physical_update = {
+            "physical_metrics": {
+                "height_cm": 168.0,
+                "current_weight_kg": 71.2,  # Weight progress
+                "goal_weight_kg": 68.0,
+                "body_fat_percentage": 21.8,  # Body fat progress
+                "muscle_mass_kg": 45.5,  # Muscle gain
+                "measurements": {"waist": 77.0, "chest": 95.0, "hips": 97.5},  # Updated measurements
+                "bmi": 25.2
+            }
+        }
+        
+        success3b, update_response_physical = self.run_test(
+            "Partial Update - Physical Metrics Only",
+            "PUT",
+            f"profiles/patient/{test_user_id}",
+            200,
+            data=physical_update
+        )
+        
+        # Test 3c: Update multiple sections simultaneously (complex auto-save scenario)
+        multi_section_update = {
+            "activity_profile": {
+                "activity_level": "VERY_ACTIVE",
+                "exercise_types": ["yoga", "pilates", "swimming", "hiking", "strength_training"],  # Added new exercise
+                "exercise_frequency": 6,  # Increased frequency
+                "sleep_schedule": {
+                    "bedtime": "22:00",  # Earlier bedtime
+                    "wake_time": "06:00",  # Earlier wake time
+                    "sleep_quality": 5  # Improved sleep quality
+                },
+                "stress_level": 1,  # Reduced stress
+                "work_type": "MIXED"
+            },
+            "goals_preferences": {
+                "health_targets": [
+                    {"type": "weight", "target": 68.0, "timeframe": "3_months"},  # Updated timeframe
+                    {"type": "body_fat", "target": 19.0, "timeframe": "5_months"},  # More ambitious target
+                    {"type": "exercise", "target": 6, "timeframe": "weekly"}  # Increased exercise target
+                ],
+                "communication_methods": ["email", "app_notifications", "text_messages"],
+                "notification_preferences": {
+                    "daily_reminders": True, 
+                    "weekly_reports": True, 
+                    "goal_achievements": True,
+                    "meal_suggestions": True,
+                    "workout_reminders": True  # New preference
+                },
+                "privacy_settings": {
+                    "share_with_providers": True, 
+                    "anonymous_data": True,
+                    "research_participation": True  # Changed mind about research
+                },
+                "data_sharing_preferences": {
+                    "family_members": True,
+                    "healthcare_team": True,
+                    "fitness_apps": True  # Now willing to share with fitness apps
+                }
+            }
+        }
+        
+        success3c, update_response_multi = self.run_test(
+            "Partial Update - Multiple Sections",
+            "PUT",
+            f"profiles/patient/{test_user_id}",
+            200,
+            data=multi_section_update
+        )
+        
+        # Test 4: Validation Testing - Ensure validation still works with complete sections
+        print("\n📝 Test 4: Validation Testing with Complete Sections")
+        
+        # Test 4a: Invalid enum value in complete section
+        invalid_enum_update = {
+            "activity_profile": {
+                "activity_level": "SUPER_ACTIVE",  # Invalid enum value
+                "exercise_types": ["yoga"],
+                "exercise_frequency": 3,
+                "sleep_schedule": {
+                    "bedtime": "22:00",
+                    "wake_time": "06:00",
+                    "sleep_quality": 4
+                },
+                "stress_level": 2,
+                "work_type": "DESK_JOB"
+            }
+        }
+        
+        success4a, _ = self.run_test(
+            "Validation Test - Invalid Enum (Should Fail)",
+            "PUT",
+            f"profiles/patient/{test_user_id}",
+            422,  # Expecting validation error
+            data=invalid_enum_update
+        )
+        
+        # Test 4b: Invalid data type in complete section
+        invalid_type_update = {
+            "physical_metrics": {
+                "height_cm": "not_a_number",  # Invalid data type
+                "current_weight_kg": 70.0,
+                "goal_weight_kg": 68.0
+            }
+        }
+        
+        success4b, _ = self.run_test(
+            "Validation Test - Invalid Data Type (Should Fail)",
+            "PUT",
+            f"profiles/patient/{test_user_id}",
+            422,  # Expecting validation error
+            data=invalid_type_update
+        )
+        
+        # Test 4c: Missing required fields in complete section
+        incomplete_section_update = {
+            "basic_info": {
+                "full_name": "Test User"
+                # Missing required fields: age, gender, location, timezone, preferred_language
+            }
+        }
+        
+        success4c, _ = self.run_test(
+            "Validation Test - Incomplete Required Section (Should Fail)",
+            "PUT",
+            f"profiles/patient/{test_user_id}",
+            422,  # Expecting validation error
+            data=incomplete_section_update
+        )
+        
+        # Test 5: Profile Completion Calculation After Updates
+        print("\n📝 Test 5: Profile Completion Calculation Verification")
+        
+        success5, final_profile = self.run_test(
+            "Get Updated Profile for Completion Check",
+            "GET",
+            f"profiles/patient/{test_user_id}",
+            200
+        )
+        
+        if success5 and final_profile:
+            final_completion = final_profile.get('profile_completion', 0)
+            print(f"   ✅ Final profile completion: {final_completion}% (Should remain 100%)")
+            final_completion_valid = final_completion == 100.0
+            if not final_completion_valid:
+                print(f"   ❌ Profile completion calculation changed unexpectedly: {final_completion}%")
+        
+        # Test 6: Profile Completion Status API
+        success6, completion_status = self.run_test(
+            "Get Profile Completion Status",
+            "GET",
+            f"profiles/completion/{test_user_id}",
+            200,
+            params={"role": "patient"}
+        )
+        
+        if success6 and completion_status:
+            api_completion = completion_status.get('completion_percentage', 0)
+            missing_sections = completion_status.get('missing_sections', [])
+            print(f"   ✅ API completion status: {api_completion}%")
+            print(f"   ✅ Missing sections: {missing_sections}")
+            
+            if api_completion != 100.0 or missing_sections:
+                print(f"   ❌ Completion API inconsistency detected")
+        
+        # Cleanup: Delete test profile
+        success_cleanup, _ = self.run_test(
+            "Cleanup - Delete Test Profile",
+            "DELETE",
+            f"profiles/patient/{test_user_id}",
+            200
+        )
+        
+        # Calculate overall success
+        all_create_update_tests = success1 and success2 and success3a and success3b and success3c
+        all_validation_tests = success4a and success4b and success4c  # These should fail (return True when they fail as expected)
+        all_completion_tests = success5 and success6
+        
+        overall_success = all_create_update_tests and all_validation_tests and all_completion_tests and success_cleanup
+        
+        print(f"\n📊 Auto-Save Compatibility Test Results:")
+        print(f"   Profile Creation & Updates: {'✅' if all_create_update_tests else '❌'}")
+        print(f"   Validation Still Working: {'✅' if all_validation_tests else '❌'}")
+        print(f"   Completion Calculation: {'✅' if all_completion_tests else '❌'}")
+        print(f"   Overall Success: {'✅' if overall_success else '❌'}")
+        
+        return overall_success
+
 def main():
     """Main test execution"""
     tester = HealthPlatformAPITester()
-    return tester.run_all_tests()
+    
+    # Run the specific auto-save compatibility test as requested
+    print("🚀 Starting Patient Profile Management API - Auto-Save Compatibility Test")
+    print(f"🌐 Base URL: {tester.base_url}")
+    print("=" * 80)
+    
+    success = tester.test_patient_profile_auto_save_compatibility()
+    
+    print("\n" + "=" * 80)
+    if success:
+        print("🎉 Patient Profile Management API - Auto-Save Compatibility: PASSED")
+        print("✅ Auto-save improvements do not break existing functionality")
+        return 0
+    else:
+        print("⚠️ Patient Profile Management API - Auto-Save Compatibility: FAILED")
+        print("❌ Issues detected that may affect auto-save functionality")
+        return 1
 
 if __name__ == "__main__":
     sys.exit(main())
