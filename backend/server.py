@@ -439,6 +439,7 @@ async def update_provider_profile(user_id: str, update: ProviderProfileUpdate):
     
     merged_profile = {**existing, **update_dict}
     merged_profile["profile_completion"] = calculate_profile_completion(merged_profile, "PROVIDER")
+    update_dict["profile_completion"] = merged_profile["profile_completion"]
     
     await db.provider_profiles.update_one(
         {"user_id": user_id},
