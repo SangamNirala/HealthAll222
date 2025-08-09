@@ -60,6 +60,30 @@ const HealthHistoryStep = ({ data = {}, onChange, icon: Icon }) => {
     updateField('current_medications', updatedMeds);
   };
 
+  // Previous surgeries helpers
+  const addSurgery = () => {
+    const currentSurgeries = data.previous_surgeries || [];
+    const newSurgery = {
+      id: Date.now().toString(),
+      name: '',
+      date: '',
+      details: ''
+    };
+    updateField('previous_surgeries', [...currentSurgeries, newSurgery]);
+  };
+
+  const updateSurgery = (id, field, value) => {
+    const updatedSurgeries = (data.previous_surgeries || []).map(surgery =>
+      surgery.id === id ? { ...surgery, [field]: value } : surgery
+    );
+    updateField('previous_surgeries', updatedSurgeries);
+  };
+
+  const removeSurgery = (id) => {
+    const updatedSurgeries = (data.previous_surgeries || []).filter(surgery => surgery.id !== id);
+    updateField('previous_surgeries', updatedSurgeries);
+  };
+
   const healthGoalOptions = [
     'Weight Loss',
     'Weight Gain', 
