@@ -54,23 +54,50 @@ const PatientProfileWizard = () => {
     Settings
   ];
 
-  // Get user ID from location state or generate one
+  // Get user ID from localStorage or generate one, and try to load existing profile
   useEffect(() => {
-    const locationUserId = location.state?.userId;
-    const existingProfile = location.state?.existingProfile;
-    
-    if (locationUserId) {
-      setUserId(locationUserId);
-      if (existingProfile) {
-        setProfileData(existingProfile);
-        setSectionCompletion(getSectionCompletionStatus(existingProfile));
-        setIsEditing(true);
+    const initializeProfile = async () => {
+      // Check for existing userId in localStorage first
+      let storedUserId = localStorage.getItem('patient_user_id');
+      
+      // Check location state (for navigation with pre-set userId)
+      const locationUserId = location.state?.userId;
+      const existingProfile = location.state?.existingProfile;
+      
+      if (locationUserId) {
+        // Use userId from location state (takes priority)
+        setUserId(locationUserId);
+        localStorage.setItem('patient_user_id', locationUserId);
+        
+        if (existingProfile) {
+          setProfileData(existingProfile);
+          setSectionCompletion(getSectionCompletionStatus(existingProfile));
+          setIsEditing(true);
+        }
+      } else if (storedUserId) {
+        // Use stored userId and try to fetch existing profile
+        setUserId(storedUserId);
+        
+        try {
+          const existingProfile = await ProfileAPI.getPatientProfile(storedUserId);
+          if (existingProfile) {
+            setProfileData(existingProfile);
+            setSectionCompletion(getSectionCompletionStatus(existingProfile));
+            setIsEditing(true);
+          }
+        } catch (error) {
+          // Profile doesn't exist yet, continue with empty profile
+          console.log('No existing profile found, starting fresh');
+        }
+      } else {
+        // Generate a new user ID and store it
+        const tempUserId = `patient_${Date.now()}`;
+        setUserId(tempUserId);
+        localStorage.setItem('patient_user_id', tempUserId);
       }
-    } else {
-      // Generate a temporary user ID for demo purposes
-      const tempUserId = `patient_${Date.now()}`;
-      setUserId(tempUserId);
-    }
+    };
+    
+    initializeProfile();
   }, [location.state]);
 
   // Auto-save functionality
