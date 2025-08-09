@@ -2,11 +2,11 @@ import React from 'react';
 import { Progress } from '../ui/progress';
 import { Check, CheckCircle } from 'lucide-react';
 
-const ProgressIndicator = ({ currentStep, totalSteps, stepLabels = [], sectionCompletion = {} }) => {
+const ProgressIndicator = ({ currentStep, totalSteps, stepLabels = [], sectionCompletion = {}, stepToSection }) => {
   const progressPercentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
   
-  // Map step numbers to section names
-  const stepToSection = {
+  // Default step-to-section mapping for patient profiles, can be overridden via props
+  const defaultStepToSection = {
     1: 'basic_info',
     2: 'physical_metrics', 
     3: 'activity_profile',
@@ -14,6 +14,9 @@ const ProgressIndicator = ({ currentStep, totalSteps, stepLabels = [], sectionCo
     5: 'dietary_profile',
     6: 'goals_preferences'
   };
+
+  // Use provided stepToSection mapping or fall back to default
+  const stepSectionMapping = stepToSection || defaultStepToSection;
 
   return (
     <div className="w-full mb-8">
