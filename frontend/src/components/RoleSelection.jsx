@@ -90,9 +90,9 @@ const RoleCard = ({ role, index }) => {
       navigate('/provider-profile');
     } else if (role.type === 'family') {
       navigate('/family-profile');
-    } else {
-      // For guest, go directly to guest setup
-      navigate('/guest-dashboard');
+    } else if (role.type === 'guest') {
+      // For guest, go to guest setup first
+      navigate('/guest-setup');
     }
   };
 
