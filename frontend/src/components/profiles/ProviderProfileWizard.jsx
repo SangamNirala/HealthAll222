@@ -45,6 +45,24 @@ const ProviderProfileWizard = () => {
     Settings
   ];
 
+  // Provider-specific step to section mapping
+  const providerStepToSection = {
+    1: 'professional_identity',
+    2: 'credentials',
+    3: 'practice_info',
+    4: 'preferences'
+  };
+
+  // Calculate provider section completion
+  const calculateSectionCompletion = (data) => {
+    return {
+      professional_identity: !!(data.professional_identity?.full_name && data.professional_identity?.professional_title),
+      credentials: !!(data.credentials?.education?.length > 0 || data.credentials?.certifications?.length > 0),
+      practice_info: !!(data.practice_info?.workplace && data.practice_info?.practice_type),
+      preferences: !!(data.preferences?.consultation_types?.length > 0)
+    };
+  };
+
   // Get user ID from localStorage or generate one, and try to load existing profile
   useEffect(() => {
     const initializeProfile = async () => {
