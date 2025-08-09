@@ -23,10 +23,10 @@ const FamilyProfileWizard = () => {
 
   // Profile data state
   const [profileData, setProfileData] = useState({
-    family_structure: null,
+    family_structure: {},
     family_members: [],
-    household_management: null,
-    care_coordination: null,
+    household_management: {},
+    care_coordination: {},
   });
 
   const totalSteps = 4;
