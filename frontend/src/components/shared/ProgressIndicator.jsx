@@ -35,7 +35,7 @@ const ProgressIndicator = ({ currentStep, totalSteps, stepLabels = [], sectionCo
           const stepNumber = index + 1;
           const isCompleted = stepNumber < currentStep;
           const isCurrent = stepNumber === currentStep;
-          const sectionName = stepToSection[stepNumber];
+          const sectionName = stepSectionMapping[stepNumber];
           const isSectionComplete = sectionCompletion[sectionName] || false;
 
           return (
