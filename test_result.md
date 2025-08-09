@@ -629,10 +629,11 @@ frontend:
         comment: "UI BEHAVIOR CHANGE RECORDED: No backend changes made. Frontend UI behavior modified - help icons in FormField component changed from hover-based tooltips to click-based popovers. This is purely a UI interaction change that doesn't require backend testing."
 
   current_focus:
-    - "Backend Profile Completion Persistence Fix"
-    - "Cross-Session Profile Editing - Patient Wizard"
-    - "Cross-Session Profile Editing - Provider Wizard"
-    - "Cross-Session Profile Editing - Family Wizard"
+    - "Patient Health History - Previous Surgeries UI"
+    - "Physical Metrics - Body Fat Visual Cue"
+    - "Section Completion Badges - ProgressIndicator Enhancement"
+    - "Provider Wizard - Section Completion Badges"
+    - "Family Wizard - Section Completion Badges"
 
 metadata:
   created_by: "main_agent"
