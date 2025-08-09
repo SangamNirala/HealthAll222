@@ -277,6 +277,8 @@ const FamilyProfileWizard = () => {
               currentStep={currentStep} 
               totalSteps={totalSteps}
               stepLabels={stepLabels}
+              sectionCompletion={sectionCompletion}
+              stepToSection={familyStepToSection}
             />
           </CardHeader>
           
