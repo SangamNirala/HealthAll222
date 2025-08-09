@@ -280,6 +280,23 @@ const PatientProfileWizard = () => {
           <CardContent className="px-8 pb-8">
             {/* Step Content */}
             <div className="min-h-[500px]">
+              {/* Section Completion Hint */}
+              {!sectionCompletion[Object.keys(sectionCompletion)[currentStep - 1]] && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <div className="flex items-start">
+                    <Clock className="w-5 h-5 text-blue-500 mr-3 mt-0.5" />
+                    <div>
+                      <h3 className="text-sm font-medium text-blue-900 mb-1">
+                        Complete this section to enable auto-save
+                      </h3>
+                      <p className="text-sm text-blue-700">
+                        Fill in all required fields in this step and your progress will be automatically saved.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               {renderStepContent()}
             </div>
 
