@@ -195,28 +195,75 @@ class HealthPlatformAPITester:
             200
         )
 
-        # Validate dashboard data structure
+        # Validate dashboard data structure based on actual API responses
         if success1 and patient_data:
-            expected_patient_keys = ['user_id', 'daily_calories', 'foods_logged', 'goals_met', 'health_score', 'recent_activities']
+            expected_patient_keys = ['user_id', 'welcome_message', 'nutrition_summary', 'health_metrics', 'goals', 'recent_meals', 'ai_recommendations']
             patient_keys_valid = all(key in patient_data for key in expected_patient_keys)
             print(f"   Patient dashboard keys validation: {'✅' if patient_keys_valid else '❌'}")
 
         if success2 and provider_data:
-            expected_provider_keys = ['user_id', 'active_patients', 'prescriptions', 'analytics_score', 'consultations', 'recent_updates']
+            expected_provider_keys = ['user_id', 'welcome_message', 'patient_overview', 'clinical_alerts', 'todays_appointments', 'patient_progress']
             provider_keys_valid = all(key in provider_data for key in expected_provider_keys)
             print(f"   Provider dashboard keys validation: {'✅' if provider_keys_valid else '❌'}")
 
         if success3 and family_data:
-            expected_family_keys = ['user_id', 'family_members', 'health_alerts', 'appointments', 'coverage', 'family_updates']
+            expected_family_keys = ['user_id', 'family_overview', 'family_members', 'meal_planning', 'health_alerts', 'upcoming_appointments']
             family_keys_valid = all(key in family_data for key in expected_family_keys)
             print(f"   Family dashboard keys validation: {'✅' if family_keys_valid else '❌'}")
 
         if success4 and guest_data:
-            expected_guest_keys = ['quick_logs', 'session_time', 'features_used', 'experience', 'message']
+            expected_guest_keys = ['session_info', 'todays_entries', 'nutrition_summary', 'simple_goals', 'nutrition_tips', 'message']
             guest_keys_valid = all(key in guest_data for key in expected_guest_keys)
             print(f"   Guest dashboard keys validation: {'✅' if guest_keys_valid else '❌'}")
 
         return success1 and success2 and success3 and success4
+
+    def test_additional_endpoints(self):
+        """Test additional role-specific endpoints"""
+        test_user_id = "test-user-123"
+        
+        # Test Patient Food Log
+        success1, _ = self.run_test(
+            "Patient Food Log",
+            "GET",
+            f"patient/food-log/{test_user_id}",
+            200
+        )
+
+        # Test Provider Patients List
+        success2, _ = self.run_test(
+            "Provider Patients List",
+            "GET",
+            "provider/patients",
+            200
+        )
+
+        # Test Provider Clinical Tools
+        success3, _ = self.run_test(
+            "Provider Clinical Tools",
+            "GET",
+            "provider/clinical-tools",
+            200
+        )
+
+        # Test Family Meal Planning
+        success4, _ = self.run_test(
+            "Family Meal Planning",
+            "GET",
+            f"family/meal-planning/{test_user_id}",
+            200
+        )
+
+        # Test Guest Quick Log (POST)
+        success5, _ = self.run_test(
+            "Guest Quick Log",
+            "POST",
+            "guest/quick-log",
+            200,
+            data={"food_name": "Apple", "calories": 95}
+        )
+
+        return success1 and success2 and success3 and success4 and success5
 
     def run_all_tests(self):
         """Run all API tests"""
