@@ -268,6 +268,8 @@ const ProviderProfileWizard = () => {
               currentStep={currentStep} 
               totalSteps={totalSteps}
               stepLabels={stepLabels}
+              sectionCompletion={sectionCompletion}
+              stepToSection={providerStepToSection}
             />
           </CardHeader>
           
