@@ -8,6 +8,8 @@ import FamilyDashboard from "./components/FamilyDashboard";
 import GuestDashboard from "./components/GuestDashboard";
 import PatientProfileWizard from "./components/profiles/PatientProfileWizard";
 import ProviderProfileWizard from "./components/profiles/ProviderProfileWizard";
+import FamilyProfileWizard from "./components/profiles/FamilyProfileWizard";
+import GuestProfileSetup from "./components/profiles/GuestProfileSetup";
 
 function App() {
   return (
