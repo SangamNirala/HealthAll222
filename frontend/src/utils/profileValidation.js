@@ -55,15 +55,33 @@ export const validateDietaryProfile = (dietaryProfile) => {
 };
 
 export const validateHealthHistory = (healthHistory) => {
-  // Health history is mostly optional, so we consider it complete if it exists
-  // Even an empty object is considered valid
-  return true;
+  // Health history is optional, but we only consider it "complete" if it has some content
+  // This prevents auto-save from triggering on empty optional sections
+  if (!healthHistory || typeof healthHistory !== 'object') return false;
+  
+  // Consider it complete if at least one meaningful field has data
+  const hasContent = Object.values(healthHistory).some(value => {
+    if (Array.isArray(value)) return value.length > 0;
+    if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
+    return value !== null && value !== undefined && value !== '';
+  });
+  
+  return hasContent;
 };
 
 export const validateGoalsPreferences = (goalsPreferences) => {
-  // Goals and preferences are optional, so we consider it complete if it exists
-  // Even an empty object is considered valid
-  return true;
+  // Goals and preferences are optional, but we only consider it "complete" if it has some content
+  // This prevents auto-save from triggering on empty optional sections
+  if (!goalsPreferences || typeof goalsPreferences !== 'object') return false;
+  
+  // Consider it complete if at least one meaningful field has data
+  const hasContent = Object.values(goalsPreferences).some(value => {
+    if (Array.isArray(value)) return value.length > 0;
+    if (typeof value === 'object' && value !== null) return Object.keys(value).length > 0;
+    return value !== null && value !== undefined && value !== '';
+  });
+  
+  return hasContent;
 };
 
 // Main function to check if profile data has any complete sections
