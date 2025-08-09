@@ -819,6 +819,681 @@ async def create_guest_food_log(food_data: dict):
         }
     }
 
+# ===== PHASE 1: ADVANCED ROLE-SPECIFIC API ENDPOINTS =====
+
+# ===== PATIENT ANALYTICS & INSIGHTS =====
+
+class NutritionTrend(BaseModel):
+    date: str
+    calories: int
+    protein: float
+    carbs: float
+    fat: float
+
+class HealthInsight(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    insight_type: str  # correlation, recommendation, pattern, alert
+    title: str
+    message: str
+    confidence: float
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class FoodLogEntry(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    food_name: str
+    quantity: float
+    unit: str
+    calories: int
+    meal_type: str  # breakfast, lunch, dinner, snack
+    logged_at: datetime = Field(default_factory=datetime.utcnow)
+    photo_url: Optional[str] = None
+
+class SymptomEntry(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    symptom_type: str  # energy, mood, digestion, sleep
+    severity: int  # 1-10 scale
+    notes: Optional[str] = None
+    recorded_at: datetime = Field(default_factory=datetime.utcnow)
+
+# ===== PROVIDER CLINICAL TOOLS =====
+
+class PatientAssignment(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    provider_id: str
+    patient_id: str
+    assignment_date: datetime = Field(default_factory=datetime.utcnow)
+    status: str = "active"  # active, inactive, completed
+
+class TreatmentPlan(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    provider_id: str
+    patient_id: str
+    plan_type: str  # nutrition, medication, lifestyle
+    recommendations: List[Dict[str, Any]]
+    target_outcomes: List[str]
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class ClinicalNote(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    provider_id: str
+    patient_id: str
+    note_type: str  # consultation, assessment, progress
+    content: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+# ===== FAMILY COORDINATION =====
+
+class FamilyGoal(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    family_id: str
+    goal_type: str  # nutrition, fitness, health
+    title: str
+    description: str
+    target_value: Optional[float] = None
+    current_progress: float = 0.0
+    participants: List[str] = []  # family member IDs
+    start_date: datetime = Field(default_factory=datetime.utcnow)
+    end_date: Optional[datetime] = None
+    status: str = "active"  # active, completed, paused
+
+class MealPlan(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    family_id: str
+    week_start: datetime
+    meals: Dict[str, Dict[str, str]]  # day -> meal_type -> recipe_name
+    shopping_list: List[str] = []
+    dietary_restrictions: List[str] = []
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+# ===== GUEST SESSION MANAGEMENT =====
+
+class GuestSession(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    session_id: str
+    activity_log: List[Dict[str, Any]] = []
+    preferences: Dict[str, Any] = {}
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    last_activity: datetime = Field(default_factory=datetime.utcnow)
+    expires_at: datetime
+
+# ===== ADVANCED API ENDPOINTS =====
+
+# Patient Analytics Endpoints
+@api_router.get("/patient/analytics/{user_id}")
+async def get_patient_analytics(user_id: str):
+    """Get comprehensive analytics for patient"""
+    return {
+        "user_id": user_id,
+        "nutrition_trends": [
+            {"date": "2024-01-15", "calories": 2100, "protein": 95, "carbs": 180, "fat": 70},
+            {"date": "2024-01-14", "calories": 1950, "protein": 88, "carbs": 165, "fat": 65},
+            {"date": "2024-01-13", "calories": 2200, "protein": 102, "carbs": 195, "fat": 75},
+            {"date": "2024-01-12", "calories": 1850, "protein": 85, "carbs": 155, "fat": 62},
+            {"date": "2024-01-11", "calories": 2050, "protein": 92, "carbs": 175, "fat": 68}
+        ],
+        "health_correlations": [
+            {"metric": "energy_level", "correlation_with": "protein_intake", "strength": 0.75, "insight": "Higher protein intake correlates with better energy levels"},
+            {"metric": "sleep_quality", "correlation_with": "caffeine_intake", "strength": -0.65, "insight": "Reduced caffeine after 2 PM improves sleep quality"},
+            {"metric": "mood", "correlation_with": "exercise", "strength": 0.82, "insight": "Regular exercise significantly improves mood scores"}
+        ],
+        "goal_progress": {
+            "weight_loss": {"target": 70, "current": 68.5, "progress": 85, "trend": "on_track"},
+            "fitness": {"target": 5, "current": 3, "progress": 60, "trend": "needs_improvement"},
+            "nutrition": {"target": 100, "current": 78, "progress": 78, "trend": "good"}
+        },
+        "personal_insights": [
+            {"type": "achievement", "message": "You've maintained your target calorie range for 5 consecutive days!", "date": "2024-01-15"},
+            {"type": "recommendation", "message": "Consider adding more fiber-rich vegetables to your lunch meals", "date": "2024-01-15"},
+            {"type": "pattern", "message": "Your energy levels are highest on days when you exercise in the morning", "date": "2024-01-14"}
+        ],
+        "energy_patterns": {
+            "morning": {"average": 7.2, "trend": "stable"},
+            "afternoon": {"average": 6.8, "trend": "declining"},
+            "evening": {"average": 6.5, "trend": "stable"}
+        },
+        "weekly_summary": {
+            "average_calories": 2030,
+            "protein_goal_met": 6,
+            "exercise_sessions": 3,
+            "weight_change": -0.3,
+            "mood_score": 7.8,
+            "sleep_quality": 7.5
+        }
+    }
+
+@api_router.get("/patient/smart-suggestions/{user_id}")
+async def get_smart_food_suggestions(user_id: str):
+    """Get AI-powered food suggestions based on eating patterns"""
+    return {
+        "user_id": user_id,
+        "quick_add_suggestions": [
+            {"name": "Greek Yogurt with Berries", "calories": 150, "reason": "Your usual morning snack", "frequency": "often"},
+            {"name": "Grilled Chicken Salad", "calories": 350, "reason": "Perfect for your lunch protein goal", "frequency": "weekly"},
+            {"name": "Almonds (1 oz)", "calories": 164, "reason": "Healthy fat you enjoyed yesterday", "frequency": "daily"},
+            {"name": "Green Smoothie", "calories": 180, "reason": "Boosts your vegetable intake", "frequency": "sometimes"}
+        ],
+        "meal_pattern_insights": {
+            "breakfast_time": "8:15 AM",
+            "lunch_time": "12:30 PM",
+            "dinner_time": "7:00 PM",
+            "snack_preferences": ["nuts", "fruits", "yogurt"],
+            "favorite_cuisines": ["Mediterranean", "Asian", "Mexican"]
+        },
+        "nutrition_gaps": [
+            {"nutrient": "Fiber", "current": 18, "target": 25, "suggestion": "Add beans or lentils to lunch"},
+            {"nutrient": "Omega-3", "current": "low", "target": "adequate", "suggestion": "Include fatty fish twice weekly"},
+            {"nutrient": "Vitamin D", "current": "insufficient", "target": "adequate", "suggestion": "Consider fortified foods or supplements"}
+        ]
+    }
+
+@api_router.post("/patient/food-log")
+async def log_food(food_entry: dict):
+    """Smart food logging with automatic nutrition lookup"""
+    # Simulate food recognition and nutrition lookup
+    return {
+        "success": True,
+        "food_entry": {
+            "id": str(uuid.uuid4()),
+            "food_name": food_entry.get("food_name", "Unknown Food"),
+            "calories": food_entry.get("calories", 200),
+            "protein": food_entry.get("protein", 15),
+            "carbs": food_entry.get("carbs", 25),
+            "fat": food_entry.get("fat", 8),
+            "confidence": 0.95,
+            "similar_foods": ["Chicken Breast", "Turkey Breast", "Lean Beef"]
+        },
+        "daily_totals": {
+            "calories": 1450,
+            "protein": 78,
+            "carbs": 145,
+            "fat": 52
+        },
+        "recommendations": [
+            "Great protein choice! This helps meet your daily protein goal.",
+            "Consider adding some vegetables for extra fiber and nutrients."
+        ]
+    }
+
+@api_router.get("/patient/symptoms-correlation/{user_id}")
+async def get_symptoms_correlation(user_id: str):
+    """Get correlations between diet and symptoms"""
+    return {
+        "user_id": user_id,
+        "correlations": [
+            {
+                "symptom": "Energy Level",
+                "strong_positive": ["protein_intake", "complex_carbs", "B_vitamins"],
+                "strong_negative": ["processed_sugar", "alcohol", "excessive_caffeine"],
+                "insights": ["Energy levels are 40% higher on days with adequate protein (>80g)"]
+            },
+            {
+                "symptom": "Digestive Health",
+                "strong_positive": ["fiber_intake", "probiotics", "water_intake"],
+                "strong_negative": ["processed_foods", "excessive_dairy", "artificial_sweeteners"],
+                "insights": ["Digestive scores improve by 60% with 25g+ fiber daily"]
+            },
+            {
+                "symptom": "Sleep Quality",
+                "strong_positive": ["magnesium", "tryptophan", "regular_meals"],
+                "strong_negative": ["late_caffeine", "large_evening_meals", "alcohol"],
+                "insights": ["Sleep quality is 35% better when avoiding caffeine after 2 PM"]
+            }
+        ],
+        "recommendations": [
+            "Track your energy levels for 2 weeks to identify patterns",
+            "Consider keeping a mood-food diary",
+            "Monitor sleep quality in relation to evening meal timing"
+        ]
+    }
+
+# Provider Clinical Endpoints
+@api_router.get("/provider/clinical-insights/{provider_id}")
+async def get_clinical_insights(provider_id: str):
+    """Get clinical decision support and insights"""
+    return {
+        "provider_id": provider_id,
+        "population_health": {
+            "total_patients": 247,
+            "diabetes_patients": 45,
+            "hypertension_patients": 78,
+            "obesity_patients": 89,
+            "metabolic_syndrome": 23
+        },
+        "treatment_outcomes": [
+            {"condition": "Type 2 Diabetes", "improvement_rate": 73, "average_hba1c_reduction": 1.2},
+            {"condition": "Hypertension", "improvement_rate": 68, "average_bp_reduction": "15/8"},
+            {"condition": "Obesity", "improvement_rate": 55, "average_weight_loss": 8.5}
+        ],
+        "evidence_based_recommendations": [
+            {
+                "condition": "Pre-diabetes",
+                "intervention": "Mediterranean Diet + Exercise",
+                "evidence_level": "A",
+                "success_rate": 85,
+                "reference": "Diabetes Care 2023"
+            },
+            {
+                "condition": "Hypertension",
+                "intervention": "DASH Diet + Sodium Reduction",
+                "evidence_level": "A",
+                "success_rate": 78,
+                "reference": "NEJM 2023"
+            }
+        ],
+        "drug_nutrient_interactions": [
+            {"medication": "Warfarin", "nutrient": "Vitamin K", "interaction": "Monitor intake consistency"},
+            {"medication": "Metformin", "nutrient": "Vitamin B12", "interaction": "May require supplementation"},
+            {"medication": "Statins", "nutrient": "CoQ10", "interaction": "Consider supplementation"}
+        ],
+        "clinical_alerts": [
+            {"patient_id": "pat_123", "alert": "HbA1c trending upward", "priority": "high", "action": "Review diet adherence"},
+            {"patient_id": "pat_456", "alert": "Blood pressure well controlled", "priority": "low", "action": "Continue current plan"}
+        ]
+    }
+
+@api_router.get("/provider/patient-analytics/{provider_id}")
+async def get_provider_patient_analytics(provider_id: str):
+    """Get comprehensive analytics across all patients"""
+    return {
+        "provider_id": provider_id,
+        "patient_demographics": {
+            "age_distribution": {"18-30": 15, "31-45": 45, "46-60": 78, "60+": 109},
+            "gender_distribution": {"male": 118, "female": 129},
+            "condition_prevalence": {
+                "diabetes": 18.2,
+                "hypertension": 31.6,
+                "obesity": 36.0,
+                "dyslipidemia": 24.3
+            }
+        },
+        "treatment_effectiveness": {
+            "diet_plans": {"prescribed": 187, "adhering": 142, "success_rate": 76},
+            "medication_compliance": {"prescribed": 156, "compliant": 147, "compliance_rate": 94},
+            "lifestyle_interventions": {"recommended": 203, "following": 154, "success_rate": 76}
+        },
+        "outcome_trends": [
+            {"month": "2024-01", "weight_loss_success": 67, "bp_control": 78, "glucose_control": 71},
+            {"month": "2023-12", "weight_loss_success": 62, "bp_control": 75, "glucose_control": 68},
+            {"month": "2023-11", "weight_loss_success": 58, "bp_control": 72, "glucose_control": 65}
+        ],
+        "risk_stratification": {
+            "low_risk": 89,
+            "moderate_risk": 124,
+            "high_risk": 34
+        }
+    }
+
+@api_router.post("/provider/treatment-plan")
+async def create_treatment_plan(plan_data: dict):
+    """Create evidence-based treatment plans"""
+    return {
+        "success": True,
+        "plan_id": str(uuid.uuid4()),
+        "patient_id": plan_data.get("patient_id"),
+        "provider_id": plan_data.get("provider_id"),
+        "recommendations": [
+            {
+                "category": "nutrition",
+                "intervention": "Mediterranean Diet Pattern",
+                "evidence_level": "A",
+                "duration": "12 weeks",
+                "monitoring": "Weekly food logs, monthly weight"
+            },
+            {
+                "category": "physical_activity",
+                "intervention": "Progressive Resistance Training",
+                "evidence_level": "A",
+                "duration": "16 weeks",
+                "monitoring": "Bi-weekly fitness assessments"
+            }
+        ],
+        "expected_outcomes": [
+            "5-10% weight reduction in 6 months",
+            "Improved insulin sensitivity",
+            "Reduced cardiovascular risk markers"
+        ],
+        "follow_up_schedule": [
+            {"week": 2, "type": "phone_check", "focus": "diet_adherence"},
+            {"week": 4, "type": "office_visit", "focus": "progress_assessment"},
+            {"week": 8, "type": "lab_work", "focus": "biomarker_monitoring"}
+        ]
+    }
+
+# Family Coordination Endpoints
+@api_router.get("/family/health-overview/{family_id}")
+async def get_family_health_overview(family_id: str):
+    """Get comprehensive family health coordination data"""
+    return {
+        "family_id": family_id,
+        "multi_member_tracking": {
+            "total_members": 4,
+            "health_status": {
+                "excellent": 2,
+                "good": 1,
+                "needs_attention": 1
+            },
+            "upcoming_appointments": [
+                {"member": "Emma", "date": "2024-01-18", "type": "Pediatric Checkup", "provider": "Dr. Smith"},
+                {"member": "John", "date": "2024-01-25", "type": "Annual Physical", "provider": "Dr. Johnson"}
+            ]
+        },
+        "shared_goals": [
+            {
+                "id": "goal_1",
+                "title": "Family Fitness Challenge",
+                "type": "physical_activity",
+                "target": "150 minutes/week per member",
+                "current_progress": 75,
+                "participants": ["John", "Sarah", "Emma", "Alex"],
+                "end_date": "2024-02-15"
+            },
+            {
+                "id": "goal_2",
+                "title": "Healthy Eating Habits",
+                "type": "nutrition",
+                "target": "5 servings fruits/vegetables daily",
+                "current_progress": 60,
+                "participants": ["John", "Sarah", "Emma", "Alex"],
+                "end_date": "2024-01-31"
+            }
+        ],
+        "meal_coordination": {
+            "dietary_restrictions": {
+                "Emma": ["tree_nuts"],
+                "Alex": ["lactose_intolerant"],
+                "Sarah": ["gluten_free"],
+                "John": ["none"]
+            },
+            "family_friendly_meals": [
+                {"name": "Gluten-Free Chicken Stir Fry", "accommodates": ["Sarah"], "nutrition_score": 9},
+                {"name": "Dairy-Free Pasta Primavera", "accommodates": ["Alex"], "nutrition_score": 8},
+                {"name": "Nut-Free Trail Mix", "accommodates": ["Emma"], "nutrition_score": 7}
+            ],
+            "weekly_meal_success": 85
+        },
+        "care_coordination": {
+            "emergency_contacts": [
+                {"name": "Grandma Betty", "relationship": "Grandmother", "phone": "+1-555-0123"},
+                {"name": "Uncle Mike", "relationship": "Uncle", "phone": "+1-555-0456"}
+            ],
+            "healthcare_providers": {
+                "family_physician": {"name": "Dr. Johnson", "phone": "+1-555-0789"},
+                "pediatrician": {"name": "Dr. Smith", "phone": "+1-555-0012"},
+                "emergency": {"name": "City Hospital", "phone": "911"}
+            },
+            "medication_schedule": [
+                {"member": "Sarah", "medication": "Multivitamin", "time": "8:00 AM", "frequency": "daily"},
+                {"member": "Emma", "medication": "Allergy Medication", "time": "7:00 PM", "frequency": "as_needed"}
+            ]
+        }
+    }
+
+@api_router.get("/family/meal-planning-advanced/{family_id}")
+async def get_advanced_meal_planning(family_id: str):
+    """Get intelligent meal planning for families"""
+    return {
+        "family_id": family_id,
+        "smart_meal_suggestions": [
+            {
+                "meal": "Breakfast - Overnight Oats Bar",
+                "accommodates_all": True,
+                "prep_time": 15,
+                "nutrition_score": 9,
+                "kid_friendly": True,
+                "dietary_notes": "Gluten-free oats, dairy-free milk options, nut-free toppings"
+            },
+            {
+                "meal": "Lunch - Build-Your-Own Salad",
+                "accommodates_all": True,
+                "prep_time": 10,
+                "nutrition_score": 10,
+                "kid_friendly": True,
+                "dietary_notes": "Customizable for all restrictions"
+            }
+        ],
+        "budget_optimization": {
+            "weekly_budget": 150,
+            "current_plan_cost": 125,
+            "savings_suggestions": [
+                "Buy seasonal vegetables - save $15/week",
+                "Bulk buy grains and legumes - save $8/week",
+                "Plan leftovers strategically - save $12/week"
+            ]
+        },
+        "nutrition_education": [
+            {
+                "topic": "Growing Bodies Need Protein",
+                "age_group": "8-12 years",
+                "key_points": ["Protein helps muscle development", "Include protein in every meal", "Fun protein sources: Greek yogurt, eggs, lean meats"],
+                "activities": ["Protein scavenger hunt", "Build a balanced plate game"]
+            },
+            {
+                "topic": "Calcium for Strong Bones",
+                "age_group": "all",
+                "key_points": ["Dairy alternatives for lactose intolerant", "Dark leafy greens are calcium-rich", "Vitamin D helps calcium absorption"],
+                "activities": ["Calcium content comparison", "Bone health family challenge"]
+            }
+        ],
+        "meal_prep_coordination": {
+            "sunday_prep": [
+                {"task": "Wash and chop vegetables", "assigned_to": "Sarah", "time": "30 min"},
+                {"task": "Cook grains in bulk", "assigned_to": "John", "time": "45 min"},
+                {"task": "Prepare snack portions", "assigned_to": "Emma & Alex", "time": "20 min"}
+            ],
+            "daily_assignments": {
+                "monday": {"cook": "Sarah", "cleanup": "John", "help": "Emma"},
+                "tuesday": {"cook": "John", "cleanup": "Sarah", "help": "Alex"}
+            }
+        }
+    }
+
+# Guest Experience Endpoints
+@api_router.get("/guest/quick-nutrition/{session_id}")
+async def get_guest_quick_nutrition(session_id: str):
+    """Get instant nutrition insights for guest users"""
+    return {
+        "session_id": session_id,
+        "instant_calculations": {
+            "estimated_bmr": 1650,
+            "daily_calorie_needs": 2100,
+            "protein_needs": "84-126g",
+            "fiber_needs": "25g",
+            "water_needs": "8-10 glasses"
+        },
+        "quick_assessments": [
+            {
+                "category": "hydration",
+                "current_status": "adequate",
+                "recommendation": "Maintain current water intake",
+                "simple_tips": ["Drink a glass of water before each meal", "Keep a water bottle visible"]
+            },
+            {
+                "category": "energy",
+                "current_status": "good",
+                "recommendation": "Include protein in every meal",
+                "simple_tips": ["Add Greek yogurt to smoothies", "Include nuts or seeds as snacks"]
+            }
+        ],
+        "educational_content": [
+            {
+                "topic": "Reading Nutrition Labels",
+                "level": "beginner",
+                "key_points": ["Look at serving size first", "Check sugar content", "Aim for more fiber"],
+                "time_to_read": "3 minutes"
+            },
+            {
+                "topic": "Portion Control Basics",
+                "level": "beginner",
+                "key_points": ["Use your hand as a guide", "Fill half plate with vegetables", "Protein = palm size"],
+                "time_to_read": "2 minutes"
+            }
+        ],
+        "upgrade_benefits": [
+            "Save your food preferences and get personalized recommendations",
+            "Track your progress over time with detailed analytics",
+            "Get custom meal plans based on your goals and dietary needs",
+            "Access to expert-reviewed nutrition content and recipes"
+        ]
+    }
+
+@api_router.post("/guest/instant-food-log")
+async def instant_guest_food_log(food_data: dict):
+    """Instant food logging for guests with immediate feedback"""
+    return {
+        "success": True,
+        "food_recognized": food_data.get("food_name", "Unknown Food"),
+        "estimated_nutrition": {
+            "calories": food_data.get("calories", 200),
+            "protein": 15,
+            "carbs": 25,
+            "fat": 8,
+            "fiber": 3
+        },
+        "instant_feedback": [
+            "Good choice! This food provides quality protein for sustained energy.",
+            "Consider adding some vegetables or fruits to boost fiber and vitamins.",
+            "This fits well within a balanced 2000-calorie daily plan."
+        ],
+        "session_totals": {
+            "today_calories": 580,
+            "meals_logged": 2,
+            "session_time": "12 minutes"
+        },
+        "simple_suggestions": [
+            "Try pairing this with a small salad for extra nutrients",
+            "A glass of water now will help with digestion",
+            "This makes a great base - add some colorful vegetables!"
+        ],
+        "learning_moment": {
+            "tip": "Did you know?",
+            "content": "Protein helps you feel full longer and supports muscle health. Aim for some protein in every meal!"
+        }
+    }
+
+# Role-Based Data Access Endpoints
+@api_router.get("/roles/{role}/features")
+async def get_role_features(role: str):
+    """Get available features for specific role"""
+    role_features = {
+        "patient": [
+            {"name": "Personal Health Analytics", "category": "analytics", "premium": False},
+            {"name": "Smart Food Logging", "category": "tracking", "premium": False},
+            {"name": "Health Goal Tracking", "category": "goals", "premium": False},
+            {"name": "Symptom Correlation", "category": "insights", "premium": True},
+            {"name": "AI Health Insights", "category": "ai", "premium": True},
+            {"name": "Medication Reminders", "category": "health", "premium": True}
+        ],
+        "provider": [
+            {"name": "Patient Management", "category": "clinical", "premium": False},
+            {"name": "Clinical Decision Support", "category": "clinical", "premium": True},
+            {"name": "Population Health Analytics", "category": "analytics", "premium": True},
+            {"name": "Evidence-Based Recommendations", "category": "clinical", "premium": True},
+            {"name": "Treatment Outcome Tracking", "category": "tracking", "premium": False}
+        ],
+        "family": [
+            {"name": "Multi-Profile Management", "category": "coordination", "premium": False},
+            {"name": "Family Meal Planning", "category": "nutrition", "premium": False},
+            {"name": "Care Coordination", "category": "health", "premium": False},
+            {"name": "Child Nutrition Education", "category": "education", "premium": True},
+            {"name": "Family Health Analytics", "category": "analytics", "premium": True}
+        ],
+        "guest": [
+            {"name": "Quick Nutrition Tracking", "category": "tracking", "premium": False},
+            {"name": "Basic Health Calculations", "category": "tools", "premium": False},
+            {"name": "Nutrition Education", "category": "education", "premium": False},
+            {"name": "Simple Goal Setting", "category": "goals", "premium": False}
+        ]
+    }
+    
+    return {
+        "role": role,
+        "features": role_features.get(role, []),
+        "feature_count": len(role_features.get(role, [])),
+        "premium_features": len([f for f in role_features.get(role, []) if f.get("premium", False)])
+    }
+
+@api_router.get("/analytics/role-usage")
+async def get_role_usage_analytics():
+    """Get usage analytics across all roles"""
+    return {
+        "total_users": 1247,
+        "role_distribution": {
+            "patient": {"count": 892, "percentage": 71.5, "growth": 12.3},
+            "provider": {"count": 45, "percentage": 3.6, "growth": 8.9},
+            "family": {"count": 234, "percentage": 18.8, "growth": 15.7},
+            "guest": {"count": 76, "percentage": 6.1, "growth": -2.1}
+        },
+        "feature_usage": {
+            "most_used": [
+                {"feature": "Food Logging", "usage": 89.2, "role": "patient"},
+                {"feature": "Family Meal Planning", "usage": 76.8, "role": "family"},
+                {"feature": "Patient Management", "usage": 92.1, "role": "provider"}
+            ],
+            "emerging": [
+                {"feature": "Symptom Correlation", "growth": 45.2, "role": "patient"},
+                {"feature": "Population Analytics", "growth": 38.7, "role": "provider"}
+            ]
+        },
+        "engagement_metrics": {
+            "daily_active_users": 567,
+            "weekly_retention": 78.4,
+            "monthly_retention": 65.2,
+            "average_session_time": "23 minutes"
+        }
+    }
+
+# Session Management for Guests
+@api_router.post("/guest/session")
+async def create_guest_session():
+    """Create a new guest session"""
+    session_id = f"guest_{int(datetime.utcnow().timestamp())}_{uuid.uuid4().hex[:8]}"
+    return {
+        "session_id": session_id,
+        "expires_at": (datetime.utcnow().timestamp() + 86400),  # 24 hours
+        "features_available": [
+            "instant_food_logging",
+            "basic_nutrition_info",
+            "simple_goal_tracking",
+            "educational_content"
+        ],
+        "limitations": [
+            "Data not permanently stored",
+            "Limited to basic features",
+            "No historical tracking",
+            "No personalized recommendations"
+        ],
+        "upgrade_benefits": [
+            "Permanent data storage",
+            "Advanced analytics",
+            "Personalized insights",
+            "Goal tracking over time"
+        ]
+    }
+
+@api_router.get("/guest/session/{session_id}/status")
+async def get_guest_session_status(session_id: str):
+    """Check guest session status and activity"""
+    return {
+        "session_id": session_id,
+        "status": "active",
+        "time_remaining": "18h 32m",
+        "activity_summary": {
+            "foods_logged": 5,
+            "tips_viewed": 3,
+            "calculations_used": 2,
+            "session_duration": "15m 23s"
+        },
+        "recommendations": [
+            "You're doing great! Consider setting a simple daily goal.",
+            "Try logging your dinner to get a complete daily picture.",
+            "Check out our nutrition tips section for more insights."
+        ]
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
