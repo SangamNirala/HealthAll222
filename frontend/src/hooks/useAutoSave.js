@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { debounce } from 'lodash-es';
+import { hasCompleteSections } from '../utils/profileValidation';
 
 const useAutoSave = (data, saveFunction, delay = 1000) => {
   const [isSaving, setIsSaving] = useState(false);
