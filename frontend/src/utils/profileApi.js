@@ -20,7 +20,28 @@ class ProfileAPI {
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+      
+      // Handle different types of errors more gracefully
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      
+      if (errorData.detail) {
+        if (typeof errorData.detail === 'string') {
+          errorMessage = errorData.detail;
+        } else if (Array.isArray(errorData.detail)) {
+          // Handle validation errors from FastAPI
+          const validationErrors = errorData.detail.map(err => {
+            if (err.msg && err.loc) {
+              return `${err.loc.join('.')}: ${err.msg}`;
+            }
+            return err.msg || 'Validation error';
+          });
+          errorMessage = validationErrors.join(', ');
+        } else {
+          errorMessage = 'Validation error - please check required fields';
+        }
+      }
+      
+      throw new Error(errorMessage);
     }
 
     return response.json();
