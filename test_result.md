@@ -514,6 +514,9 @@ metadata:
 
 test_plan:
   current_focus: []
+  - agent: "main"
+    message: "UI tweak: suppressed the mid-footer auto-saving spinner during editing to prevent distracting flicker. Auto-save still runs behind the scenes and the header shows 'Auto-save enabled' only when a section is complete. Ready for frontend verification."
+
   stuck_tasks: []
   test_all: false
   test_priority: "completed"
