@@ -7,6 +7,7 @@ import ProviderDashboard from "./components/ProviderDashboard";
 import FamilyDashboard from "./components/FamilyDashboard";
 import GuestDashboard from "./components/GuestDashboard";
 import PatientProfileWizard from "./components/profiles/PatientProfileWizard";
+import ProviderProfileWizard from "./components/profiles/ProviderProfileWizard";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/family-dashboard" element={<FamilyDashboard />} />
           <Route path="/guest-dashboard" element={<GuestDashboard />} />
           <Route path="/patient-profile" element={<PatientProfileWizard />} />
+          <Route path="/provider-profile" element={<ProviderProfileWizard />} />
         </Routes>
       </BrowserRouter>
     </div>
