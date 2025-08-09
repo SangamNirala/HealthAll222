@@ -77,15 +77,28 @@ const PatientProfileWizard = () => {
   const saveProfile = async (data) => {
     if (!userId) return;
 
-    const profilePayload = {
-      user_id: userId,
-      ...data
-    };
+    // Build a sanitized payload that only includes sections which are actually complete
+    const completion = getSectionCompletionStatus(data);
+    const sections = ['basic_info', 'physical_metrics', 'activity_profile', 'health_history', 'dietary_profile', 'goals_preferences'];
+    const sanitized = sections.reduce((acc, key) => {
+      if (completion[key]) {
+        acc[key] = data[key];
+      }
+      return acc;
+    }, {});
+
+    // If nothing complete, do not attempt to save
+    if (Object.keys(sanitized).length === 0) return;
 
     try {
       if (isEditing) {
-        await ProfileAPI.updatePatientProfile(userId, data);
+        // Partial update with only valid sections
+        await ProfileAPI.updatePatientProfile(userId, sanitized);
       } else {
+        const profilePayload = {
+          user_id: userId,
+          ...sanitized,
+        };
         await ProfileAPI.createPatientProfile(profilePayload);
         setIsEditing(true);
       }
