@@ -123,8 +123,8 @@ const RoleCard = ({ role, index }) => {
         <Button 
           className={`w-full bg-gradient-to-r ${role.bgColor} hover:shadow-lg hover:shadow-blue-500/25 transition-shadow duration-300 text-white border-0 min-h-[60px] h-auto py-4 px-6 text-sm font-semibold group leading-tight`}
         >
-          <div className="flex items-center justify-center text-center">
-            <span className="flex-1">{role.buttonText}</span>
+          <div className="flex items-center justify-center text-center w-full">
+            <span className="flex-1 whitespace-pre-line">{role.buttonText}</span>
             <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform duration-200 flex-shrink-0" />
           </div>
         </Button>
