@@ -239,6 +239,9 @@ backend:
       - working: true
         agent: "testing_agent"
         comment: "AUTO-SAVE COMPATIBILITY TESTING COMPLETE: ✅ FULLY SUCCESSFUL - Comprehensive testing confirms auto-save improvements do not break existing functionality. Patient profile creation with complete data works perfectly (100% completion). Partial updates (basic_info only, physical_metrics only, multiple sections) all function correctly, simulating auto-save behavior. Validation still works properly with complete sections - invalid enums, data types, and incomplete required sections properly rejected with 422 status. Profile completion calculation remains accurate at 100% after updates. Profile completion status API consistent. All CRUD operations maintain integrity. Backend APIs are fully compatible with frontend auto-save improvements."
+      - working: true
+        agent: "testing_agent"
+        comment: "SMOKE TEST VALIDATION COMPLETE: ✅ Patient profile partial updates confirmed working as expected. Test 1: POST /api/profiles/patient with only user_id and complete basic_info section succeeded (16.7% completion). Test 2: PUT /api/profiles/patient/{user_id} with only complete physical_metrics section succeeded (profile completion maintained). Test 3: PUT with incomplete activity_profile (missing sleep_schedule) correctly returned 422 validation error. Test 4: GET returned merged profile with both basic_info and physical_metrics sections present and completion > 0. All partial update scenarios work correctly - backend accepts complete sections and properly validates incomplete ones."
 
   - task: "Provider Profile Management API"
     implemented: true
