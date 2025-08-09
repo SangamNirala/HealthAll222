@@ -72,7 +72,19 @@ const useAutoSave = (data, saveFunction, delay = 1000) => {
       setLastSaved(new Date());
     } catch (error) {
       console.error('Manual save failed:', error);
-      setSaveError(error.message);
+      // Improve error message handling for better user experience
+      let errorMessage = 'Please fill in required fields to save your progress';
+      
+      if (error.message && typeof error.message === 'string') {
+        // Check if it's a validation error from backend
+        if (error.message.includes('validation error') || error.message.includes('422')) {
+          errorMessage = 'Please complete required fields before saving';
+        } else if (!error.message.includes('[object Object]')) {
+          errorMessage = error.message;
+        }
+      }
+      
+      setSaveError(errorMessage);
       throw error;
     } finally {
       setIsSaving(false);
