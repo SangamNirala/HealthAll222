@@ -379,6 +379,10 @@ frontend:
         agent: "main"
         comment: "✅ CRITICAL BUG FIXED: Resolved auto-save validation error when entering partial data (e.g., only gender). Implemented smart validation that only triggers auto-save when complete sections are filled. Added profileValidation.js utility, enhanced ProgressIndicator, and improved user feedback. Users no longer see 'Save failed: body.basic_info.age: Field required' errors when filling individual fields. Tested successfully - form now works smoothly without premature validation errors."
 
+      - working: false
+        agent: "user"
+        comment: "Auto-save repeatedly triggers save errors in step 2 (Physical) and step 3 (Activity) even when fields are empty. Needs fix to suppress saving until section is complete."
+
   - task: "Provider Profile Wizard UI"
     implemented: true
     working: true
