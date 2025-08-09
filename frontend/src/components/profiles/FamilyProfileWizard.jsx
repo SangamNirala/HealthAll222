@@ -144,10 +144,12 @@ const FamilyProfileWizard = () => {
 
   // Update specific section of profile data
   const updateProfileSection = (section, data) => {
-    setProfileData(prev => ({
-      ...prev,
+    const updatedData = {
+      ...profileData,
       [section]: data
-    }));
+    };
+    setProfileData(updatedData);
+    setSectionCompletion(calculateSectionCompletion(updatedData));
   };
 
   // Step navigation
