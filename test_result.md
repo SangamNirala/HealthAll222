@@ -319,6 +319,10 @@ frontend:
     file: "/app/frontend/src/components/PatientDashboard.jsx"
     stuck_count: 0
     priority: "high"
+      - working: false
+        agent: "user"
+        comment: "Auto-saving indicator in WizardNavigation keeps popping in and out on step 3 even when only one field is filled. Expected only when step complete or about to navigate."
+
     needs_retesting: true
     status_history:
       - working: true
