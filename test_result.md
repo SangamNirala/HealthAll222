@@ -360,6 +360,12 @@ frontend:
       - working: true
         agent: "main"
         comment: "FIXED: Changed profileData initialization from null to empty objects ({}) in PatientProfileWizard.jsx to prevent null reference errors. Also fixed FamilyProfileWizard and ProviderProfileWizard."
+      - working: false
+        agent: "user"
+        comment: "NEW ERROR REPORTED: Auto-save error showing multiple [object Object] messages when profile wizard loads"
+      - working: true
+        agent: "main"
+        comment: "FIXED AUTO-SAVE: Modified useAutoSave hook to prevent saving empty profile data that lacks required fields. Improved error message display to handle object errors properly. Auto-save now only triggers when there's meaningful content in the form."
       - working: true
         agent: "testing"
         comment: "BUG FIX VALIDATED: ✅ Original null reference error resolved. Patient profile wizard loads successfully, BasicInfoStep component works properly, form fields are accessible and functional. Full name field accepts input without errors. Minor: Auto-save has backend API validation issues (422 status) but core functionality works."
