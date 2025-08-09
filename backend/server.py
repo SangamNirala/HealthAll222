@@ -333,6 +333,22 @@ class GuestProfileCreate(BaseModel):
     simple_goals: SimpleGoals
     session_expires: datetime
 
+# ===== PROFILE COMPLETION HELPERS =====
+
+def calculate_profile_completion(profile: dict, profile_type: str) -> float:
+    """Calculate profile completion percentage based on filled fields"""
+    if profile_type == "PATIENT":
+        sections = ["basic_info", "physical_metrics", "activity_profile", "health_history", "dietary_profile", "goals_preferences"]
+    elif profile_type == "PROVIDER":
+        sections = ["professional_identity", "credentials", "practice_info", "preferences"]
+    elif profile_type == "FAMILY":
+        sections = ["family_structure", "family_members", "household_management", "care_coordination"]
+    else:
+        return 100.0  # Guest profiles are always complete
+    
+    completed_sections = sum(1 for section in sections if profile.get(section) is not None)
+    return (completed_sections / len(sections)) * 100.0
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
