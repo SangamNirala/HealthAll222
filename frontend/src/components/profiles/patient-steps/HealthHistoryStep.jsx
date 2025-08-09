@@ -300,6 +300,72 @@ const HealthHistoryStep = ({ data = {}, onChange, icon: Icon }) => {
         </CardContent>
       </Card>
 
+      {/* Previous Surgeries */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Scissors className="w-5 h-5 mr-2" />
+              Previous Surgeries or Procedures
+            </div>
+            <button
+              type="button"
+              onClick={addSurgery}
+              className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+            >
+              Add Surgery/Procedure
+            </button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {data.previous_surgeries && data.previous_surgeries.length > 0 ? (
+            <div className="space-y-4">
+              {data.previous_surgeries.map((surgery) => (
+                <div key={surgery.id} className="bg-gray-50 p-4 rounded-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <FormField
+                      type="input"
+                      label="Procedure Name"
+                      value={surgery.name}
+                      onChange={(value) => updateSurgery(surgery.id, 'name', value)}
+                      placeholder="e.g., Appendectomy"
+                    />
+                    <FormField
+                      type="input"
+                      label="Date"
+                      value={surgery.date}
+                      onChange={(value) => updateSurgery(surgery.id, 'date', value)}
+                      placeholder="YYYY-MM-DD (optional)"
+                    />
+                  </div>
+                  <div className="mt-3">
+                    <FormField
+                      type="textarea"
+                      label="Notes/Details"
+                      value={surgery.details}
+                      onChange={(value) => updateSurgery(surgery.id, 'details', value)}
+                      placeholder="Additional details about the procedure (optional)"
+                      rows={2}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeSurgery(surgery.id)}
+                    className="mt-2 text-sm text-red-600 hover:text-red-800"
+                  >
+                    Remove Surgery/Procedure
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center py-4">
+              No surgeries or procedures added. Click "Add Surgery/Procedure" to include your medical history.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Allergies */}
       <Card>
         <CardHeader>
