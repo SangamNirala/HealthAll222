@@ -79,14 +79,26 @@ const RoleCard = ({ role, index }) => {
   const navigate = useNavigate();
   const IconComponent = role.icon;
 
-  const handleCardClick = () => {
+  const handleDashboardClick = () => {
     navigate(role.route);
+  };
+
+  const handleProfileClick = () => {
+    if (role.type === 'patient') {
+      navigate('/patient-profile');
+    } else if (role.type === 'provider') {
+      navigate('/provider-profile');
+    } else if (role.type === 'family') {
+      navigate('/family-profile');
+    } else {
+      // For guest, go directly to guest setup
+      navigate('/guest-dashboard');
+    }
   };
 
   return (
     <Card 
-      className={`role-card slide-in-up delay-${(index + 1) * 100} cursor-pointer bg-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group`}
-      onClick={handleCardClick}
+      className={`role-card slide-in-up delay-${(index + 1) * 100} bg-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group`}
     >
       <div className="relative h-48 overflow-hidden image-overlay">
         <img 
@@ -120,14 +132,50 @@ const RoleCard = ({ role, index }) => {
           ))}
         </div>
         
-        <Button 
-          className={`w-full bg-gradient-to-r ${role.bgColor} hover:shadow-lg hover:shadow-blue-500/25 transition-shadow duration-300 text-white border-0 min-h-[60px] h-auto py-4 px-6 text-sm font-semibold group leading-tight`}
-        >
-          <div className="flex items-center justify-center text-center w-full">
-            <span className="flex-1 whitespace-pre-line">{role.buttonText}</span>
-            <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform duration-200 flex-shrink-0" />
-          </div>
-        </Button>
+        {/* Action Buttons */}
+        <div className="space-y-3">
+          {role.type !== 'guest' && (
+            <Button 
+              onClick={handleProfileClick}
+              className={`w-full bg-gradient-to-r ${role.bgColor} hover:shadow-lg hover:shadow-blue-500/25 transition-shadow duration-300 text-white border-0 py-3 px-6 text-sm font-semibold group`}
+            >
+              <div className="flex items-center justify-center w-full">
+                <User className="w-4 h-4 mr-2" />
+                <span>Create Profile</span>
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
+              </div>
+            </Button>
+          )}
+          
+          <Button 
+            onClick={handleDashboardClick}
+            variant={role.type !== 'guest' ? "outline" : "default"}
+            className={`w-full ${role.type === 'guest' 
+              ? `bg-gradient-to-r ${role.bgColor} hover:shadow-lg hover:shadow-blue-500/25 transition-shadow duration-300 text-white border-0` 
+              : `border-2 hover:bg-gray-50`
+            } py-3 px-6 text-sm font-semibold group`}
+          >
+            <div className="flex items-center justify-center w-full">
+              {role.type === 'guest' ? (
+                <>
+                  <span className="whitespace-pre-line">{role.buttonText}</span>
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
+                </>
+              ) : (
+                <>
+                  <span>View Dashboard</span>
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
+                </>
+              )}
+            </div>
+          </Button>
+        </div>
+        
+        {role.type !== 'guest' && (
+          <p className="text-xs text-gray-500 text-center mt-3">
+            Create a profile first for personalized experience
+          </p>
+        )}
       </CardContent>
     </Card>
   );
