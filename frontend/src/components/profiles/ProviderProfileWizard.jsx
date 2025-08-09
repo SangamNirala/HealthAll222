@@ -204,7 +204,7 @@ const ProviderProfileWizard = () => {
             
             {saveError && (
               <div className="text-red-600 text-sm">
-                Save failed: {saveError}
+                Save failed: {typeof saveError === 'string' ? saveError : 'Please fill in required fields to save your progress'}
               </div>
             )}
           </div>
