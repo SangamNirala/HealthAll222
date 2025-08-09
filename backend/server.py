@@ -62,6 +62,277 @@ class HealthMetricCreate(BaseModel):
     value: float
     unit: str
 
+# ===== COMPREHENSIVE PROFILE MODELS =====
+
+# Enums for Profile Data
+class ActivityLevelEnum(str, Enum):
+    SEDENTARY = "SEDENTARY"
+    LIGHTLY_ACTIVE = "LIGHTLY_ACTIVE" 
+    MODERATELY_ACTIVE = "MODERATELY_ACTIVE"
+    VERY_ACTIVE = "VERY_ACTIVE"
+    EXTRA_ACTIVE = "EXTRA_ACTIVE"
+
+class WorkTypeEnum(str, Enum):
+    DESK_JOB = "DESK_JOB"
+    PHYSICAL_WORK = "PHYSICAL_WORK"
+    MIXED = "MIXED"
+    STUDENT = "STUDENT"
+    RETIRED = "RETIRED"
+
+class DietTypeEnum(str, Enum):
+    OMNIVORE = "OMNIVORE"
+    VEGETARIAN = "VEGETARIAN"
+    VEGAN = "VEGAN"
+    PESCATARIAN = "PESCATARIAN"
+    FLEXITARIAN = "FLEXITARIAN"
+
+class MealTimingEnum(str, Enum):
+    TRADITIONAL_3_MEALS = "TRADITIONAL_3_MEALS"
+    SMALL_FREQUENT = "SMALL_FREQUENT"
+    INTERMITTENT_FASTING = "INTERMITTENT_FASTING"
+
+# Patient Profile Models
+class BasicInfo(BaseModel):
+    full_name: str
+    age: int
+    gender: str
+    location: str
+    contact_preferences: Dict[str, bool] = {}
+    timezone: str
+    emergency_contact: Dict[str, str] = {}
+    preferred_language: str = "English"
+
+class PhysicalMetrics(BaseModel):
+    height_cm: float
+    current_weight_kg: float
+    goal_weight_kg: Optional[float] = None
+    body_fat_percentage: Optional[float] = None
+    muscle_mass_kg: Optional[float] = None
+    measurements: Dict[str, float] = {}  # waist, chest, hips
+    bmi: Optional[float] = None
+
+class SleepSchedule(BaseModel):
+    bedtime: str
+    wake_time: str
+    sleep_quality: int = Field(ge=1, le=5)
+
+class ActivityProfile(BaseModel):
+    activity_level: ActivityLevelEnum
+    exercise_types: List[str] = []
+    exercise_frequency: int  # days per week
+    sleep_schedule: SleepSchedule
+    stress_level: int = Field(ge=1, le=5)
+    work_type: WorkTypeEnum
+
+class HealthHistory(BaseModel):
+    primary_health_goals: List[str] = []
+    medical_conditions: Dict[str, str] = {}  # condition: severity
+    current_medications: List[Dict[str, Any]] = []
+    allergies: List[str] = []
+    food_intolerances: List[str] = []
+    previous_surgeries: List[Dict[str, Any]] = []
+    family_medical_history: List[str] = []
+
+class DietaryProfile(BaseModel):
+    diet_type: DietTypeEnum
+    cultural_restrictions: List[str] = []
+    specific_diets: List[str] = []
+    food_allergies: List[str] = []
+    food_dislikes: List[str] = []
+    meal_timing_preference: MealTimingEnum
+    cooking_skill_level: int = Field(ge=1, le=5)
+    available_cooking_time: int  # minutes per day
+
+class GoalsPreferences(BaseModel):
+    health_targets: List[Dict[str, Any]] = []
+    communication_methods: List[str] = []
+    notification_preferences: Dict[str, bool] = {}
+    privacy_settings: Dict[str, bool] = {}
+    data_sharing_preferences: Dict[str, bool] = {}
+
+class PatientProfile(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    role: str = "PATIENT"
+    basic_info: Optional[BasicInfo] = None
+    physical_metrics: Optional[PhysicalMetrics] = None
+    activity_profile: Optional[ActivityProfile] = None
+    health_history: Optional[HealthHistory] = None
+    dietary_profile: Optional[DietaryProfile] = None
+    goals_preferences: Optional[GoalsPreferences] = None
+    profile_completion: float = 0.0
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PatientProfileCreate(BaseModel):
+    user_id: str
+    basic_info: Optional[BasicInfo] = None
+    physical_metrics: Optional[PhysicalMetrics] = None
+    activity_profile: Optional[ActivityProfile] = None
+    health_history: Optional[HealthHistory] = None
+    dietary_profile: Optional[DietaryProfile] = None
+    goals_preferences: Optional[GoalsPreferences] = None
+
+class PatientProfileUpdate(BaseModel):
+    basic_info: Optional[BasicInfo] = None
+    physical_metrics: Optional[PhysicalMetrics] = None
+    activity_profile: Optional[ActivityProfile] = None
+    health_history: Optional[HealthHistory] = None
+    dietary_profile: Optional[DietaryProfile] = None
+    goals_preferences: Optional[GoalsPreferences] = None
+
+# Provider Profile Models
+class ProfessionalIdentity(BaseModel):
+    full_name: str
+    professional_title: str
+    medical_license: str
+    registration_numbers: Dict[str, str] = {}
+    years_experience: int
+
+class Education(BaseModel):
+    degree: str
+    institution: str
+    graduation_year: int
+    specialization: str
+
+class Certification(BaseModel):
+    name: str
+    organization: str
+    issue_date: str
+    expiration_date: str
+    status: str = "ACTIVE"
+
+class ProfessionalCredentials(BaseModel):
+    education: List[Education] = []
+    certifications: List[Certification] = []
+    specializations: List[str] = []
+
+class PracticeInfo(BaseModel):
+    workplace: str
+    practice_type: str
+    patient_demographics: List[str] = []
+    languages_spoken: List[str] = []
+    areas_of_expertise: List[str] = []
+
+class WorkingHours(BaseModel):
+    timezone: str
+    schedule: Dict[str, Dict[str, str]] = {}  # day: {start, end}
+
+class PracticePreferences(BaseModel):
+    consultation_types: List[str] = []
+    working_hours: WorkingHours
+    max_patients: int
+    accepting_new_patients: bool = True
+    specialized_conditions: List[str] = []
+    treatment_philosophies: List[str] = []
+
+class ProviderProfile(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    role: str = "PROVIDER"
+    professional_identity: Optional[ProfessionalIdentity] = None
+    credentials: Optional[ProfessionalCredentials] = None
+    practice_info: Optional[PracticeInfo] = None
+    preferences: Optional[PracticePreferences] = None
+    verification_status: str = "PENDING"
+    profile_completion: float = 0.0
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class ProviderProfileCreate(BaseModel):
+    user_id: str
+    professional_identity: Optional[ProfessionalIdentity] = None
+    credentials: Optional[ProfessionalCredentials] = None
+    practice_info: Optional[PracticeInfo] = None
+    preferences: Optional[PracticePreferences] = None
+
+class ProviderProfileUpdate(BaseModel):
+    professional_identity: Optional[ProfessionalIdentity] = None
+    credentials: Optional[ProfessionalCredentials] = None
+    practice_info: Optional[PracticeInfo] = None
+    preferences: Optional[PracticePreferences] = None
+
+# Family Profile Models
+class FamilyStructure(BaseModel):
+    family_role: str  # Parent, Spouse, Adult Child, etc.
+    number_of_members: int
+    primary_caregiver: bool = False
+
+class FamilyMember(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    relationship: str
+    age: int
+    gender: str
+    special_needs: List[str] = []
+    allergies: List[str] = []
+    medications: List[str] = []
+    health_conditions: List[str] = []
+
+class HouseholdManagement(BaseModel):
+    common_dietary_restrictions: List[str] = []
+    family_meal_preferences: List[str] = []
+    budget_considerations: Dict[str, Any] = {}
+    shopping_responsibilities: List[str] = []
+    cooking_responsibilities: List[str] = []
+
+class CareCoordination(BaseModel):
+    healthcare_providers: Dict[str, Dict[str, str]] = {}  # member: {provider, contact}
+    emergency_contacts: List[Dict[str, str]] = []
+    medication_management: Dict[str, str] = {}
+    health_tracking_preferences: Dict[str, bool] = {}
+
+class FamilyProfile(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    role: str = "FAMILY"
+    family_structure: Optional[FamilyStructure] = None
+    family_members: List[FamilyMember] = []
+    household_management: Optional[HouseholdManagement] = None
+    care_coordination: Optional[CareCoordination] = None
+    profile_completion: float = 0.0
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class FamilyProfileCreate(BaseModel):
+    user_id: str
+    family_structure: Optional[FamilyStructure] = None
+    family_members: List[FamilyMember] = []
+    household_management: Optional[HouseholdManagement] = None
+    care_coordination: Optional[CareCoordination] = None
+
+class FamilyProfileUpdate(BaseModel):
+    family_structure: Optional[FamilyStructure] = None
+    family_members: Optional[List[FamilyMember]] = None
+    household_management: Optional[HouseholdManagement] = None
+    care_coordination: Optional[CareCoordination] = None
+
+# Guest Profile Models
+class BasicDemographics(BaseModel):
+    age: int
+    gender: str
+    activity_level: ActivityLevelEnum
+
+class SimpleGoals(BaseModel):
+    goal_type: str  # maintain, lose, gain
+    target_amount: Optional[float] = None
+    timeframe: Optional[str] = None
+
+class GuestProfile(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    session_id: str
+    role: str = "GUEST"
+    basic_demographics: Optional[BasicDemographics] = None
+    simple_goals: Optional[SimpleGoals] = None
+    session_expires: datetime
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class GuestProfileCreate(BaseModel):
+    session_id: str
+    basic_demographics: BasicDemographics
+    simple_goals: SimpleGoals
+    session_expires: datetime
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
