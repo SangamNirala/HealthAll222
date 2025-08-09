@@ -7,6 +7,7 @@ import ProgressIndicator from '../shared/ProgressIndicator';
 import WizardNavigation from '../shared/WizardNavigation';
 import useAutoSave from '../../hooks/useAutoSave';
 import ProfileAPI from '../../utils/profileApi';
+import { getSectionCompletionStatus } from '../../utils/profileValidation';
 
 // Step Components
 import FamilyStructureStep from './family-steps/FamilyStructureStep';
