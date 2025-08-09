@@ -27,7 +27,21 @@ const useAutoSave = (data, saveFunction, delay = 1000) => {
   // Trigger auto-save when data changes
   useEffect(() => {
     if (data && Object.keys(data).length > 0) {
-      debouncedSave(data);
+      // Check if data has actual meaningful content, not just empty objects
+      const hasContent = Object.values(data).some(section => {
+        if (section === null || section === undefined) return false;
+        if (Array.isArray(section)) return section.length > 0;
+        if (typeof section === 'object') {
+          return Object.keys(section).length > 0 && Object.values(section).some(value => 
+            value !== null && value !== undefined && value !== ''
+          );
+        }
+        return true;
+      });
+      
+      if (hasContent) {
+        debouncedSave(data);
+      }
     }
 
     // Cleanup
