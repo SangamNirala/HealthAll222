@@ -142,16 +142,16 @@ const FormField = ({
             {required && <span className="text-red-500 ml-1">*</span>}
           </Label>
           {helpText && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <HelpCircle className="h-4 w-4 text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="max-w-xs">{helpText}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button type="button" aria-label={`Help for ${label}`} className="focus:outline-none">
+                  <HelpCircle className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="text-sm leading-snug max-w-xs">
+                {helpText}
+              </PopoverContent>
+            </Popover>
           )}
         </div>
       )}
