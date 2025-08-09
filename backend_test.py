@@ -1522,25 +1522,354 @@ class HealthPlatformAPITester:
         
         return overall_success
 
+    def test_profile_completion_persistence_fix(self):
+        """Test that profile_completion is properly persisted to database after updates"""
+        print("\n🔍 Testing Profile Completion Persistence Fix")
+        print("Focus: Verify profile_completion field is saved to database (not just calculated)")
+        
+        # Test Patient Profile Completion Persistence
+        print("\n📝 Testing Patient Profile Completion Persistence")
+        patient_user_id = f"patient_persist_{datetime.now().strftime('%H%M%S_%f')}"
+        
+        # Step 1: Create patient profile with only basic_info (should be ~16.7% completion)
+        basic_info_data = {
+            "user_id": patient_user_id,
+            "basic_info": {
+                "full_name": "Sarah Johnson",
+                "age": 28,
+                "gender": "Female",
+                "location": "New York, NY",
+                "timezone": "America/New_York",
+                "preferred_language": "English"
+            }
+        }
+        
+        success1, create_response = self.run_test(
+            "Create Patient Profile - Basic Info Only",
+            "POST",
+            "profiles/patient",
+            200,
+            data=basic_info_data
+        )
+        
+        initial_completion = 0
+        if success1 and create_response:
+            initial_completion = create_response.get('profile_completion', 0)
+            print(f"   ✅ Initial completion: {initial_completion}% (Expected: ~16.7%)")
+        
+        # Step 2: PUT update to add physical_metrics section
+        physical_metrics_update = {
+            "physical_metrics": {
+                "height_cm": 165.0,
+                "current_weight_kg": 65.0,
+                "goal_weight_kg": 60.0,
+                "body_fat_percentage": 22.0,
+                "measurements": {"waist": 75.0, "chest": 88.0},
+                "bmi": 23.9
+            }
+        }
+        
+        success2, update_response = self.run_test(
+            "Update Patient Profile - Add Physical Metrics",
+            "PUT",
+            f"profiles/patient/{patient_user_id}",
+            200,
+            data=physical_metrics_update
+        )
+        
+        updated_completion = 0
+        if success2 and update_response:
+            updated_completion = update_response.get('profile_completion', 0)
+            print(f"   ✅ Updated completion: {updated_completion}% (Expected: ~33.3%)")
+        
+        # Step 3: Verify GET shows increased completion percentage
+        success3, get_response = self.run_test(
+            "Get Patient Profile - Verify Persisted Completion",
+            "GET",
+            f"profiles/patient/{patient_user_id}",
+            200
+        )
+        
+        persisted_completion = 0
+        if success3 and get_response:
+            persisted_completion = get_response.get('profile_completion', 0)
+            print(f"   ✅ Persisted completion: {persisted_completion}% (Should match updated: {updated_completion}%)")
+        
+        # Step 4: Verify completion API endpoint returns updated values
+        success4, completion_api_response = self.run_test(
+            "Get Patient Profile Completion Status",
+            "GET",
+            f"profiles/completion/{patient_user_id}",
+            200,
+            params={"role": "PATIENT"}
+        )
+        
+        api_completion = 0
+        if success4 and completion_api_response:
+            api_completion = completion_api_response.get('completion_percentage', 0)
+            print(f"   ✅ API completion: {api_completion}% (Should match persisted: {persisted_completion}%)")
+        
+        # Test Provider Profile Completion Persistence
+        print("\n📝 Testing Provider Profile Completion Persistence")
+        provider_user_id = f"provider_persist_{datetime.now().strftime('%H%M%S_%f')}"
+        
+        # Step 1: Create provider profile with only professional_identity (25% completion)
+        professional_identity_data = {
+            "user_id": provider_user_id,
+            "professional_identity": {
+                "full_name": "Dr. Emily Rodriguez",
+                "professional_title": "Registered Dietitian",
+                "medical_license": "RD123456",
+                "registration_numbers": {"state_license": "CA-RD-789"},
+                "years_experience": 8
+            }
+        }
+        
+        success5, provider_create_response = self.run_test(
+            "Create Provider Profile - Professional Identity Only",
+            "POST",
+            "profiles/provider",
+            200,
+            data=professional_identity_data
+        )
+        
+        provider_initial_completion = 0
+        if success5 and provider_create_response:
+            provider_initial_completion = provider_create_response.get('profile_completion', 0)
+            print(f"   ✅ Provider initial completion: {provider_initial_completion}% (Expected: 25%)")
+        
+        # Step 2: PUT update to add credentials section
+        credentials_update = {
+            "credentials": {
+                "education": [
+                    {
+                        "degree": "Master of Science in Nutrition",
+                        "institution": "University of California, Davis",
+                        "graduation_year": 2015,
+                        "specialization": "Clinical Nutrition"
+                    }
+                ],
+                "certifications": [
+                    {
+                        "name": "Certified Diabetes Educator",
+                        "organization": "CBDCE",
+                        "issue_date": "2018-06-15",
+                        "expiration_date": "2025-06-15",
+                        "status": "ACTIVE"
+                    }
+                ],
+                "specializations": ["diabetes_management", "weight_management"]
+            }
+        }
+        
+        success6, provider_update_response = self.run_test(
+            "Update Provider Profile - Add Credentials",
+            "PUT",
+            f"profiles/provider/{provider_user_id}",
+            200,
+            data=credentials_update
+        )
+        
+        provider_updated_completion = 0
+        if success6 and provider_update_response:
+            provider_updated_completion = provider_update_response.get('profile_completion', 0)
+            print(f"   ✅ Provider updated completion: {provider_updated_completion}% (Expected: 50%)")
+        
+        # Step 3: Verify GET shows increased completion percentage
+        success7, provider_get_response = self.run_test(
+            "Get Provider Profile - Verify Persisted Completion",
+            "GET",
+            f"profiles/provider/{provider_user_id}",
+            200
+        )
+        
+        provider_persisted_completion = 0
+        if success7 and provider_get_response:
+            provider_persisted_completion = provider_get_response.get('profile_completion', 0)
+            print(f"   ✅ Provider persisted completion: {provider_persisted_completion}% (Should match updated: {provider_updated_completion}%)")
+        
+        # Step 4: Verify completion API endpoint reflects new percentage
+        success8, provider_completion_api = self.run_test(
+            "Get Provider Profile Completion Status",
+            "GET",
+            f"profiles/completion/{provider_user_id}",
+            200,
+            params={"role": "PROVIDER"}
+        )
+        
+        provider_api_completion = 0
+        if success8 and provider_completion_api:
+            provider_api_completion = provider_completion_api.get('completion_percentage', 0)
+            print(f"   ✅ Provider API completion: {provider_api_completion}% (Should match persisted: {provider_persisted_completion}%)")
+        
+        # Test Family Profile Completion Persistence
+        print("\n📝 Testing Family Profile Completion Persistence")
+        family_user_id = f"family_persist_{datetime.now().strftime('%H%M%S_%f')}"
+        
+        # Step 1: Create family profile with only family_structure (25% completion)
+        family_structure_data = {
+            "user_id": family_user_id,
+            "family_structure": {
+                "family_role": "Parent",
+                "number_of_members": 3,
+                "primary_caregiver": True
+            }
+        }
+        
+        success9, family_create_response = self.run_test(
+            "Create Family Profile - Family Structure Only",
+            "POST",
+            "profiles/family",
+            200,
+            data=family_structure_data
+        )
+        
+        family_initial_completion = 0
+        if success9 and family_create_response:
+            family_initial_completion = family_create_response.get('profile_completion', 0)
+            print(f"   ✅ Family initial completion: {family_initial_completion}% (Expected: 25%)")
+        
+        # Step 2: PUT update to add family_members section
+        family_members_update = {
+            "family_members": [
+                {
+                    "name": "John Smith",
+                    "relationship": "Self",
+                    "age": 42,
+                    "gender": "Male",
+                    "special_needs": [],
+                    "allergies": ["pollen"],
+                    "medications": [],
+                    "health_conditions": []
+                },
+                {
+                    "name": "Mary Smith",
+                    "relationship": "Spouse",
+                    "age": 38,
+                    "gender": "Female",
+                    "special_needs": [],
+                    "allergies": [],
+                    "medications": [],
+                    "health_conditions": []
+                },
+                {
+                    "name": "Emma Smith",
+                    "relationship": "Daughter",
+                    "age": 12,
+                    "gender": "Female",
+                    "special_needs": [],
+                    "allergies": ["peanuts"],
+                    "medications": [],
+                    "health_conditions": []
+                }
+            ]
+        }
+        
+        success10, family_update_response = self.run_test(
+            "Update Family Profile - Add Family Members",
+            "PUT",
+            f"profiles/family/{family_user_id}",
+            200,
+            data=family_members_update
+        )
+        
+        family_updated_completion = 0
+        if success10 and family_update_response:
+            family_updated_completion = family_update_response.get('profile_completion', 0)
+            print(f"   ✅ Family updated completion: {family_updated_completion}% (Expected: 50%)")
+        
+        # Step 3: Verify GET shows increased completion percentage
+        success11, family_get_response = self.run_test(
+            "Get Family Profile - Verify Persisted Completion",
+            "GET",
+            f"profiles/family/{family_user_id}",
+            200
+        )
+        
+        family_persisted_completion = 0
+        if success11 and family_get_response:
+            family_persisted_completion = family_get_response.get('profile_completion', 0)
+            print(f"   ✅ Family persisted completion: {family_persisted_completion}% (Should match updated: {family_updated_completion}%)")
+        
+        # Step 4: Verify completion API endpoint reflects new percentage
+        success12, family_completion_api = self.run_test(
+            "Get Family Profile Completion Status",
+            "GET",
+            f"profiles/completion/{family_user_id}",
+            200,
+            params={"role": "FAMILY"}
+        )
+        
+        family_api_completion = 0
+        if success12 and family_completion_api:
+            family_api_completion = family_completion_api.get('completion_percentage', 0)
+            print(f"   ✅ Family API completion: {family_api_completion}% (Should match persisted: {family_persisted_completion}%)")
+        
+        # Cleanup test profiles
+        self.run_test("Cleanup Patient Profile", "DELETE", f"profiles/patient/{patient_user_id}", 200)
+        self.run_test("Cleanup Provider Profile", "DELETE", f"profiles/provider/{provider_user_id}", 200)
+        self.run_test("Cleanup Family Profile", "DELETE", f"profiles/family/{family_user_id}", 200)
+        
+        # Validate persistence logic
+        patient_persistence_valid = (
+            initial_completion < updated_completion and
+            updated_completion == persisted_completion and
+            persisted_completion == api_completion
+        )
+        
+        provider_persistence_valid = (
+            provider_initial_completion < provider_updated_completion and
+            provider_updated_completion == provider_persisted_completion and
+            provider_persisted_completion == provider_api_completion
+        )
+        
+        family_persistence_valid = (
+            family_initial_completion < family_updated_completion and
+            family_updated_completion == family_persisted_completion and
+            family_persisted_completion == family_api_completion
+        )
+        
+        overall_success = (
+            success1 and success2 and success3 and success4 and
+            success5 and success6 and success7 and success8 and
+            success9 and success10 and success11 and success12 and
+            patient_persistence_valid and provider_persistence_valid and family_persistence_valid
+        )
+        
+        print(f"\n📊 Profile Completion Persistence Test Results:")
+        print(f"   Patient Profile Persistence: {'✅' if patient_persistence_valid else '❌'}")
+        print(f"   Provider Profile Persistence: {'✅' if provider_persistence_valid else '❌'}")
+        print(f"   Family Profile Persistence: {'✅' if family_persistence_valid else '❌'}")
+        print(f"   Overall Success: {'✅' if overall_success else '❌'}")
+        
+        if not patient_persistence_valid:
+            print(f"   ❌ Patient: Initial({initial_completion}%) → Updated({updated_completion}%) → Persisted({persisted_completion}%) → API({api_completion}%)")
+        if not provider_persistence_valid:
+            print(f"   ❌ Provider: Initial({provider_initial_completion}%) → Updated({provider_updated_completion}%) → Persisted({provider_persisted_completion}%) → API({provider_api_completion}%)")
+        if not family_persistence_valid:
+            print(f"   ❌ Family: Initial({family_initial_completion}%) → Updated({family_updated_completion}%) → Persisted({family_persisted_completion}%) → API({family_api_completion}%)")
+        
+        return overall_success
+
 def main():
     """Main test execution"""
     tester = HealthPlatformAPITester()
     
-    # Run the specific smoke test as requested in the review
-    print("🚀 Starting Patient Profile Partial Updates - Smoke Test")
+    # Run the profile completion persistence test as requested in the review
+    print("🚀 Starting Profile Completion Persistence Fix Test")
     print(f"🌐 Base URL: {tester.base_url}")
     print("=" * 80)
     
-    success = tester.test_patient_profile_partial_updates_smoke_test()
+    success = tester.test_profile_completion_persistence_fix()
     
     print("\n" + "=" * 80)
     if success:
-        print("🎉 Patient Profile Partial Updates - Smoke Test: PASSED")
-        print("✅ Patient profile endpoints accept partial updates where provided sections are complete")
+        print("🎉 Profile Completion Persistence Fix Test: PASSED")
+        print("✅ Profile completion is properly persisted to database after updates")
         return 0
     else:
-        print("⚠️ Patient Profile Partial Updates - Smoke Test: FAILED")
-        print("❌ Issues detected with partial update functionality")
+        print("⚠️ Profile Completion Persistence Fix Test: FAILED")
+        print("❌ Issues detected with profile completion persistence")
         return 1
 
 if __name__ == "__main__":
