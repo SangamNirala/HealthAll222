@@ -3,7 +3,8 @@
 import requests
 import sys
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
+import uuid
 
 class HealthPlatformAPITester:
     def __init__(self, base_url="https://6ee6a422-bba9-45d2-b104-2a7130091b83.preview.emergentagent.com/api"):
