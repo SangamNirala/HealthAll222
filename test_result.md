@@ -347,13 +347,19 @@ frontend:
     implemented: true
     working: true
     file: "/app/frontend/src/components/profiles/PatientProfileWizard.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: true
     status_history:
       - working: true
         agent: "main"
         comment: "PHASE 2: Complete 6-step patient profile wizard implemented with auto-save, progress tracking, comprehensive health data collection, and backend integration. Ready for testing."
+      - working: false
+        agent: "user"
+        comment: "ERROR REPORTED: Cannot read properties of null (reading 'full_name') in BasicInfoStep component when clicking Create Profile button"
+      - working: true
+        agent: "main"
+        comment: "FIXED: Changed profileData initialization from null to empty objects ({}) in PatientProfileWizard.jsx to prevent null reference errors. Also fixed FamilyProfileWizard and ProviderProfileWizard."
 
   - task: "Provider Profile Wizard UI"
     implemented: true
@@ -366,6 +372,9 @@ frontend:
       - working: true
         agent: "main"
         comment: "PHASE 2: Complete 4-step provider profile wizard implemented with professional credentials, practice info, preferences, and credential verification system."
+      - working: true
+        agent: "main"
+        comment: "FIXED: Changed profileData initialization from null to empty objects to prevent null reference errors."
 
   - task: "Shared Wizard Components"
     implemented: true
@@ -414,6 +423,9 @@ frontend:
       - working: true
         agent: "main"
         comment: "PHASE 2: Complete 4-step family profile wizard implemented with family structure, member management, household management, and care coordination. Auto-save and progress tracking included."
+      - working: true
+        agent: "main"
+        comment: "FIXED: Changed profileData initialization from null to empty objects to prevent null reference errors."
 
   - task: "Guest Profile Setup UI"
     implemented: true
