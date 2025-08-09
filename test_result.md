@@ -104,6 +104,66 @@
 
 user_problem_statement: "UI Enhancements: Add 'Previous surgeries or medical procedures' to Patient Health History step, wired to backend previous_surgeries field. Add body-fat visual cue/guide in Physical Metrics step. Show section '✓ Saved' badges in ProgressIndicator for Provider and Family wizards with per-section completion checks."
 
+  - task: "Patient Health History - Previous Surgeries UI"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/components/profiles/patient-steps/HealthHistoryStep.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "IMPLEMENTED: Added previous surgeries/procedures section to Patient Health History step with add/edit/remove UI using FormField components. Includes procedure name, date (optional), and notes/details fields. Wired to updateField('previous_surgeries', updatedArray) and backend previous_surgeries field. Ready for testing."
+
+  - task: "Physical Metrics - Body Fat Visual Cue"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/components/profiles/patient-steps/PhysicalMetricsStep.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "IMPLEMENTED: Added visual guide info block below Body Fat Percentage input with healthy range guidelines (10-22% men, 20-32% women). Styled with blue background and informative text. No validation changes, purely visual aid. Ready for testing."
+
+  - task: "Section Completion Badges - ProgressIndicator Enhancement"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/components/shared/ProgressIndicator.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "IMPLEMENTED: Enhanced ProgressIndicator to support custom stepToSection mapping via props. Added optional stepToSection prop while maintaining backward compatibility with default patient mapping. Ready for Provider/Family wizard integration testing."
+
+  - task: "Provider Wizard - Section Completion Badges"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/components/profiles/ProviderProfileWizard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "IMPLEMENTED: Added sectionCompletion state and calculateSectionCompletion function for Provider wizard. Completion logic: professional_identity (full_name && professional_title), credentials (education.length > 0 || certifications.length > 0), practice_info (workplace && practice_type), preferences (consultation_types.length > 0). Updated ProgressIndicator with provider stepToSection mapping. Ready for testing."
+
+  - task: "Family Wizard - Section Completion Badges"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/components/profiles/FamilyProfileWizard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "IMPLEMENTED: Added sectionCompletion state and calculateSectionCompletion function for Family wizard. Completion logic: family_structure (family_role && number_of_members > 0), family_members (length > 0), household_management (any dietary restrictions, meal preferences, or budget), care_coordination (any healthcare providers, emergency contacts, or health tracking). Updated ProgressIndicator with family stepToSection mapping. Ready for testing."
+
   - task: "Backend Profile Completion Persistence Fix"
     implemented: true
     working: true
