@@ -488,6 +488,7 @@ async def update_family_profile(user_id: str, update: FamilyProfileUpdate):
     
     merged_profile = {**existing, **update_dict}
     merged_profile["profile_completion"] = calculate_profile_completion(merged_profile, "FAMILY")
+    update_dict["profile_completion"] = merged_profile["profile_completion"]
     
     await db.family_profiles.update_one(
         {"user_id": user_id},
