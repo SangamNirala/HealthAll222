@@ -273,6 +273,7 @@ const PatientProfileWizard = () => {
               currentStep={currentStep} 
               totalSteps={totalSteps}
               stepLabels={stepLabels}
+              sectionCompletion={sectionCompletion}
             />
           </CardHeader>
           
