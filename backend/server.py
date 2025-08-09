@@ -354,6 +354,218 @@ def calculate_profile_completion(profile: dict, profile_type: str) -> float:
 async def root():
     return {"message": "Health & Nutrition Platform API"}
 
+# ===== PROFILE MANAGEMENT API ENDPOINTS =====
+
+# Patient Profile Endpoints
+@api_router.post("/profiles/patient", response_model=PatientProfile)
+async def create_patient_profile(profile: PatientProfileCreate):
+    profile_dict = profile.dict()
+    profile_obj = PatientProfile(**profile_dict)
+    profile_obj.profile_completion = calculate_profile_completion(profile_dict, "PATIENT")
+    
+    # Check if profile already exists
+    existing = await db.patient_profiles.find_one({"user_id": profile.user_id})
+    if existing:
+        raise HTTPException(status_code=400, detail="Profile already exists for this user")
+    
+    await db.patient_profiles.insert_one(profile_obj.dict())
+    return profile_obj
+
+@api_router.get("/profiles/patient/{user_id}", response_model=PatientProfile)
+async def get_patient_profile(user_id: str):
+    profile = await db.patient_profiles.find_one({"user_id": user_id})
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return PatientProfile(**profile)
+
+@api_router.put("/profiles/patient/{user_id}", response_model=PatientProfile)
+async def update_patient_profile(user_id: str, update: PatientProfileUpdate):
+    existing = await db.patient_profiles.find_one({"user_id": user_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    update_dict = {k: v for k, v in update.dict().items() if v is not None}
+    update_dict["updated_at"] = datetime.utcnow()
+    
+    # Merge existing profile with updates
+    merged_profile = {**existing, **update_dict}
+    merged_profile["profile_completion"] = calculate_profile_completion(merged_profile, "PATIENT")
+    
+    await db.patient_profiles.update_one(
+        {"user_id": user_id},
+        {"$set": update_dict}
+    )
+    
+    updated_profile = await db.patient_profiles.find_one({"user_id": user_id})
+    return PatientProfile(**updated_profile)
+
+@api_router.delete("/profiles/patient/{user_id}")
+async def delete_patient_profile(user_id: str):
+    result = await db.patient_profiles.delete_one({"user_id": user_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return {"message": "Profile deleted successfully"}
+
+# Provider Profile Endpoints
+@api_router.post("/profiles/provider", response_model=ProviderProfile)
+async def create_provider_profile(profile: ProviderProfileCreate):
+    profile_dict = profile.dict()
+    profile_obj = ProviderProfile(**profile_dict)
+    profile_obj.profile_completion = calculate_profile_completion(profile_dict, "PROVIDER")
+    
+    existing = await db.provider_profiles.find_one({"user_id": profile.user_id})
+    if existing:
+        raise HTTPException(status_code=400, detail="Profile already exists for this user")
+    
+    await db.provider_profiles.insert_one(profile_obj.dict())
+    return profile_obj
+
+@api_router.get("/profiles/provider/{user_id}", response_model=ProviderProfile)
+async def get_provider_profile(user_id: str):
+    profile = await db.provider_profiles.find_one({"user_id": user_id})
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return ProviderProfile(**profile)
+
+@api_router.put("/profiles/provider/{user_id}", response_model=ProviderProfile)
+async def update_provider_profile(user_id: str, update: ProviderProfileUpdate):
+    existing = await db.provider_profiles.find_one({"user_id": user_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    update_dict = {k: v for k, v in update.dict().items() if v is not None}
+    update_dict["updated_at"] = datetime.utcnow()
+    
+    merged_profile = {**existing, **update_dict}
+    merged_profile["profile_completion"] = calculate_profile_completion(merged_profile, "PROVIDER")
+    
+    await db.provider_profiles.update_one(
+        {"user_id": user_id},
+        {"$set": update_dict}
+    )
+    
+    updated_profile = await db.provider_profiles.find_one({"user_id": user_id})
+    return ProviderProfile(**updated_profile)
+
+@api_router.delete("/profiles/provider/{user_id}")
+async def delete_provider_profile(user_id: str):
+    result = await db.provider_profiles.delete_one({"user_id": user_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return {"message": "Profile deleted successfully"}
+
+# Family Profile Endpoints
+@api_router.post("/profiles/family", response_model=FamilyProfile)
+async def create_family_profile(profile: FamilyProfileCreate):
+    profile_dict = profile.dict()
+    profile_obj = FamilyProfile(**profile_dict)
+    profile_obj.profile_completion = calculate_profile_completion(profile_dict, "FAMILY")
+    
+    existing = await db.family_profiles.find_one({"user_id": profile.user_id})
+    if existing:
+        raise HTTPException(status_code=400, detail="Profile already exists for this user")
+    
+    await db.family_profiles.insert_one(profile_obj.dict())
+    return profile_obj
+
+@api_router.get("/profiles/family/{user_id}", response_model=FamilyProfile)
+async def get_family_profile(user_id: str):
+    profile = await db.family_profiles.find_one({"user_id": user_id})
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return FamilyProfile(**profile)
+
+@api_router.put("/profiles/family/{user_id}", response_model=FamilyProfile)
+async def update_family_profile(user_id: str, update: FamilyProfileUpdate):
+    existing = await db.family_profiles.find_one({"user_id": user_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    update_dict = {k: v for k, v in update.dict().items() if v is not None}
+    update_dict["updated_at"] = datetime.utcnow()
+    
+    merged_profile = {**existing, **update_dict}
+    merged_profile["profile_completion"] = calculate_profile_completion(merged_profile, "FAMILY")
+    
+    await db.family_profiles.update_one(
+        {"user_id": user_id},
+        {"$set": update_dict}
+    )
+    
+    updated_profile = await db.family_profiles.find_one({"user_id": user_id})
+    return FamilyProfile(**updated_profile)
+
+@api_router.delete("/profiles/family/{user_id}")
+async def delete_family_profile(user_id: str):
+    result = await db.family_profiles.delete_one({"user_id": user_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return {"message": "Profile deleted successfully"}
+
+# Guest Profile Endpoints
+@api_router.post("/profiles/guest", response_model=GuestProfile)
+async def create_guest_profile(profile: GuestProfileCreate):
+    profile_dict = profile.dict()
+    profile_obj = GuestProfile(**profile_dict)
+    
+    # Clean up expired guest profiles periodically
+    await db.guest_profiles.delete_many({"session_expires": {"$lt": datetime.utcnow()}})
+    
+    await db.guest_profiles.insert_one(profile_obj.dict())
+    return profile_obj
+
+@api_router.get("/profiles/guest/{session_id}", response_model=GuestProfile)
+async def get_guest_profile(session_id: str):
+    profile = await db.guest_profiles.find_one({
+        "session_id": session_id,
+        "session_expires": {"$gt": datetime.utcnow()}
+    })
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found or expired")
+    return GuestProfile(**profile)
+
+@api_router.delete("/profiles/guest/{session_id}")
+async def delete_guest_profile(session_id: str):
+    result = await db.guest_profiles.delete_one({"session_id": session_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    return {"message": "Profile deleted successfully"}
+
+# Profile Completion Status Endpoints
+@api_router.get("/profiles/completion/{user_id}")
+async def get_profile_completion_status(user_id: str, role: str):
+    if role.upper() == "PATIENT":
+        profile = await db.patient_profiles.find_one({"user_id": user_id})
+    elif role.upper() == "PROVIDER":
+        profile = await db.provider_profiles.find_one({"user_id": user_id})
+    elif role.upper() == "FAMILY":
+        profile = await db.family_profiles.find_one({"user_id": user_id})
+    else:
+        raise HTTPException(status_code=400, detail="Invalid role specified")
+    
+    if not profile:
+        return {"completion_percentage": 0.0, "missing_sections": []}
+    
+    completion = profile.get("profile_completion", 0.0)
+    
+    # Determine missing sections
+    missing_sections = []
+    if role.upper() == "PATIENT":
+        sections = ["basic_info", "physical_metrics", "activity_profile", "health_history", "dietary_profile", "goals_preferences"]
+    elif role.upper() == "PROVIDER":
+        sections = ["professional_identity", "credentials", "practice_info", "preferences"]
+    else:  # FAMILY
+        sections = ["family_structure", "family_members", "household_management", "care_coordination"]
+    
+    missing_sections = [section for section in sections if not profile.get(section)]
+    
+    return {
+        "completion_percentage": completion,
+        "missing_sections": missing_sections,
+        "total_sections": len(sections),
+        "completed_sections": len(sections) - len(missing_sections)
+    }
+
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
     status_dict = input.dict()
