@@ -100,7 +100,7 @@ const FamilyProfileWizard = () => {
           const existingProfile = await ProfileAPI.getFamilyProfile(storedUserId);
           if (existingProfile) {
             setProfileData(existingProfile);
-            setSectionCompletion(getSectionCompletionStatus(existingProfile));
+            setSectionCompletion(calculateSectionCompletion(existingProfile));
             setIsEditing(true);
           }
         } catch (error) {
