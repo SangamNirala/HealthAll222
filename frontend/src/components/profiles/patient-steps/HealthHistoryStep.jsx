@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import FormField from '../../shared/FormField';
-import { Heart, Pill, AlertTriangle, Users } from 'lucide-react';
+import { Heart, Pill, AlertTriangle, Users, Scissors } from 'lucide-react';
 
 const HealthHistoryStep = ({ data = {}, onChange, icon: Icon }) => {
   const updateField = (field, value) => {
