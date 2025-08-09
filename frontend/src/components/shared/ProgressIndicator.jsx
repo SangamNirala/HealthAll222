@@ -1,9 +1,19 @@
 import React from 'react';
 import { Progress } from '../ui/progress';
-import { Check } from 'lucide-react';
+import { Check, CheckCircle } from 'lucide-react';
 
-const ProgressIndicator = ({ currentStep, totalSteps, stepLabels = [] }) => {
+const ProgressIndicator = ({ currentStep, totalSteps, stepLabels = [], sectionCompletion = {} }) => {
   const progressPercentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
+  
+  // Map step numbers to section names
+  const stepToSection = {
+    1: 'basic_info',
+    2: 'physical_metrics', 
+    3: 'activity_profile',
+    4: 'health_history',
+    5: 'dietary_profile',
+    6: 'goals_preferences'
+  };
 
   return (
     <div className="w-full mb-8">
@@ -22,10 +32,16 @@ const ProgressIndicator = ({ currentStep, totalSteps, stepLabels = [] }) => {
           const stepNumber = index + 1;
           const isCompleted = stepNumber < currentStep;
           const isCurrent = stepNumber === currentStep;
-          const isUpcoming = stepNumber > currentStep;
+          const sectionName = stepToSection[stepNumber];
+          const isSectionComplete = sectionCompletion[sectionName] || false;
 
           return (
-            <div key={stepNumber} className="flex flex-col items-center">
+            <div key={stepNumber} className="flex flex-col items-center relative">
+              {/* Section Complete Indicator */}
+              {isSectionComplete && (
+                <CheckCircle className="w-3 h-3 text-green-500 absolute -top-1 -right-1 bg-white rounded-full" />
+              )}
+              
               {/* Step Circle */}
               <div
                 className={`
@@ -54,6 +70,9 @@ const ProgressIndicator = ({ currentStep, totalSteps, stepLabels = [] }) => {
                   `}
                 >
                   {stepLabels[index]}
+                  {isSectionComplete && (
+                    <div className="text-green-600 font-medium">✓ Saved</div>
+                  )}
                 </div>
               )}
             </div>
