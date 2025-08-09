@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "ROLE-SPECIFIC DASHBOARD IMPLEMENTATION - Building on the role selection foundation, implement distinct dashboard layouts and basic functionality for each user role: Patient Dashboard, Healthcare Provider Dashboard, Family Dashboard, and Guest Dashboard with role-specific features and navigation."
+user_problem_statement: "Backend completion fix + cross-session editing: Fix backend so profile_completion is persisted on every profile update (patient, provider, family). Enable true profile editing by auto-loading existing profiles when users revisit the wizards using localStorage persistence per role."
 
 backend:
   - task: "Role-Specific API Endpoints"
