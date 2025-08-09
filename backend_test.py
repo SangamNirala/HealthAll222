@@ -291,6 +291,10 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Dashboard Endpoints...")
         self.test_dashboard_endpoints()
 
+        # Test additional endpoints
+        print("\n📋 Testing Additional Role-Specific Endpoints...")
+        self.test_additional_endpoints()
+
         # Print final results
         print("\n" + "=" * 60)
         print(f"📊 FINAL RESULTS")
