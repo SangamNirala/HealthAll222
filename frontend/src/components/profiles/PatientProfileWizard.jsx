@@ -255,13 +255,6 @@ const PatientProfileWizard = () => {
             
             {/* Save Status and Section Completion */}
             <div className="flex items-center space-x-4">
-              {isSaving && (
-                <div className="flex items-center text-blue-600 text-sm">
-                  <Clock className="w-4 h-4 mr-1 animate-spin" />
-                  Saving...
-                </div>
-              )}
-              
               {Object.values(sectionCompletion).some(complete => complete) && (
                 <div className="flex items-center text-green-600 text-sm">
                   <CheckCircle className="w-4 h-4 mr-1" />
