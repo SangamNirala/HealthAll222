@@ -390,6 +390,7 @@ async def update_patient_profile(user_id: str, update: PatientProfileUpdate):
     # Merge existing profile with updates
     merged_profile = {**existing, **update_dict}
     merged_profile["profile_completion"] = calculate_profile_completion(merged_profile, "PATIENT")
+    update_dict["profile_completion"] = merged_profile["profile_completion"]
     
     await db.patient_profiles.update_one(
         {"user_id": user_id},
