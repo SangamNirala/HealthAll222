@@ -1020,6 +1020,10 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Additional Role-Specific Endpoints...")
         self.test_additional_endpoints()
 
+        # Test profile management endpoints
+        print("\n📋 Testing Profile Management Endpoints...")
+        self.test_profile_management_endpoints()
+
         # Print final results
         print("\n" + "=" * 60)
         print(f"📊 FINAL RESULTS")
