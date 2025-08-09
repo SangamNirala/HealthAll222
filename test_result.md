@@ -514,6 +514,9 @@ test_plan:
   test_all: false
   test_priority: "completed"
 
+  - agent: "main"
+    message: "FIX APPLIED: PatientProfileWizard now sends only completed sections to backend (sanitized payload) and will not include empty placeholders. This prevents repeated auto-save 422 errors in steps 2-3. Marking Patient Profile Wizard UI for retesting."
+
 agent_communication:
   - agent: "user"
     message: "ERROR REPORTED: When clicking 'Create Profile' button, getting error 'Cannot read properties of null (reading 'full_name')' in BasicInfoStep component"
