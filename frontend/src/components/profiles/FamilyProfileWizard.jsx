@@ -89,7 +89,7 @@ const FamilyProfileWizard = () => {
         
         if (existingProfile) {
           setProfileData(existingProfile);
-          setSectionCompletion(getSectionCompletionStatus(existingProfile));
+          setSectionCompletion(calculateSectionCompletion(existingProfile));
           setIsEditing(true);
         }
       } else if (storedUserId) {
