@@ -98,10 +98,17 @@ const PatientProfileWizard = () => {
 
   // Update specific section of profile data
   const updateProfileSection = (section, data) => {
-    setProfileData(prev => ({
-      ...prev,
-      [section]: data
-    }));
+    setProfileData(prev => {
+      const updated = {
+        ...prev,
+        [section]: data
+      };
+      
+      // Update section completion status
+      setSectionCompletion(getSectionCompletionStatus(updated));
+      
+      return updated;
+    });
   };
 
   // Step navigation
