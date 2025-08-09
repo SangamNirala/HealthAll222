@@ -46,6 +46,32 @@ const FamilyProfileWizard = () => {
     Heart
   ];
 
+  // Family-specific step to section mapping
+  const familyStepToSection = {
+    1: 'family_structure',
+    2: 'family_members',
+    3: 'household_management',
+    4: 'care_coordination'
+  };
+
+  // Calculate family section completion
+  const calculateSectionCompletion = (data) => {
+    return {
+      family_structure: !!(data.family_structure?.family_role && data.family_structure?.number_of_members > 0),
+      family_members: !!(data.family_members?.length > 0),
+      household_management: !!(
+        data.household_management?.common_dietary_restrictions?.length > 0 ||
+        data.household_management?.family_meal_preferences?.length > 0 ||
+        data.household_management?.budget_considerations
+      ),
+      care_coordination: !!(
+        data.care_coordination?.healthcare_providers?.length > 0 ||
+        data.care_coordination?.emergency_contacts?.length > 0 ||
+        data.care_coordination?.health_tracking_preferences
+      )
+    };
+  };
+
   // Get user ID from localStorage or generate one, and try to load existing profile
   useEffect(() => {
     const initializeProfile = async () => {
