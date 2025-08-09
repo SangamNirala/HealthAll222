@@ -328,8 +328,9 @@ const PatientProfileWizard = () => {
               onNext={goToNextStep}
               onSave={completeProfile}
               isNextDisabled={!isCurrentStepValid()}
-              isLoading={isSaving}
+              isLoading={false}
               showSave={currentStep === totalSteps}
+              showAutoSaveIndicator={false}
             />
           </CardContent>
         </Card>
