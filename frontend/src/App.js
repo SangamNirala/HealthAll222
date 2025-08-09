@@ -23,6 +23,8 @@ function App() {
           <Route path="/guest-dashboard" element={<GuestDashboard />} />
           <Route path="/patient-profile" element={<PatientProfileWizard />} />
           <Route path="/provider-profile" element={<ProviderProfileWizard />} />
+          <Route path="/family-profile" element={<FamilyProfileWizard />} />
+          <Route path="/guest-setup" element={<GuestProfileSetup />} />
         </Routes>
       </BrowserRouter>
     </div>
