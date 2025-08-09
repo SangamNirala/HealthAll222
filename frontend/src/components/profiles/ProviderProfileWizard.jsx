@@ -91,6 +91,7 @@ const ProviderProfileWizard = () => {
           const existingProfile = await ProfileAPI.getProviderProfile(storedUserId);
           if (existingProfile) {
             setProfileData(existingProfile);
+            setSectionCompletion(calculateSectionCompletion(existingProfile));
             setIsEditing(true);
           }
         } catch (error) {
