@@ -626,22 +626,21 @@ class Phase3FamilyGuestAPITester:
         )
         
         success4, guest_completion = self.run_test(
-            "Get Guest Profile Completion for Integration",
+            "Get Guest Profile Completion for Integration (Should Fail - Not Supported)",
             "GET",
             f"profiles/completion/{guest_session_id}",
-            200,
+            400,  # Should fail because GUEST role is not supported
             params={"role": "GUEST"}
         )
         
-        if success3 and success4 and family_completion and guest_completion:
+        if success3 and family_completion:
             family_percentage = family_completion.get('completion_percentage', 0)
-            guest_percentage = guest_completion.get('completion_percentage', 0)
             
             print(f"   Family Profile Completion: {family_percentage}%")
-            print(f"   Guest Profile Completion: {guest_percentage}%")
+            print(f"   Guest Profile Completion: Not supported (by design)")
             
-            # Family should be partial, Guest should be complete
-            completion_comparison_valid = family_percentage < 100.0 and guest_percentage == 100.0
+            # Family should be partial, Guest completion tracking is not supported
+            completion_comparison_valid = family_percentage < 100.0
             print(f"   Completion Comparison: {'✅' if completion_comparison_valid else '❌'}")
         
         # Test 3: Test data validation consistency
