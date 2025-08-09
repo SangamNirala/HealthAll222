@@ -535,6 +535,9 @@ test_plan:
 
   stuck_tasks: []
   test_all: false
+  - agent: "main"
+    message: "Implemented click-to-open help popovers next to field labels across all profile steps via shared FormField component. Please verify that question mark icons are clickable and display the specified helpText for fields with guidance."
+
   test_priority: "completed"
 
   - agent: "main"
