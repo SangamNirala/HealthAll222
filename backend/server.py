@@ -108,14 +108,54 @@ async def get_user_health_metrics(user_id: str):
 async def get_patient_dashboard(user_id: str):
     return {
         "user_id": user_id,
-        "daily_calories": 1847,
-        "foods_logged": 12,
-        "goals_met": "3/5",
-        "health_score": "87%",
-        "recent_activities": [
-            {"type": "food_log", "description": "Logged breakfast: Oatmeal with berries"},
-            {"type": "goal", "description": "Completed water intake goal"},
-            {"type": "recommendation", "description": "New meal plan recommendation available"}
+        "welcome_message": "Welcome back, Sarah!",
+        "nutrition_summary": {
+            "calories": {"current": 1847, "remaining": 153, "target": 2000},
+            "protein": {"current": 98, "target": 120, "unit": "g"},
+            "carbs": {"current": 147, "target": 200, "unit": "g"},
+            "fat": {"current": 52, "target": 65, "unit": "g"}
+        },
+        "health_metrics": {
+            "blood_pressure": {"value": "120/80", "unit": "mmHg", "status": "Normal"},
+            "weight": {"value": 68.5, "unit": "kg", "change": -0.3},
+            "glucose": {"value": 95, "unit": "mg/dL", "status": "Normal"}
+        },
+        "goals": {
+            "daily_steps": {"current": 8432, "target": 10000, "progress": 84},
+            "water_intake": {"current": 6, "target": 8, "progress": 75},
+            "weekly_exercise": {"current": 3, "target": 5, "progress": 60}
+        },
+        "recent_meals": [
+            {"id": 1, "meal": "Breakfast", "food": "Oatmeal with berries", "calories": 350, "time": "8:00 AM"},
+            {"id": 2, "meal": "Lunch", "food": "Grilled chicken salad", "calories": 425, "time": "12:30 PM"}
+        ],
+        "ai_recommendations": [
+            {"type": "meal", "title": "Meal Suggestion", "message": "Try a protein-rich snack like Greek yogurt to reach your daily protein goal."},
+            {"type": "hydration", "title": "Hydration Reminder", "message": "You're 2 glasses behind your water goal. Have a glass now!"},
+            {"type": "activity", "title": "Activity Boost", "message": "A 15-minute walk would help you reach your step goal."}
+        ]
+    }
+
+@api_router.get("/patient/food-log/{user_id}")
+async def get_patient_food_log(user_id: str):
+    return {
+        "user_id": user_id,
+        "today_entries": [
+            {"id": 1, "time": "8:00 AM", "meal": "Breakfast", "food": "Oatmeal with berries", "calories": 350},
+            {"id": 2, "time": "12:30 PM", "meal": "Lunch", "food": "Grilled chicken salad", "calories": 425}
+        ],
+        "total_calories": 775,
+        "remaining_calories": 1225
+    }
+
+@api_router.get("/patient/health-metrics/{user_id}")
+async def get_patient_health_metrics(user_id: str):
+    return {
+        "user_id": user_id,
+        "metrics": [
+            {"type": "weight", "value": 68.5, "unit": "kg", "date": "2024-01-15", "trend": "decreasing"},
+            {"type": "blood_pressure", "systolic": 120, "diastolic": 80, "date": "2024-01-15", "status": "normal"},
+            {"type": "glucose", "value": 95, "unit": "mg/dL", "date": "2024-01-15", "status": "normal"}
         ]
     }
 
@@ -124,14 +164,50 @@ async def get_patient_dashboard(user_id: str):
 async def get_provider_dashboard(user_id: str):
     return {
         "user_id": user_id,
-        "active_patients": 247,
-        "prescriptions": 156,
-        "analytics_score": "94%",
-        "consultations": 12,
-        "recent_updates": [
-            {"type": "assessment", "description": "Patient John D. completed nutrition assessment"},
-            {"type": "prescription", "description": "New prescription request from Sarah M."},
-            {"type": "report", "description": "Weekly report ready for review"}
+        "welcome_message": "Good morning, Dr. Smith!",
+        "patient_overview": {
+            "active_patients": 247,
+            "prescriptions": 156,
+            "compliance_rate": 94,
+            "todays_visits": 12
+        },
+        "clinical_alerts": [
+            {"id": 1, "patient": "John D.", "type": "critical", "message": "Blood pressure spike detected", "priority": "high"},
+            {"id": 2, "patient": "Sarah M.", "type": "warning", "message": "Missed medication doses", "priority": "medium"},
+            {"id": 3, "patient": "Mike R.", "type": "info", "message": "Excellent progress this week", "priority": "low"}
+        ],
+        "todays_appointments": [
+            {"id": 1, "time": "9:00 AM", "patient": "Emma Wilson", "type": "Nutrition consultation", "status": "completed"},
+            {"id": 2, "time": "11:30 AM", "patient": "David Chen", "type": "Follow-up appointment", "status": "in_progress"},
+            {"id": 3, "time": "2:00 PM", "patient": "Lisa Garcia", "type": "Initial assessment", "status": "upcoming"}
+        ],
+        "patient_progress": {
+            "weight_loss_goals": {"percentage": 87, "description": "patients on track"},
+            "medication_adherence": {"percentage": 94, "description": "compliance rate"},
+            "lifestyle_changes": {"percentage": 76, "description": "showing improvement"}
+        }
+    }
+
+@api_router.get("/provider/patients")
+async def get_provider_patients():
+    return {
+        "patients": [
+            {"id": 1, "name": "John Doe", "age": 45, "condition": "Diabetes", "last_visit": "2024-01-10", "status": "stable"},
+            {"id": 2, "name": "Sarah Miller", "age": 38, "condition": "Hypertension", "last_visit": "2024-01-12", "status": "improving"},
+            {"id": 3, "name": "Mike Rodriguez", "age": 52, "condition": "Obesity", "last_visit": "2024-01-08", "status": "excellent"}
+        ],
+        "total_patients": 247,
+        "active_patients": 189
+    }
+
+@api_router.get("/provider/clinical-tools")
+async def get_clinical_tools():
+    return {
+        "tools": [
+            {"name": "Diet Prescription Generator", "description": "Create evidence-based diet plans", "category": "nutrition"},
+            {"name": "Drug Interaction Checker", "description": "Check for medication interactions", "category": "pharmacy"},
+            {"name": "BMI Calculator", "description": "Calculate and track BMI over time", "category": "assessment"},
+            {"name": "Risk Assessment", "description": "Cardiovascular risk calculator", "category": "assessment"}
         ]
     }
 
@@ -140,14 +216,53 @@ async def get_provider_dashboard(user_id: str):
 async def get_family_dashboard(user_id: str):
     return {
         "user_id": user_id,
-        "family_members": 4,
-        "health_alerts": 2,
-        "appointments": 3,
-        "coverage": "100%",
-        "family_updates": [
-            {"type": "achievement", "description": "Emma completed her daily nutrition goals"},
-            {"type": "reminder", "description": "Reminder: Alex's doctor appointment tomorrow"},
-            {"type": "report", "description": "Weekly family health report available"}
+        "family_overview": {
+            "family_members": 4,
+            "health_alerts": 2,
+            "appointments": 3,
+            "coverage": "100%"
+        },
+        "family_members": [
+            {"id": 1, "name": "John (Dad)", "age": 42, "status": "healthy", "avatar_color": "blue"},
+            {"id": 2, "name": "Sarah (Mom)", "age": 38, "status": "healthy", "avatar_color": "pink"},
+            {"id": 3, "name": "Emma (12)", "age": 12, "status": "checkup_due", "avatar_color": "purple"},
+            {"id": 4, "name": "Alex (8)", "age": 8, "status": "healthy", "avatar_color": "green"}
+        ],
+        "meal_planning": {
+            "week_completion": 85,
+            "planned_days": 5,
+            "total_days": 7,
+            "next_meals": [
+                {"day": "Tonight", "meal": "Grilled Chicken", "status": "ready"},
+                {"day": "Tomorrow", "meal": "Pasta Primavera", "status": "planned"}
+            ]
+        },
+        "health_alerts": [
+            {"type": "checkup", "member": "Emma", "message": "Due in 2 weeks", "priority": "medium"},
+            {"type": "vaccination", "member": "All", "message": "All up to date", "priority": "low"}
+        ],
+        "upcoming_appointments": [
+            {"date": "Tomorrow", "time": "3:00 PM", "member": "Emma", "type": "Dental Checkup"},
+            {"date": "Wednesday", "time": "4:30 PM", "member": "Alex", "type": "Soccer Practice"},
+            {"date": "Friday", "time": "6:00 PM", "member": "Family", "type": "Dinner Planning"}
+        ]
+    }
+
+@api_router.get("/family/meal-planning/{user_id}")
+async def get_family_meal_planning(user_id: str):
+    return {
+        "user_id": user_id,
+        "weekly_plan": {
+            "monday": {"breakfast": "Pancakes", "lunch": "Sandwiches", "dinner": "Chicken Stir-fry"},
+            "tuesday": {"breakfast": "Oatmeal", "lunch": "Soup", "dinner": "Pasta"},
+            "wednesday": {"breakfast": "Toast", "lunch": "Salad", "dinner": "Fish"},
+            "thursday": {"breakfast": "Cereal", "lunch": "Leftovers", "dinner": "Pizza"},
+            "friday": {"breakfast": "Eggs", "lunch": "Wraps", "dinner": "Tacos"}
+        },
+        "shopping_list": ["Chicken breast", "Vegetables", "Pasta", "Fish fillets", "Eggs", "Bread"],
+        "family_recipes": [
+            {"id": 1, "name": "Mom's Healthy Lasagna", "rating": 5, "category": "dinner", "kid_approved": True},
+            {"id": 2, "name": "Rainbow Smoothie Bowls", "rating": 4, "category": "breakfast", "kid_approved": True}
         ]
     }
 
@@ -155,11 +270,50 @@ async def get_family_dashboard(user_id: str):
 @api_router.get("/guest/dashboard")
 async def get_guest_dashboard():
     return {
-        "quick_logs": 5,
-        "session_time": "15m",
-        "features_used": 3,
-        "experience": "Good",
+        "session_info": {
+            "quick_logs": 5,
+            "session_time": "15m",
+            "features_used": 3,
+            "experience": "Good"
+        },
+        "todays_entries": [
+            {"id": 1, "name": "Coffee with milk", "time": "8:00 AM", "calories": 50},
+            {"id": 2, "name": "Toast with avocado", "time": "8:30 AM", "calories": 320}
+        ],
+        "nutrition_summary": {
+            "total_calories": 370,
+            "meals_logged": {"breakfast": 370, "lunch": 0, "dinner": 0}
+        },
+        "simple_goals": [
+            {"name": "Eat 5 servings of fruits/vegetables", "current": 2, "target": 5, "progress": 40},
+            {"name": "Drink 8 glasses of water", "current": 3, "target": 8, "progress": 37.5},
+            {"name": "Log all meals today", "current": 1, "target": 3, "progress": 33.3}
+        ],
+        "nutrition_tips": {
+            "daily_tip": {
+                "title": "Stay Hydrated",
+                "content": "Drinking water before meals can help with portion control and digestion. Aim for at least 8 glasses throughout the day."
+            },
+            "quick_facts": [
+                {"title": "🥗 Fiber Fact", "content": "Adults need 25-35g of fiber daily for optimal digestive health."},
+                {"title": "💪 Protein Power", "content": "Include protein in every meal to help maintain stable blood sugar levels."},
+                {"title": "🌈 Color Variety", "content": "Eating different colored fruits and vegetables ensures diverse nutrients."}
+            ]
+        },
         "message": "Guest session active - data will not be permanently saved"
+    }
+
+@api_router.post("/guest/quick-log")
+async def create_guest_food_log(food_data: dict):
+    return {
+        "success": True,
+        "message": "Food logged successfully (session only)",
+        "entry": {
+            "id": f"guest_{datetime.now().strftime('%H%M%S')}",
+            "food": food_data.get("food_name", "Unknown food"),
+            "calories": food_data.get("calories", 0),
+            "time": datetime.now().strftime("%I:%M %p")
+        }
     }
 
 # Include the router in the main app
