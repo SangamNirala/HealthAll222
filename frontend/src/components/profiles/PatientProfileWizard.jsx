@@ -63,6 +63,7 @@ const PatientProfileWizard = () => {
       setUserId(locationUserId);
       if (existingProfile) {
         setProfileData(existingProfile);
+        setSectionCompletion(getSectionCompletionStatus(existingProfile));
         setIsEditing(true);
       }
     } else {
