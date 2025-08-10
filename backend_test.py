@@ -2352,6 +2352,155 @@ class HealthPlatformAPITester:
         
         return success
 
+    def test_guest_food_log_api_integration(self):
+        """Test Guest Food Log API integration specifically as requested"""
+        print("\n📋 Testing Guest Food Log API Integration...")
+        
+        # Test 1: Create guest session
+        success1, session_response = self.run_test(
+            "Create Guest Session",
+            "POST",
+            "guest/session",
+            200
+        )
+        
+        session_id = None
+        if success1 and session_response:
+            session_id = session_response.get('session_id')
+            expected_keys = ['session_id', 'expires_at', 'features_available', 'limitations', 'upgrade_benefits']
+            missing_keys = [key for key in expected_keys if key not in session_response]
+            
+            if not missing_keys:
+                print(f"   ✅ Session creation response contains all required keys: {expected_keys}")
+                print(f"   📝 Session ID: {session_id}")
+                
+                # Validate features available
+                features = session_response.get('features_available', [])
+                if 'instant_food_logging' in features:
+                    print(f"   ✅ Instant food logging feature available")
+                else:
+                    print(f"   ❌ Instant food logging feature not available")
+                    success1 = False
+            else:
+                print(f"   ❌ Session creation response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: Test instant food logging with different food items
+        food_items = [
+            {"food_name": "grilled chicken breast", "calories": 165},
+            {"food_name": "greek yogurt", "calories": 100},
+            {"food_name": "banana", "calories": 105}
+        ]
+        
+        food_logging_success = True
+        for i, food_item in enumerate(food_items, 1):
+            success, response = self.run_test(
+                f"Instant Food Log - {food_item['food_name'].title()}",
+                "POST",
+                "guest/instant-food-log",
+                200,
+                data=food_item
+            )
+            
+            if success and response:
+                # Validate instant food logging response structure
+                expected_keys = ['success', 'food_recognized', 'estimated_nutrition', 'instant_feedback', 
+                               'session_totals', 'simple_suggestions', 'learning_moment']
+                missing_keys = [key for key in expected_keys if key not in response]
+                
+                if not missing_keys:
+                    print(f"   ✅ Food logging response contains all required keys")
+                    
+                    # Validate estimated nutrition structure
+                    nutrition = response.get('estimated_nutrition', {})
+                    nutrition_keys = ['calories', 'protein', 'carbs', 'fat', 'fiber']
+                    missing_nutrition_keys = [key for key in nutrition_keys if key not in nutrition]
+                    
+                    if not missing_nutrition_keys:
+                        print(f"   ✅ Nutrition data structure valid")
+                        print(f"   🍎 {food_item['food_name'].title()}: {nutrition.get('calories')} cal, {nutrition.get('protein')}g protein")
+                    else:
+                        print(f"   ❌ Nutrition data missing keys: {missing_nutrition_keys}")
+                        food_logging_success = False
+                    
+                    # Validate instant feedback
+                    feedback = response.get('instant_feedback', [])
+                    if feedback and len(feedback) > 0:
+                        print(f"   ✅ Instant feedback provided: {len(feedback)} feedback items")
+                        print(f"   💡 Sample feedback: {feedback[0]}")
+                    else:
+                        print(f"   ❌ No instant feedback provided")
+                        food_logging_success = False
+                    
+                    # Validate learning moment
+                    learning_moment = response.get('learning_moment', {})
+                    if learning_moment and 'tip' in learning_moment and 'content' in learning_moment:
+                        print(f"   ✅ Learning moment provided: {learning_moment.get('tip')}")
+                    else:
+                        print(f"   ❌ Learning moment missing or incomplete")
+                        food_logging_success = False
+                    
+                    # Validate simple suggestions
+                    suggestions = response.get('simple_suggestions', [])
+                    if suggestions and len(suggestions) > 0:
+                        print(f"   ✅ Simple suggestions provided: {len(suggestions)} suggestions")
+                    else:
+                        print(f"   ❌ No simple suggestions provided")
+                        food_logging_success = False
+                        
+                else:
+                    print(f"   ❌ Food logging response missing keys: {missing_keys}")
+                    food_logging_success = False
+            else:
+                food_logging_success = False
+        
+        # Test 3: Check session status if session was created
+        session_status_success = True
+        if session_id:
+            success3, status_response = self.run_test(
+                "Check Guest Session Status",
+                "GET",
+                f"guest/session/{session_id}/status",
+                200
+            )
+            
+            if success3 and status_response:
+                expected_keys = ['session_id', 'status', 'time_remaining', 'activity_summary', 'recommendations']
+                missing_keys = [key for key in expected_keys if key not in status_response]
+                
+                if not missing_keys:
+                    print(f"   ✅ Session status response contains all required keys")
+                    
+                    # Validate activity summary
+                    activity = status_response.get('activity_summary', {})
+                    activity_keys = ['foods_logged', 'tips_viewed', 'calculations_used', 'session_duration']
+                    missing_activity_keys = [key for key in activity_keys if key not in activity]
+                    
+                    if not missing_activity_keys:
+                        print(f"   ✅ Activity summary structure valid")
+                        print(f"   📊 Foods logged: {activity.get('foods_logged')}, Session duration: {activity.get('session_duration')}")
+                    else:
+                        print(f"   ❌ Activity summary missing keys: {missing_activity_keys}")
+                        session_status_success = False
+                else:
+                    print(f"   ❌ Session status response missing keys: {missing_keys}")
+                    session_status_success = False
+            else:
+                session_status_success = False
+        
+        # Test 4: Test complete flow validation
+        flow_success = success1 and food_logging_success and session_status_success
+        
+        if flow_success:
+            print(f"\n   ✅ COMPLETE FLOW VALIDATION PASSED")
+            print(f"   ✅ Session creation ➜ Food logging ➜ Session status - All working correctly")
+            print(f"   ✅ API returns expected structure with instant_feedback, learning_moment, simple_suggestions, estimated_nutrition")
+        else:
+            print(f"\n   ❌ COMPLETE FLOW VALIDATION FAILED")
+            print(f"   ❌ Issues found in session management or food logging functionality")
+        
+        return flow_success
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
