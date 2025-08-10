@@ -6,7 +6,7 @@ import json
 from datetime import datetime
 
 class PatientAnalyticsAPITester:
-    def __init__(self, base_url="https://c106a525-5953-4cfd-b18e-6aeb53c6425e.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://8def9e22-0786-4699-b01a-2b4364ad62a4.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
