@@ -24,12 +24,28 @@ const QuickStart = () => (
     </CardHeader>
     <CardContent>
       <div className="bg-purple-100 border border-purple-200 rounded-lg p-6 mb-6">
-        <div className="flex items-center space-x-3">
-          <UserX className="w-6 h-6 text-purple-600" />
-          <div>
-            <h3 className="text-lg font-semibold text-purple-900">Guest Mode Active</h3>
-            <p className="text-purple-700">Your data is temporarily stored and will not be saved permanently. Create an account to save your progress.</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <UserX className="w-6 h-6 text-purple-600" />
+            <div>
+              <h3 className="text-lg font-semibold text-purple-900">Guest Mode Active</h3>
+              <p className="text-purple-700">Your data is temporarily stored and will not be saved permanently.</p>
+            </div>
           </div>
+          <div className="flex items-center space-x-2">
+            <Clock className="w-4 h-4 text-purple-600" />
+            <span className="text-sm text-purple-700">{Math.floor(sessionTime / 60)}:{(sessionTime % 60).toString().padStart(2, '0')}</span>
+          </div>
+        </div>
+        <div className="mt-3">
+          <Button
+            size="sm"
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+            onClick={() => setShowUpgradePrompt(true)}
+          >
+            <Crown className="w-4 h-4 mr-2" />
+            Save Progress - Create Free Account
+          </Button>
         </div>
       </div>
       
