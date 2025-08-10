@@ -80,6 +80,14 @@ function App() {
             <Route path="/family-members" element={<FamilyMembers />} />
             <Route path="/family-meals" element={<FamilyMeals />} />
             
+            {/* Phase 5: Advanced Family Features Routes */}
+            <Route path="/family-coordination" element={<FamilyCoordination />} />
+            <Route path="/family-calendar" element={<FamilyCalendar />} />
+            <Route path="/child-nutrition-education" element={<ChildNutritionEducation />} />
+            <Route path="/caregiver-tools" element={<CaregiverTools />} />
+            <Route path="/family-goals" element={<FamilyGoalsCoordination />} />
+            <Route path="/multi-profile-management" element={<MultiProfileManagement />} />
+            
             {/* Guest Navigation Routes */}
             <Route path="/guest-food-log" element={<GuestFoodLog />} />
             <Route path="/guest-tips" element={<GuestNutritionTips />} />
