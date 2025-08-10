@@ -26,7 +26,8 @@ const ROLE_CONFIG = {
       { label: 'Profile', path: '/patient-profile', icon: 'User' },
       { label: 'Food Log', path: '/patient-food-log', icon: 'Apple' },
       { label: 'Health Metrics', path: '/patient-metrics', icon: 'Activity' },
-      { label: 'Goals', path: '/patient-goals', icon: 'Target' }
+      { label: 'Goals', path: '/patient-goals', icon: 'Target' },
+      { label: 'Analytics', path: '/patient-analytics', icon: 'BarChart3' }
     ],
     quickActions: [
       { label: 'Quick Log', icon: 'Plus', action: 'quickLog' },
@@ -152,9 +153,9 @@ export const RoleProvider = ({ children }) => {
   };
 
   return (
-    <RoleContext.Provider value={value}>
+    &lt;RoleContext.Provider value={value}&gt;
       {children}
-    </RoleContext.Provider>
+    &lt;/RoleContext.Provider&gt;
   );
 };
 
