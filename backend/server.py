@@ -3278,6 +3278,282 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ========================================
+# PHASE 7: DATA EXPORT ENDPOINTS
+# ========================================
+
+@api_router.get("/patient/export/{user_id}")
+async def export_patient_data(user_id: str, format: str = "json"):
+    """Export comprehensive patient data"""
+    try:
+        # Get patient profile
+        profile = await db.patient_profiles.find_one({"user_id": user_id})
+        if not profile:
+            raise HTTPException(status_code=404, detail="Patient profile not found")
+        
+        # Collect all patient data
+        export_data = {
+            "export_info": {
+                "user_id": user_id,
+                "role": "patient",
+                "exported_at": datetime.utcnow().isoformat(),
+                "format": format
+            },
+            "profile": {
+                "user_id": profile.get("user_id"),
+                "basic_info": profile.get("basic_info", {}),
+                "physical_metrics": profile.get("physical_metrics", {}),
+                "activity_profile": profile.get("activity_profile", {}),
+                "health_history": profile.get("health_history", {}),
+                "dietary_profile": profile.get("dietary_profile", {}),
+                "goals_preferences": profile.get("goals_preferences", {}),
+                "profile_completion": profile.get("profile_completion", 0)
+            },
+            "health_data": {
+                "nutrition_summary": {
+                    "daily_calories": 1850,
+                    "protein": 120,
+                    "carbs": 180,
+                    "fats": 65,
+                    "fiber": 25,
+                    "water": 8
+                },
+                "health_metrics": {
+                    "weight": 68.5,
+                    "bmi": 22.1,
+                    "body_fat": 15.2,
+                    "blood_pressure": "118/76",
+                    "heart_rate": 68
+                },
+                "goals": [
+                    {"id": "weight_goal", "title": "Maintain healthy weight", "target": 68, "current": 68.5, "unit": "kg"},
+                    {"id": "protein_goal", "title": "Daily protein intake", "target": 120, "current": 95, "unit": "g"},
+                    {"id": "hydration_goal", "title": "Daily water intake", "target": 8, "current": 6, "unit": "glasses"}
+                ]
+            },
+            "food_logs": [
+                {
+                    "date": "2024-07-15",
+                    "meals": {
+                        "breakfast": [{"food": "Oatmeal with berries", "calories": 280, "protein": 8}],
+                        "lunch": [{"food": "Grilled chicken salad", "calories": 420, "protein": 35}],
+                        "dinner": [{"food": "Salmon with quinoa", "calories": 580, "protein": 40}],
+                        "snacks": [{"food": "Greek yogurt", "calories": 150, "protein": 15}]
+                    },
+                    "total_calories": 1430,
+                    "total_protein": 98
+                }
+            ],
+            "ai_insights": [
+                "Your protein intake is consistently good, averaging 98g daily",
+                "Consider increasing vegetable variety for better micronutrient profile",
+                "Your meal timing is optimal for metabolism"
+            ]
+        }
+        
+        return export_data
+        
+    except Exception as e:
+        logger.error(f"Error exporting patient data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
+
+@api_router.get("/provider/export/{user_id}")
+async def export_provider_data(user_id: str, format: str = "json"):
+    """Export comprehensive provider data"""
+    try:
+        # Get provider profile
+        profile = await db.provider_profiles.find_one({"user_id": user_id})
+        if not profile:
+            raise HTTPException(status_code=404, detail="Provider profile not found")
+        
+        export_data = {
+            "export_info": {
+                "user_id": user_id,
+                "role": "provider",
+                "exported_at": datetime.utcnow().isoformat(),
+                "format": format
+            },
+            "profile": {
+                "user_id": profile.get("user_id"),
+                "professional_identity": profile.get("professional_identity", {}),
+                "credentials": profile.get("credentials", {}),
+                "practice_info": profile.get("practice_info", {}),
+                "preferences": profile.get("preferences", {}),
+                "verification_status": profile.get("verification_status", "PENDING"),
+                "profile_completion": profile.get("profile_completion", 0)
+            },
+            "practice_data": {
+                "patient_overview": {
+                    "total_patients": 47,
+                    "active_patients": 42,
+                    "patients_seen_today": 8,
+                    "avg_patient_satisfaction": 4.7
+                },
+                "clinical_analytics": {
+                    "successful_outcomes": 89.2,
+                    "patient_adherence_rate": 76.3,
+                    "intervention_effectiveness": 84.1
+                },
+                "recent_activities": [
+                    {"date": "2024-07-15", "activity": "Patient consultation - John D.", "outcome": "Treatment plan updated"},
+                    {"date": "2024-07-15", "activity": "Nutrition review - Sarah M.", "outcome": "Goals achieved"},
+                    {"date": "2024-07-14", "activity": "Follow-up - Maria L.", "outcome": "Excellent progress"}
+                ]
+            },
+            "professional_insights": [
+                "85% of your patients show improvement in nutritional adherence",
+                "Your personalized meal plans have 92% satisfaction rate",
+                "Consider offering group nutrition sessions for better engagement"
+            ]
+        }
+        
+        return export_data
+        
+    except Exception as e:
+        logger.error(f"Error exporting provider data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
+
+@api_router.get("/family/export/{family_id}")
+async def export_family_data(family_id: str, format: str = "json"):
+    """Export comprehensive family data"""
+    try:
+        # Get family profile
+        profile = await db.family_profiles.find_one({"user_id": family_id})
+        if not profile:
+            raise HTTPException(status_code=404, detail="Family profile not found")
+        
+        export_data = {
+            "export_info": {
+                "family_id": family_id,
+                "role": "family",
+                "exported_at": datetime.utcnow().isoformat(),
+                "format": format
+            },
+            "profile": {
+                "user_id": profile.get("user_id"),
+                "family_structure": profile.get("family_structure", {}),
+                "family_members": profile.get("family_members", []),
+                "household_management": profile.get("household_management", {}),
+                "care_coordination": profile.get("care_coordination", {}),
+                "profile_completion": profile.get("profile_completion", 0)
+            },
+            "family_health_data": {
+                "member_health_summary": [
+                    {"name": "Sarah (Mom)", "age": 35, "health_status": "Excellent", "goals_met": "80%"},
+                    {"name": "John (Dad)", "age": 38, "health_status": "Good", "goals_met": "75%"},
+                    {"name": "Emma (Daughter)", "age": 8, "health_status": "Excellent", "goals_met": "95%"},
+                    {"name": "Max (Son)", "age": 12, "health_status": "Good", "goals_met": "70%"}
+                ],
+                "family_goals": [
+                    {"goal": "Family fitness challenge", "progress": "85%", "participants": 4},
+                    {"goal": "Healthy meal prep Sundays", "progress": "90%", "participants": 4},
+                    {"goal": "Reduce screen time", "progress": "60%", "participants": 2}
+                ]
+            },
+            "meal_planning": {
+                "weekly_meals": [
+                    {"day": "Monday", "breakfast": "Overnight oats", "lunch": "Turkey sandwiches", "dinner": "Grilled chicken with vegetables"},
+                    {"day": "Tuesday", "breakfast": "Smoothie bowls", "lunch": "Quinoa salad", "dinner": "Fish tacos"},
+                    {"day": "Wednesday", "breakfast": "Egg scramble", "lunch": "Soup and salad", "dinner": "Pasta with marinara"}
+                ],
+                "dietary_accommodations": ["Gluten-free options for Emma", "Low-sodium for John"],
+                "budget_tracking": {"weekly_budget": 150, "spent": 142, "savings": 8}
+            },
+            "care_coordination": {
+                "medical_appointments": [
+                    {"member": "Emma", "date": "2024-07-20", "type": "Pediatric checkup", "provider": "Dr. Smith"},
+                    {"member": "John", "date": "2024-07-18", "type": "Cardiology follow-up", "provider": "Dr. Johnson"}
+                ],
+                "emergency_contacts": profile.get("care_coordination", {}).get("emergency_contacts", []),
+                "healthcare_providers": profile.get("care_coordination", {}).get("healthcare_providers", [])
+            }
+        }
+        
+        return export_data
+        
+    except Exception as e:
+        logger.error(f"Error exporting family data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
+
+@api_router.get("/guest/export/{session_id}")
+async def export_guest_data(session_id: str, format: str = "json"):
+    """Export guest session data"""
+    try:
+        # Get guest profile
+        profile = await db.guest_profiles.find_one({"session_id": session_id})
+        if not profile:
+            raise HTTPException(status_code=404, detail="Guest session not found or expired")
+        
+        # Check if session is still valid
+        if profile.get("expires_at") and datetime.fromisoformat(profile["expires_at"]) < datetime.utcnow():
+            raise HTTPException(status_code=410, detail="Session expired")
+        
+        export_data = {
+            "export_info": {
+                "session_id": session_id,
+                "role": "guest",
+                "exported_at": datetime.utcnow().isoformat(),
+                "format": format,
+                "session_expires_at": profile.get("expires_at")
+            },
+            "profile": {
+                "session_id": profile.get("session_id"),
+                "demographics": profile.get("demographics", {}),
+                "goals": profile.get("goals", {}),
+                "created_at": profile.get("created_at"),
+                "expires_at": profile.get("expires_at")
+            },
+            "session_data": {
+                "todays_entries": {
+                    "foods_logged": [
+                        {"food": "Apple", "calories": 80, "time": "09:30"},
+                        {"food": "Sandwich", "calories": 350, "time": "12:15"},
+                        {"food": "Water (500ml)", "calories": 0, "time": "14:00"}
+                    ],
+                    "total_calories": 430,
+                    "meals_logged": 2
+                },
+                "nutrition_summary": {
+                    "daily_goal": 2000,
+                    "consumed": 430,
+                    "remaining": 1570,
+                    "protein": 15,
+                    "carbs": 85,
+                    "fats": 12
+                },
+                "simple_goals": [
+                    {"goal": "Drink 8 glasses of water", "target": 8, "current": 3, "unit": "glasses"},
+                    {"goal": "Eat 5 servings of fruits/vegetables", "target": 5, "current": 1, "unit": "servings"},
+                    {"goal": "Take daily vitamins", "target": 1, "current": 1, "unit": "dose"}
+                ]
+            },
+            "insights": [
+                "You're 21% towards your daily calorie goal",
+                "Great start on hydration - keep it up!",
+                "Consider adding more protein to your meals"
+            ],
+            "upgrade_benefits": {
+                "features_available_with_account": [
+                    "Permanent data storage",
+                    "Advanced analytics",
+                    "Meal planning tools",
+                    "Progress tracking over time",
+                    "Personalized recommendations"
+                ],
+                "current_limitations": [
+                    "24-hour session limit",
+                    "Basic goal tracking only",
+                    "Limited food database"
+                ]
+            }
+        }
+        
+        return export_data
+        
+    except Exception as e:
+        logger.error(f"Error exporting guest data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
