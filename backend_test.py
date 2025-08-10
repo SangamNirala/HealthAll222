@@ -1002,6 +1002,68 @@ class HealthPlatformAPITester:
         
         return success1 and success2 and success3 and success4 and success5 and success6
 
+    def test_patient_analytics_endpoints(self):
+        """Test Patient Analytics endpoints for the new Patient Analytics page"""
+        print("\n📋 Testing Patient Analytics Endpoints...")
+        
+        test_user_id = "demo-patient-123"
+        
+        # Test 1: GET /api/patient/analytics/{user_id}
+        success1, analytics_data = self.run_test(
+            "Patient Analytics",
+            "GET",
+            f"patient/analytics/{test_user_id}",
+            200
+        )
+        
+        # Validate analytics response structure
+        if success1 and analytics_data:
+            expected_keys = ['nutrition_trends', 'ai_powered_insights', 'weekly_summary']
+            missing_keys = [key for key in expected_keys if key not in analytics_data]
+            if not missing_keys:
+                print(f"   ✅ Analytics response contains all required keys: {expected_keys}")
+            else:
+                print(f"   ❌ Analytics response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: GET /api/patient/smart-suggestions/{user_id}
+        success2, suggestions_data = self.run_test(
+            "Patient Smart Suggestions",
+            "GET",
+            f"patient/smart-suggestions/{test_user_id}",
+            200
+        )
+        
+        # Validate smart suggestions response structure
+        if success2 and suggestions_data:
+            expected_keys = ['quick_add_suggestions', 'meal_pattern_insights']
+            missing_keys = [key for key in expected_keys if key not in suggestions_data]
+            if not missing_keys:
+                print(f"   ✅ Smart suggestions response contains all required keys: {expected_keys}")
+            else:
+                print(f"   ❌ Smart suggestions response missing keys: {missing_keys}")
+                success2 = False
+        
+        # Test 3: GET /api/patient/symptoms-correlation/{user_id}
+        success3, correlation_data = self.run_test(
+            "Patient Symptoms Correlation",
+            "GET",
+            f"patient/symptoms-correlation/{test_user_id}",
+            200
+        )
+        
+        # Validate symptoms correlation response structure
+        if success3 and correlation_data:
+            expected_keys = ['correlations', 'recommendations']
+            missing_keys = [key for key in expected_keys if key not in correlation_data]
+            if not missing_keys:
+                print(f"   ✅ Symptoms correlation response contains all required keys: {expected_keys}")
+            else:
+                print(f"   ❌ Symptoms correlation response missing keys: {missing_keys}")
+                success3 = False
+        
+        return success1 and success2 and success3
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
@@ -1035,6 +1097,10 @@ class HealthPlatformAPITester:
         # Test profile management endpoints
         print("\n📋 Testing Profile Management Endpoints...")
         self.test_profile_management_endpoints()
+
+        # Test patient analytics endpoints
+        print("\n📋 Testing Patient Analytics Endpoints...")
+        self.test_patient_analytics_endpoints()
 
         # Print final results
         print("\n" + "=" * 60)
