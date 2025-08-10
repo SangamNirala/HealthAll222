@@ -7,7 +7,7 @@ import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 import { 
   Activity, Apple, Target, TrendingUp, 
-  Scale, Heart, Droplets, Plus, Clock, Award, ChevronRight 
+  Scale, Heart, Droplets, Plus, Clock, Award, ChevronRight, Camera 
 } from 'lucide-react';
 
 // Component: Welcome Card
