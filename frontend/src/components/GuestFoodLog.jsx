@@ -578,12 +578,66 @@ const GuestFoodLog = () => {
                     <p className="text-xs text-gray-500 mt-1">
                       {Math.round((getTotalCalories() / 2000) * 100)}% of daily goal
                     </p>
+                    
+                    {/* Smart upgrade prompt based on progress */}
+                    {getTotalCalories() > 1000 && (
+                      <div className="mt-3 p-3 bg-gradient-to-r from-purple-100 to-violet-100 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <Crown className="w-4 h-4 text-purple-600" />
+                          <div className="text-xs">
+                            <div className="font-semibold text-purple-900">Great progress!</div>
+                            <div className="text-purple-700">Upgrade to track macros, get AI insights, and never lose your data.</div>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          className="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-xs"
+                          onClick={() => setShowUpgradePrompt(true)}
+                        >
+                          <Zap className="w-3 h-3 mr-1" />
+                          Unlock Premium Features
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
             </Card>
           </div>
         </div>
+
+        {/* Real-time Feedback */}
+        {realtimeFeedback && (
+          <RealTimeFeedback
+            type={realtimeFeedback.type}
+            data={realtimeFeedback}
+            onAction={(action) => {
+              console.log('Food log feedback action:', action);
+              if (action === 'level_up' || action === 'try_suggestion') {
+                setShowUpgradePrompt(true);
+              }
+            }}
+            onDismiss={() => setRealtimeFeedback(null)}
+            position="bottom-right"
+          />
+        )}
+
+        {/* Upgrade Modal */}
+        {showUpgradePrompt && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="max-w-lg">
+              <UpgradePrompt
+                type="food_logging_limit"
+                context={`You've logged ${loggedFoods.length} foods today with ${getTotalCalories()} calories! You're doing amazing. Unlock unlimited tracking and get personalized insights to optimize your nutrition journey.`}
+                triggerAction={() => {
+                  console.log('Upgrade triggered from food log');
+                  // Implement upgrade flow
+                }}
+                onClose={() => setShowUpgradePrompt(false)}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
