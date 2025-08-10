@@ -4060,6 +4060,10 @@ class HealthPlatformAPITester:
         print(f"Tests Passed: {self.tests_passed}")
         print(f"Success Rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
         
+        # Highlight the priority test result
+        print(f"\n🎯 PRIORITY TEST RESULT:")
+        print(f"   Guest Session Management & Export: {'✅ PASSED' if guest_session_success else '❌ FAILED'}")
+        
         if self.tests_passed == self.tests_run:
             print("🎉 All tests passed!")
             return 0
