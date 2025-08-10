@@ -283,9 +283,16 @@ const PopulationHealth = () => (
 
 // Main Provider Dashboard Component
 const ProviderDashboard = () => {
+  const { switchRole } = useRole();
+
+  // Set role to provider when component mounts
+  useEffect(() => {
+    switchRole('provider');
+  }, [switchRole]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100">
-      <ProviderHeader />
+      <SmartNavigation />
       <div className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <PatientOverview />
