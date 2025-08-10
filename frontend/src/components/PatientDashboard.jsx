@@ -71,10 +71,6 @@ const QuickFoodLogging = () => (
       </CardTitle>
     </CardHeader>
     <CardContent className="space-y-3">
-      <Button className="w-full justify-start bg-blue-500 hover:bg-blue-600">
-        <Camera className="w-4 h-4 mr-3" />
-        Take Photo
-      </Button>
       <Button className="w-full justify-start bg-green-500 hover:bg-green-600">
         <Apple className="w-4 h-4 mr-3" />
         Search Food
