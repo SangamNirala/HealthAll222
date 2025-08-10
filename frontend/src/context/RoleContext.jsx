@@ -82,8 +82,7 @@ const ROLE_CONFIG = {
     quickActions: [
       { label: 'Add Member', icon: 'UserPlus', action: 'addMember' },
       { label: 'Plan Meals', icon: 'ChefHat', action: 'planMeals' },
-      { label: 'Emergency Info', icon: 'AlertTriangle', action: 'emergencyInfo' },
-      { label: 'Health Check', icon: 'Activity', action: 'healthCheck' }
+      { label: 'Export Data', icon: 'Download', action: 'exportData' }
     ]
   },
   guest: {
