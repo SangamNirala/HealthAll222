@@ -313,7 +313,10 @@ const NutritionTips = () => (
       </div>
       
       <div className="mt-6 text-center">
-        <Button className="bg-gradient-to-r from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700">
+        <Button 
+          className="bg-gradient-to-r from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700"
+          onClick={handleUpgradeAction}
+        >
           <Heart className="w-4 h-4 mr-2" />
           Create Free Account to Save Progress
         </Button>
