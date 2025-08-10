@@ -257,9 +257,16 @@ const ProgressCharts = () => (
 
 // Main Patient Dashboard Component
 const PatientDashboard = () => {
+  const { switchRole } = useRole();
+
+  // Set role to patient when component mounts
+  useEffect(() => {
+    switchRole('patient');
+  }, [switchRole]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <PatientHeader />
+      <SmartNavigation />
       <div className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <WelcomeCard />
