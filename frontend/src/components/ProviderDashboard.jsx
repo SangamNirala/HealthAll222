@@ -176,19 +176,19 @@ const ClinicalTools = () => (
     <CardContent className="space-y-3">
       <Button className="w-full justify-start bg-emerald-500 hover:bg-emerald-600">
         <Users className="w-4 h-4 mr-3" />
-        Patient Management
+        Patient Queue
       </Button>
       <Button className="w-full justify-start bg-blue-500 hover:bg-blue-600">
         <FileText className="w-4 h-4 mr-3" />
-        Diet Prescription Tools
+        Clinical Decision Support
       </Button>
       <Button className="w-full justify-start bg-purple-500 hover:bg-purple-600">
         <BarChart3 className="w-4 h-4 mr-3" />
-        Clinical Analytics
+        Treatment Outcomes
       </Button>
       <Button className="w-full justify-start bg-orange-500 hover:bg-orange-600">
         <BookOpen className="w-4 h-4 mr-3" />
-        Evidence Database
+        Continuing Education
       </Button>
     </CardContent>
   </Card>
