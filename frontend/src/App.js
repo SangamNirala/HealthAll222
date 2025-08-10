@@ -58,6 +58,8 @@ function App() {
             <Route path="/patient-metrics" element={<PatientHealthMetrics />} />
             <Route path="/patient-goals" element={<PatientGoals />} />
             <Route path="/patient-analytics" element={<PatientAnalytics />} />
+            <Route path="/patient-medications" element={<PatientMedicationReminder />} />
+            <Route path="/patient-timeline" element={<PatientHealthTimeline />} />
             
             {/* Provider Navigation Routes */}
             <Route path="/provider-patients" element={<ProviderPatients />} />
