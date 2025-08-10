@@ -355,6 +355,15 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
               {roleConfig.quickActions.map((action, index) => (
                 <QuickActionButton key={index} action={action} isMobile />
               ))}
+              
+              {/* Mobile Export Button */}
+              <Button
+                onClick={() => setShowExportModal(true)}
+                className={`w-full justify-start bg-gradient-to-r ${themeClasses.gradient} text-white hover:opacity-90`}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export Data
+              </Button>
             </div>
           </div>
         </div>
