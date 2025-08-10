@@ -1034,7 +1034,11 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Phase 7: Data Export API Endpoints"
+    - "Phase 7: Data Export Frontend Components"  
+    - "Phase 8: Mobile Responsiveness & Performance"
+    - "Phase 8: Optimized Components & Performance"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
