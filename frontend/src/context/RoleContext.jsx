@@ -98,6 +98,7 @@ const ROLE_CONFIG = {
       { label: 'Dashboard', path: '/guest-dashboard', icon: 'LayoutDashboard' },
       { label: 'Quick Setup', path: '/guest-setup', icon: 'Settings' },
       { label: 'Food Log', path: '/guest-food-log', icon: 'Apple' },
+      { label: 'Goals', path: '/guest-goals', icon: 'Target' },
       { label: 'Health Calculator', path: '/guest-calculator', icon: 'Calculator' },
       { label: 'Nutrition Tips', path: '/guest-tips', icon: 'BookOpen' }
     ],
