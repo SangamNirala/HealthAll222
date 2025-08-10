@@ -27,7 +27,10 @@ typer>=0.9.0
 # AI Service Libraries
 groq>=0.4.1
 google-generativeai>=0.3.2
+google-ai-generativelanguage>=0.4.0
 openai>=1.12.0
 huggingface-hub>=0.20.3
 transformers>=4.36.0
 httpx>=0.27.0
+distro>=1.8.0
+PyYAML>=6.0
