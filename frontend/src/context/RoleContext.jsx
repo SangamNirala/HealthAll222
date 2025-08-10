@@ -32,8 +32,7 @@ const ROLE_CONFIG = {
       { label: 'Health Timeline', path: '/patient-timeline', icon: 'Calendar' }
     ],
     quickActions: [
-      { label: 'Quick Log', icon: 'Plus', action: 'quickLog' },
-      { label: 'Take Photo', icon: 'Camera', action: 'photoLog' }
+      { label: 'Quick Log', icon: 'Plus', action: 'quickLog' }
     ]
   },
   provider: {
