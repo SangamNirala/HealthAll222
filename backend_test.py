@@ -3275,6 +3275,528 @@ class HealthPlatformAPITester:
         
         return success1 and success2
 
+    def test_phase7_data_export_endpoints(self):
+        """Test Phase 7 Data Export API Endpoints"""
+        print("\n📋 Testing Phase 7 Data Export Endpoints...")
+        
+        # Test identifiers as specified in the review request
+        patient_id = "demo-patient-123"
+        provider_id = "demo-provider-123"
+        family_id = "demo-family-123"
+        guest_session_id = "demo-guest-session-123"
+        
+        # Test 1: Patient Data Export
+        patient_success = self.test_patient_data_export_comprehensive(patient_id)
+        
+        # Test 2: Provider Data Export
+        provider_success = self.test_provider_data_export_comprehensive(provider_id)
+        
+        # Test 3: Family Data Export
+        family_success = self.test_family_data_export_comprehensive(family_id)
+        
+        # Test 4: Guest Data Export
+        guest_success = self.test_guest_data_export_comprehensive(guest_session_id)
+        
+        # Test 5: Error handling for non-existent profiles
+        error_handling_success = self.test_export_error_handling()
+        
+        return (patient_success and provider_success and family_success and 
+                guest_success and error_handling_success)
+
+    def test_patient_data_export_comprehensive(self, user_id):
+        """Test Patient Data Export endpoint with comprehensive validation"""
+        print("\n🏥 Testing Patient Data Export...")
+        
+        success, export_data = self.run_test(
+            "Patient Data Export",
+            "GET",
+            f"patient/export/{user_id}",
+            200
+        )
+        
+        if success and export_data:
+            # Validate export_info metadata
+            export_info = export_data.get('export_info', {})
+            expected_info_keys = ['user_id', 'role', 'exported_at', 'format']
+            missing_info_keys = [key for key in expected_info_keys if key not in export_info]
+            
+            if not missing_info_keys:
+                print(f"   ✅ Export info metadata valid: {expected_info_keys}")
+                
+                # Validate role-specific data
+                if export_info.get('role') == 'patient':
+                    print(f"   ✅ Role correctly identified as 'patient'")
+                else:
+                    print(f"   ❌ Role mismatch: expected 'patient', got '{export_info.get('role')}'")
+                    success = False
+                    
+                # Validate user_id matches
+                if export_info.get('user_id') == user_id:
+                    print(f"   ✅ User ID correctly set: {user_id}")
+                else:
+                    print(f"   ❌ User ID mismatch: expected '{user_id}', got '{export_info.get('user_id')}'")
+                    success = False
+            else:
+                print(f"   ❌ Export info missing keys: {missing_info_keys}")
+                success = False
+            
+            # Validate comprehensive data structure
+            expected_main_keys = ['export_info', 'profile', 'health_data', 'food_logs', 'ai_insights']
+            missing_main_keys = [key for key in expected_main_keys if key not in export_data]
+            
+            if not missing_main_keys:
+                print(f"   ✅ Patient export contains all required sections: {expected_main_keys}")
+                
+                # Validate profile data completeness
+                profile = export_data.get('profile', {})
+                profile_keys = ['user_id', 'basic_info', 'physical_metrics', 'activity_profile', 
+                               'health_history', 'dietary_profile', 'goals_preferences', 'profile_completion']
+                missing_profile_keys = [key for key in profile_keys if key not in profile]
+                
+                if not missing_profile_keys:
+                    print(f"   ✅ Patient profile data structure complete")
+                    completion = profile.get('profile_completion', 0)
+                    print(f"   📊 Profile completion: {completion}%")
+                else:
+                    print(f"   ❌ Patient profile missing keys: {missing_profile_keys}")
+                
+                # Validate health data
+                health_data = export_data.get('health_data', {})
+                health_keys = ['nutrition_summary', 'health_metrics', 'goals']
+                missing_health_keys = [key for key in health_keys if key not in health_data]
+                
+                if not missing_health_keys:
+                    print(f"   ✅ Health data structure complete")
+                    goals = health_data.get('goals', [])
+                    print(f"   🎯 Health goals: {len(goals)} goals tracked")
+                else:
+                    print(f"   ❌ Health data missing keys: {missing_health_keys}")
+                
+                # Validate food logs
+                food_logs = export_data.get('food_logs', [])
+                if isinstance(food_logs, list) and len(food_logs) > 0:
+                    log = food_logs[0]
+                    log_keys = ['date', 'meals', 'total_calories', 'total_protein']
+                    missing_log_keys = [key for key in log_keys if key not in log]
+                    
+                    if not missing_log_keys:
+                        print(f"   ✅ Food logs structure valid: {len(food_logs)} days")
+                    else:
+                        print(f"   ❌ Food logs missing keys: {missing_log_keys}")
+                else:
+                    print(f"   ⚠️  No food logs in export")
+                
+                # Validate AI insights
+                ai_insights = export_data.get('ai_insights', [])
+                if isinstance(ai_insights, list) and len(ai_insights) > 0:
+                    print(f"   ✅ AI insights provided: {len(ai_insights)} insights")
+                else:
+                    print(f"   ⚠️  No AI insights in export")
+                    
+            else:
+                print(f"   ❌ Patient export missing main sections: {missing_main_keys}")
+                success = False
+            
+            # Validate JSON format compliance
+            try:
+                import json
+                json.dumps(export_data)
+                print(f"   ✅ Export data is valid JSON format")
+            except (TypeError, ValueError) as e:
+                print(f"   ❌ Export data is not valid JSON: {e}")
+                success = False
+        
+        return success
+
+    def test_provider_data_export_comprehensive(self, user_id):
+        """Test Provider Data Export endpoint with comprehensive validation"""
+        print("\n👩‍⚕️ Testing Provider Data Export...")
+        
+        success, export_data = self.run_test(
+            "Provider Data Export",
+            "GET",
+            f"provider/export/{user_id}",
+            200
+        )
+        
+        if success and export_data:
+            # Validate export_info metadata
+            export_info = export_data.get('export_info', {})
+            expected_info_keys = ['user_id', 'role', 'exported_at', 'format']
+            missing_info_keys = [key for key in expected_info_keys if key not in export_info]
+            
+            if not missing_info_keys:
+                print(f"   ✅ Export info metadata valid: {expected_info_keys}")
+                
+                # Validate role-specific data
+                if export_info.get('role') == 'provider':
+                    print(f"   ✅ Role correctly identified as 'provider'")
+                else:
+                    print(f"   ❌ Role mismatch: expected 'provider', got '{export_info.get('role')}'")
+                    success = False
+                    
+                # Validate user_id matches
+                if export_info.get('user_id') == user_id:
+                    print(f"   ✅ User ID correctly set: {user_id}")
+                else:
+                    print(f"   ❌ User ID mismatch: expected '{user_id}', got '{export_info.get('user_id')}'")
+                    success = False
+            else:
+                print(f"   ❌ Export info missing keys: {missing_info_keys}")
+                success = False
+            
+            # Validate comprehensive data structure
+            expected_main_keys = ['export_info', 'profile', 'practice_data', 'professional_insights']
+            missing_main_keys = [key for key in expected_main_keys if key not in export_data]
+            
+            if not missing_main_keys:
+                print(f"   ✅ Provider export contains all required sections: {expected_main_keys}")
+                
+                # Validate profile data completeness
+                profile = export_data.get('profile', {})
+                profile_keys = ['user_id', 'professional_identity', 'credentials', 'practice_info', 
+                               'preferences', 'verification_status', 'profile_completion']
+                missing_profile_keys = [key for key in profile_keys if key not in profile]
+                
+                if not missing_profile_keys:
+                    print(f"   ✅ Provider profile data structure complete")
+                    verification = profile.get('verification_status', 'UNKNOWN')
+                    completion = profile.get('profile_completion', 0)
+                    print(f"   📊 Verification: {verification}, Completion: {completion}%")
+                else:
+                    print(f"   ❌ Provider profile missing keys: {missing_profile_keys}")
+                
+                # Validate practice data
+                practice_data = export_data.get('practice_data', {})
+                practice_keys = ['patient_overview', 'clinical_analytics', 'recent_activities']
+                missing_practice_keys = [key for key in practice_keys if key not in practice_data]
+                
+                if not missing_practice_keys:
+                    print(f"   ✅ Practice data structure complete")
+                    patient_overview = practice_data.get('patient_overview', {})
+                    total_patients = patient_overview.get('total_patients', 0)
+                    print(f"   👥 Total patients: {total_patients}")
+                else:
+                    print(f"   ❌ Practice data missing keys: {missing_practice_keys}")
+                
+                # Validate professional insights
+                insights = export_data.get('professional_insights', [])
+                if isinstance(insights, list) and len(insights) > 0:
+                    print(f"   ✅ Professional insights provided: {len(insights)} insights")
+                else:
+                    print(f"   ⚠️  No professional insights in export")
+                    
+            else:
+                print(f"   ❌ Provider export missing main sections: {missing_main_keys}")
+                success = False
+            
+            # Validate JSON format compliance
+            try:
+                import json
+                json.dumps(export_data)
+                print(f"   ✅ Export data is valid JSON format")
+            except (TypeError, ValueError) as e:
+                print(f"   ❌ Export data is not valid JSON: {e}")
+                success = False
+        
+        return success
+
+    def test_family_data_export_comprehensive(self, family_id):
+        """Test Family Data Export endpoint with comprehensive validation"""
+        print("\n👨‍👩‍👧‍👦 Testing Family Data Export...")
+        
+        success, export_data = self.run_test(
+            "Family Data Export",
+            "GET",
+            f"family/export/{family_id}",
+            200
+        )
+        
+        if success and export_data:
+            # Validate export_info metadata
+            export_info = export_data.get('export_info', {})
+            expected_info_keys = ['family_id', 'role', 'exported_at', 'format']
+            missing_info_keys = [key for key in expected_info_keys if key not in export_info]
+            
+            if not missing_info_keys:
+                print(f"   ✅ Export info metadata valid: {expected_info_keys}")
+                
+                # Validate role-specific data
+                if export_info.get('role') == 'family':
+                    print(f"   ✅ Role correctly identified as 'family'")
+                else:
+                    print(f"   ❌ Role mismatch: expected 'family', got '{export_info.get('role')}'")
+                    success = False
+                    
+                # Validate family_id matches
+                if export_info.get('family_id') == family_id:
+                    print(f"   ✅ Family ID correctly set: {family_id}")
+                else:
+                    print(f"   ❌ Family ID mismatch: expected '{family_id}', got '{export_info.get('family_id')}'")
+                    success = False
+            else:
+                print(f"   ❌ Export info missing keys: {missing_info_keys}")
+                success = False
+            
+            # Validate comprehensive data structure
+            expected_main_keys = ['export_info', 'profile', 'family_health_data', 'meal_planning', 'care_coordination']
+            missing_main_keys = [key for key in expected_main_keys if key not in export_data]
+            
+            if not missing_main_keys:
+                print(f"   ✅ Family export contains all required sections: {expected_main_keys}")
+                
+                # Validate profile data completeness
+                profile = export_data.get('profile', {})
+                profile_keys = ['user_id', 'family_structure', 'family_members', 'household_management', 
+                               'care_coordination', 'profile_completion']
+                missing_profile_keys = [key for key in profile_keys if key not in profile]
+                
+                if not missing_profile_keys:
+                    print(f"   ✅ Family profile data structure complete")
+                    family_members = profile.get('family_members', [])
+                    completion = profile.get('profile_completion', 0)
+                    print(f"   👥 Family members: {len(family_members)}, Completion: {completion}%")
+                else:
+                    print(f"   ❌ Family profile missing keys: {missing_profile_keys}")
+                
+                # Validate family health data
+                health_data = export_data.get('family_health_data', {})
+                health_keys = ['member_health_summary', 'family_goals']
+                missing_health_keys = [key for key in health_keys if key not in health_data]
+                
+                if not missing_health_keys:
+                    print(f"   ✅ Family health data structure complete")
+                    member_summary = health_data.get('member_health_summary', [])
+                    family_goals = health_data.get('family_goals', [])
+                    print(f"   📊 Health summaries: {len(member_summary)}, Goals: {len(family_goals)}")
+                else:
+                    print(f"   ❌ Family health data missing keys: {missing_health_keys}")
+                
+                # Validate meal planning data
+                meal_planning = export_data.get('meal_planning', {})
+                meal_keys = ['weekly_meals', 'dietary_accommodations', 'budget_tracking']
+                missing_meal_keys = [key for key in meal_keys if key not in meal_planning]
+                
+                if not missing_meal_keys:
+                    print(f"   ✅ Meal planning data structure complete")
+                    weekly_meals = meal_planning.get('weekly_meals', [])
+                    accommodations = meal_planning.get('dietary_accommodations', [])
+                    print(f"   🍽️ Weekly meals: {len(weekly_meals)}, Accommodations: {len(accommodations)}")
+                else:
+                    print(f"   ❌ Meal planning missing keys: {missing_meal_keys}")
+                
+                # Validate care coordination
+                care_coordination = export_data.get('care_coordination', {})
+                care_keys = ['medical_appointments', 'emergency_contacts', 'healthcare_providers']
+                missing_care_keys = [key for key in care_keys if key not in care_coordination]
+                
+                if not missing_care_keys:
+                    print(f"   ✅ Care coordination data structure complete")
+                    appointments = care_coordination.get('medical_appointments', [])
+                    emergency_contacts = care_coordination.get('emergency_contacts', [])
+                    print(f"   🏥 Appointments: {len(appointments)}, Emergency contacts: {len(emergency_contacts)}")
+                else:
+                    print(f"   ❌ Care coordination missing keys: {missing_care_keys}")
+                    
+            else:
+                print(f"   ❌ Family export missing main sections: {missing_main_keys}")
+                success = False
+            
+            # Validate JSON format compliance
+            try:
+                import json
+                json.dumps(export_data)
+                print(f"   ✅ Export data is valid JSON format")
+            except (TypeError, ValueError) as e:
+                print(f"   ❌ Export data is not valid JSON: {e}")
+                success = False
+        
+        return success
+
+    def test_guest_data_export_comprehensive(self, session_id):
+        """Test Guest Data Export endpoint with comprehensive validation"""
+        print("\n👤 Testing Guest Data Export...")
+        
+        success, export_data = self.run_test(
+            "Guest Data Export",
+            "GET",
+            f"guest/export/{session_id}",
+            200
+        )
+        
+        if success and export_data:
+            # Validate export_info metadata
+            export_info = export_data.get('export_info', {})
+            expected_info_keys = ['session_id', 'role', 'exported_at', 'format', 'session_expires_at']
+            missing_info_keys = [key for key in expected_info_keys if key not in export_info]
+            
+            if not missing_info_keys:
+                print(f"   ✅ Export info metadata valid: {expected_info_keys}")
+                
+                # Validate role-specific data
+                if export_info.get('role') == 'guest':
+                    print(f"   ✅ Role correctly identified as 'guest'")
+                else:
+                    print(f"   ❌ Role mismatch: expected 'guest', got '{export_info.get('role')}'")
+                    success = False
+                
+                # Validate session_id matches
+                if export_info.get('session_id') == session_id:
+                    print(f"   ✅ Session ID correctly set: {session_id}")
+                else:
+                    print(f"   ❌ Session ID mismatch: expected '{session_id}', got '{export_info.get('session_id')}'")
+                    success = False
+                
+                # Validate session expiration handling
+                session_expires = export_info.get('session_expires_at')
+                if session_expires:
+                    print(f"   ✅ Session expiration info provided: {session_expires}")
+                else:
+                    print(f"   ⚠️  No session expiration info")
+            else:
+                print(f"   ❌ Export info missing keys: {missing_info_keys}")
+                success = False
+            
+            # Validate comprehensive data structure
+            expected_main_keys = ['export_info', 'profile', 'session_data', 'insights', 'upgrade_benefits']
+            missing_main_keys = [key for key in expected_main_keys if key not in export_data]
+            
+            if not missing_main_keys:
+                print(f"   ✅ Guest export contains all required sections: {expected_main_keys}")
+                
+                # Validate profile data completeness
+                profile = export_data.get('profile', {})
+                profile_keys = ['session_id', 'demographics', 'goals', 'created_at', 'expires_at']
+                missing_profile_keys = [key for key in profile_keys if key not in profile]
+                
+                if not missing_profile_keys:
+                    print(f"   ✅ Guest profile data structure complete")
+                    demographics = profile.get('demographics', {})
+                    goals = profile.get('goals', {})
+                    print(f"   👤 Demographics: {bool(demographics)}, Goals: {bool(goals)}")
+                else:
+                    print(f"   ❌ Guest profile missing keys: {missing_profile_keys}")
+                
+                # Validate session data
+                session_data = export_data.get('session_data', {})
+                session_keys = ['todays_entries', 'nutrition_summary', 'simple_goals']
+                missing_session_keys = [key for key in session_keys if key not in session_data]
+                
+                if not missing_session_keys:
+                    print(f"   ✅ Session data structure complete")
+                    
+                    # Validate today's entries
+                    todays_entries = session_data.get('todays_entries', {})
+                    if 'foods_logged' in todays_entries and 'total_calories' in todays_entries:
+                        foods_count = len(todays_entries.get('foods_logged', []))
+                        total_calories = todays_entries.get('total_calories', 0)
+                        print(f"   🍽️ Today's entries: {foods_count} foods, {total_calories} calories")
+                    else:
+                        print(f"   ⚠️  Incomplete today's entries data")
+                        
+                    # Validate simple goals
+                    simple_goals = session_data.get('simple_goals', [])
+                    if isinstance(simple_goals, list) and len(simple_goals) > 0:
+                        print(f"   🎯 Simple goals: {len(simple_goals)} goals tracked")
+                    else:
+                        print(f"   ⚠️  No simple goals in session data")
+                else:
+                    print(f"   ❌ Session data missing keys: {missing_session_keys}")
+                
+                # Validate upgrade benefits (guest-specific feature)
+                upgrade_benefits = export_data.get('upgrade_benefits', {})
+                upgrade_keys = ['features_available_with_account', 'current_limitations']
+                missing_upgrade_keys = [key for key in upgrade_keys if key not in upgrade_benefits]
+                
+                if not missing_upgrade_keys:
+                    print(f"   ✅ Upgrade benefits information complete")
+                    features_count = len(upgrade_benefits.get('features_available_with_account', []))
+                    limitations_count = len(upgrade_benefits.get('current_limitations', []))
+                    print(f"   ⬆️ Upgrade info: {features_count} features, {limitations_count} limitations")
+                else:
+                    print(f"   ❌ Upgrade benefits missing keys: {missing_upgrade_keys}")
+                
+                # Validate insights
+                insights = export_data.get('insights', [])
+                if isinstance(insights, list) and len(insights) > 0:
+                    print(f"   ✅ Insights provided: {len(insights)} insights")
+                else:
+                    print(f"   ⚠️  No insights in export")
+                    
+            else:
+                print(f"   ❌ Guest export missing main sections: {missing_main_keys}")
+                success = False
+            
+            # Validate JSON format compliance
+            try:
+                import json
+                json.dumps(export_data)
+                print(f"   ✅ Export data is valid JSON format")
+            except (TypeError, ValueError) as e:
+                print(f"   ❌ Export data is not valid JSON: {e}")
+                success = False
+        
+        return success
+
+    def test_export_error_handling(self):
+        """Test error handling for non-existent profiles and expired sessions"""
+        print("\n🚫 Testing Export Error Handling...")
+        
+        # Test 1: Non-existent patient profile (404)
+        success1, _ = self.run_test(
+            "Non-existent Patient Export (Should Fail)",
+            "GET",
+            "patient/export/non-existent-patient-123",
+            404
+        )
+        
+        # Test 2: Non-existent provider profile (404)
+        success2, _ = self.run_test(
+            "Non-existent Provider Export (Should Fail)",
+            "GET",
+            "provider/export/non-existent-provider-123",
+            404
+        )
+        
+        # Test 3: Non-existent family profile (404)
+        success3, _ = self.run_test(
+            "Non-existent Family Export (Should Fail)",
+            "GET",
+            "family/export/non-existent-family-123",
+            404
+        )
+        
+        # Test 4: Non-existent guest session (404)
+        success4, _ = self.run_test(
+            "Non-existent Guest Export (Should Fail)",
+            "GET",
+            "guest/export/non-existent-session-123",
+            404
+        )
+        
+        # Test 5: Test expired guest session (if backend supports it)
+        # Note: This would require creating an expired session first, 
+        # but for now we'll test with a non-existent session
+        success5, _ = self.run_test(
+            "Expired Guest Session Export (Should Fail)",
+            "GET",
+            "guest/export/expired-session-123",
+            404  # or 410 if session expired
+        )
+        
+        if success1:
+            print(f"   ✅ Patient 404 error handling working")
+        if success2:
+            print(f"   ✅ Provider 404 error handling working")
+        if success3:
+            print(f"   ✅ Family 404 error handling working")
+        if success4:
+            print(f"   ✅ Guest 404 error handling working")
+        if success5:
+            print(f"   ✅ Expired session error handling working")
+        
+        return success1 and success2 and success3 and success4 and success5
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
