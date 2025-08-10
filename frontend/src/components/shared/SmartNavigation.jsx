@@ -299,9 +299,19 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
 
             {/* Quick Actions */}
             <div className="hidden md:flex items-center space-x-2">
-              {roleConfig.quickActions.slice(0, 2).map((action, index) => (
+              {roleConfig.quickActions.slice(0, 1).map((action, index) => (
                 <QuickActionButton key={index} action={action} />
               ))}
+              
+              {/* Export Data Button */}
+              <Button
+                size="sm"
+                onClick={() => setShowExportModal(true)}
+                className={`bg-gradient-to-r ${themeClasses.gradient} text-white hover:opacity-90`}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
             </div>
 
             {/* Mobile Menu Button */}
