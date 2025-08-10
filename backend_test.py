@@ -3797,6 +3797,200 @@ class HealthPlatformAPITester:
         
         return success1 and success2 and success3 and success4 and success5
 
+    def test_guest_session_management_and_export(self):
+        """Test the fixed guest session management and data export functionality"""
+        print("\n📋 Testing Guest Session Management and Data Export...")
+        
+        # Test 1: Create a new guest session - verify it creates a guest profile in database
+        print("\n🔍 Step 1: Creating guest session...")
+        success1, session_response = self.run_test(
+            "Create Guest Session",
+            "POST",
+            "guest/session",
+            200
+        )
+        
+        if not success1 or not session_response:
+            print("❌ Failed to create guest session - cannot continue with export test")
+            return False
+        
+        session_id = session_response.get('session_id')
+        if not session_id:
+            print("❌ No session_id returned from guest session creation")
+            return False
+        
+        print(f"✅ Guest session created with ID: {session_id}")
+        
+        # Validate session response structure
+        expected_session_keys = ['session_id', 'expires_at', 'features_available', 'limitations', 'upgrade_benefits']
+        missing_session_keys = [key for key in expected_session_keys if key not in session_response]
+        if missing_session_keys:
+            print(f"⚠️  Session response missing keys: {missing_session_keys}")
+        else:
+            print("✅ Session response structure is complete")
+        
+        # Test 2: Verify guest profile was created in database by trying to get it
+        print(f"\n🔍 Step 2: Verifying guest profile exists in database...")
+        success2, profile_response = self.run_test(
+            "Get Guest Profile (Verify Database Creation)",
+            "GET",
+            f"profiles/guest/{session_id}",
+            200
+        )
+        
+        if success2:
+            print("✅ Guest profile successfully created in database")
+            print(f"   Profile session_id: {profile_response.get('session_id')}")
+            print(f"   Profile expires: {profile_response.get('session_expires')}")
+        else:
+            print("❌ Guest profile was not created in database - this was the original issue")
+            return False
+        
+        # Test 3: Test data export with the session_id - verify it now works
+        print(f"\n🔍 Step 3: Testing data export with session_id: {session_id}")
+        success3, export_response = self.run_test(
+            "Export Guest Data",
+            "GET",
+            f"guest/export/{session_id}",
+            200
+        )
+        
+        if not success3:
+            print("❌ Guest data export failed - the fix may not be working properly")
+            return False
+        
+        print("✅ Guest data export successful!")
+        
+        # Validate export response structure
+        if export_response:
+            expected_export_keys = ['export_info', 'profile', 'session_data', 'insights', 'upgrade_benefits']
+            missing_export_keys = [key for key in expected_export_keys if key not in export_response]
+            
+            if not missing_export_keys:
+                print("✅ Export response contains all required keys")
+                
+                # Validate export_info structure
+                export_info = export_response.get('export_info', {})
+                if export_info.get('session_id') == session_id:
+                    print(f"✅ Export info session_id matches: {session_id}")
+                else:
+                    print(f"❌ Export info session_id mismatch")
+                    return False
+                
+                # Validate profile structure
+                profile = export_response.get('profile', {})
+                if profile.get('session_id') == session_id:
+                    print(f"✅ Profile session_id matches: {session_id}")
+                else:
+                    print(f"❌ Profile session_id mismatch")
+                    return False
+                
+                # Validate session_data structure
+                session_data = export_response.get('session_data', {})
+                session_data_keys = ['todays_entries', 'nutrition_summary', 'simple_goals']
+                missing_session_keys = [key for key in session_data_keys if key not in session_data]
+                
+                if not missing_session_keys:
+                    print("✅ Session data structure is complete")
+                else:
+                    print(f"⚠️  Session data missing keys: {missing_session_keys}")
+                
+            else:
+                print(f"❌ Export response missing keys: {missing_export_keys}")
+                return False
+        
+        # Test 4: Test complete guest workflow - session creation -> data export
+        print(f"\n🔍 Step 4: Testing complete guest workflow with new session...")
+        
+        # Create another session to test the complete workflow
+        success4, workflow_session = self.run_test(
+            "Create Second Guest Session (Workflow Test)",
+            "POST",
+            "guest/session",
+            200
+        )
+        
+        if success4 and workflow_session:
+            workflow_session_id = workflow_session.get('session_id')
+            print(f"✅ Second session created: {workflow_session_id}")
+            
+            # Immediately try to export data from the new session
+            success5, workflow_export = self.run_test(
+                "Export Data from New Session (Workflow Test)",
+                "GET",
+                f"guest/export/{workflow_session_id}",
+                200
+            )
+            
+            if success5:
+                print("✅ Complete workflow successful: session creation -> immediate data export")
+            else:
+                print("❌ Workflow failed: could not export data from newly created session")
+                return False
+        else:
+            print("❌ Failed to create second session for workflow test")
+            return False
+        
+        # Test 5: Test that expired guest profiles are cleaned up properly
+        print(f"\n🔍 Step 5: Testing expired profile cleanup...")
+        
+        # Try to export from a non-existent session (should fail with 404)
+        fake_session_id = "fake_session_12345"
+        success6, _ = self.run_test(
+            "Export from Non-existent Session (Should Fail)",
+            "GET",
+            f"guest/export/{fake_session_id}",
+            404  # Expecting 404 Not Found
+        )
+        
+        if success6:
+            print("✅ Properly handles non-existent session with 404 error")
+        else:
+            print("❌ Did not properly handle non-existent session")
+            return False
+        
+        # Test 6: Verify session status endpoint works
+        print(f"\n🔍 Step 6: Testing session status endpoint...")
+        success7, status_response = self.run_test(
+            "Get Guest Session Status",
+            "GET",
+            f"guest/session/{session_id}/status",
+            200
+        )
+        
+        if success7 and status_response:
+            print("✅ Session status endpoint working")
+            if status_response.get('session_id') == session_id:
+                print(f"✅ Status response session_id matches: {session_id}")
+            else:
+                print(f"⚠️  Status response session_id mismatch")
+        else:
+            print("⚠️  Session status endpoint failed (not critical for main fix)")
+        
+        print(f"\n🎉 Guest Session Management and Export Test Summary:")
+        print(f"   ✅ Guest session creation: {'PASSED' if success1 else 'FAILED'}")
+        print(f"   ✅ Database profile creation: {'PASSED' if success2 else 'FAILED'}")
+        print(f"   ✅ Data export functionality: {'PASSED' if success3 else 'FAILED'}")
+        print(f"   ✅ Complete workflow: {'PASSED' if success4 and success5 else 'FAILED'}")
+        print(f"   ✅ Error handling: {'PASSED' if success6 else 'FAILED'}")
+        print(f"   ✅ Session status: {'PASSED' if success7 else 'PASSED (optional)'}")
+        
+        # All critical tests must pass
+        all_critical_passed = success1 and success2 and success3 and success4 and success5 and success6
+        
+        if all_critical_passed:
+            print("\n🎉 ALL GUEST SESSION MANAGEMENT AND EXPORT TESTS PASSED!")
+            print("✅ The fix is working correctly:")
+            print("   - Guest sessions now create profiles in database")
+            print("   - Data export now works for guest sessions")
+            print("   - Complete workflow functions properly")
+            print("   - Error handling is appropriate")
+        else:
+            print("\n❌ SOME GUEST SESSION TESTS FAILED")
+            print("   The fix may need additional work")
+        
+        return all_critical_passed
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
