@@ -1002,6 +1002,264 @@ class HealthPlatformAPITester:
         
         return success1 and success2 and success3 and success4 and success5 and success6
 
+    def test_patient_profile_creation_and_autosave(self):
+        """Test Patient Profile Creation and Auto-Save functionality as requested"""
+        print("\n📋 Testing Patient Profile Creation and Auto-Save Functionality...")
+        
+        # Test 1: Create basic patient profile with minimal basic_info data
+        test_user_id = f"profile_test_{datetime.now().strftime('%H%M%S')}"
+        
+        basic_profile_data = {
+            "user_id": test_user_id,
+            "basic_info": {
+                "full_name": "Sarah Johnson",
+                "age": 28,
+                "gender": "Female",
+                "location": "New York, NY",
+                "timezone": "America/New_York",
+                "preferred_language": "English"
+            }
+        }
+        
+        success1, profile_response = self.run_test(
+            "Create Basic Patient Profile (Name + Age)",
+            "POST",
+            "profiles/patient",
+            200,
+            data=basic_profile_data
+        )
+        
+        # Validate profile completion calculation for basic profile
+        if success1 and profile_response:
+            completion = profile_response.get('profile_completion', 0)
+            print(f"   Profile completion for basic info only: {completion}%")
+            # Should be 16.7% (1 out of 6 sections completed)
+            expected_completion = 16.7
+            completion_valid = abs(completion - expected_completion) < 1.0
+            print(f"   Profile completion validation: {'✅' if completion_valid else '❌'} (Expected ~{expected_completion}%)")
+        
+        # Test 2: Get profile completion status
+        success2, completion_data = self.run_test(
+            "Get Profile Completion Status",
+            "GET",
+            f"profiles/completion/{test_user_id}",
+            200,
+            params={"role": "patient"}
+        )
+        
+        # Validate completion status response
+        if success2 and completion_data:
+            expected_keys = ['completion_percentage', 'missing_sections', 'total_sections', 'completed_sections']
+            missing_keys = [key for key in expected_keys if key not in completion_data]
+            if not missing_keys:
+                print(f"   ✅ Completion status contains all required keys: {expected_keys}")
+                completion_pct = completion_data.get('completion_percentage', 0)
+                missing_sections = completion_data.get('missing_sections', [])
+                completed_sections = completion_data.get('completed_sections', 0)
+                total_sections = completion_data.get('total_sections', 0)
+                
+                print(f"   Completion: {completion_pct}%, Completed: {completed_sections}/{total_sections} sections")
+                print(f"   Missing sections: {missing_sections}")
+                
+                # Should have 5 missing sections (physical_metrics, activity_profile, health_history, dietary_profile, goals_preferences)
+                expected_missing = 5
+                missing_valid = len(missing_sections) == expected_missing
+                print(f"   Missing sections validation: {'✅' if missing_valid else '❌'} (Expected {expected_missing} missing)")
+            else:
+                print(f"   ❌ Completion status missing keys: {missing_keys}")
+                success2 = False
+        
+        # Test 3: Test auto-save with partial data (complete basic_info section)
+        complete_basic_info_data = {
+            "basic_info": {
+                "full_name": "Sarah Johnson",
+                "age": 28,
+                "gender": "Female",
+                "location": "New York, NY",
+                "contact_preferences": {"email": True, "sms": False, "push": True},
+                "timezone": "America/New_York",
+                "emergency_contact": {"name": "John Johnson", "phone": "+1-555-0123"},
+                "preferred_language": "English"
+            }
+        }
+        
+        success3, update_response = self.run_test(
+            "Auto-Save: Update with Complete Basic Info",
+            "PUT",
+            f"profiles/patient/{test_user_id}",
+            200,
+            data=complete_basic_info_data
+        )
+        
+        # Test 4: Test auto-save with incomplete basic_info section (missing required fields)
+        incomplete_user_id = f"incomplete_test_{datetime.now().strftime('%H%M%S')}"
+        
+        incomplete_basic_info_data = {
+            "user_id": incomplete_user_id,
+            "basic_info": {
+                "full_name": "Test User"
+                # Missing age, gender, location, timezone, preferred_language
+            }
+        }
+        
+        success4, _ = self.run_test(
+            "Create Profile with Incomplete Basic Info (Should Fail)",
+            "POST",
+            "profiles/patient",
+            422,  # Expecting validation error
+            data=incomplete_basic_info_data
+        )
+        
+        # Test 5: Test auto-save behavior with partial profile data (add physical_metrics)
+        physical_metrics_data = {
+            "physical_metrics": {
+                "height_cm": 165.0,
+                "current_weight_kg": 65.0,
+                "goal_weight_kg": 60.0,
+                "body_fat_percentage": 22.5,
+                "measurements": {"waist": 75.0, "chest": 90.0, "hips": 95.0},
+                "bmi": 23.9
+            }
+        }
+        
+        success5, physical_response = self.run_test(
+            "Auto-Save: Add Physical Metrics Section",
+            "PUT",
+            f"profiles/patient/{test_user_id}",
+            200,
+            data=physical_metrics_data
+        )
+        
+        # Validate profile completion increased
+        if success5 and physical_response:
+            new_completion = physical_response.get('profile_completion', 0)
+            print(f"   Profile completion after adding physical metrics: {new_completion}%")
+            # Should be 33.3% (2 out of 6 sections completed)
+            expected_completion = 33.3
+            completion_valid = abs(new_completion - expected_completion) < 1.0
+            print(f"   Updated completion validation: {'✅' if completion_valid else '❌'} (Expected ~{expected_completion}%)")
+        
+        # Test 6: Test section completion badges logic - add health history with previous surgeries
+        health_history_data = {
+            "health_history": {
+                "primary_health_goals": ["weight_loss", "better_sleep"],
+                "medical_conditions": {"hypertension": "mild"},
+                "current_medications": [
+                    {"name": "Lisinopril", "dosage": "10mg", "frequency": "daily"}
+                ],
+                "allergies": ["peanuts"],
+                "food_intolerances": ["lactose"],
+                "previous_surgeries": [
+                    {
+                        "procedure": "Appendectomy",
+                        "date": "2018-03-15",
+                        "notes": "Routine appendix removal, no complications"
+                    },
+                    {
+                        "procedure": "Wisdom tooth extraction",
+                        "date": "2020-07-22",
+                        "notes": "All four wisdom teeth removed"
+                    }
+                ],
+                "family_medical_history": ["diabetes", "heart_disease"]
+            }
+        }
+        
+        success6, health_response = self.run_test(
+            "Auto-Save: Add Health History with Previous Surgeries",
+            "PUT",
+            f"profiles/patient/{test_user_id}",
+            200,
+            data=health_history_data
+        )
+        
+        # Validate previous surgeries were saved
+        if success6 and health_response:
+            health_history = health_response.get('health_history', {})
+            previous_surgeries = health_history.get('previous_surgeries', [])
+            print(f"   Previous surgeries saved: {len(previous_surgeries)} procedures")
+            surgeries_valid = len(previous_surgeries) == 2
+            print(f"   Previous surgeries validation: {'✅' if surgeries_valid else '❌'} (Expected 2 procedures)")
+            
+            new_completion = health_response.get('profile_completion', 0)
+            print(f"   Profile completion after adding health history: {new_completion}%")
+            # Should be 50.0% (3 out of 6 sections completed)
+            expected_completion = 50.0
+            completion_valid = abs(new_completion - expected_completion) < 1.0
+            print(f"   Updated completion validation: {'✅' if completion_valid else '❌'} (Expected ~{expected_completion}%)")
+        
+        # Test 7: Get final profile to verify all data persisted correctly
+        success7, final_profile = self.run_test(
+            "Get Final Profile (Verify Persistence)",
+            "GET",
+            f"profiles/patient/{test_user_id}",
+            200
+        )
+        
+        # Validate all sections are present and completion is correct
+        if success7 and final_profile:
+            sections_present = []
+            if final_profile.get('basic_info'): sections_present.append('basic_info')
+            if final_profile.get('physical_metrics'): sections_present.append('physical_metrics')
+            if final_profile.get('health_history'): sections_present.append('health_history')
+            
+            print(f"   Sections present in final profile: {sections_present}")
+            print(f"   Final profile completion: {final_profile.get('profile_completion', 0)}%")
+            
+            # Verify previous surgeries are still there
+            health_history = final_profile.get('health_history', {})
+            previous_surgeries = health_history.get('previous_surgeries', [])
+            if previous_surgeries:
+                print(f"   ✅ Previous surgeries persisted: {[s.get('procedure') for s in previous_surgeries]}")
+            else:
+                print(f"   ❌ Previous surgeries not persisted")
+                success7 = False
+        
+        # Test 8: Test validation logic with invalid data
+        invalid_activity_data = {
+            "activity_profile": {
+                "activity_level": "INVALID_LEVEL",  # Invalid enum
+                "exercise_frequency": 3,
+                "sleep_schedule": {
+                    "bedtime": "23:00",
+                    "wake_time": "07:00",
+                    "sleep_quality": 4
+                },
+                "stress_level": 3,
+                "work_type": "DESK_JOB"
+            }
+        }
+        
+        success8, _ = self.run_test(
+            "Auto-Save: Invalid Activity Profile (Should Fail)",
+            "PUT",
+            f"profiles/patient/{test_user_id}",
+            422,  # Expecting validation error
+            data=invalid_activity_data
+        )
+        
+        # Clean up test profile
+        cleanup_success, _ = self.run_test(
+            "Cleanup Test Profile",
+            "DELETE",
+            f"profiles/patient/{test_user_id}",
+            200
+        )
+        
+        print(f"\n📊 Patient Profile Creation & Auto-Save Test Summary:")
+        print(f"   ✅ Basic profile creation: {'PASS' if success1 else 'FAIL'}")
+        print(f"   ✅ Completion status tracking: {'PASS' if success2 else 'FAIL'}")
+        print(f"   ✅ Auto-save complete section: {'PASS' if success3 else 'FAIL'}")
+        print(f"   ✅ Validation of incomplete data: {'PASS' if success4 else 'FAIL'}")
+        print(f"   ✅ Auto-save partial updates: {'PASS' if success5 else 'FAIL'}")
+        print(f"   ✅ Previous surgeries functionality: {'PASS' if success6 else 'FAIL'}")
+        print(f"   ✅ Data persistence verification: {'PASS' if success7 else 'FAIL'}")
+        print(f"   ✅ Invalid data validation: {'PASS' if success8 else 'FAIL'}")
+        print(f"   ✅ Cleanup: {'PASS' if cleanup_success else 'FAIL'}")
+        
+        return (success1 and success2 and success3 and success4 and success5 and 
+                success6 and success7 and success8 and cleanup_success)
+
     def test_patient_analytics_endpoints(self):
         """Test Patient Analytics endpoints for the new Patient Analytics page"""
         print("\n📋 Testing Patient Analytics Endpoints...")
