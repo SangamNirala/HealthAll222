@@ -8,7 +8,7 @@ import { Badge } from './ui/badge';
 import { 
   Zap, Clock, Eye, UserX, Plus, Apple, 
   Target, Info, BookOpen, TrendingUp, Award,
-  Camera, Search, Edit, Heart
+  Camera, Search, Edit, Heart, Calculator
 } from 'lucide-react';
 
 // Component: Quick Start Guide
