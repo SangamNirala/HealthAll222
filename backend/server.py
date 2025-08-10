@@ -1019,14 +1019,41 @@ async def get_patient_analytics(user_id: str):
 @api_router.get("/patient/smart-suggestions/{user_id}")
 async def get_smart_food_suggestions(user_id: str):
     """Get AI-powered food suggestions based on eating patterns"""
+    
+    # Sample user profile - in real app, this would come from database
+    user_profile = {
+        "diet_type": "mediterranean",
+        "allergies": ["tree_nuts"],
+        "favorite_foods": ["salmon", "quinoa", "berries", "greek_yogurt"],
+        "cooking_time": 30
+    }
+    
+    current_intake = {
+        "calories": 1200,
+        "protein": 45,
+        "calories_remaining": 800,
+        "time_of_day": "afternoon"
+    }
+    
+    # Get AI-powered food suggestions
+    try:
+        ai_suggestions = await get_smart_food_suggestions(user_profile, current_intake)
+    except Exception as e:
+        logger.error(f"AI food suggestions error: {e}")
+        ai_suggestions = []
+    
+    # Default suggestions if AI fails
+    default_suggestions = [
+        {"name": "Greek Yogurt with Berries", "calories": 150, "reason": "Your usual morning snack", "frequency": "often"},
+        {"name": "Grilled Chicken Salad", "calories": 350, "reason": "Perfect for your lunch protein goal", "frequency": "weekly"},
+        {"name": "Almonds (1 oz)", "calories": 164, "reason": "Healthy fat you enjoyed yesterday", "frequency": "daily"},
+        {"name": "Green Smoothie", "calories": 180, "reason": "Boosts your vegetable intake", "frequency": "sometimes"}
+    ]
+    
     return {
         "user_id": user_id,
-        "quick_add_suggestions": [
-            {"name": "Greek Yogurt with Berries", "calories": 150, "reason": "Your usual morning snack", "frequency": "often"},
-            {"name": "Grilled Chicken Salad", "calories": 350, "reason": "Perfect for your lunch protein goal", "frequency": "weekly"},
-            {"name": "Almonds (1 oz)", "calories": 164, "reason": "Healthy fat you enjoyed yesterday", "frequency": "daily"},
-            {"name": "Green Smoothie", "calories": 180, "reason": "Boosts your vegetable intake", "frequency": "sometimes"}
-        ],
+        "ai_powered": len(ai_suggestions) > 0,
+        "quick_add_suggestions": ai_suggestions if ai_suggestions else default_suggestions,
         "meal_pattern_insights": {
             "breakfast_time": "8:15 AM",
             "lunch_time": "12:30 PM",
