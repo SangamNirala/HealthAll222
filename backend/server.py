@@ -2239,6 +2239,587 @@ async def get_advanced_meal_planning(family_id: str):
         }
     }
 
+# PHASE 5: Comprehensive Family Features - Advanced APIs
+
+@api_router.get("/family/calendar-integration/{family_id}")
+async def get_family_calendar_integration(family_id: str):
+    """Advanced family calendar with health events coordination"""
+    return {
+        "family_id": family_id,
+        "calendar_overview": {
+            "this_week_events": [
+                {
+                    "id": "evt_1",
+                    "title": "Emma - Pediatric Annual Checkup",
+                    "date": "2024-01-18",
+                    "time": "2:30 PM",
+                    "type": "medical_appointment",
+                    "member": "Emma",
+                    "provider": "Dr. Smith",
+                    "location": "Children's Clinic",
+                    "preparation_needed": ["Bring insurance card", "List of current medications", "Growth chart"],
+                    "reminders_set": True
+                },
+                {
+                    "id": "evt_2", 
+                    "title": "Family Meal Prep Day",
+                    "date": "2024-01-20",
+                    "time": "10:00 AM",
+                    "type": "meal_prep",
+                    "participants": ["Sarah", "John", "Emma", "Alex"],
+                    "planned_meals": ["Overnight oats", "Chicken stir fry", "Veggie muffins"],
+                    "shopping_completed": True
+                },
+                {
+                    "id": "evt_3",
+                    "title": "Alex - Soccer Practice",
+                    "date": "2024-01-21",
+                    "time": "4:30 PM", 
+                    "type": "physical_activity",
+                    "member": "Alex",
+                    "location": "Community Sports Center",
+                    "health_benefits": ["cardiovascular health", "teamwork", "coordination"],
+                    "hydration_reminder": True
+                }
+            ],
+            "upcoming_medical": [
+                {"member": "John", "appointment": "Annual Physical", "date": "2024-01-25", "status": "confirmed"},
+                {"member": "Sarah", "appointment": "Nutritionist Consultation", "date": "2024-02-01", "status": "tentative"},
+                {"member": "Emma", "appointment": "Orthodontist Follow-up", "date": "2024-02-08", "status": "confirmed"}
+            ],
+            "medication_schedule": {
+                "daily_reminders": [
+                    {"member": "Sarah", "medication": "Prenatal Vitamin", "time": "8:00 AM", "status": "active"},
+                    {"member": "Emma", "medication": "Allergy Medication", "time": "7:00 PM", "condition": "seasonal allergies", "status": "as_needed"}
+                ],
+                "upcoming_refills": [
+                    {"member": "Emma", "medication": "Allergy Medication", "refill_due": "2024-01-30", "pharmacy": "Main Street Pharmacy"}
+                ]
+            }
+        },
+        "synchronization": {
+            "google_calendar": {"connected": True, "last_sync": "2024-01-17 6:00 AM"},
+            "apple_calendar": {"connected": False, "available": True},
+            "outlook_calendar": {"connected": False, "available": True}
+        },
+        "family_coordination": {
+            "shared_responsibilities": [
+                {"task": "Take Emma to checkup", "assigned_to": "Sarah", "date": "2024-01-18", "backup": "John"},
+                {"task": "Pick up prescriptions", "assigned_to": "John", "date": "2024-01-19", "backup": "Sarah"}
+            ],
+            "transportation_coordination": [
+                {"event": "Emma's Checkup", "driver": "Sarah", "passengers": ["Emma"], "departure_time": "2:00 PM"},
+                {"event": "Alex's Soccer", "driver": "John", "passengers": ["Alex"], "departure_time": "4:00 PM"}
+            ]
+        }
+    }
+
+@api_router.get("/family/child-nutrition-education/{family_id}")
+async def get_child_nutrition_education(family_id: str):
+    """Comprehensive child nutrition education portal"""
+    return {
+        "family_id": family_id,
+        "age_specific_content": [
+            {
+                "age_group": "8-10 years (Alex)",
+                "learning_modules": [
+                    {
+                        "title": "Super Foods for Super Kids",
+                        "duration": "15 minutes",
+                        "type": "interactive_game",
+                        "concepts": ["protein for muscles", "calcium for bones", "vitamins for energy"],
+                        "activities": ["Food superhero matching", "Build a power plate", "Nutrient scavenger hunt"],
+                        "completion_badge": "Nutrition Detective",
+                        "progress": 60
+                    },
+                    {
+                        "title": "Reading Food Labels Like a Pro", 
+                        "duration": "10 minutes",
+                        "type": "tutorial_video",
+                        "concepts": ["serving sizes", "sugar content", "ingredient lists"],
+                        "activities": ["Label detective game", "Compare similar foods", "Make healthy swaps"],
+                        "completion_badge": "Label Reader",
+                        "progress": 0
+                    }
+                ],
+                "dietary_considerations": ["lactose_intolerant", "high_energy_needs", "growing_body"],
+                "recommended_portions": {
+                    "proteins": "2-3 servings/day",
+                    "vegetables": "3-4 servings/day", 
+                    "fruits": "2-3 servings/day",
+                    "grains": "4-5 servings/day",
+                    "dairy_alternatives": "2-3 servings/day"
+                }
+            },
+            {
+                "age_group": "12-14 years (Emma)",
+                "learning_modules": [
+                    {
+                        "title": "Fueling Your Growing Body",
+                        "duration": "20 minutes", 
+                        "type": "interactive_workshop",
+                        "concepts": ["adolescent nutrition needs", "body image positivity", "sports nutrition"],
+                        "activities": ["Plan a perfect day of eating", "Myth vs fact quiz", "Energy balance calculator"],
+                        "completion_badge": "Teen Nutrition Expert",
+                        "progress": 30
+                    },
+                    {
+                        "title": "Cooking Skills for Independence",
+                        "duration": "25 minutes",
+                        "type": "hands_on_cooking",
+                        "concepts": ["meal preparation", "food safety", "balanced cooking"],
+                        "activities": ["Cook a balanced meal", "Grocery shopping simulation", "Recipe modification"],
+                        "completion_badge": "Young Chef",
+                        "progress": 80
+                    }
+                ],
+                "dietary_considerations": ["tree_nuts_allergy", "adolescent_growth", "active_lifestyle"],
+                "recommended_portions": {
+                    "proteins": "3-4 servings/day",
+                    "vegetables": "4-5 servings/day",
+                    "fruits": "3-4 servings/day", 
+                    "grains": "6-7 servings/day",
+                    "healthy_fats": "2-3 servings/day"
+                }
+            }
+        ],
+        "family_challenges": [
+            {
+                "name": "Rainbow Plate Challenge",
+                "description": "Eat foods of every color each day for a week",
+                "duration": "7 days",
+                "participants": ["Emma", "Alex"],
+                "progress": {"Emma": 85, "Alex": 70},
+                "rewards": ["Healthy cooking class", "Family day out", "New sports equipment"]
+            },
+            {
+                "name": "Hydration Heroes",
+                "description": "Track water intake and learn about hydration", 
+                "duration": "10 days",
+                "participants": ["Emma", "Alex", "Sarah", "John"],
+                "progress": {"Emma": 90, "Alex": 65, "Sarah": 100, "John": 80},
+                "rewards": ["Family water bottles", "Healthy smoothie making", "Spa day"]
+            }
+        ],
+        "expert_resources": [
+            {
+                "title": "Pediatric Nutritionist Q&A",
+                "type": "live_session", 
+                "date": "2024-01-25",
+                "time": "7:00 PM",
+                "expert": "Dr. Lisa Chen, RD",
+                "topics": ["Picky eating", "Food allergies", "Growth nutrition"],
+                "registration_required": True
+            },
+            {
+                "title": "Family Cooking Workshop",
+                "type": "hands_on_class",
+                "date": "2024-02-03",
+                "time": "2:00 PM", 
+                "location": "Community Kitchen",
+                "instructor": "Chef Maria Rodriguez",
+                "focus": "Allergen-free family meals",
+                "age_range": "8+ with parent"
+            }
+        ]
+    }
+
+@api_router.get("/family/caregiver-tools/{family_id}")
+async def get_advanced_caregiver_tools(family_id: str):
+    """Advanced caregiver tools and emergency management"""
+    return {
+        "family_id": family_id,
+        "emergency_management": {
+            "emergency_contacts": [
+                {
+                    "name": "Grandma Betty",
+                    "relationship": "Grandmother", 
+                    "phone": "+1-555-0123",
+                    "availability": "weekdays 9AM-6PM",
+                    "medical_authority": True,
+                    "key_holder": True,
+                    "special_instructions": "Knows Emma's allergy protocol"
+                },
+                {
+                    "name": "Uncle Mike",
+                    "relationship": "Uncle",
+                    "phone": "+1-555-0456", 
+                    "availability": "weekends and evenings",
+                    "medical_authority": False,
+                    "key_holder": True,
+                    "special_instructions": "Lives 5 minutes away, has backup car seats"
+                },
+                {
+                    "name": "Neighbor Jane",
+                    "relationship": "Neighbor",
+                    "phone": "+1-555-0789",
+                    "availability": "emergencies only",
+                    "medical_authority": False,
+                    "key_holder": False,
+                    "special_instructions": "Retired nurse, great in medical emergencies"
+                }
+            ],
+            "medical_information": {
+                "Emma": {
+                    "allergies": ["tree nuts", "severe"],
+                    "medications": ["EpiPen - always carry", "Allergy medication - as needed"],
+                    "medical_conditions": ["Seasonal allergies"],
+                    "emergency_protocols": ["Use EpiPen immediately for nut exposure", "Call 911", "Contact parents"],
+                    "insurance": {"provider": "Blue Cross", "policy": "XYZ123", "group": "FAM001"}
+                },
+                "Alex": {
+                    "allergies": ["none known"],
+                    "medications": ["none regular"],
+                    "medical_conditions": ["Lactose intolerant"],
+                    "emergency_protocols": ["Standard emergency care", "Avoid dairy products"],
+                    "insurance": {"provider": "Blue Cross", "policy": "XYZ123", "group": "FAM001"}
+                }
+            },
+            "healthcare_providers": {
+                "primary_care": {"name": "Dr. Johnson", "phone": "+1-555-0100", "available": "24/7 on-call"},
+                "pediatrician": {"name": "Dr. Smith", "phone": "+1-555-0200", "available": "Mon-Fri 8AM-6PM"},
+                "emergency": {"name": "City Hospital ER", "phone": "911", "address": "123 Medical Center Dr"},
+                "urgent_care": {"name": "QuickCare Clinic", "phone": "+1-555-0300", "available": "7AM-11PM daily"}
+            }
+        },
+        "medication_management": {
+            "current_medications": [
+                {
+                    "member": "Sarah",
+                    "medication": "Prenatal Vitamin",
+                    "dosage": "1 tablet daily",
+                    "time": "8:00 AM",
+                    "refill_date": "2024-02-15",
+                    "pharmacy": "Main Street Pharmacy",
+                    "reminder_enabled": True,
+                    "side_effects_to_watch": ["nausea", "constipation"]
+                },
+                {
+                    "member": "Emma", 
+                    "medication": "EpiPen",
+                    "dosage": "0.3mg auto-injector",
+                    "condition": "severe tree nut allergy",
+                    "location": ["backpack", "home", "car"],
+                    "expiration_date": "2024-08-15",
+                    "replacement_reminder": True,
+                    "training_needed": ["How to use", "When to use", "After-care steps"]
+                }
+            ],
+            "medication_adherence": {
+                "Sarah": {"compliance_rate": 95, "missed_doses": 2, "streak": 28},
+                "Emma": {"compliance_rate": 100, "missed_doses": 0, "streak": 45}
+            },
+            "refill_management": [
+                {"medication": "Prenatal Vitamin", "due_date": "2024-02-15", "auto_refill": True, "status": "scheduled"},
+                {"medication": "EpiPen", "due_date": "2024-07-15", "auto_refill": False, "status": "reminder_set"}
+            ]
+        },
+        "care_coordination": {
+            "shared_tasks": [
+                {"task": "Daily medication check", "assigned_to": "Sarah", "backup": "John", "frequency": "daily"},
+                {"task": "Weekly health check-ins", "assigned_to": "alternating", "frequency": "weekly"},
+                {"task": "Medical appointment scheduling", "assigned_to": "Sarah", "backup": "John", "frequency": "as_needed"}
+            ],
+            "communication_hub": {
+                "family_chat": {"enabled": True, "platform": "secure_messaging", "participants": ["Sarah", "John"]},
+                "provider_communication": {"enabled": True, "secure_portal": True, "recent_messages": 3},
+                "school_nurse_contact": {"name": "Nurse Patricia", "phone": "+1-555-0400", "email": "patricia@school.edu"}
+            },
+            "document_management": {
+                "medical_records": {"location": "encrypted_cloud", "last_updated": "2024-01-15", "access": ["Sarah", "John"]},
+                "insurance_cards": {"location": "digital_wallet", "backup_printed": True, "expiration": "2024-12-31"},
+                "emergency_info_sheets": {"location": "car, home, school", "last_updated": "2024-01-10", "review_due": "2024-07-10"}
+            }
+        },
+        "health_monitoring": {
+            "wellness_checks": [
+                {"member": "Emma", "type": "allergy_symptom_tracking", "frequency": "daily", "last_entry": "2024-01-17"},
+                {"member": "Alex", "type": "growth_monitoring", "frequency": "monthly", "last_entry": "2024-01-01"},
+                {"member": "Sarah", "type": "pregnancy_wellness", "frequency": "weekly", "last_entry": "2024-01-16"}
+            ],
+            "symptom_tracking": {
+                "Emma": {
+                    "tracked_symptoms": ["sneezing", "itchy_eyes", "congestion"],
+                    "triggers": ["tree_pollen", "dust"],
+                    "patterns": "Symptoms worse in morning and evening",
+                    "improvements": "Better with air purifier in room"
+                }
+            },
+            "growth_tracking": {
+                "Alex": {
+                    "height": {"current": "4'8\"", "growth_rate": "2 inches/year", "percentile": "75th"},
+                    "weight": {"current": "85 lbs", "growth_rate": "healthy", "percentile": "70th"},
+                    "next_measurement": "2024-02-01"
+                },
+                "Emma": {
+                    "height": {"current": "5'2\"", "growth_rate": "1 inch/year", "percentile": "60th"},
+                    "weight": {"current": "105 lbs", "growth_rate": "healthy", "percentile": "55th"},
+                    "next_measurement": "2024-02-01"
+                }
+            }
+        }
+    }
+
+@api_router.get("/family/goals-coordination/{family_id}")
+async def get_family_goals_coordination(family_id: str):
+    """Advanced family goal setting and progress coordination"""
+    return {
+        "family_id": family_id,
+        "active_goals": [
+            {
+                "id": "goal_nutrition_2024",
+                "title": "Balanced Nutrition Challenge",
+                "category": "nutrition",
+                "description": "Each family member eats 5 servings of fruits and vegetables daily",
+                "start_date": "2024-01-01",
+                "end_date": "2024-03-31",
+                "participants": [
+                    {"name": "Sarah", "target": "5 servings/day", "current_progress": 85, "streak": 12},
+                    {"name": "John", "target": "5 servings/day", "current_progress": 70, "streak": 8},
+                    {"name": "Emma", "target": "4 servings/day", "current_progress": 90, "streak": 15},
+                    {"name": "Alex", "target": "4 servings/day", "current_progress": 65, "streak": 5}
+                ],
+                "family_progress": 77,
+                "milestones": [
+                    {"week": 2, "achieved": True, "reward": "Family movie night"},
+                    {"week": 4, "achieved": True, "reward": "Healthy cooking class"},
+                    {"week": 8, "achieved": False, "reward": "Weekend farmer's market trip"},
+                    {"week": 12, "achieved": False, "reward": "Family day at the park"}
+                ],
+                "tracking_method": "daily_photo_journal",
+                "support_features": ["meal_suggestions", "progress_charts", "family_leaderboard"]
+            },
+            {
+                "id": "goal_fitness_2024",
+                "title": "Family Fitness Adventure",
+                "category": "physical_activity",
+                "description": "Family participates in physical activities together 4x per week",
+                "start_date": "2024-01-01",
+                "end_date": "2024-06-30",
+                "participants": [
+                    {"name": "Sarah", "target": "4 activities/week", "current_progress": 80, "favorite_activity": "hiking"},
+                    {"name": "John", "target": "4 activities/week", "current_progress": 75, "favorite_activity": "cycling"},
+                    {"name": "Emma", "target": "3 activities/week", "current_progress": 95, "favorite_activity": "dancing"},
+                    {"name": "Alex", "target": "4 activities/week", "current_progress": 90, "favorite_activity": "soccer"}
+                ],
+                "family_progress": 85,
+                "weekly_activities": [
+                    {"day": "Saturday", "activity": "Family bike ride", "status": "completed", "duration": "45 min"},
+                    {"day": "Sunday", "activity": "Park playground", "status": "completed", "duration": "60 min"},
+                    {"day": "Wednesday", "activity": "Evening walk", "status": "scheduled", "duration": "30 min"},
+                    {"day": "Friday", "activity": "Dance party", "status": "planned", "duration": "20 min"}
+                ],
+                "health_benefits": ["cardiovascular health", "family_bonding", "stress_reduction", "better_sleep"]
+            },
+            {
+                "id": "goal_wellness_2024",
+                "title": "Family Wellness Routine",
+                "category": "overall_wellness", 
+                "description": "Establish healthy family routines for sleep, hydration, and mindfulness",
+                "start_date": "2024-01-01",
+                "end_date": "2024-12-31",
+                "participants": [
+                    {"name": "Sarah", "focus_areas": ["sleep_schedule", "hydration", "stress_management"], "progress": 88},
+                    {"name": "John", "focus_areas": ["sleep_schedule", "hydration", "work_life_balance"], "progress": 72},
+                    {"name": "Emma", "focus_areas": ["sleep_schedule", "screen_time", "study_stress"], "progress": 82},
+                    {"name": "Alex", "focus_areas": ["sleep_schedule", "hydration", "emotional_regulation"], "progress": 79}
+                ],
+                "family_routines": [
+                    {
+                        "routine": "Digital sunset at 8 PM",
+                        "description": "All screens off 1 hour before bedtime",
+                        "compliance": 85,
+                        "benefits": ["better_sleep", "family_time", "reduced_eye_strain"]
+                    },
+                    {
+                        "routine": "Morning hydration challenge",
+                        "description": "Everyone drinks water immediately upon waking",
+                        "compliance": 92,
+                        "benefits": ["metabolism_boost", "alertness", "healthy_habit"]
+                    },
+                    {
+                        "routine": "Weekly family gratitude circle",
+                        "description": "Share three things we're grateful for each Sunday",
+                        "compliance": 78,
+                        "benefits": ["emotional_wellbeing", "family_connection", "positive_mindset"]
+                    }
+                ]
+            }
+        ],
+        "goal_analytics": {
+            "overall_family_score": 83,
+            "improvement_trends": [
+                {"metric": "nutrition_consistency", "change": "+15%", "period": "last_month"},
+                {"metric": "physical_activity", "change": "+22%", "period": "last_month"},
+                {"metric": "sleep_quality", "change": "+8%", "period": "last_month"}
+            ],
+            "challenge_areas": [
+                {"area": "weekend_consistency", "improvement_suggestion": "Plan weekend activities in advance"},
+                {"area": "weather_dependency", "improvement_suggestion": "Add indoor activity alternatives"}
+            ]
+        },
+        "motivation_system": {
+            "individual_rewards": [
+                {"member": "Emma", "earned": "Choice of weekend activity", "for": "15-day nutrition streak"},
+                {"member": "Alex", "earned": "Extra 30 min screen time", "for": "Completing fitness week"}
+            ],
+            "family_rewards": [
+                {"earned": "Family movie night", "for": "Everyone meeting weekly nutrition goal"},
+                {"pending": "Weekend camping trip", "requirement": "Complete 4-week fitness challenge"}
+            ],
+            "celebration_milestones": [
+                {"milestone": "1 month of consistent goals", "celebration": "Family dinner at favorite restaurant"},
+                {"milestone": "3 months of progress", "celebration": "Family vacation planning session"},
+                {"milestone": "6 months of success", "celebration": "Special family adventure day"}
+            ]
+        }
+    }
+
+@api_router.post("/family/goals/{goal_id}/update-progress")
+async def update_family_goal_progress(goal_id: str, progress_data: dict):
+    """Update progress for family goals"""
+    return {
+        "goal_id": goal_id,
+        "updated": True,
+        "new_progress": progress_data.get("progress", 0),
+        "member": progress_data.get("member", "unknown"),
+        "streak_updated": True,
+        "family_progress_recalculated": True,
+        "milestone_check": {
+            "milestone_reached": progress_data.get("progress", 0) > 80,
+            "reward_unlocked": "Family celebration dinner" if progress_data.get("progress", 0) > 80 else None
+        },
+        "encouragement_message": "Great job staying committed to your family's health goals!",
+        "next_milestone": "Keep it up! You're only 5% away from your next reward."
+    }
+
+@api_router.get("/family/multi-profile-management/{family_id}")
+async def get_multi_profile_management(family_id: str):
+    """Advanced multi-profile management system"""
+    return {
+        "family_id": family_id,
+        "profile_overview": {
+            "total_profiles": 4,
+            "completion_status": {
+                "Sarah": {"completion": 95, "status": "complete", "last_updated": "2024-01-16"},
+                "John": {"completion": 88, "status": "complete", "last_updated": "2024-01-15"},
+                "Emma": {"completion": 92, "status": "complete", "last_updated": "2024-01-17"},
+                "Alex": {"completion": 85, "status": "complete", "last_updated": "2024-01-14"}
+            },
+            "data_synchronization": {
+                "last_sync": "2024-01-17 7:00 AM",
+                "sync_status": "up_to_date",
+                "conflicts_resolved": 0,
+                "pending_updates": []
+            }
+        },
+        "member_profiles": [
+            {
+                "member": "Sarah",
+                "role": "Primary Caregiver",
+                "age": 38,
+                "health_summary": {
+                    "current_conditions": ["Pregnancy - 2nd trimester"],
+                    "allergies": ["none"],
+                    "medications": ["Prenatal vitamins"],
+                    "recent_vitals": {"bp": "118/75", "weight": "142 lbs", "heart_rate": "72 bpm"},
+                    "health_goals": ["Healthy pregnancy weight gain", "Regular prenatal care", "Stress management"]
+                },
+                "dietary_preferences": {
+                    "restrictions": ["none"],
+                    "preferences": ["organic_when_possible", "minimal_processed_foods"],
+                    "cultural_dietary": ["Mediterranean_influenced"]
+                },
+                "activity_level": "moderately_active",
+                "responsibilities": ["medication_management", "appointment_scheduling", "meal_planning"]
+            },
+            {
+                "member": "John",
+                "role": "Secondary Caregiver",
+                "age": 40,
+                "health_summary": {
+                    "current_conditions": ["Mild hypertension"],
+                    "allergies": ["environmental_dust"],
+                    "medications": ["Blood pressure medication"],
+                    "recent_vitals": {"bp": "132/82", "weight": "185 lbs", "heart_rate": "68 bpm"},
+                    "health_goals": ["Blood pressure management", "Weight maintenance", "Regular exercise"]
+                },
+                "dietary_preferences": {
+                    "restrictions": ["low_sodium"],
+                    "preferences": ["whole_grains", "lean_proteins"],
+                    "cultural_dietary": ["American_traditional"]
+                },
+                "activity_level": "lightly_active",
+                "responsibilities": ["transportation", "emergency_backup", "weekend_meal_prep"]
+            },
+            {
+                "member": "Emma",
+                "role": "Dependent - Adolescent", 
+                "age": 12,
+                "health_summary": {
+                    "current_conditions": ["Seasonal allergies"],
+                    "allergies": ["tree_nuts_severe", "pollen"],
+                    "medications": ["EpiPen", "Allergy medication as needed"],
+                    "recent_vitals": {"height": "5'2\"", "weight": "105 lbs", "growth_percentile": "60th"},
+                    "health_goals": ["Allergy management", "Healthy growth", "Physical fitness"]
+                },
+                "dietary_preferences": {
+                    "restrictions": ["tree_nuts", "avoids_processed_snacks"],
+                    "preferences": ["fruits", "yogurt", "homemade_baked_goods"],
+                    "cultural_dietary": ["family_style_meals"]
+                },
+                "activity_level": "very_active",
+                "school_coordination": {
+                    "school_nurse_informed": True,
+                    "emergency_action_plan": "on_file",
+                    "lunch_modifications": "nut_free_table"
+                }
+            },
+            {
+                "member": "Alex",
+                "role": "Dependent - Child",
+                "age": 8,
+                "health_summary": {
+                    "current_conditions": ["none"],
+                    "allergies": ["none_known"],
+                    "medications": ["none_regular"],
+                    "recent_vitals": {"height": "4'8\"", "weight": "85 lbs", "growth_percentile": "75th"},
+                    "health_goals": ["Healthy growth", "Develop good eating habits", "Stay active"],
+                    "dietary_considerations": ["lactose_intolerant"]
+                },
+                "dietary_preferences": {
+                    "restrictions": ["dairy_limited"],
+                    "preferences": ["chicken", "pasta", "apples", "rice"],
+                    "challenges": ["picky_eater", "limited_vegetable_acceptance"]
+                },
+                "activity_level": "very_active",
+                "school_coordination": {
+                    "lunch_modifications": "dairy_free_options",
+                    "snack_preferences": "nut_free_crackers_fruit"
+                }
+            }
+        ],
+        "coordination_tools": {
+            "shared_calendar": {
+                "medical_appointments": 3,
+                "medication_reminders": 5,
+                "meal_planning_sessions": 2,
+                "family_activities": 8
+            },
+            "communication_system": {
+                "family_chat_active": True,
+                "provider_messaging": True,
+                "school_communication": True,
+                "emergency_notifications": True
+            },
+            "data_sharing": {
+                "with_healthcare_providers": ["with_consent", "secure_portal"],
+                "with_schools": ["emergency_info_only", "updated_automatically"],
+                "with_family_members": ["age_appropriate_access"]
+            }
+        }
+    }
+
 # Guest Experience Endpoints
 @api_router.get("/guest/quick-nutrition/{session_id}")
 async def get_guest_quick_nutrition(session_id: str):
