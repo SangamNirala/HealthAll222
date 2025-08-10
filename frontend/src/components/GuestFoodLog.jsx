@@ -160,9 +160,47 @@ const GuestFoodLog = () => {
         // Save to localStorage
         localStorage.setItem(`guest_foods_${sessionId}`, JSON.stringify(updatedFoods));
         
+        // Update streak tracking
+        const today = new Date().toDateString();
+        const lastLogDate = localStorage.getItem('last_log_date');
+        const currentStreak = parseInt(localStorage.getItem('current_streak') || '0');
+        
+        if (lastLogDate !== today) {
+          const newStreak = lastLogDate === new Date(Date.now() - 86400000).toDateString() ? currentStreak + 1 : 1;
+          setStreakDays(newStreak);
+          localStorage.setItem('current_streak', newStreak.toString());
+          localStorage.setItem('last_log_date', today);
+          
+          // Show streak achievement feedback
+          if (newStreak > 1) {
+            setTimeout(() => {
+              setRealtimeFeedback({
+                type: 'streak_achievement',
+                streakDays: newStreak,
+                message: `${newStreak} day logging streak!`
+              });
+            }, 1500);
+          }
+        }
+        
+        // Show food logged feedback
+        setRealtimeFeedback({
+          type: 'food_logged',
+          foodName: result.food_recognized,
+          calories: result.estimated_nutrition.calories,
+          insights: result.instant_feedback.slice(0, 2)
+        });
+        
         // Reset form
         setNewFood('');
         setShowAddForm(false);
+        
+        // Check for upgrade triggers
+        if (updatedFoods.length >= 5 || getTotalCalories() > 1500) {
+          setTimeout(() => {
+            setShowUpgradePrompt(true);
+          }, 5000);
+        }
         
         // Show success feedback briefly
         setTimeout(() => setLastFeedback(null), 10000); // Clear after 10 seconds
