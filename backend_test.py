@@ -2872,9 +2872,9 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Phase 5 Comprehensive Family Features...")
         self.test_phase5_family_features()
 
-        # Test Guest Food Log API Integration (SPECIFIC REQUEST)
-        print("\n📋 Testing Guest Food Log API Integration...")
-        self.test_guest_food_log_api_integration()
+        # Test Phase 6 Guest Goals Management
+        print("\n📋 Testing Phase 6 Guest Goals Management...")
+        phase6_success = self.test_phase6_guest_goals_management()
 
         # Print final results
         print("\n" + "=" * 60)
