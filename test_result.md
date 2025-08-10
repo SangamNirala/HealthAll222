@@ -953,19 +953,17 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
-  - agent: "main"
-    message: "UI tweak: suppressed the mid-footer auto-saving spinner during editing to prevent distracting flicker. Auto-save still runs behind the scenes and the header shows 'Auto-save enabled' only when a section is complete. Ready for frontend verification."
-
+  current_focus:
+    - "Phase 5 - Family Calendar Integration API"
+    - "Phase 5 - Child Nutrition Education API" 
+    - "Phase 5 - Advanced Caregiver Tools API"
+    - "Phase 5 - Family Goals Coordination API"
+    - "Phase 5 - Multi-Profile Management API"
+    - "Phase 5 - Family Health Overview API"
+    - "Phase 5 - Advanced Meal Planning API"
   stuck_tasks: []
   test_all: false
-  - agent: "main"
-    message: "Implemented click-to-open help popovers next to field labels across all profile steps via shared FormField component. Please verify that question mark icons are clickable and display the specified helpText for fields with guidance."
-
-  test_priority: "completed"
-
-  - agent: "main"
-    message: "FIX APPLIED: PatientProfileWizard now sends only completed sections to backend (sanitized payload) and will not include empty placeholders. This prevents repeated auto-save 422 errors in steps 2-3. Marking Patient Profile Wizard UI for retesting."
+  test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
