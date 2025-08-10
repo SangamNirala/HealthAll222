@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRole } from '../context/RoleContext';
 import SmartNavigation from './shared/SmartNavigation';
+import UpgradePrompt from './shared/UpgradePrompt';
+import RealTimeFeedback from './shared/RealTimeFeedback';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
@@ -8,7 +10,7 @@ import { Badge } from './ui/badge';
 import { 
   Search, Plus, Clock, Trash2, Target, Apple, 
   Lightbulb, Heart, CheckCircle, Sparkles, 
-  TrendingUp, Info, AlertCircle
+  TrendingUp, Info, AlertCircle, Zap, Crown
 } from 'lucide-react';
 
 const GuestFoodLog = () => {
