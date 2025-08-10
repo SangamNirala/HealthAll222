@@ -104,7 +104,7 @@ const ROLE_CONFIG = {
     ],
     quickActions: [
       { label: 'Log Food', icon: 'Plus', action: 'logFood' },
-      { label: 'Set Goal', icon: 'Target', action: 'setGoal' }
+      { label: 'Export Data', icon: 'Download', action: 'exportData' }
     ]
   }
 };
