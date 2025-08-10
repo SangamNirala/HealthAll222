@@ -2501,6 +2501,327 @@ class HealthPlatformAPITester:
         
         return flow_success
 
+    def test_phase6_guest_goals_management(self):
+        """Test Phase 6 Guest Goals Management APIs"""
+        print("\n📋 Testing Phase 6 Guest Goals Management APIs...")
+        
+        # Test 1: Create guest session
+        session_success = self.test_guest_session_creation()
+        
+        if not session_success:
+            print("❌ Guest session creation failed - skipping goal tests")
+            return False
+        
+        # Test 2-5: Test goal management with created session
+        goals_success = self.test_guest_goals_management_flow()
+        
+        return session_success and goals_success
+
+    def test_guest_session_creation(self):
+        """Test guest session creation"""
+        print("\n🔑 Testing Guest Session Creation...")
+        
+        success, session_data = self.run_test(
+            "Create Guest Session",
+            "POST",
+            "guest/session",
+            200
+        )
+        
+        if success and session_data:
+            # Validate session response structure
+            expected_keys = ['session_id', 'expires_at', 'features_available', 'limitations', 'upgrade_benefits']
+            missing_keys = [key for key in expected_keys if key not in session_data]
+            
+            if not missing_keys:
+                print(f"   ✅ Guest session response contains all required keys: {expected_keys}")
+                
+                # Store session_id for subsequent tests
+                self.test_session_id = session_data.get('session_id')
+                print(f"   🔑 Session ID: {self.test_session_id}")
+                
+                # Validate features available
+                features = session_data.get('features_available', [])
+                expected_features = ['instant_food_logging', 'basic_nutrition_info', 'simple_goal_tracking', 'educational_content']
+                if all(feature in features for feature in expected_features):
+                    print(f"   ✅ All expected features available: {len(features)} features")
+                else:
+                    print(f"   ⚠️  Some expected features missing")
+                
+                return True
+            else:
+                print(f"   ❌ Guest session response missing keys: {missing_keys}")
+                return False
+        
+        return False
+
+    def test_guest_goals_management_flow(self):
+        """Test complete guest goals management flow"""
+        if not hasattr(self, 'test_session_id'):
+            print("❌ No session ID available for testing")
+            return False
+        
+        session_id = self.test_session_id
+        
+        # Test 1: Sync guest goals with backend
+        sync_success = self.test_sync_guest_goals(session_id)
+        
+        # Test 2: Retrieve guest goals
+        retrieve_success = self.test_retrieve_guest_goals(session_id)
+        
+        # Test 3: Update goal progress
+        progress_success = self.test_update_goal_progress(session_id)
+        
+        # Test 4: Get goal analytics
+        analytics_success = self.test_guest_goal_analytics(session_id)
+        
+        return sync_success and retrieve_success and progress_success and analytics_success
+
+    def test_sync_guest_goals(self, session_id):
+        """Test syncing guest goals with backend"""
+        print("\n📝 Testing Guest Goals Sync...")
+        
+        # Sample goals data with different categories and progress levels
+        sample_goals = {
+            "goals": [
+                {
+                    "id": 1,
+                    "title": "Drink 8 glasses of water",
+                    "category": "hydration",
+                    "target": 8,
+                    "unit": "glasses",
+                    "current": 3,
+                    "timeframe": "daily",
+                    "createdAt": datetime.utcnow().isoformat(),
+                    "lastUpdated": datetime.utcnow().isoformat()
+                },
+                {
+                    "id": 2,
+                    "title": "Eat 5 servings of fruits/vegetables",
+                    "category": "nutrition",
+                    "target": 5,
+                    "unit": "servings",
+                    "current": 2,
+                    "timeframe": "daily",
+                    "createdAt": datetime.utcnow().isoformat(),
+                    "lastUpdated": datetime.utcnow().isoformat()
+                },
+                {
+                    "id": 3,
+                    "title": "Take vitamins",
+                    "category": "habits",
+                    "target": 1,
+                    "unit": "dose",
+                    "current": 1,
+                    "timeframe": "daily",
+                    "createdAt": datetime.utcnow().isoformat(),
+                    "lastUpdated": datetime.utcnow().isoformat()
+                }
+            ]
+        }
+        
+        success, sync_response = self.run_test(
+            "Sync Guest Goals",
+            "POST",
+            f"guest/goals/{session_id}",
+            200,
+            data=sample_goals
+        )
+        
+        if success and sync_response:
+            # Validate sync response structure
+            expected_keys = ['success', 'session_id', 'goals_synced', 'expires_at']
+            missing_keys = [key for key in expected_keys if key not in sync_response]
+            
+            if not missing_keys:
+                print(f"   ✅ Goals sync response contains all required keys: {expected_keys}")
+                
+                # Validate sync details
+                goals_synced = sync_response.get('goals_synced', 0)
+                if goals_synced == 3:
+                    print(f"   ✅ All 3 goals synced successfully")
+                    return True
+                else:
+                    print(f"   ❌ Expected 3 goals synced, got {goals_synced}")
+                    return False
+            else:
+                print(f"   ❌ Goals sync response missing keys: {missing_keys}")
+                return False
+        
+        return False
+
+    def test_retrieve_guest_goals(self, session_id):
+        """Test retrieving guest goals for a session"""
+        print("\n📖 Testing Guest Goals Retrieval...")
+        
+        success, goals_response = self.run_test(
+            "Retrieve Guest Goals",
+            "GET",
+            f"guest/goals/{session_id}",
+            200
+        )
+        
+        if success and goals_response:
+            # Validate goals response structure
+            expected_keys = ['success', 'session_id', 'goals']
+            missing_keys = [key for key in expected_keys if key not in goals_response]
+            
+            if not missing_keys:
+                print(f"   ✅ Goals retrieval response contains all required keys: {expected_keys}")
+                
+                # Validate goals data
+                goals = goals_response.get('goals', [])
+                if len(goals) == 3:
+                    print(f"   ✅ Retrieved all 3 synced goals")
+                    
+                    # Validate goal structure
+                    goal = goals[0]
+                    goal_keys = ['id', 'title', 'category', 'target', 'unit', 'current', 'timeframe']
+                    missing_goal_keys = [key for key in goal_keys if key not in goal]
+                    
+                    if not missing_goal_keys:
+                        print(f"   ✅ Goal structure valid")
+                        
+                        # Validate different categories
+                        categories = [g.get('category') for g in goals]
+                        expected_categories = ['hydration', 'nutrition', 'habits']
+                        if all(cat in categories for cat in expected_categories):
+                            print(f"   ✅ All expected categories present: {categories}")
+                            return True
+                        else:
+                            print(f"   ❌ Missing expected categories. Got: {categories}")
+                            return False
+                    else:
+                        print(f"   ❌ Goal structure missing keys: {missing_goal_keys}")
+                        return False
+                else:
+                    print(f"   ❌ Expected 3 goals, got {len(goals)}")
+                    return False
+            else:
+                print(f"   ❌ Goals retrieval response missing keys: {missing_keys}")
+                return False
+        
+        return False
+
+    def test_update_goal_progress(self, session_id):
+        """Test updating progress for a specific goal"""
+        print("\n📈 Testing Goal Progress Update...")
+        
+        # Update progress for goal ID 1 (water intake)
+        progress_update = {
+            "goal_id": 1,
+            "current": 5  # Updated from 3 to 5 glasses
+        }
+        
+        success, progress_response = self.run_test(
+            "Update Goal Progress",
+            "POST",
+            f"guest/goals/{session_id}/progress",
+            200,
+            data=progress_update
+        )
+        
+        if success and progress_response:
+            # Validate progress update response structure
+            expected_keys = ['success', 'goal_id', 'new_current', 'message']
+            missing_keys = [key for key in expected_keys if key not in progress_response]
+            
+            if not missing_keys:
+                print(f"   ✅ Progress update response contains all required keys: {expected_keys}")
+                
+                # Validate update details
+                goal_id = progress_response.get('goal_id')
+                new_current = progress_response.get('new_current')
+                
+                if goal_id == 1 and new_current == 5:
+                    print(f"   ✅ Goal progress updated successfully: Goal {goal_id} now at {new_current}")
+                    return True
+                else:
+                    print(f"   ❌ Progress update mismatch. Expected goal 1 at 5, got goal {goal_id} at {new_current}")
+                    return False
+            else:
+                print(f"   ❌ Progress update response missing keys: {missing_keys}")
+                return False
+        
+        return False
+
+    def test_guest_goal_analytics(self, session_id):
+        """Test getting goal analytics and insights"""
+        print("\n📊 Testing Guest Goal Analytics...")
+        
+        success, analytics_response = self.run_test(
+            "Get Goal Analytics",
+            "GET",
+            f"guest/goals/{session_id}/analytics",
+            200
+        )
+        
+        if success and analytics_response:
+            # Validate analytics response structure
+            expected_keys = ['success', 'session_id', 'analytics']
+            missing_keys = [key for key in expected_keys if key not in analytics_response]
+            
+            if not missing_keys:
+                print(f"   ✅ Analytics response contains all required keys: {expected_keys}")
+                
+                # Validate analytics data structure
+                analytics = analytics_response.get('analytics', {})
+                analytics_keys = ['total_goals', 'completed_goals', 'completion_rate', 'category_breakdown', 'insights', 'motivational_message', 'next_actions']
+                missing_analytics_keys = [key for key in analytics_keys if key not in analytics]
+                
+                if not missing_analytics_keys:
+                    print(f"   ✅ Analytics data contains all required keys: {analytics_keys}")
+                    
+                    # Validate analytics calculations
+                    total_goals = analytics.get('total_goals', 0)
+                    completed_goals = analytics.get('completed_goals', 0)
+                    completion_rate = analytics.get('completion_rate', 0)
+                    
+                    print(f"   📊 Analytics Summary:")
+                    print(f"      Total Goals: {total_goals}")
+                    print(f"      Completed Goals: {completed_goals}")
+                    print(f"      Completion Rate: {completion_rate}%")
+                    
+                    # Validate category breakdown
+                    category_breakdown = analytics.get('category_breakdown', {})
+                    expected_categories = ['hydration', 'nutrition', 'habits']
+                    
+                    if all(cat in category_breakdown for cat in expected_categories):
+                        print(f"   ✅ Category breakdown includes all expected categories")
+                        
+                        # Check if habits category shows as completed (current=1, target=1)
+                        habits_stats = category_breakdown.get('habits', {})
+                        if habits_stats.get('completed', 0) == 1 and habits_stats.get('total', 0) == 1:
+                            print(f"   ✅ Habits category correctly shows as completed")
+                        
+                    else:
+                        print(f"   ❌ Category breakdown missing expected categories")
+                        return False
+                    
+                    # Validate insights and motivational messages
+                    insights = analytics.get('insights', [])
+                    motivational_message = analytics.get('motivational_message', '')
+                    next_actions = analytics.get('next_actions', [])
+                    
+                    if insights and motivational_message and next_actions:
+                        print(f"   ✅ Analytics includes insights ({len(insights)}), motivational message, and next actions ({len(next_actions)})")
+                        print(f"   💬 Sample insight: {insights[0] if insights else 'None'}")
+                        print(f"   🎯 Motivational message: {motivational_message}")
+                        print(f"   📋 Next action: {next_actions[0] if next_actions else 'None'}")
+                        return True
+                    else:
+                        print(f"   ❌ Missing insights, motivational message, or next actions")
+                        return False
+                        
+                else:
+                    print(f"   ❌ Analytics data missing keys: {missing_analytics_keys}")
+                    return False
+            else:
+                print(f"   ❌ Analytics response missing keys: {missing_keys}")
+                return False
+        
+        return False
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
