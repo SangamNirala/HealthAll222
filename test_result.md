@@ -105,6 +105,18 @@
 user_problem_statement: "UI Enhancements: Add 'Previous surgeries or medical procedures' to Patient Health History step, wired to backend previous_surgeries field. Add body-fat visual cue/guide in Physical Metrics step. Show section '✓ Saved' badges in ProgressIndicator for Provider and Family wizards with per-section completion checks."
 
 frontend:
+  - task: "Phase 6: Guest Health Calculator Component"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/GuestHealthCalculator.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "IMPLEMENTED: Comprehensive BMI/Health Calculator for optimized guest experience. Features: BMI calculation with instant results, BMR (Basal Metabolic Rate) calculation, Daily calorie needs based on activity level (5 levels), Health recommendations based on BMI category, BMI reference chart with color-coded categories, Nutrition targets (protein, water needs), Form validation and error handling, Reset functionality, Professional styling with responsive design, Upgrade prompts for conversion optimization. Successfully integrated into guest navigation and dashboard. Testing confirmed: Form accepts all required inputs (age, gender, height, weight, activity), Calculations are mathematically accurate, Results display with proper formatting and health guidance, Reset button clears form completely, Navigation works seamlessly from dashboard."
+
   - task: "Patient Analytics Page"
     implemented: true
     working: false
