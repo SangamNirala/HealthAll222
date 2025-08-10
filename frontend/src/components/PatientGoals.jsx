@@ -73,6 +73,7 @@ const PatientGoals = () => {
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [actionMessage, setActionMessage] = useState('');
   const [newGoal, setNewGoal] = useState({
     title: '',
