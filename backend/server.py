@@ -3553,6 +3553,8 @@ async def export_guest_data(session_id: str, format: str = "json"):
         
         return export_data
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error exporting guest data: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
