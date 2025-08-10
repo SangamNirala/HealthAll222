@@ -1358,7 +1358,8 @@ async def get_patient_analytics(user_id: str):
     
     # Generate AI-powered insights
     try:
-        ai_insights = await get_nutrition_insights(user_data)
+        # ai_insights = await get_nutrition_insights(user_data)
+        ai_insights = {"insights": [], "recommendations": [], "confidence": 0.0}
     except Exception as e:
         logger.error(f"AI insights error: {e}")
         ai_insights = {"insights": [], "recommendations": [], "confidence": 0.0}
