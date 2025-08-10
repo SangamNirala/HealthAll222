@@ -73,11 +73,17 @@ const ROLE_CONFIG = {
       { label: 'Family Members', path: '/family-members', icon: 'User' },
       { label: 'Meal Planning', path: '/family-meals', icon: 'ChefHat' },
       { label: 'Calendar', path: '/family-calendar', icon: 'Calendar' },
-      { label: 'Care Coordination', path: '/family-care', icon: 'Shield' }
+      { label: 'Coordination', path: '/family-coordination', icon: 'Shield' },
+      { label: 'Child Education', path: '/child-nutrition-education', icon: 'BookOpen' },
+      { label: 'Caregiver Tools', path: '/caregiver-tools', icon: 'Heart' },
+      { label: 'Family Goals', path: '/family-goals', icon: 'Target' },
+      { label: 'Multi-Profiles', path: '/multi-profile-management', icon: 'Settings' }
     ],
     quickActions: [
       { label: 'Add Member', icon: 'UserPlus', action: 'addMember' },
-      { label: 'Plan Meals', icon: 'ChefHat', action: 'planMeals' }
+      { label: 'Plan Meals', icon: 'ChefHat', action: 'planMeals' },
+      { label: 'Emergency Info', icon: 'AlertTriangle', action: 'emergencyInfo' },
+      { label: 'Health Check', icon: 'Activity', action: 'healthCheck' }
     ]
   },
   guest: {
