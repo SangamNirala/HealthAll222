@@ -94,6 +94,7 @@ function App() {
             <Route path="/guest-food-log" element={<GuestFoodLog />} />
             <Route path="/guest-calculator" element={<GuestHealthCalculator />} />
             <Route path="/guest-tips" element={<GuestNutritionTips />} />
+            <Route path="/guest-goals" element={<GuestGoals />} />
           </Routes>
         </BrowserRouter>
       </RoleProvider>
