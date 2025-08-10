@@ -717,6 +717,415 @@ async def get_clinical_tools():
         ]
     }
 
+# PHASE 4: Advanced Provider Features
+
+@api_router.get("/provider/patient-queue/{provider_id}")
+async def get_patient_queue(provider_id: str):
+    """Patient Queue Management System"""
+    return {
+        "provider_id": provider_id,
+        "queue_stats": {
+            "total_in_queue": 12,
+            "urgent": 3,
+            "scheduled": 8,
+            "walk_in": 1,
+            "avg_wait_time": "18 minutes"
+        },
+        "priority_queue": [
+            {
+                "id": "urgent-001",
+                "patient_name": "Maria Rodriguez",
+                "condition": "Chest pain",
+                "priority": "urgent",
+                "wait_time": "5 minutes",
+                "room": "ER-3",
+                "vitals": {"bp": "160/95", "hr": "105", "temp": "98.6°F"},
+                "status": "ready_for_provider"
+            },
+            {
+                "id": "urgent-002", 
+                "patient_name": "Robert Chen",
+                "condition": "Diabetic emergency",
+                "priority": "urgent",
+                "wait_time": "12 minutes",
+                "room": "Room 5",
+                "vitals": {"bp": "145/88", "hr": "92", "glucose": "280"},
+                "status": "vitals_taken"
+            }
+        ],
+        "scheduled_queue": [
+            {
+                "id": "sched-001",
+                "patient_name": "Sarah Johnson",
+                "appointment_time": "2:00 PM",
+                "condition": "Routine follow-up",
+                "priority": "routine",
+                "wait_time": "on_time",
+                "room": "Room 2",
+                "status": "checked_in"
+            },
+            {
+                "id": "sched-002",
+                "patient_name": "David Wilson",
+                "appointment_time": "2:30 PM", 
+                "condition": "Medication review",
+                "priority": "routine",
+                "wait_time": "early",
+                "room": "waiting",
+                "status": "waiting"
+            }
+        ],
+        "completed_today": 8,
+        "no_shows": 1
+    }
+
+@api_router.post("/provider/clinical-decision-support")
+async def clinical_decision_support(request: dict):
+    """AI-Powered Clinical Decision Support"""
+    patient_data = request.get("patient_data", {})
+    symptoms = request.get("symptoms", [])
+    history = request.get("history", [])
+    
+    # This would integrate with AI service for real recommendations
+    return {
+        "request_id": f"cds-{uuid.uuid4().hex[:8]}",
+        "patient_id": patient_data.get("id", "unknown"),
+        "ai_recommendations": [
+            {
+                "category": "diagnosis",
+                "confidence": 0.87,
+                "recommendation": "Consider Type 2 Diabetes screening based on symptoms",
+                "evidence": "Patient presents with classic triad: polyuria, polydipsia, and unexplained weight loss",
+                "next_steps": ["Order HbA1c", "Fasting glucose test", "Consider glucose tolerance test"]
+            },
+            {
+                "category": "treatment",
+                "confidence": 0.92,
+                "recommendation": "Lifestyle modifications as first-line intervention",
+                "evidence": "Evidence-based guidelines support lifestyle changes for pre-diabetes prevention",
+                "next_steps": ["Dietary counseling", "Exercise prescription", "Weight management plan"]
+            }
+        ],
+        "drug_interactions": [],
+        "contraindications": [],
+        "clinical_guidelines": [
+            {
+                "guideline": "ADA Standards of Medical Care 2024",
+                "recommendation": "Screen adults ≥45 years for diabetes every 3 years",
+                "relevance": "high"
+            }
+        ],
+        "risk_scores": {
+            "diabetes_risk": 0.73,
+            "cardiovascular_risk": 0.41,
+            "overall_risk": "moderate"
+        }
+    }
+
+@api_router.get("/provider/treatment-outcomes/{provider_id}")
+async def get_treatment_outcomes(provider_id: str, timeframe: str = "30d"):
+    """Treatment Outcome Tracking"""
+    return {
+        "provider_id": provider_id,
+        "timeframe": timeframe,
+        "outcome_summary": {
+            "total_patients_treated": 156,
+            "successful_outcomes": 134,
+            "success_rate": 85.9,
+            "readmission_rate": 4.2,
+            "patient_satisfaction": 4.7
+        },
+        "condition_outcomes": [
+            {
+                "condition": "Type 2 Diabetes",
+                "patients": 45,
+                "improved": 38,
+                "stable": 5,
+                "declined": 2,
+                "avg_hba1c_reduction": 1.2,
+                "target_achievement_rate": 84.4
+            },
+            {
+                "condition": "Hypertension",
+                "patients": 62,
+                "improved": 48,
+                "stable": 12,
+                "declined": 2,
+                "avg_bp_reduction": "15/8 mmHg",
+                "target_achievement_rate": 77.4
+            },
+            {
+                "condition": "Obesity",
+                "patients": 33,
+                "improved": 28,
+                "stable": 4,
+                "declined": 1,
+                "avg_weight_loss": 12.3,
+                "target_achievement_rate": 84.8
+            }
+        ],
+        "trending_metrics": [
+            {
+                "metric": "HbA1c Control",
+                "current": 84.4,
+                "previous": 78.2,
+                "trend": "improving",
+                "change": "+6.2%"
+            },
+            {
+                "metric": "Blood Pressure Control",
+                "current": 77.4,
+                "previous": 74.1,
+                "trend": "improving", 
+                "change": "+3.3%"
+            }
+        ]
+    }
+
+@api_router.get("/provider/population-health/{provider_id}")
+async def get_population_health(provider_id: str):
+    """Population Health Analytics"""
+    return {
+        "provider_id": provider_id,
+        "population_overview": {
+            "total_population": 2847,
+            "active_patients": 2156,
+            "high_risk_patients": 284,
+            "chronic_conditions_prevalence": 45.2
+        },
+        "demographic_breakdown": [
+            {"age_group": "18-35", "count": 542, "percentage": 19.0, "top_conditions": ["Anxiety", "Depression"]},
+            {"age_group": "36-50", "count": 896, "percentage": 31.5, "top_conditions": ["Hypertension", "Diabetes"]},
+            {"age_group": "51-65", "count": 758, "percentage": 26.6, "top_conditions": ["Diabetes", "Heart Disease"]},
+            {"age_group": "65+", "count": 651, "percentage": 22.9, "top_conditions": ["Heart Disease", "Arthritis"]}
+        ],
+        "condition_prevalence": [
+            {"condition": "Hypertension", "count": 567, "prevalence": 19.9, "trend": "stable"},
+            {"condition": "Type 2 Diabetes", "count": 423, "prevalence": 14.9, "trend": "increasing"},
+            {"condition": "Obesity", "count": 398, "prevalence": 14.0, "trend": "increasing"},
+            {"condition": "Heart Disease", "count": 278, "prevalence": 9.8, "trend": "stable"},
+            {"condition": "Depression", "count": 234, "prevalence": 8.2, "trend": "increasing"}
+        ],
+        "risk_stratification": {
+            "low_risk": {"count": 1698, "percentage": 59.7},
+            "medium_risk": {"count": 865, "percentage": 30.4},
+            "high_risk": {"count": 284, "percentage": 9.9}
+        },
+        "quality_measures": [
+            {
+                "measure": "Diabetes HbA1c Control",
+                "target": ">80%",
+                "current": "84.2%",
+                "status": "meeting_target"
+            },
+            {
+                "measure": "Blood Pressure Control",
+                "target": ">75%", 
+                "current": "77.8%",
+                "status": "meeting_target"
+            },
+            {
+                "measure": "Preventive Screening",
+                "target": ">90%",
+                "current": "67.3%",
+                "status": "below_target"
+            }
+        ],
+        "intervention_opportunities": [
+            {
+                "intervention": "Diabetes Prevention Program",
+                "eligible_patients": 156,
+                "potential_impact": "23% risk reduction",
+                "priority": "high"
+            },
+            {
+                "intervention": "Hypertension Management",
+                "eligible_patients": 89,
+                "potential_impact": "15% cardiovascular risk reduction",
+                "priority": "medium"
+            }
+        ]
+    }
+
+@api_router.post("/provider/evidence-recommendations")
+async def get_evidence_recommendations(request: dict):
+    """AI-Powered Evidence-Based Recommendations"""
+    condition = request.get("condition", "")
+    patient_profile = request.get("patient_profile", {})
+    clinical_context = request.get("clinical_context", "")
+    
+    # This would integrate with AI service for real evidence-based recommendations
+    return {
+        "request_id": f"ebr-{uuid.uuid4().hex[:8]}",
+        "condition": condition,
+        "evidence_level": "high",
+        "recommendations": [
+            {
+                "category": "first_line_treatment",
+                "recommendation": "Metformin monotherapy",
+                "evidence_level": "A",
+                "source": "ADA 2024 Standards of Care",
+                "dosing": "Start 500mg BID, titrate to 1000mg BID",
+                "monitoring": "Monitor renal function, B12 levels",
+                "contraindications": ["eGFR <30", "Acute heart failure"],
+                "confidence": 0.94
+            },
+            {
+                "category": "lifestyle_intervention",
+                "recommendation": "Structured lifestyle program",
+                "evidence_level": "A",
+                "source": "Diabetes Prevention Program",
+                "details": "7% weight loss goal, 150 min/week moderate exercise",
+                "expected_outcome": "58% diabetes risk reduction",
+                "confidence": 0.96
+            }
+        ],
+        "clinical_studies": [
+            {
+                "study": "UKPDS",
+                "year": "1998",
+                "finding": "Intensive glucose control reduces microvascular complications",
+                "relevance": "high",
+                "patient_count": 3867
+            }
+        ],
+        "contraindications": [],
+        "drug_interactions": [],
+        "patient_specific_factors": [
+            {
+                "factor": "Age > 65",
+                "implication": "Consider lower starting dose",
+                "adjustment": "Start metformin 250mg BID"
+            }
+        ],
+        "follow_up_recommendations": [
+            "Reassess in 3 months",
+            "Monitor HbA1c quarterly",
+            "Annual eye exam",
+            "Quarterly foot exam"
+        ]
+    }
+
+@api_router.get("/provider/continuing-education/{provider_id}")
+async def get_continuing_education(provider_id: str):
+    """Professional Continuing Education Portal"""
+    return {
+        "provider_id": provider_id,
+        "education_summary": {
+            "total_credits_earned": 32.5,
+            "credits_required": 50.0,
+            "progress_percentage": 65.0,
+            "courses_completed": 8,
+            "courses_in_progress": 3,
+            "deadline": "2024-12-31"
+        },
+        "featured_courses": [
+            {
+                "id": "course-001",
+                "title": "Advanced Diabetes Management 2024",
+                "provider": "American Diabetes Association", 
+                "credits": 4.0,
+                "duration": "4 hours",
+                "format": "Online",
+                "difficulty": "Intermediate",
+                "rating": 4.8,
+                "enrolled": False,
+                "cost": "Free",
+                "description": "Latest evidence-based approaches to diabetes care",
+                "learning_objectives": [
+                    "Apply 2024 ADA guidelines",
+                    "Optimize medication regimens",
+                    "Implement technology solutions"
+                ]
+            },
+            {
+                "id": "course-002",
+                "title": "Population Health Strategies",
+                "provider": "CDC",
+                "credits": 3.5,
+                "duration": "3.5 hours",
+                "format": "Webinar",
+                "difficulty": "Advanced",
+                "rating": 4.6,
+                "enrolled": True,
+                "progress": 60,
+                "cost": "Free",
+                "description": "Community-based interventions for chronic disease"
+            }
+        ],
+        "my_courses": [
+            {
+                "id": "course-003",
+                "title": "Nutrition Counseling Essentials",
+                "status": "in_progress",
+                "progress": 75,
+                "credits": 2.5,
+                "due_date": "2024-02-15",
+                "last_accessed": "2024-01-10"
+            },
+            {
+                "id": "course-004", 
+                "title": "Clinical Documentation",
+                "status": "completed",
+                "progress": 100,
+                "credits": 3.0,
+                "completed_date": "2023-12-20",
+                "certificate_url": "/certificates/course-004.pdf"
+            }
+        ],
+        "categories": [
+            {"id": "diabetes", "name": "Diabetes Care", "course_count": 15},
+            {"id": "cardiology", "name": "Cardiovascular Health", "course_count": 12},
+            {"id": "nutrition", "name": "Nutrition & Dietetics", "course_count": 18},
+            {"id": "mental_health", "name": "Mental Health", "course_count": 9},
+            {"id": "technology", "name": "Health Technology", "course_count": 7}
+        ],
+        "upcoming_deadlines": [
+            {"course": "Nutrition Counseling Essentials", "due_date": "2024-02-15", "days_left": 6},
+            {"course": "Annual CME Requirement", "due_date": "2024-12-31", "days_left": 330}
+        ]
+    }
+
+@api_router.post("/provider/courses/{course_id}/enroll")
+async def enroll_in_course(course_id: str, provider_id: str = Body(...)):
+    """Enroll in a continuing education course"""
+    return {
+        "course_id": course_id,
+        "provider_id": provider_id,
+        "enrollment_status": "success",
+        "message": "Successfully enrolled in course",
+        "access_url": f"/courses/{course_id}/learn",
+        "enrollment_date": "2024-01-15"
+    }
+
+@api_router.get("/provider/certificates/{provider_id}")
+async def get_certificates(provider_id: str):
+    """Get earned certificates"""
+    return {
+        "provider_id": provider_id,
+        "certificates": [
+            {
+                "id": "cert-001",
+                "course_title": "Advanced Diabetes Management",
+                "credits": 4.0,
+                "completed_date": "2023-11-15",
+                "certificate_number": "ADM-2023-001",
+                "download_url": "/certificates/cert-001.pdf",
+                "verification_code": "ADM4B7X9"
+            },
+            {
+                "id": "cert-002",
+                "course_title": "Clinical Documentation", 
+                "credits": 3.0,
+                "completed_date": "2023-12-20",
+                "certificate_number": "CD-2023-002",
+                "download_url": "/certificates/cert-002.pdf",
+                "verification_code": "CD8K2M5P"
+            }
+        ],
+        "total_credits": 32.5
+    }
+
 # Family-specific endpoints
 @api_router.get("/family/dashboard/{user_id}")
 async def get_family_dashboard(user_id: str):
