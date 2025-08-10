@@ -34,6 +34,14 @@ import GuestNutritionTips from "./components/GuestNutritionTips";
 import FamilyMembers from "./components/FamilyMembers";
 import FamilyMeals from "./components/FamilyMeals";
 
+// Phase 5: Advanced Family Features
+import FamilyCoordination from "./components/FamilyCoordination";
+import FamilyCalendar from "./components/FamilyCalendar";
+import ChildNutritionEducation from "./components/ChildNutritionEducation";
+import CaregiverTools from "./components/CaregiverTools";
+import FamilyGoalsCoordination from "./components/FamilyGoalsCoordination";
+import MultiProfileManagement from "./components/MultiProfileManagement";
+
 function App() {
   return (
     <div className="App">
