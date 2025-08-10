@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 import { 
-  Activity, Apple, Target, TrendingUp, Camera, 
+  Activity, Apple, Target, TrendingUp, 
   Scale, Heart, Droplets, Plus, Clock, Award, ChevronRight 
 } from 'lucide-react';
 
