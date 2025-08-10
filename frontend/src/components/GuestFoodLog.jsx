@@ -5,42 +5,204 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
-import { Search, Plus, Clock, Trash2, Target, Apple } from 'lucide-react';
+import { 
+  Search, Plus, Clock, Trash2, Target, Apple, 
+  Lightbulb, Heart, CheckCircle, Sparkles, 
+  TrendingUp, Info, AlertCircle
+} from 'lucide-react';
 
 const GuestFoodLog = () => {
   const { switchRole } = useRole();
   const [searchQuery, setSearchQuery] = useState('');
-  const [loggedFoods, setLoggedFoods] = useState([
-    {
-      id: 1,
-      name: 'Toast with avocado',
-      time: '8:30 AM',
-      calories: 320,
-      meal: 'Breakfast'
-    }
-  ]);
-
+  const [loggedFoods, setLoggedFoods] = useState([]);
   const [newFood, setNewFood] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [isLogging, setIsLogging] = useState(false);
+  const [sessionId, setSessionId] = useState('');
+  const [sessionTotals, setSessionTotals] = useState({
+    today_calories: 0,
+    meals_logged: 0,
+    session_time: '0 minutes'
+  });
+  const [lastFeedback, setLastFeedback] = useState(null);
+  const [learningMoment, setLearningMoment] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
 
-  // Switch to guest role when component mounts
+  // Initialize guest session
   useEffect(() => {
     switchRole('guest');
+    initializeGuestSession();
   }, [switchRole]);
 
-  const handleAddFood = () => {
-    if (newFood.trim()) {
-      const newEntry = {
-        id: loggedFoods.length + 1,
-        name: newFood,
+  const initializeGuestSession = async () => {
+    try {
+      // Check if session exists in localStorage
+      let guestSession = localStorage.getItem('guest_session_id');
+      
+      if (!guestSession) {
+        // Create new session via API
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/guest/session`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const sessionData = await response.json();
+          guestSession = sessionData.session_id;
+          localStorage.setItem('guest_session_id', guestSession);
+          localStorage.setItem('guest_session_expires', sessionData.expires_at);
+        } else {
+          // Fallback session ID
+          guestSession = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
+          localStorage.setItem('guest_session_id', guestSession);
+        }
+      }
+      
+      setSessionId(guestSession);
+      
+      // Load existing logged foods from localStorage for this session
+      const savedFoods = localStorage.getItem(`guest_foods_${guestSession}`);
+      if (savedFoods) {
+        const foods = JSON.parse(savedFoods);
+        setLoggedFoods(foods);
+        updateSessionTotals(foods);
+      }
+    } catch (error) {
+      console.error('Failed to initialize guest session:', error);
+      // Fallback session ID
+      const fallbackSession = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
+      setSessionId(fallbackSession);
+      localStorage.setItem('guest_session_id', fallbackSession);
+    }
+  };
+
+  const updateSessionTotals = (foods) => {
+    const totalCalories = foods.reduce((sum, food) => sum + (food.calories || 0), 0);
+    setSessionTotals({
+      today_calories: totalCalories,
+      meals_logged: foods.length,
+      session_time: calculateSessionTime()
+    });
+  };
+
+  const calculateSessionTime = () => {
+    const sessionStart = localStorage.getItem('guest_session_start');
+    if (sessionStart) {
+      const startTime = new Date(sessionStart);
+      const currentTime = new Date();
+      const diffMinutes = Math.floor((currentTime - startTime) / (1000 * 60));
+      return `${diffMinutes} minutes`;
+    } else {
+      localStorage.setItem('guest_session_start', new Date().toISOString());
+      return '0 minutes';
+    }
+  };
+
+  const handleAddFood = async () => {
+    if (!newFood.trim()) return;
+
+    setIsLogging(true);
+    
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/guest/instant-food-log`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          food_name: newFood.trim(),
+          session_id: sessionId,
+          calories: estimateCalories(newFood), // Basic estimation
+          meal_time: getMealTime(),
+          logged_at: new Date().toISOString()
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        
+        // Create new food entry with API response data
+        const newEntry = {
+          id: Date.now(),
+          name: result.food_recognized,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          calories: result.estimated_nutrition.calories,
+          protein: result.estimated_nutrition.protein,
+          carbs: result.estimated_nutrition.carbs,
+          fat: result.estimated_nutrition.fat,
+          fiber: result.estimated_nutrition.fiber,
+          meal: getMealTime(),
+          api_feedback: result.instant_feedback,
+          suggestions: result.simple_suggestions
+        };
+
+        // Update state
+        const updatedFoods = [...loggedFoods, newEntry];
+        setLoggedFoods(updatedFoods);
+        setLastFeedback(result.instant_feedback);
+        setLearningMoment(result.learning_moment);
+        setSuggestions(result.simple_suggestions);
+        
+        // Update session totals from API response
+        if (result.session_totals) {
+          setSessionTotals(result.session_totals);
+        } else {
+          updateSessionTotals(updatedFoods);
+        }
+
+        // Save to localStorage
+        localStorage.setItem(`guest_foods_${sessionId}`, JSON.stringify(updatedFoods));
+        
+        // Reset form
+        setNewFood('');
+        setShowAddForm(false);
+        
+        // Show success feedback briefly
+        setTimeout(() => setLastFeedback(null), 10000); // Clear after 10 seconds
+        
+      } else {
+        throw new Error('Failed to log food');
+      }
+    } catch (error) {
+      console.error('Error logging food:', error);
+      
+      // Fallback to local storage if API fails
+      const fallbackEntry = {
+        id: Date.now(),
+        name: newFood.trim(),
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        calories: Math.floor(Math.random() * 300) + 100, // Random for demo
-        meal: getMealTime()
+        calories: estimateCalories(newFood),
+        meal: getMealTime(),
+        api_feedback: ['Food logged successfully! Keep up the great work.'],
+        suggestions: ['Try adding some vegetables to make it even healthier!']
       };
-      setLoggedFoods([...loggedFoods, newEntry]);
+      
+      const updatedFoods = [...loggedFoods, fallbackEntry];
+      setLoggedFoods(updatedFoods);
+      updateSessionTotals(updatedFoods);
+      localStorage.setItem(`guest_foods_${sessionId}`, JSON.stringify(updatedFoods));
+      
       setNewFood('');
       setShowAddForm(false);
+      setLastFeedback(['Food logged successfully! (Offline mode)']);
+    } finally {
+      setIsLogging(false);
     }
+  };
+
+  const estimateCalories = (foodName) => {
+    // Simple calorie estimation based on food keywords
+    const foodLower = foodName.toLowerCase();
+    if (foodLower.includes('salad') || foodLower.includes('vegetable')) return 50;
+    if (foodLower.includes('fruit') || foodLower.includes('apple') || foodLower.includes('banana')) return 80;
+    if (foodLower.includes('chicken') || foodLower.includes('fish')) return 200;
+    if (foodLower.includes('rice') || foodLower.includes('pasta')) return 220;
+    if (foodLower.includes('bread') || foodLower.includes('toast')) return 150;
+    if (foodLower.includes('egg')) return 70;
+    if (foodLower.includes('yogurt')) return 100;
+    return 180; // Default estimate
   };
 
   const getMealTime = () => {
@@ -52,11 +214,14 @@ const GuestFoodLog = () => {
   };
 
   const removeFood = (id) => {
-    setLoggedFoods(loggedFoods.filter(food => food.id !== id));
+    const updatedFoods = loggedFoods.filter(food => food.id !== id);
+    setLoggedFoods(updatedFoods);
+    updateSessionTotals(updatedFoods);
+    localStorage.setItem(`guest_foods_${sessionId}`, JSON.stringify(updatedFoods));
   };
 
   const getTotalCalories = () => {
-    return loggedFoods.reduce((total, food) => total + food.calories, 0);
+    return sessionTotals.today_calories || loggedFoods.reduce((total, food) => total + (food.calories || 0), 0);
   };
 
   const getMealColor = (meal) => {
@@ -68,6 +233,11 @@ const GuestFoodLog = () => {
     }
   };
 
+  const handleQuickAdd = async (foodName) => {
+    setNewFood(foodName);
+    setShowAddForm(true);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-violet-100">
       <SmartNavigation />
@@ -75,9 +245,43 @@ const GuestFoodLog = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Quick Food Log</h1>
-          <p className="text-gray-600">Simple food tracking to get started with healthy habits</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Smart Food Log</h1>
+          <p className="text-gray-600">Instant food tracking with AI-powered feedback and insights</p>
         </div>
+
+        {/* Instant Feedback Section */}
+        {lastFeedback && (
+          <Card className="mb-6 border-2 border-green-200 bg-green-50">
+            <CardContent className="pt-6">
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="w-6 h-6 text-green-600 mt-1 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-green-900 mb-2">Instant Feedback</h3>
+                  <div className="space-y-1">
+                    {lastFeedback.map((feedback, index) => (
+                      <p key={index} className="text-sm text-green-800">{feedback}</p>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Learning Moment */}
+        {learningMoment && (
+          <Card className="mb-6 border-2 border-blue-200 bg-blue-50">
+            <CardContent className="pt-6">
+              <div className="flex items-start space-x-3">
+                <Lightbulb className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold text-blue-900 mb-1">{learningMoment.tip}</h3>
+                  <p className="text-sm text-blue-800">{learningMoment.content}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -102,7 +306,7 @@ const GuestFoodLog = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{loggedFoods.length}</div>
+              <div className="text-2xl font-bold text-green-600">{sessionTotals.meals_logged}</div>
               <p className="text-xs text-gray-500">entries today</p>
             </CardContent>
           </Card>
@@ -111,12 +315,12 @@ const GuestFoodLog = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-gray-600 flex items-center">
                 <Target className="w-4 h-4 mr-2 text-orange-600" />
-                Daily Goal
+                Session Time
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">2000</div>
-              <p className="text-xs text-gray-500">calories target</p>
+              <div className="text-lg font-bold text-orange-600">{sessionTotals.session_time}</div>
+              <p className="text-xs text-gray-500">active tracking</p>
             </CardContent>
           </Card>
         </div>
@@ -148,12 +352,28 @@ const GuestFoodLog = () => {
                       placeholder="What did you eat?"
                       value={newFood}
                       onChange={(e) => setNewFood(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleAddFood()}
+                      disabled={isLogging}
                     />
                     <div className="flex space-x-2">
-                      <Button onClick={handleAddFood} className="bg-purple-600 hover:bg-purple-700">
-                        Add Food
+                      <Button 
+                        onClick={handleAddFood} 
+                        disabled={isLogging || !newFood.trim()}
+                        className="bg-purple-600 hover:bg-purple-700"
+                      >
+                        {isLogging ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                            Logging...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Log Food
+                          </>
+                        )}
                       </Button>
-                      <Button variant="outline" onClick={() => setShowAddForm(false)}>
+                      <Button variant="outline" onClick={() => setShowAddForm(false)} disabled={isLogging}>
                         Cancel
                       </Button>
                     </div>
@@ -179,11 +399,9 @@ const GuestFoodLog = () => {
                         key={food}
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          setNewFood(food);
-                          setShowAddForm(true);
-                        }}
-                        className="text-xs justify-start"
+                        onClick={() => handleQuickAdd(food)}
+                        className="text-xs justify-start hover:bg-purple-50"
+                        disabled={isLogging}
                       >
                         {food}
                       </Button>
@@ -192,6 +410,28 @@ const GuestFoodLog = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Suggestions Card */}
+            {suggestions.length > 0 && (
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-sm">
+                    <TrendingUp className="w-4 h-4 mr-2 text-green-600" />
+                    Smart Suggestions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {suggestions.map((suggestion, index) => (
+                      <div key={index} className="flex items-start text-xs">
+                        <Info className="w-3 h-3 text-blue-500 mr-2 mt-0.5 flex-shrink-0" />
+                        <span className="text-gray-600">{suggestion}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Food Log Entries */}
@@ -213,7 +453,7 @@ const GuestFoodLog = () => {
                   <div className="text-center py-12">
                     <Apple className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                     <div className="text-gray-400 mb-2">No food logged yet</div>
-                    <p className="text-sm text-gray-500">Start by adding your first meal!</p>
+                    <p className="text-sm text-gray-500">Start by adding your first meal to get instant feedback!</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -234,12 +474,36 @@ const GuestFoodLog = () => {
                           </Button>
                         </div>
                         
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between mb-3">
                           <h3 className="font-semibold text-gray-900">{food.name}</h3>
                           <div className="text-lg font-bold text-purple-600">
                             {food.calories} <span className="text-sm text-gray-500">cal</span>
                           </div>
                         </div>
+
+                        {/* Nutrition breakdown if available */}
+                        {food.protein && (
+                          <div className="grid grid-cols-4 gap-2 text-xs text-gray-600 mb-3">
+                            <div>Protein: {food.protein}g</div>
+                            <div>Carbs: {food.carbs}g</div>
+                            <div>Fat: {food.fat}g</div>
+                            <div>Fiber: {food.fiber}g</div>
+                          </div>
+                        )}
+
+                        {/* API Feedback for this specific food */}
+                        {food.api_feedback && (
+                          <div className="mt-3 p-3 bg-green-50 rounded-lg">
+                            <div className="flex items-start space-x-2">
+                              <Heart className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                              <div className="space-y-1">
+                                {food.api_feedback.slice(0, 2).map((feedback, index) => (
+                                  <p key={index} className="text-xs text-green-800">{feedback}</p>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
