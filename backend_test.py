@@ -2551,6 +2551,10 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Phase 5 Comprehensive Family Features...")
         self.test_phase5_family_features()
 
+        # Test Guest Food Log API Integration (SPECIFIC REQUEST)
+        print("\n📋 Testing Guest Food Log API Integration...")
+        self.test_guest_food_log_api_integration()
+
         # Print final results
         print("\n" + "=" * 60)
         print(f"📊 FINAL RESULTS")
