@@ -3408,6 +3408,8 @@ async def export_provider_data(user_id: str, format: str = "json"):
         
         return export_data
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error exporting provider data: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
