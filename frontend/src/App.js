@@ -66,6 +66,7 @@ function App() {
             <Route path="/provider-patients" element={<ProviderPatients />} />
             <Route path="/provider-tools" element={<ProviderTools />} />
             <Route path="/provider-analytics" element={<ProviderAnalytics />} />
+            <Route path="/provider-education" element={<ProviderEducation />} />
             
             {/* Family Navigation Routes */}
             <Route path="/family-members" element={<FamilyMembers />} />
