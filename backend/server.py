@@ -11,6 +11,9 @@ import uuid
 from datetime import datetime
 from enum import Enum
 
+# Import AI services
+from ai_services import get_nutrition_insights, get_smart_food_suggestions, get_health_correlations, get_clinical_insights
+
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
