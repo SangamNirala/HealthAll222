@@ -26,6 +26,10 @@ import ProviderAnalytics from "./components/ProviderAnalytics";
 import GuestFoodLog from "./components/GuestFoodLog";
 import GuestNutritionTips from "./components/GuestNutritionTips";
 
+// Family navigation pages
+import FamilyMembers from "./components/FamilyMembers";
+import FamilyMeals from "./components/FamilyMeals";
+
 function App() {
   return (
     <div className="App">
