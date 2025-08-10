@@ -29,7 +29,7 @@ const ROLE_CONFIG = {
       { label: 'Goals', path: '/patient-goals', icon: 'Target' },
       { label: 'Analytics', path: '/patient-analytics', icon: 'BarChart3' },
       { label: 'Medications', path: '/patient-medications', icon: 'Pill' },
-      { label: 'Health Timeline', path: '/patient-timeline', icon: 'Timeline' }
+      { label: 'Health Timeline', path: '/patient-timeline', icon: 'Calendar' }
     ],
     quickActions: [
       { label: 'Quick Log', icon: 'Plus', action: 'quickLog' },
