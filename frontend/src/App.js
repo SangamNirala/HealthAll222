@@ -33,46 +33,46 @@ import FamilyMeals from "./components/FamilyMeals";
 
 function App() {
   return (
-    &lt;div className="App"&gt;
-      &lt;RoleProvider&gt;
-        &lt;BrowserRouter&gt;
-          &lt;Routes&gt;
-            &lt;Route path="/" element={&lt;RoleSelection /&gt;} /&gt;
+    <div className="App">
+      <RoleProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<RoleSelection />} />
             
             {/* Dashboard Routes */}
-            &lt;Route path="/patient-dashboard" element={&lt;PatientDashboard /&gt;} /&gt;
-            &lt;Route path="/provider-dashboard" element={&lt;ProviderDashboard /&gt;} /&gt;
-            &lt;Route path="/family-dashboard" element={&lt;FamilyDashboard /&gt;} /&gt;
-            &lt;Route path="/guest-dashboard" element={&lt;GuestDashboard /&gt;} /&gt;
+            <Route path="/patient-dashboard" element={<PatientDashboard />} />
+            <Route path="/provider-dashboard" element={<ProviderDashboard />} />
+            <Route path="/family-dashboard" element={<FamilyDashboard />} />
+            <Route path="/guest-dashboard" element={<GuestDashboard />} />
             
             {/* Profile Routes */}
-            &lt;Route path="/patient-profile" element={&lt;PatientProfileWizard /&gt;} /&gt;
-            &lt;Route path="/provider-profile" element={&lt;ProviderProfileWizard /&gt;} /&gt;
-            &lt;Route path="/family-profile" element={&lt;FamilyProfileWizard /&gt;} /&gt;
-            &lt;Route path="/guest-setup" element={&lt;GuestProfileSetup /&gt;} /&gt;
+            <Route path="/patient-profile" element={<PatientProfileWizard />} />
+            <Route path="/provider-profile" element={<ProviderProfileWizard />} />
+            <Route path="/family-profile" element={<FamilyProfileWizard />} />
+            <Route path="/guest-setup" element={<GuestProfileSetup />} />
             
             {/* Patient Navigation Routes */}
-            &lt;Route path="/patient-food-log" element={&lt;PatientFoodLog /&gt;} /&gt;
-            &lt;Route path="/patient-metrics" element={&lt;PatientHealthMetrics /&gt;} /&gt;
-            &lt;Route path="/patient-goals" element={&lt;PatientGoals /&gt;} /&gt;
-            &lt;Route path="/patient-analytics" element={&lt;PatientAnalytics /&gt;} /&gt;
+            <Route path="/patient-food-log" element={<PatientFoodLog />} />
+            <Route path="/patient-metrics" element={<PatientHealthMetrics />} />
+            <Route path="/patient-goals" element={<PatientGoals />} />
+            <Route path="/patient-analytics" element={<PatientAnalytics />} />
             
             {/* Provider Navigation Routes */}
-            &lt;Route path="/provider-patients" element={&lt;ProviderPatients /&gt;} /&gt;
-            &lt;Route path="/provider-tools" element={&lt;ProviderTools /&gt;} /&gt;
-            &lt;Route path="/provider-analytics" element={&lt;ProviderAnalytics /&gt;} /&gt;
+            <Route path="/provider-patients" element={<ProviderPatients />} />
+            <Route path="/provider-tools" element={<ProviderTools />} />
+            <Route path="/provider-analytics" element={<ProviderAnalytics />} />
             
             {/* Family Navigation Routes */}
-            &lt;Route path="/family-members" element={&lt;FamilyMembers /&gt;} /&gt;
-            &lt;Route path="/family-meals" element={&lt;FamilyMeals /&gt;} /&gt;
+            <Route path="/family-members" element={<FamilyMembers />} />
+            <Route path="/family-meals" element={<FamilyMeals />} />
             
             {/* Guest Navigation Routes */}
-            &lt;Route path="/guest-food-log" element={&lt;GuestFoodLog /&gt;} /&gt;
-            &lt;Route path="/guest-tips" element={&lt;GuestNutritionTips /&gt;} /&gt;
-          &lt;/Routes&gt;
-        &lt;/BrowserRouter&gt;
-      &lt;/RoleProvider&gt;
-    &lt;/div&gt;
+            <Route path="/guest-food-log" element={<GuestFoodLog />} />
+            <Route path="/guest-tips" element={<GuestNutritionTips />} />
+          </Routes>
+        </BrowserRouter>
+      </RoleProvider>
+    </div>
   );
 }
 
