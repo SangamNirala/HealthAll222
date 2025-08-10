@@ -3551,6 +3551,9 @@ async def export_guest_data(session_id: str, format: str = "json"):
         logger.error(f"Error exporting guest data: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
 
+# Include the router in the main app (after all endpoints are defined)
+app.include_router(api_router)
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
