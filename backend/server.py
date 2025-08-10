@@ -1448,7 +1448,8 @@ async def get_smart_food_suggestions(user_id: str):
     
     # Get AI-powered food suggestions
     try:
-        ai_suggestions = await get_smart_food_suggestions(user_profile, current_intake)
+        # ai_suggestions = await get_smart_food_suggestions(user_profile, current_intake)
+        ai_suggestions = []
     except Exception as e:
         logger.error(f"AI food suggestions error: {e}")
         ai_suggestions = []
