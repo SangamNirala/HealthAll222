@@ -29,6 +29,7 @@ import ProviderEducation from "./components/ProviderEducation";
 // Guest navigation pages
 import GuestFoodLog from "./components/GuestFoodLog";
 import GuestNutritionTips from "./components/GuestNutritionTips";
+import GuestHealthCalculator from "./components/GuestHealthCalculator";
 
 // Family navigation pages
 import FamilyMembers from "./components/FamilyMembers";
