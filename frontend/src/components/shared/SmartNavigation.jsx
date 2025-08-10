@@ -222,10 +222,10 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
             <Button
               variant="ghost"
               onClick={() => navigate('/')}
-              className={themeClasses.hover}
+              className={`${themeClasses.hover} ${isMobile ? 'p-2' : ''}`}
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
-              <span className="hidden sm:inline">Home</span>
+              {!isMobile && <span>Home</span>}
             </Button>
             
             <div className="h-6 w-px bg-gray-300" />
@@ -235,34 +235,41 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
               <div className={`bg-gradient-to-r ${themeClasses.gradient} rounded-xl p-2`}>
                 <Home className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-gray-900 hidden md:block">
-                {roleConfig.title}
-              </h1>
+              {!isMobile && (
+                <h1 className="text-xl font-bold text-gray-900 hidden md:block">
+                  {roleConfig.title}
+                </h1>
+              )}
             </div>
 
             {/* Desktop Navigation Items */}
             <div className="hidden lg:flex items-center space-x-1 ml-8">
-              {roleConfig.navigationItems.slice(0, 4).map((item) => (
+              {roleConfig.navigationItems.slice(0, isMobile ? 2 : 4).map((item) => (
                 <NavigationItem key={item.path} item={item} />
               ))}
               
               {/* More menu for additional items */}
-              {roleConfig.navigationItems.length > 4 && (
+              {roleConfig.navigationItems.length > (isMobile ? 2 : 4) && (
                 <div className="relative" ref={moreMenuRef}>
                   <Button 
                     variant="ghost" 
                     className={themeClasses.hover}
                     onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
                   >
-                    More
-                    <ChevronDown className="w-4 h-4 ml-1" />
+                    <MoreHorizontal className="w-4 h-4" />
+                    {!isMobile && (
+                      <>
+                        <span className="ml-1">More</span>
+                        <ChevronDown className="w-4 h-4 ml-1" />
+                      </>
+                    )}
                   </Button>
                   
                   {/* More dropdown menu */}
                   {isMoreMenuOpen && (
-                    <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                    <div className={`absolute top-full ${isMobile ? 'right-0' : 'left-0'} mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50`}>
                       <div className="py-2">
-                        {roleConfig.navigationItems.slice(4).map((item) => (
+                        {roleConfig.navigationItems.slice(isMobile ? 2 : 4).map((item) => (
                           <button
                             key={item.path}
                             onClick={() => {
@@ -284,37 +291,39 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
           </div>
 
           {/* Right Section - Role Switcher and Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             {/* Role Badge and Switcher */}
             {showRoleSwitcher && (
               <div className="flex items-center space-x-2">
                 <Badge 
                   variant="secondary" 
-                  className={`bg-${theme.primary}-100 text-${theme.primary}-800 cursor-pointer hover:bg-${theme.primary}-200`}
+                  className={`bg-${theme.primary}-100 text-${theme.primary}-800 cursor-pointer hover:bg-${theme.primary}-200 ${isMobile ? 'text-xs px-2' : ''}`}
                   onClick={() => setIsRoleSwitcherOpen(true)}
                 >
-                  {roleConfig.name} Mode
+                  {isMobile ? roleConfig.name : `${roleConfig.name} Mode`}
                   <ChevronDown className="w-3 h-3 ml-1" />
                 </Badge>
               </div>
             )}
 
-            {/* Quick Actions */}
-            <div className="hidden md:flex items-center space-x-2">
-              {roleConfig.quickActions.slice(0, 1).map((action, index) => (
-                <QuickActionButton key={index} action={action} />
-              ))}
-              
-              {/* Export Data Button */}
-              <Button
-                size="sm"
-                onClick={() => setShowExportModal(true)}
-                className={`bg-gradient-to-r ${themeClasses.gradient} text-white hover:opacity-90`}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
-            </div>
+            {/* Quick Actions - Responsive */}
+            {!isMobile && (
+              <div className="hidden md:flex items-center space-x-2">
+                {roleConfig.quickActions.slice(0, 1).map((action, index) => (
+                  <QuickActionButton key={index} action={action} />
+                ))}
+                
+                {/* Export Data Button */}
+                <Button
+                  size="sm"
+                  onClick={() => setShowExportModal(true)}
+                  className={`bg-gradient-to-r ${themeClasses.gradient} text-white hover:opacity-90`}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+              </div>
+            )}
 
             {/* Mobile Menu Button */}
             <Button
@@ -332,7 +341,7 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
         </div>
 
         {/* Breadcrumbs */}
-        {breadcrumbs && (
+        {breadcrumbs && !isMobile && (
           <div className="pb-4 pt-2">
             {breadcrumbs}
           </div>
