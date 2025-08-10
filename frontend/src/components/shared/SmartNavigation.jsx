@@ -355,26 +355,33 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
             {/* Navigation Items */}
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Navigation</h3>
-              {roleConfig.navigationItems.map((item) => (
-                <NavigationItem key={item.path} item={item} isMobile />
-              ))}
+              <div className="grid grid-cols-2 gap-2">
+                {roleConfig.navigationItems.map((item) => (
+                  <NavigationItem key={item.path} item={item} isMobile />
+                ))}
+              </div>
             </div>
             
             {/* Quick Actions */}
             <div className="space-y-2 pt-4 border-t">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Quick Actions</h3>
-              {roleConfig.quickActions.map((action, index) => (
-                <QuickActionButton key={index} action={action} isMobile />
-              ))}
-              
-              {/* Mobile Export Button */}
-              <Button
-                onClick={() => setShowExportModal(true)}
-                className={`w-full justify-start bg-gradient-to-r ${themeClasses.gradient} text-white hover:opacity-90`}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export Data
-              </Button>
+              <div className="space-y-2">
+                {roleConfig.quickActions.map((action, index) => (
+                  <QuickActionButton key={index} action={action} isMobile />
+                ))}
+                
+                {/* Mobile Export Button */}
+                <Button
+                  onClick={() => {
+                    setShowExportModal(true);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`w-full justify-start bg-gradient-to-r ${themeClasses.gradient} text-white hover:opacity-90`}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Data
+                </Button>
+              </div>
             </div>
           </div>
         </div>
