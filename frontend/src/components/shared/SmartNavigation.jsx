@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useRole } from '../../context/RoleContext';
+import { useResponsive } from '../../hooks/useResponsive';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import RoleSwitcher from './RoleSwitcher';
@@ -9,7 +10,7 @@ import {
   ArrowLeft, LayoutDashboard, User, Users, Apple, Activity, Target, 
   Stethoscope, BarChart3, BookOpen, FileText, UserPlus, ChefHat, 
   Calendar, Shield, Settings, Plus, Camera, Menu, X, Home, ChevronDown,
-  Pill, Timeline, Download
+  Pill, Timeline, Download, MoreHorizontal
 } from 'lucide-react';
 
 
