@@ -261,7 +261,7 @@ const SimpleGoals = () => {
 };
 
 // Component: Nutrition Tips
-const NutritionTips = () => (
+const NutritionTips = ({ handleUpgradeAction }) => (
   <Card className="col-span-full lg:col-span-2">
     <CardHeader>
       <CardTitle className="flex items-center">
