@@ -389,7 +389,7 @@ const GuestDashboard = () => {
     
     // Show upgrade prompt after 2 minutes or 3rd visit
     const timer = setTimeout(() => {
-      if (currentVisits >= 3 || sessionTime > 120) {
+      if (currentVisits >= 3) {
         setShowUpgradePrompt(true);
       }
     }, 120000); // 2 minutes
@@ -413,7 +413,7 @@ const GuestDashboard = () => {
       clearTimeout(timer);
       clearInterval(sessionTimer);
     };
-  }, [switchRole, sessionTime]);
+  }, [switchRole]);
 
   const handleUpgradeAction = () => {
     console.log('Upgrade action triggered from dashboard');
