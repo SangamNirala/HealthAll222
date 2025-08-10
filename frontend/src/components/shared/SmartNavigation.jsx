@@ -7,7 +7,8 @@ import RoleSwitcher from './RoleSwitcher';
 import { 
   ArrowLeft, LayoutDashboard, User, Users, Apple, Activity, Target, 
   Stethoscope, BarChart3, BookOpen, FileText, UserPlus, ChefHat, 
-  Calendar, Shield, Settings, Plus, Camera, Menu, X, Home, ChevronDown
+  Calendar, Shield, Settings, Plus, Camera, Menu, X, Home, ChevronDown,
+  Pill, Timeline
 } from 'lucide-react';
 
 
@@ -15,7 +16,7 @@ import {
 const ICON_MAP = {
   LayoutDashboard, User, Users, Apple, Activity, Target, Stethoscope, 
   BarChart3, BookOpen, FileText, UserPlus, ChefHat, Calendar, Shield, 
-  Settings, Plus, Camera, Home
+  Settings, Plus, Camera, Home, Pill, Timeline
 };
 
 const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
