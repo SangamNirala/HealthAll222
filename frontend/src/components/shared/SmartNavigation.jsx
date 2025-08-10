@@ -16,7 +16,7 @@ import {
 const ICON_MAP = {
   LayoutDashboard, User, Users, Apple, Activity, Target, Stethoscope, 
   BarChart3, BookOpen, FileText, UserPlus, ChefHat, Calendar, Shield, 
-  Settings, Plus, Camera, Home, Pill, Timeline
+  Settings, Plus, Camera, Home, Pill
 };
 
 const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
