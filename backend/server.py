@@ -3023,6 +3023,247 @@ async def get_guest_session_status(session_id: str):
         ]
     }
 
+# ===== PHASE 6: GUEST GOAL MANAGEMENT APIS =====
+
+class GuestGoal(BaseModel):
+    id: int
+    title: str
+    category: str
+    target: int
+    unit: str
+    current: int = 0
+    timeframe: str = "daily"
+    createdAt: str
+    lastUpdated: str
+
+class GuestGoalSession(BaseModel):
+    session_id: str
+    goals: List[GuestGoal] = []
+    last_updated: datetime = Field(default_factory=datetime.utcnow)
+    expires_at: datetime
+
+@api_router.post("/guest/goals/{session_id}")
+async def sync_guest_goals(session_id: str, goal_data: dict):
+    """Sync guest goals with backend for session persistence"""
+    try:
+        goals_list = goal_data.get('goals', [])
+        
+        # Store in temporary collection with expiration
+        goal_session = {
+            "session_id": session_id,
+            "goals": goals_list,
+            "last_updated": datetime.utcnow(),
+            "expires_at": datetime.utcnow() + timedelta(hours=24)
+        }
+        
+        # Update or insert goal session
+        await db.guest_goal_sessions.update_one(
+            {"session_id": session_id},
+            {"$set": goal_session},
+            upsert=True
+        )
+        
+        # Clean up expired sessions
+        await db.guest_goal_sessions.delete_many({
+            "expires_at": {"$lt": datetime.utcnow()}
+        })
+        
+        return {
+            "success": True,
+            "session_id": session_id,
+            "goals_synced": len(goals_list),
+            "expires_at": goal_session["expires_at"].isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Goal sync error: {e}")
+        return {"success": False, "error": "Failed to sync goals"}
+
+@api_router.get("/guest/goals/{session_id}")
+async def get_guest_goals(session_id: str):
+    """Retrieve guest goals for a session"""
+    try:
+        goal_session = await db.guest_goal_sessions.find_one({
+            "session_id": session_id,
+            "expires_at": {"$gt": datetime.utcnow()}
+        })
+        
+        if not goal_session:
+            return {
+                "success": True,
+                "session_id": session_id,
+                "goals": [],
+                "message": "No goals found for this session"
+            }
+        
+        return {
+            "success": True,
+            "session_id": session_id,
+            "goals": goal_session.get("goals", []),
+            "last_updated": goal_session.get("last_updated").isoformat(),
+            "expires_at": goal_session.get("expires_at").isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Goal retrieval error: {e}")
+        return {"success": False, "error": "Failed to retrieve goals"}
+
+@api_router.post("/guest/goals/{session_id}/progress")
+async def update_guest_goal_progress(session_id: str, progress_data: dict):
+    """Update progress for a specific goal"""
+    try:
+        goal_id = progress_data.get('goal_id')
+        new_current = progress_data.get('current', 0)
+        
+        # Update specific goal progress
+        result = await db.guest_goal_sessions.update_one(
+            {
+                "session_id": session_id,
+                "expires_at": {"$gt": datetime.utcnow()},
+                "goals.id": goal_id
+            },
+            {
+                "$set": {
+                    "goals.$.current": new_current,
+                    "goals.$.lastUpdated": datetime.utcnow().isoformat(),
+                    "last_updated": datetime.utcnow()
+                }
+            }
+        )
+        
+        if result.modified_count > 0:
+            return {
+                "success": True,
+                "goal_id": goal_id,
+                "new_current": new_current,
+                "message": "Progress updated successfully"
+            }
+        else:
+            return {"success": False, "error": "Goal not found or session expired"}
+            
+    except Exception as e:
+        logger.error(f"Goal progress update error: {e}")
+        return {"success": False, "error": "Failed to update progress"}
+
+@api_router.get("/guest/goals/{session_id}/analytics")
+async def get_guest_goal_analytics(session_id: str):
+    """Get goal analytics and insights for guest session"""
+    try:
+        goal_session = await db.guest_goal_sessions.find_one({
+            "session_id": session_id,
+            "expires_at": {"$gt": datetime.utcnow()}
+        })
+        
+        if not goal_session:
+            return {"success": False, "error": "Session not found or expired"}
+        
+        goals = goal_session.get("goals", [])
+        
+        # Calculate analytics
+        total_goals = len(goals)
+        completed_goals = len([g for g in goals if g.get('current', 0) >= g.get('target', 1)])
+        completion_rate = (completed_goals / total_goals * 100) if total_goals > 0 else 0
+        
+        # Category breakdown
+        category_stats = {}
+        for goal in goals:
+            category = goal.get('category', 'other')
+            if category not in category_stats:
+                category_stats[category] = {'total': 0, 'completed': 0}
+            category_stats[category]['total'] += 1
+            if goal.get('current', 0) >= goal.get('target', 1):
+                category_stats[category]['completed'] += 1
+        
+        # Generate insights
+        insights = []
+        if completion_rate >= 80:
+            insights.append("Excellent progress! You're crushing your goals today.")
+        elif completion_rate >= 50:
+            insights.append("Great work! You're more than halfway to your daily goals.")
+        elif completion_rate >= 25:
+            insights.append("Good start! Keep going to reach more of your goals.")
+        else:
+            insights.append("Every step counts! Start with one small goal to build momentum.")
+        
+        # Add category-specific insights
+        for category, stats in category_stats.items():
+            if stats['completed'] == stats['total'] and stats['total'] > 0:
+                insights.append(f"🎉 Perfect {category} goals completion!")
+        
+        return {
+            "success": True,
+            "session_id": session_id,
+            "analytics": {
+                "total_goals": total_goals,
+                "completed_goals": completed_goals,
+                "completion_rate": round(completion_rate, 1),
+                "category_breakdown": category_stats,
+                "session_duration": calculate_session_duration(goal_session.get("last_updated")),
+                "insights": insights,
+                "motivational_message": get_motivational_message(completion_rate),
+                "next_actions": get_next_action_suggestions(goals)
+            }
+        }
+    except Exception as e:
+        logger.error(f"Goal analytics error: {e}")
+        return {"success": False, "error": "Failed to generate analytics"}
+
+def calculate_session_duration(last_updated):
+    """Calculate session duration"""
+    if not last_updated:
+        return "0 minutes"
+    
+    duration = datetime.utcnow() - last_updated
+    minutes = int(duration.total_seconds() / 60)
+    
+    if minutes < 60:
+        return f"{minutes} minutes"
+    hours = minutes // 60
+    remaining_minutes = minutes % 60
+    return f"{hours}h {remaining_minutes}m"
+
+def get_motivational_message(completion_rate):
+    """Get motivational message based on completion rate"""
+    if completion_rate >= 100:
+        return "🎉 Amazing! You've completed all your goals for today!"
+    elif completion_rate >= 75:
+        return "🌟 You're almost there! Just a few more goals to go!"
+    elif completion_rate >= 50:
+        return "💪 Great momentum! Keep pushing towards your goals!"
+    elif completion_rate >= 25:
+        return "🚀 Good progress! Every small step counts!"
+    else:
+        return "🌱 Start with one goal - you've got this!"
+
+def get_next_action_suggestions(goals):
+    """Get actionable next step suggestions"""
+    suggestions = []
+    
+    incomplete_goals = [g for g in goals if g.get('current', 0) < g.get('target', 1)]
+    
+    if not incomplete_goals:
+        suggestions.append("All goals completed! Consider setting a bonus goal.")
+        return suggestions
+    
+    # Find easiest goal to complete
+    easiest_goal = min(incomplete_goals, 
+                      key=lambda g: g.get('target', 1) - g.get('current', 0))
+    
+    remaining = easiest_goal.get('target', 1) - easiest_goal.get('current', 0)
+    if remaining == 1:
+        suggestions.append(f"Quick win: Complete '{easiest_goal.get('title', 'Unknown')}' - just 1 more {easiest_goal.get('unit', 'step')}!")
+    else:
+        suggestions.append(f"Focus on '{easiest_goal.get('title', 'Unknown')}' - {remaining} {easiest_goal.get('unit', 'steps')} to go!")
+    
+    # Category-specific suggestions
+    nutrition_goals = [g for g in incomplete_goals if g.get('category') == 'nutrition']
+    if nutrition_goals:
+        suggestions.append("💡 Add vegetables to your next meal for nutrition goal progress!")
+    
+    hydration_goals = [g for g in incomplete_goals if g.get('category') == 'hydration']
+    if hydration_goals:
+        suggestions.append("💧 Keep a water bottle nearby to stay on track!")
+    
+    return suggestions[:3]  # Limit to 3 suggestions
+
 # Include the router in the main app
 app.include_router(api_router)
 
