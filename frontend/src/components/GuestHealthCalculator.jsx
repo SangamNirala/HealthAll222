@@ -471,21 +471,47 @@ const GuestHealthCalculator = () => {
                 <Card className="border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-violet-50">
                   <CardContent className="pt-6">
                     <div className="text-center">
-                      <Zap className="w-12 h-12 text-purple-600 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">Want More Detailed Analysis?</h3>
+                      <Sparkles className="w-12 h-12 text-purple-600 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">Unlock Your Full Health Potential</h3>
                       <p className="text-gray-600 mb-4">
-                        Create a free account to track your progress over time, get personalized meal plans, 
-                        and receive AI-powered health insights.
+                        Your results show great potential! Get advanced body composition analysis, 
+                        metabolic insights, and personalized action plans with our premium features.
                       </p>
+                      <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 mb-4">
+                        <div className="text-sm text-yellow-800">
+                          🎯 <strong>Limited Time:</strong> Free 7-day premium trial + personalized nutrition plan
+                        </div>
+                      </div>
                       <div className="flex justify-center space-x-3">
-                        <Button className="bg-purple-600 hover:bg-purple-700">
-                          <Heart className="w-4 h-4 mr-2" />
-                          Create Free Account
+                        <Button 
+                          className="bg-purple-600 hover:bg-purple-700"
+                          onClick={handleUpgradeAction}
+                        >
+                          <Zap className="w-4 h-4 mr-2" />
+                          Start Free Trial
                         </Button>
                         <Button variant="outline">
                           <Apple className="w-4 h-4 mr-2" />
                           Learn More
                         </Button>
+                      </div>
+                      <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+                        <div className="flex items-center text-gray-600">
+                          <CheckCircle className="w-3 h-3 text-green-500 mr-1" />
+                          Body fat percentage tracking
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <CheckCircle className="w-3 h-3 text-green-500 mr-1" />
+                          Advanced metabolic insights
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <CheckCircle className="w-3 h-3 text-green-500 mr-1" />
+                          Progress tracking over time
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <CheckCircle className="w-3 h-3 text-green-500 mr-1" />
+                          AI-powered recommendations
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -494,6 +520,36 @@ const GuestHealthCalculator = () => {
             )}
           </div>
         </div>
+
+        {/* Real-time feedback */}
+        {feedbackData && (
+          <RealTimeFeedback
+            type="smart_suggestion"
+            data={feedbackData}
+            onAction={(action) => {
+              console.log('Feedback action:', action);
+              if (action === 'try_suggestion') {
+                setShowUpgradePrompt(true);
+              }
+            }}
+            onDismiss={() => setFeedbackData(null)}
+            position="bottom-right"
+          />
+        )}
+
+        {/* Full upgrade modal */}
+        {showUpgradePrompt && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="max-w-lg">
+              <UpgradePrompt
+                type="calculator_results"
+                context={results ? `Your BMI of ${results.bmi} shows potential for health optimization. Our advanced features can help you track progress and achieve your goals faster.` : ''}
+                triggerAction={handleUpgradeAction}
+                onClose={() => setShowUpgradePrompt(false)}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
