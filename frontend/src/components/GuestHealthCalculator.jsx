@@ -169,6 +169,14 @@ const GuestHealthCalculator = () => {
       activityLevel: ''
     });
     setResults(null);
+    setFeedbackData(null);
+    setShowUpgradePrompt(false);
+  };
+
+  const handleUpgradeAction = () => {
+    // Redirect to upgrade page or show modal
+    console.log('Upgrade triggered from calculator');
+    // Could implement actual upgrade flow here
   };
 
   return (
