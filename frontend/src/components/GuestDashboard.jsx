@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 // Component: Quick Start Guide
-const QuickStart = () => (
+const QuickStart = ({ sessionTime, setShowUpgradePrompt }) => (
   <Card className="col-span-full lg:col-span-2">
     <CardHeader>
       <CardTitle className="flex items-center">
