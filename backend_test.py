@@ -1386,6 +1386,507 @@ class HealthPlatformAPITester:
         
         return all_tests_passed
 
+    def test_phase4_provider_features(self):
+        """Test Phase 4 Advanced Provider Features endpoints"""
+        print("\n📋 Testing Phase 4 Advanced Provider Features...")
+        
+        test_provider_id = "provider-123"
+        
+        # Test 1: Patient Queue Management
+        queue_success = self.test_patient_queue_management(test_provider_id)
+        
+        # Test 2: Clinical Decision Support
+        cds_success = self.test_clinical_decision_support()
+        
+        # Test 3: Treatment Outcomes
+        outcomes_success = self.test_treatment_outcomes(test_provider_id)
+        
+        # Test 4: Population Health Analytics
+        population_success = self.test_population_health_analytics(test_provider_id)
+        
+        # Test 5: Evidence-Based Recommendations
+        evidence_success = self.test_evidence_based_recommendations()
+        
+        # Test 6: Continuing Education
+        education_success = self.test_continuing_education(test_provider_id)
+        
+        # Test 7: Course Enrollment
+        enrollment_success = self.test_course_enrollment()
+        
+        # Test 8: Certificate Management
+        certificates_success = self.test_certificate_management(test_provider_id)
+        
+        return (queue_success and cds_success and outcomes_success and 
+                population_success and evidence_success and education_success and 
+                enrollment_success and certificates_success)
+
+    def test_patient_queue_management(self, provider_id):
+        """Test Patient Queue Management System"""
+        print("\n🏥 Testing Patient Queue Management...")
+        
+        success, queue_data = self.run_test(
+            "Patient Queue Management",
+            "GET",
+            f"provider/patient-queue/{provider_id}",
+            200
+        )
+        
+        # Validate queue response structure
+        if success and queue_data:
+            expected_keys = ['provider_id', 'queue_stats', 'priority_queue', 'scheduled_queue', 'completed_today', 'no_shows']
+            missing_keys = [key for key in expected_keys if key not in queue_data]
+            
+            if not missing_keys:
+                print(f"   ✅ Patient queue response contains all required keys: {expected_keys}")
+                
+                # Validate queue_stats structure
+                queue_stats = queue_data.get('queue_stats', {})
+                stats_keys = ['total_in_queue', 'urgent', 'scheduled', 'walk_in', 'avg_wait_time']
+                missing_stats_keys = [key for key in stats_keys if key not in queue_stats]
+                
+                if not missing_stats_keys:
+                    print(f"   ✅ Queue stats structure valid")
+                    print(f"   📊 Total in queue: {queue_stats.get('total_in_queue')}, Urgent: {queue_stats.get('urgent')}")
+                else:
+                    print(f"   ❌ Queue stats missing keys: {missing_stats_keys}")
+                    success = False
+                
+                # Validate priority_queue structure
+                priority_queue = queue_data.get('priority_queue', [])
+                if priority_queue and len(priority_queue) > 0:
+                    patient = priority_queue[0]
+                    patient_keys = ['id', 'patient_name', 'condition', 'priority', 'wait_time', 'room', 'vitals', 'status']
+                    missing_patient_keys = [key for key in patient_keys if key not in patient]
+                    
+                    if not missing_patient_keys:
+                        print(f"   ✅ Priority queue patient structure valid")
+                        print(f"   🚨 Priority patient: {patient.get('patient_name')} - {patient.get('condition')}")
+                    else:
+                        print(f"   ❌ Priority queue patient missing keys: {missing_patient_keys}")
+                        success = False
+                
+            else:
+                print(f"   ❌ Patient queue response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
+    def test_clinical_decision_support(self):
+        """Test AI-Powered Clinical Decision Support"""
+        print("\n🧠 Testing Clinical Decision Support...")
+        
+        # Sample patient data for clinical decision support
+        sample_patient_data = {
+            "patient_data": {
+                "id": "patient-456",
+                "age": 52,
+                "gender": "male",
+                "weight": 95,
+                "height": 175,
+                "bmi": 31.0,
+                "blood_pressure": "145/92",
+                "glucose": 126
+            },
+            "symptoms": [
+                "increased thirst",
+                "frequent urination", 
+                "unexplained weight loss",
+                "fatigue"
+            ],
+            "history": [
+                "family_history_diabetes",
+                "hypertension",
+                "sedentary_lifestyle"
+            ]
+        }
+        
+        success, cds_data = self.run_test(
+            "Clinical Decision Support",
+            "POST",
+            "provider/clinical-decision-support",
+            200,
+            data=sample_patient_data
+        )
+        
+        # Validate clinical decision support response
+        if success and cds_data:
+            expected_keys = ['request_id', 'patient_id', 'ai_recommendations', 'drug_interactions', 'contraindications', 'clinical_guidelines', 'risk_scores']
+            missing_keys = [key for key in expected_keys if key not in cds_data]
+            
+            if not missing_keys:
+                print(f"   ✅ Clinical decision support response contains all required keys")
+                
+                # Validate AI recommendations structure
+                ai_recommendations = cds_data.get('ai_recommendations', [])
+                if ai_recommendations and len(ai_recommendations) > 0:
+                    recommendation = ai_recommendations[0]
+                    rec_keys = ['category', 'confidence', 'recommendation', 'evidence', 'next_steps']
+                    missing_rec_keys = [key for key in rec_keys if key not in recommendation]
+                    
+                    if not missing_rec_keys:
+                        print(f"   ✅ AI recommendation structure valid")
+                        print(f"   🎯 Confidence: {recommendation.get('confidence')}, Category: {recommendation.get('category')}")
+                    else:
+                        print(f"   ❌ AI recommendation missing keys: {missing_rec_keys}")
+                        success = False
+                
+                # Validate risk scores
+                risk_scores = cds_data.get('risk_scores', {})
+                if risk_scores:
+                    print(f"   ✅ Risk scores provided: {list(risk_scores.keys())}")
+                    diabetes_risk = risk_scores.get('diabetes_risk', 0)
+                    print(f"   📊 Diabetes risk: {diabetes_risk}")
+                
+            else:
+                print(f"   ❌ Clinical decision support response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
+    def test_treatment_outcomes(self, provider_id):
+        """Test Treatment Outcome Tracking"""
+        print("\n📈 Testing Treatment Outcomes...")
+        
+        success, outcomes_data = self.run_test(
+            "Treatment Outcomes",
+            "GET",
+            f"provider/treatment-outcomes/{provider_id}",
+            200,
+            params={"timeframe": "30d"}
+        )
+        
+        # Validate treatment outcomes response
+        if success and outcomes_data:
+            expected_keys = ['provider_id', 'timeframe', 'outcome_summary', 'condition_outcomes', 'trending_metrics']
+            missing_keys = [key for key in expected_keys if key not in outcomes_data]
+            
+            if not missing_keys:
+                print(f"   ✅ Treatment outcomes response contains all required keys")
+                
+                # Validate outcome summary
+                outcome_summary = outcomes_data.get('outcome_summary', {})
+                summary_keys = ['total_patients_treated', 'successful_outcomes', 'success_rate', 'readmission_rate', 'patient_satisfaction']
+                missing_summary_keys = [key for key in summary_keys if key not in outcome_summary]
+                
+                if not missing_summary_keys:
+                    print(f"   ✅ Outcome summary structure valid")
+                    success_rate = outcome_summary.get('success_rate', 0)
+                    print(f"   📊 Success rate: {success_rate}%, Patient satisfaction: {outcome_summary.get('patient_satisfaction')}")
+                else:
+                    print(f"   ❌ Outcome summary missing keys: {missing_summary_keys}")
+                    success = False
+                
+                # Validate condition outcomes
+                condition_outcomes = outcomes_data.get('condition_outcomes', [])
+                if condition_outcomes and len(condition_outcomes) > 0:
+                    condition = condition_outcomes[0]
+                    condition_keys = ['condition', 'patients', 'improved', 'stable', 'declined', 'target_achievement_rate']
+                    missing_condition_keys = [key for key in condition_keys if key not in condition]
+                    
+                    if not missing_condition_keys:
+                        print(f"   ✅ Condition outcomes structure valid")
+                        print(f"   🏥 {condition.get('condition')}: {condition.get('improved')}/{condition.get('patients')} improved")
+                    else:
+                        print(f"   ❌ Condition outcomes missing keys: {missing_condition_keys}")
+                        success = False
+                
+            else:
+                print(f"   ❌ Treatment outcomes response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
+    def test_population_health_analytics(self, provider_id):
+        """Test Population Health Analytics"""
+        print("\n👥 Testing Population Health Analytics...")
+        
+        success, population_data = self.run_test(
+            "Population Health Analytics",
+            "GET",
+            f"provider/population-health/{provider_id}",
+            200
+        )
+        
+        # Validate population health response
+        if success and population_data:
+            expected_keys = ['provider_id', 'population_overview', 'demographic_breakdown', 'condition_prevalence', 'risk_stratification', 'quality_measures', 'intervention_opportunities']
+            missing_keys = [key for key in expected_keys if key not in population_data]
+            
+            if not missing_keys:
+                print(f"   ✅ Population health response contains all required keys")
+                
+                # Validate population overview
+                population_overview = population_data.get('population_overview', {})
+                overview_keys = ['total_population', 'active_patients', 'high_risk_patients', 'chronic_conditions_prevalence']
+                missing_overview_keys = [key for key in overview_keys if key not in population_overview]
+                
+                if not missing_overview_keys:
+                    print(f"   ✅ Population overview structure valid")
+                    total_pop = population_overview.get('total_population', 0)
+                    high_risk = population_overview.get('high_risk_patients', 0)
+                    print(f"   📊 Total population: {total_pop}, High risk: {high_risk}")
+                else:
+                    print(f"   ❌ Population overview missing keys: {missing_overview_keys}")
+                    success = False
+                
+                # Validate demographic breakdown
+                demographic_breakdown = population_data.get('demographic_breakdown', [])
+                if demographic_breakdown and len(demographic_breakdown) > 0:
+                    demo = demographic_breakdown[0]
+                    demo_keys = ['age_group', 'count', 'percentage', 'top_conditions']
+                    missing_demo_keys = [key for key in demo_keys if key not in demo]
+                    
+                    if not missing_demo_keys:
+                        print(f"   ✅ Demographic breakdown structure valid")
+                        print(f"   👥 Age group {demo.get('age_group')}: {demo.get('count')} patients ({demo.get('percentage')}%)")
+                    else:
+                        print(f"   ❌ Demographic breakdown missing keys: {missing_demo_keys}")
+                        success = False
+                
+                # Validate quality measures
+                quality_measures = population_data.get('quality_measures', [])
+                if quality_measures and len(quality_measures) > 0:
+                    measure = quality_measures[0]
+                    measure_keys = ['measure', 'target', 'current', 'status']
+                    missing_measure_keys = [key for key in measure_keys if key not in measure]
+                    
+                    if not missing_measure_keys:
+                        print(f"   ✅ Quality measures structure valid")
+                        print(f"   📏 {measure.get('measure')}: {measure.get('current')} (target: {measure.get('target')})")
+                    else:
+                        print(f"   ❌ Quality measures missing keys: {missing_measure_keys}")
+                        success = False
+                
+            else:
+                print(f"   ❌ Population health response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
+    def test_evidence_based_recommendations(self):
+        """Test AI-Powered Evidence-Based Recommendations"""
+        print("\n📚 Testing Evidence-Based Recommendations...")
+        
+        # Sample condition data for evidence-based recommendations
+        sample_condition_data = {
+            "condition": "Type 2 Diabetes",
+            "patient_profile": {
+                "age": 58,
+                "gender": "female",
+                "weight": 82,
+                "height": 162,
+                "bmi": 31.2,
+                "hba1c": 8.1,
+                "egfr": 75,
+                "comorbidities": ["hypertension", "obesity"]
+            },
+            "clinical_context": "newly_diagnosed"
+        }
+        
+        success, evidence_data = self.run_test(
+            "Evidence-Based Recommendations",
+            "POST",
+            "provider/evidence-recommendations",
+            200,
+            data=sample_condition_data
+        )
+        
+        # Validate evidence-based recommendations response
+        if success and evidence_data:
+            expected_keys = ['request_id', 'condition', 'evidence_level', 'recommendations', 'clinical_studies', 'contraindications', 'drug_interactions', 'patient_specific_factors', 'follow_up_recommendations']
+            missing_keys = [key for key in expected_keys if key not in evidence_data]
+            
+            if not missing_keys:
+                print(f"   ✅ Evidence-based recommendations response contains all required keys")
+                
+                # Validate recommendations structure
+                recommendations = evidence_data.get('recommendations', [])
+                if recommendations and len(recommendations) > 0:
+                    recommendation = recommendations[0]
+                    rec_keys = ['category', 'recommendation', 'evidence_level', 'source', 'confidence']
+                    missing_rec_keys = [key for key in rec_keys if key not in recommendation]
+                    
+                    if not missing_rec_keys:
+                        print(f"   ✅ Recommendation structure valid")
+                        print(f"   📋 Category: {recommendation.get('category')}, Evidence level: {recommendation.get('evidence_level')}")
+                        print(f"   🎯 Confidence: {recommendation.get('confidence')}")
+                    else:
+                        print(f"   ❌ Recommendation missing keys: {missing_rec_keys}")
+                        success = False
+                
+                # Validate clinical studies
+                clinical_studies = evidence_data.get('clinical_studies', [])
+                if clinical_studies and len(clinical_studies) > 0:
+                    study = clinical_studies[0]
+                    study_keys = ['study', 'year', 'finding', 'relevance', 'patient_count']
+                    missing_study_keys = [key for key in study_keys if key not in study]
+                    
+                    if not missing_study_keys:
+                        print(f"   ✅ Clinical studies structure valid")
+                        print(f"   🔬 Study: {study.get('study')} ({study.get('year')}), Relevance: {study.get('relevance')}")
+                    else:
+                        print(f"   ❌ Clinical studies missing keys: {missing_study_keys}")
+                        success = False
+                
+                # Validate follow-up recommendations
+                follow_up = evidence_data.get('follow_up_recommendations', [])
+                if follow_up:
+                    print(f"   ✅ Follow-up recommendations provided: {len(follow_up)} recommendations")
+                
+            else:
+                print(f"   ❌ Evidence-based recommendations response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
+    def test_continuing_education(self, provider_id):
+        """Test Professional Continuing Education Portal"""
+        print("\n🎓 Testing Continuing Education...")
+        
+        success, education_data = self.run_test(
+            "Continuing Education",
+            "GET",
+            f"provider/continuing-education/{provider_id}",
+            200
+        )
+        
+        # Validate continuing education response
+        if success and education_data:
+            expected_keys = ['provider_id', 'education_summary', 'featured_courses', 'my_courses', 'categories', 'upcoming_deadlines']
+            missing_keys = [key for key in expected_keys if key not in education_data]
+            
+            if not missing_keys:
+                print(f"   ✅ Continuing education response contains all required keys")
+                
+                # Validate education summary
+                education_summary = education_data.get('education_summary', {})
+                summary_keys = ['total_credits_earned', 'credits_required', 'progress_percentage', 'courses_completed', 'courses_in_progress', 'deadline']
+                missing_summary_keys = [key for key in summary_keys if key not in education_summary]
+                
+                if not missing_summary_keys:
+                    print(f"   ✅ Education summary structure valid")
+                    credits_earned = education_summary.get('total_credits_earned', 0)
+                    credits_required = education_summary.get('credits_required', 0)
+                    progress = education_summary.get('progress_percentage', 0)
+                    print(f"   📊 Credits: {credits_earned}/{credits_required} ({progress}% complete)")
+                else:
+                    print(f"   ❌ Education summary missing keys: {missing_summary_keys}")
+                    success = False
+                
+                # Validate featured courses
+                featured_courses = education_data.get('featured_courses', [])
+                if featured_courses and len(featured_courses) > 0:
+                    course = featured_courses[0]
+                    course_keys = ['id', 'title', 'provider', 'credits', 'duration', 'format', 'difficulty', 'rating', 'enrolled', 'cost', 'description', 'learning_objectives']
+                    missing_course_keys = [key for key in course_keys if key not in course]
+                    
+                    if not missing_course_keys:
+                        print(f"   ✅ Featured course structure valid")
+                        print(f"   📚 Course: {course.get('title')} ({course.get('credits')} credits)")
+                        print(f"   ⭐ Rating: {course.get('rating')}, Format: {course.get('format')}")
+                    else:
+                        print(f"   ❌ Featured course missing keys: {missing_course_keys}")
+                        success = False
+                
+                # Validate categories
+                categories = education_data.get('categories', [])
+                if categories and len(categories) > 0:
+                    category = categories[0]
+                    cat_keys = ['id', 'name', 'course_count']
+                    missing_cat_keys = [key for key in cat_keys if key not in category]
+                    
+                    if not missing_cat_keys:
+                        print(f"   ✅ Categories structure valid")
+                        print(f"   📂 Category: {category.get('name')} ({category.get('course_count')} courses)")
+                    else:
+                        print(f"   ❌ Categories missing keys: {missing_cat_keys}")
+                        success = False
+                
+            else:
+                print(f"   ❌ Continuing education response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
+    def test_course_enrollment(self):
+        """Test Course Enrollment"""
+        print("\n📝 Testing Course Enrollment...")
+        
+        # Sample enrollment data
+        enrollment_data = {
+            "provider_id": "provider-123"
+        }
+        
+        success, enrollment_response = self.run_test(
+            "Course Enrollment",
+            "POST",
+            "provider/courses/course-001/enroll",
+            200,
+            data=enrollment_data
+        )
+        
+        # Validate course enrollment response
+        if success and enrollment_response:
+            expected_keys = ['course_id', 'provider_id', 'enrollment_status', 'message', 'access_url', 'enrollment_date']
+            missing_keys = [key for key in expected_keys if key not in enrollment_response]
+            
+            if not missing_keys:
+                print(f"   ✅ Course enrollment response contains all required keys")
+                enrollment_status = enrollment_response.get('enrollment_status')
+                course_id = enrollment_response.get('course_id')
+                print(f"   ✅ Enrollment status: {enrollment_status} for course {course_id}")
+                print(f"   🔗 Access URL: {enrollment_response.get('access_url')}")
+            else:
+                print(f"   ❌ Course enrollment response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
+    def test_certificate_management(self, provider_id):
+        """Test Certificate Management"""
+        print("\n🏆 Testing Certificate Management...")
+        
+        success, certificates_data = self.run_test(
+            "Certificate Management",
+            "GET",
+            f"provider/certificates/{provider_id}",
+            200
+        )
+        
+        # Validate certificate management response
+        if success and certificates_data:
+            expected_keys = ['provider_id', 'certificates', 'total_credits']
+            missing_keys = [key for key in expected_keys if key not in certificates_data]
+            
+            if not missing_keys:
+                print(f"   ✅ Certificate management response contains all required keys")
+                
+                # Validate certificates structure
+                certificates = certificates_data.get('certificates', [])
+                if certificates and len(certificates) > 0:
+                    certificate = certificates[0]
+                    cert_keys = ['id', 'course_title', 'credits', 'completed_date', 'certificate_number', 'download_url', 'verification_code']
+                    missing_cert_keys = [key for key in cert_keys if key not in certificate]
+                    
+                    if not missing_cert_keys:
+                        print(f"   ✅ Certificate structure valid")
+                        print(f"   🏆 Certificate: {certificate.get('course_title')} ({certificate.get('credits')} credits)")
+                        print(f"   📅 Completed: {certificate.get('completed_date')}")
+                        print(f"   🔢 Certificate #: {certificate.get('certificate_number')}")
+                    else:
+                        print(f"   ❌ Certificate missing keys: {missing_cert_keys}")
+                        success = False
+                
+                # Validate total credits
+                total_credits = certificates_data.get('total_credits', 0)
+                print(f"   📊 Total credits earned: {total_credits}")
+                
+            else:
+                print(f"   ❌ Certificate management response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
