@@ -1424,6 +1424,10 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Patient Analytics Endpoints...")
         self.test_patient_analytics_endpoints()
 
+        # Test Phase 3 Patient APIs
+        print("\n📋 Testing Phase 3 Patient APIs...")
+        self.test_phase3_patient_apis()
+
         # Print final results
         print("\n" + "=" * 60)
         print(f"📊 FINAL RESULTS")
