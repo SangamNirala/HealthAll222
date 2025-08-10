@@ -928,7 +928,48 @@ class GuestSession(BaseModel):
 # Patient Analytics Endpoints
 @api_router.get("/patient/analytics/{user_id}")
 async def get_patient_analytics(user_id: str):
-    """Get comprehensive analytics for patient"""
+    """Get comprehensive analytics for patient with AI-powered insights"""
+    
+    # Sample user data - in real app, this would come from database
+    user_data = {
+        "user_id": user_id,
+        "age": 32,
+        "gender": "female",
+        "activity_level": "moderately_active",
+        "goals": ["weight_loss", "energy_improvement"],
+        "diet_type": "mediterranean",
+        "avg_calories": 2030,
+        "avg_protein": 92,
+        "avg_carbs": 175,
+        "avg_fat": 68,
+        "weight": 68.5,
+        "energy_level": 7.2,
+        "sleep_quality": 7.5
+    }
+    
+    # Generate AI-powered insights
+    try:
+        ai_insights = await get_nutrition_insights(user_data)
+    except Exception as e:
+        logger.error(f"AI insights error: {e}")
+        ai_insights = {"insights": [], "recommendations": [], "confidence": 0.0}
+    
+    # Generate health correlations with AI
+    health_data = {
+        "daily_logs": [{"date": "2024-01-15", "energy": 7.5, "protein": 95}],
+        "sleep_patterns": "consistent_7h",
+        "exercise_frequency": "3x_week",
+        "energy_trend": "improving",
+        "weight_trend": "decreasing",
+        "mood_patterns": "stable_positive"
+    }
+    
+    try:
+        ai_correlations = await get_health_correlations(health_data)
+    except Exception as e:
+        logger.error(f"AI correlations error: {e}")
+        ai_correlations = {"correlations": []}
+    
     return {
         "user_id": user_id,
         "nutrition_trends": [
@@ -938,21 +979,28 @@ async def get_patient_analytics(user_id: str):
             {"date": "2024-01-12", "calories": 1850, "protein": 85, "carbs": 155, "fat": 62},
             {"date": "2024-01-11", "calories": 2050, "protein": 92, "carbs": 175, "fat": 68}
         ],
-        "health_correlations": [
+        "health_correlations": ai_correlations.get("correlations", [
             {"metric": "energy_level", "correlation_with": "protein_intake", "strength": 0.75, "insight": "Higher protein intake correlates with better energy levels"},
             {"metric": "sleep_quality", "correlation_with": "caffeine_intake", "strength": -0.65, "insight": "Reduced caffeine after 2 PM improves sleep quality"},
             {"metric": "mood", "correlation_with": "exercise", "strength": 0.82, "insight": "Regular exercise significantly improves mood scores"}
-        ],
+        ]),
         "goal_progress": {
             "weight_loss": {"target": 70, "current": 68.5, "progress": 85, "trend": "on_track"},
             "fitness": {"target": 5, "current": 3, "progress": 60, "trend": "needs_improvement"},
             "nutrition": {"target": 100, "current": 78, "progress": 78, "trend": "good"}
         },
-        "personal_insights": [
+        "ai_powered_insights": {
+            "source": ai_insights.get("source", "default"),
+            "confidence": ai_insights.get("confidence", 0.6),
+            "insights": ai_insights.get("insights", ["Analysis completed with available data"]),
+            "recommendations": ai_insights.get("recommendations", ["Continue current healthy practices"]),
+            "action_items": ai_insights.get("action_items", ["Monitor progress regularly"])
+        },
+        "personal_insights": ai_insights.get("insights", [
             {"type": "achievement", "message": "You've maintained your target calorie range for 5 consecutive days!", "date": "2024-01-15"},
             {"type": "recommendation", "message": "Consider adding more fiber-rich vegetables to your lunch meals", "date": "2024-01-15"},
             {"type": "pattern", "message": "Your energy levels are highest on days when you exercise in the morning", "date": "2024-01-14"}
-        ],
+        ]),
         "energy_patterns": {
             "morning": {"average": 7.2, "trend": "stable"},
             "afternoon": {"average": 6.8, "trend": "declining"},
