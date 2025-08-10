@@ -293,9 +293,16 @@ const NutritionTips = () => (
 
 // Main Guest Dashboard Component
 const GuestDashboard = () => {
+  const { switchRole } = useRole();
+
+  // Set role to guest when component mounts
+  useEffect(() => {
+    switchRole('guest');
+  }, [switchRole]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-violet-100">
-      <GuestHeader />
+      <SmartNavigation />
       <div className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <QuickStart />
