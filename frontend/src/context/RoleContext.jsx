@@ -155,9 +155,9 @@ export const RoleProvider = ({ children }) => {
   };
 
   return (
-    &lt;RoleContext.Provider value={value}&gt;
+    <RoleContext.Provider value={value}>
       {children}
-    &lt;/RoleContext.Provider&gt;
+    </RoleContext.Provider>
   );
 };
 
