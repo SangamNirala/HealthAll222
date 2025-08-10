@@ -23,3 +23,10 @@ numpy>=1.26.0
 python-multipart>=0.0.9
 jq>=1.6.0
 typer>=0.9.0
+
+# AI Service Libraries
+groq>=0.4.1
+google-generativeai>=0.3.2
+openai>=1.12.0
+huggingface-hub>=0.20.3
+transformers>=4.36.0
