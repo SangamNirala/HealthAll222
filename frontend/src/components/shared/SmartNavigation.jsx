@@ -10,6 +10,10 @@ import {
   Calendar, Shield, Settings, Plus, Camera, Menu, X, Home, ChevronDown
 } from 'lucide-react';
 
+// Ensure BarChart3 is available in icon map
+
+} from 'lucide-react';
+
 // Icon mapping for dynamic icon rendering
 const ICON_MAP = {
   LayoutDashboard, User, Users, Apple, Activity, Target, Stethoscope, 
