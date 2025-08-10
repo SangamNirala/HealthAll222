@@ -1,0 +1,338 @@
+import React, { useState, useEffect } from 'react';
+import { useRole } from '../context/RoleContext';
+import SmartNavigation from './shared/SmartNavigation';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
+import { Badge } from './ui/badge';
+import { Target, Plus, Edit3, Trash2, CheckCircle, Clock, TrendingUp } from 'lucide-react';
+
+const PatientGoals = () => {
+  const { switchRole } = useRole();
+  const [goals, setGoals] = useState([
+    {
+      id: 1,
+      title: 'Lose 5 lbs',
+      category: 'Weight Loss',
+      target: 5,
+      current: 2,
+      unit: 'lbs',
+      deadline: '2024-03-01',
+      status: 'in_progress',
+      priority: 'high'
+    },
+    {
+      id: 2,
+      title: 'Walk 10,000 steps daily',
+      category: 'Activity',
+      target: 10000,
+      current: 8500,
+      unit: 'steps',
+      deadline: 'Daily',
+      status: 'in_progress',
+      priority: 'medium'
+    },
+    {
+      id: 3,
+      title: 'Drink 8 glasses of water',
+      category: 'Hydration',
+      target: 8,
+      current: 8,
+      unit: 'glasses',
+      deadline: 'Daily',
+      status: 'completed',
+      priority: 'high'
+    }
+  ]);
+
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newGoal, setNewGoal] = useState({
+    title: '',
+    category: 'Weight Loss',
+    target: '',
+    unit: '',
+    deadline: ''
+  });
+
+  useEffect(() => {
+    switchRole('patient');
+  }, [switchRole]);
+
+  const categories = ['Weight Loss', 'Activity', 'Nutrition', 'Hydration', 'Sleep', 'Mental Health'];
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'in_progress': return 'bg-blue-100 text-blue-800';
+      case 'overdue': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'high': return 'border-l-red-500';
+      case 'medium': return 'border-l-yellow-500';
+      case 'low': return 'border-l-green-500';
+      default: return 'border-l-gray-500';
+    }
+  };
+
+  const getProgressPercentage = (current, target) => {
+    return Math.min((current / target) * 100, 100);
+  };
+
+  const handleAddGoal = () => {
+    if (newGoal.title && newGoal.target) {
+      const goal = {
+        id: goals.length + 1,
+        ...newGoal,
+        current: 0,
+        status: 'in_progress',
+        priority: 'medium',
+        target: parseInt(newGoal.target)
+      };
+      setGoals([...goals, goal]);
+      setNewGoal({ title: '', category: 'Weight Loss', target: '', unit: '', deadline: '' });
+      setShowAddForm(false);
+    }
+  };
+
+  const completeGoal = (id) => {
+    setGoals(goals.map(goal => 
+      goal.id === id ? { ...goal, status: 'completed', current: goal.target } : goal
+    ));
+  };
+
+  const deleteGoal = (id) => {
+    setGoals(goals.filter(goal => goal.id !== id));
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <SmartNavigation />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Health Goals</h1>
+          <p className="text-gray-600">Set and track your health and wellness objectives</p>
+        </div>
+
+        {/* Goal Summary */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card className="border-2 border-blue-200 bg-blue-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center">
+                <Target className="w-8 h-8 text-blue-600 mr-3" />
+                <div>
+                  <div className="text-2xl font-bold text-blue-600">{goals.length}</div>
+                  <p className="text-sm text-gray-600">Total Goals</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-2 border-green-200 bg-green-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center">
+                <CheckCircle className="w-8 h-8 text-green-600 mr-3" />
+                <div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {goals.filter(g => g.status === 'completed').length}
+                  </div>
+                  <p className="text-sm text-gray-600">Completed</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-2 border-yellow-200 bg-yellow-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center">
+                <Clock className="w-8 h-8 text-yellow-600 mr-3" />
+                <div>
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {goals.filter(g => g.status === 'in_progress').length}
+                  </div>
+                  <p className="text-sm text-gray-600">In Progress</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-2 border-purple-200 bg-purple-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center">
+                <TrendingUp className="w-8 h-8 text-purple-600 mr-3" />
+                <div>
+                  <div className="text-2xl font-bold text-purple-600">
+                    {Math.round(goals.reduce((acc, goal) => acc + getProgressPercentage(goal.current, goal.target), 0) / goals.length)}%
+                  </div>
+                  <p className="text-sm text-gray-600">Avg Progress</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Add Goal Button */}
+        <div className="mb-8">
+          <Button onClick={() => setShowAddForm(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="w-4 h-4 mr-2" />
+            Add New Goal
+          </Button>
+        </div>
+
+        {/* Goals Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {goals.map((goal) => (
+            <Card key={goal.id} className={`border-l-4 ${getPriorityColor(goal.priority)} hover:shadow-lg transition-shadow`}>
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-lg leading-tight">{goal.title}</CardTitle>
+                    <div className="flex items-center space-x-2 mt-2">
+                      <Badge variant="secondary">{goal.category}</Badge>
+                      <Badge className={getStatusColor(goal.status)}>
+                        {goal.status.replace('_', ' ')}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="flex space-x-1">
+                    <Button variant="ghost" size="sm">
+                      <Edit3 className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => deleteGoal(goal.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Progress */}
+                  <div>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-gray-600">Progress</span>
+                      <span className="font-semibold">
+                        {goal.current} / {goal.target} {goal.unit}
+                      </span>
+                    </div>
+                    <div className="bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                        style={{ width: `${getProgressPercentage(goal.current, goal.target)}%` }}
+                      ></div>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {Math.round(getProgressPercentage(goal.current, goal.target))}% complete
+                    </div>
+                  </div>
+
+                  {/* Deadline */}
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">Deadline:</span>
+                    <span className="font-medium">{goal.deadline}</span>
+                  </div>
+
+                  {/* Action Button */}
+                  {goal.status !== 'completed' && (
+                    <Button 
+                      onClick={() => completeGoal(goal.id)}
+                      className="w-full bg-green-600 hover:bg-green-700"
+                      size="sm"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Mark Complete
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Add Goal Modal */}
+        {showAddForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <Card className="w-full max-w-md mx-4">
+              <CardHeader>
+                <CardTitle>Add New Goal</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Goal Title</label>
+                  <Input
+                    placeholder="e.g., Lose 10 pounds"
+                    value={newGoal.title}
+                    onChange={(e) => setNewGoal({ ...newGoal, title: e.target.value })}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                  <select 
+                    className="w-full border border-gray-300 rounded-md px-3 py-2"
+                    value={newGoal.category}
+                    onChange={(e) => setNewGoal({ ...newGoal, category: e.target.value })}
+                  >
+                    {categories.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Target</label>
+                    <Input
+                      type="number"
+                      placeholder="10"
+                      value={newGoal.target}
+                      onChange={(e) => setNewGoal({ ...newGoal, target: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Unit</label>
+                    <Input
+                      placeholder="lbs, steps, etc."
+                      value={newGoal.unit}
+                      onChange={(e) => setNewGoal({ ...newGoal, unit: e.target.value })}
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Deadline</label>
+                  <Input
+                    type="date"
+                    value={newGoal.deadline}
+                    onChange={(e) => setNewGoal({ ...newGoal, deadline: e.target.value })}
+                  />
+                </div>
+                
+                <div className="flex space-x-3 pt-4">
+                  <Button onClick={handleAddGoal} className="bg-blue-600 hover:bg-blue-700">
+                    Add Goal
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowAddForm(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default PatientGoals;
