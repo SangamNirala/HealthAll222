@@ -119,7 +119,7 @@ const GuestHealthCalculator = () => {
       const bmiInfo = getBMICategory(bmi);
       const recommendations = getHealthRecommendations(bmi, bmr, dailyCalories);
       
-      setResults({
+      const newResults = {
         bmi: bmi.toFixed(1),
         bmr: Math.round(bmr),
         dailyCalories,
@@ -128,9 +128,35 @@ const GuestHealthCalculator = () => {
         proteinNeeds: `${Math.round(weightNum * 0.8)}-${Math.round(weightNum * 1.2)}g`,
         waterNeeds: `${Math.round(weightNum * 0.035)} liters`,
         activityInfo: activityData
+      };
+      
+      setResults(newResults);
+      setIsCalculating(false);
+      
+      // Increment calculation count for upgrade prompts
+      const newCount = calculationCount + 1;
+      setCalculationCount(newCount);
+      
+      // Show real-time feedback
+      setFeedbackData({
+        type: 'calculation_complete',
+        title: 'Health Metrics Calculated!',
+        insights: [
+          `Your BMI is ${newResults.bmi} (${newResults.bmiCategory.category})`,
+          `Daily calorie needs: ${newResults.dailyCalories} calories`,
+          bmiInfo.risk === 'low' ? 'Great! Your BMI is in the healthy range.' :
+          bmiInfo.risk === 'moderate' ? 'Consider lifestyle changes for better health.' :
+          'Consult with a healthcare provider for personalized advice.'
+        ]
       });
       
-      setIsCalculating(false);
+      // Show upgrade prompt after 2nd calculation or if BMI suggests optimization
+      if (newCount >= 2 || bmiInfo.risk !== 'low') {
+        setTimeout(() => {
+          setShowUpgradePrompt(true);
+        }, 3000);
+      }
+      
     }, 1000);
   };
 
