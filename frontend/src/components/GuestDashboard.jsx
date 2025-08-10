@@ -1,45 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useRole } from '../context/RoleContext';
+import SmartNavigation from './shared/SmartNavigation';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { 
-  ArrowLeft, Zap, Clock, Eye, UserX, Plus, Apple, 
+  Zap, Clock, Eye, UserX, Plus, Apple, 
   Target, Info, BookOpen, TrendingUp, Award,
   Camera, Search, Edit, Heart
 } from 'lucide-react';
-
-// Component: Guest Header
-const GuestHeader = () => {
-  const navigate = useNavigate();
-  
-  return (
-    <header className="bg-white shadow-sm border-b">
-      <div className="max-w-7xl mx-auto px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/')}
-              className="hover:bg-purple-50"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Back to Home
-            </Button>
-            <div className="h-6 w-px bg-gray-300" />
-            <h1 className="text-2xl font-bold text-gray-900">Quick Health Tracking</h1>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-              <UserX className="w-3 h-3 mr-1" />
-              Guest Mode
-            </Badge>
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-};
 
 // Component: Quick Start Guide
 const QuickStart = () => (
