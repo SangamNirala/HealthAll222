@@ -17,6 +17,8 @@ import PatientFoodLog from "./components/PatientFoodLog";
 import PatientHealthMetrics from "./components/PatientHealthMetrics";
 import PatientGoals from "./components/PatientGoals";
 import PatientAnalytics from "./components/PatientAnalytics";
+import PatientMedicationReminder from "./components/PatientMedicationReminder";
+import PatientHealthTimeline from "./components/PatientHealthTimeline";
 
 // Provider navigation pages
 import ProviderPatients from "./components/ProviderPatients";
