@@ -3329,6 +3329,10 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Phase 6 Guest Goals Management...")
         phase6_success = self.test_phase6_guest_goals_management()
 
+        # Test Phase 7 Data Export Endpoints
+        print("\n📋 Testing Phase 7 Data Export Endpoints...")
+        phase7_success = self.test_phase7_data_export_endpoints()
+
         # Print final results
         print("\n" + "=" * 60)
         print(f"📊 FINAL RESULTS")
