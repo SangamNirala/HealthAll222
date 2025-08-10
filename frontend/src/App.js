@@ -30,6 +30,7 @@ import ProviderEducation from "./components/ProviderEducation";
 import GuestFoodLog from "./components/GuestFoodLog";
 import GuestNutritionTips from "./components/GuestNutritionTips";
 import GuestHealthCalculator from "./components/GuestHealthCalculator";
+import GuestGoals from "./components/GuestGoals";
 
 // Family navigation pages
 import FamilyMembers from "./components/FamilyMembers";
