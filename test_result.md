@@ -105,6 +105,18 @@
 user_problem_statement: "UI Enhancements: Add 'Previous surgeries or medical procedures' to Patient Health History step, wired to backend previous_surgeries field. Add body-fat visual cue/guide in Physical Metrics step. Show section '✓ Saved' badges in ProgressIndicator for Provider and Family wizards with per-section completion checks."
 
 frontend:
+  - task: "Patient Analytics Page"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/components/PatientAnalytics.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "IMPLEMENTED: Dedicated Patient Analytics page with charts, AI insights, smart food suggestions, and symptom correlation. Wired to backend endpoints with localStorage user id fallback. Added nav item and route. Ready for frontend testing."
+
   - task: "Patient Food Log Navigation"
     implemented: true
     working: true
