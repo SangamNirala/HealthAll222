@@ -23,6 +23,7 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
   const { currentRole, getRoleConfig, getCurrentTheme } = useRole();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   
   const roleConfig = getRoleConfig();
   const theme = getCurrentTheme();
