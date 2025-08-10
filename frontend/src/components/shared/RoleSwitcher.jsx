@@ -71,19 +71,77 @@ const RoleSwitcher = ({ isOpen, onClose }) => {
     const isCurrent = currentRole === role;
     const wasUsedBefore = roleHistory.includes(role);
 
+    const getCardClasses = () => {
+      if (!isSelected) return 'hover:bg-gray-50';
+      
+      switch (config.theme.primary) {
+        case 'blue':
+          return 'ring-2 ring-blue-500 bg-blue-50';
+        case 'emerald':
+          return 'ring-2 ring-emerald-500 bg-emerald-50';
+        case 'amber':
+          return 'ring-2 ring-amber-500 bg-amber-50';
+        case 'purple':
+          return 'ring-2 ring-purple-500 bg-purple-50';
+        default:
+          return 'ring-2 ring-gray-500 bg-gray-50';
+      }
+    };
+
+    const getIconClasses = () => {
+      switch (config.theme.primary) {
+        case 'blue':
+          return 'bg-gradient-to-r from-blue-500 to-blue-700';
+        case 'emerald':
+          return 'bg-gradient-to-r from-emerald-500 to-emerald-700';
+        case 'amber':
+          return 'bg-gradient-to-r from-amber-500 to-amber-700';
+        case 'purple':
+          return 'bg-gradient-to-r from-purple-500 to-purple-700';
+        default:
+          return 'bg-gradient-to-r from-gray-500 to-gray-700';
+      }
+    };
+
+    const getCheckClasses = () => {
+      switch (config.theme.primary) {
+        case 'blue':
+          return 'bg-blue-500';
+        case 'emerald':
+          return 'bg-emerald-500';
+        case 'amber':
+          return 'bg-amber-500';
+        case 'purple':
+          return 'bg-purple-500';
+        default:
+          return 'bg-gray-500';
+      }
+    };
+
+    const getBenefitClasses = () => {
+      switch (config.theme.primary) {
+        case 'blue':
+          return 'bg-gradient-to-r from-blue-500 to-blue-700';
+        case 'emerald':
+          return 'bg-gradient-to-r from-emerald-500 to-emerald-700';
+        case 'amber':
+          return 'bg-gradient-to-r from-amber-500 to-amber-700';
+        case 'purple':
+          return 'bg-gradient-to-r from-purple-500 to-purple-700';
+        default:
+          return 'bg-gradient-to-r from-gray-500 to-gray-700';
+      }
+    };
+
     return (
       <Card 
-        className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-          isSelected 
-            ? `ring-2 ring-${config.theme.primary}-500 bg-${config.theme.primary}-50` 
-            : 'hover:bg-gray-50'
-        }`}
+        className={`cursor-pointer transition-all duration-200 hover:shadow-md ${getCardClasses()}`}
         onClick={() => setSelectedRole(role)}
       >
         <CardContent className="p-6">
           <div className="flex items-start space-x-4">
             {/* Role Icon */}
-            <div className={`rounded-full p-3 bg-gradient-to-r ${config.theme.gradient} flex-shrink-0`}>
+            <div className={`rounded-full p-3 ${getIconClasses()} flex-shrink-0`}>
               <IconComponent className="w-6 h-6 text-white" />
             </div>
             
@@ -134,7 +192,7 @@ const RoleSwitcher = ({ isOpen, onClose }) => {
               <div className="space-y-1">
                 {description.benefits.map((benefit, index) => (
                   <div key={index} className="flex items-center space-x-2">
-                    <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${config.theme.gradient}`} />
+                    <div className={`w-1.5 h-1.5 rounded-full ${getBenefitClasses()}`} />
                     <span className="text-xs text-gray-700">{benefit}</span>
                   </div>
                 ))}
@@ -143,7 +201,7 @@ const RoleSwitcher = ({ isOpen, onClose }) => {
             
             {/* Selection Indicator */}
             {isSelected && (
-              <div className={`rounded-full p-1 bg-${config.theme.primary}-500`}>
+              <div className={`rounded-full p-1 ${getCheckClasses()}`}>
                 <Check className="w-4 h-4 text-white" />
               </div>
             )}
@@ -151,6 +209,24 @@ const RoleSwitcher = ({ isOpen, onClose }) => {
         </CardContent>
       </Card>
     );
+  };
+
+  const getSelectedConfig = () => getRoleConfig(selectedRole);
+  const selectedConfig = getSelectedConfig();
+
+  const getButtonClasses = () => {
+    switch (selectedConfig.theme.primary) {
+      case 'blue':
+        return 'bg-gradient-to-r from-blue-500 to-blue-700';
+      case 'emerald':
+        return 'bg-gradient-to-r from-emerald-500 to-emerald-700';
+      case 'amber':
+        return 'bg-gradient-to-r from-amber-500 to-amber-700';
+      case 'purple':
+        return 'bg-gradient-to-r from-purple-500 to-purple-700';
+      default:
+        return 'bg-gradient-to-r from-gray-500 to-gray-700';
+    }
   };
 
   return (
@@ -180,9 +256,9 @@ const RoleSwitcher = ({ isOpen, onClose }) => {
         <div className="flex items-center justify-between p-6 border-t bg-gray-50">
           <div className="text-sm text-gray-600">
             {selectedRole !== currentRole ? (
-              <span>Switching to <strong>{getRoleConfig(selectedRole).name}</strong> mode</span>
+              <span>Switching to <strong>{selectedConfig.name}</strong> mode</span>
             ) : (
-              <span>Currently in <strong>{getRoleConfig(selectedRole).name}</strong> mode</span>
+              <span>Currently in <strong>{selectedConfig.name}</strong> mode</span>
             )}
           </div>
           
@@ -193,7 +269,7 @@ const RoleSwitcher = ({ isOpen, onClose }) => {
             <Button 
               onClick={handleRoleSwitch}
               disabled={selectedRole === currentRole}
-              className={`bg-gradient-to-r ${getRoleConfig(selectedRole).theme.gradient} text-white hover:opacity-90 disabled:opacity-50`}
+              className={`${getButtonClasses()} text-white hover:opacity-90 disabled:opacity-50`}
             >
               {selectedRole === currentRole ? 'Current Role' : (
                 <>

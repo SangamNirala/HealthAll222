@@ -42,35 +42,27 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
   const handleQuickAction = (action) => {
     switch (action) {
       case 'quickLog':
-        // Handle quick food log action
         console.log('Quick log action triggered');
         break;
       case 'photoLog':
-        // Handle photo log action
         console.log('Photo log action triggered');
         break;
       case 'newPatient':
-        // Handle new patient action
         console.log('New patient action triggered');
         break;
       case 'prescriptions':
-        // Handle prescriptions action
         console.log('Prescriptions action triggered');
         break;
       case 'addMember':
-        // Handle add family member action
         console.log('Add member action triggered');
         break;
       case 'planMeals':
-        // Handle meal planning action
         console.log('Plan meals action triggered');
         break;
       case 'logFood':
-        // Handle guest food log action
         console.log('Log food action triggered');
         break;
       case 'setGoal':
-        // Handle set goal action
         console.log('Set goal action triggered');
         break;
       default:
@@ -82,15 +74,36 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
     const IconComponent = ICON_MAP[item.icon];
     const isActive = isActivePath(item.path);
     
+    const getActiveClasses = () => {
+      switch (theme.primary) {
+        case 'blue':
+          return isActive 
+            ? 'bg-blue-100 text-blue-900 hover:bg-blue-200' 
+            : 'hover:bg-blue-50 text-gray-700 hover:text-gray-900';
+        case 'emerald':
+          return isActive 
+            ? 'bg-emerald-100 text-emerald-900 hover:bg-emerald-200' 
+            : 'hover:bg-emerald-50 text-gray-700 hover:text-gray-900';
+        case 'amber':
+          return isActive 
+            ? 'bg-amber-100 text-amber-900 hover:bg-amber-200' 
+            : 'hover:bg-amber-50 text-gray-700 hover:text-gray-900';
+        case 'purple':
+          return isActive 
+            ? 'bg-purple-100 text-purple-900 hover:bg-purple-200' 
+            : 'hover:bg-purple-50 text-gray-700 hover:text-gray-900';
+        default:
+          return isActive 
+            ? 'bg-gray-100 text-gray-900 hover:bg-gray-200' 
+            : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900';
+      }
+    };
+    
     return (
       <Button
         variant={isActive ? "default" : "ghost"}
         onClick={() => handleNavigation(item.path)}
-        className={`${isMobile ? 'w-full justify-start' : ''} ${
-          isActive 
-            ? `bg-${theme.primary}-100 text-${theme.primary}-900 hover:bg-${theme.primary}-200` 
-            : `${theme.hoverBg} text-gray-700 hover:text-gray-900`
-        }`}
+        className={`${isMobile ? 'w-full justify-start' : ''} ${getActiveClasses()}`}
       >
         {IconComponent && <IconComponent className="w-4 h-4 mr-2" />}
         {item.label}
@@ -101,17 +114,64 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
   const QuickActionButton = ({ action, isMobile = false }) => {
     const IconComponent = ICON_MAP[action.icon];
     
+    const getGradientClass = () => {
+      switch (theme.primary) {
+        case 'blue':
+          return 'bg-gradient-to-r from-blue-500 to-blue-700';
+        case 'emerald':
+          return 'bg-gradient-to-r from-emerald-500 to-emerald-700';
+        case 'amber':
+          return 'bg-gradient-to-r from-amber-500 to-amber-700';
+        case 'purple':
+          return 'bg-gradient-to-r from-purple-500 to-purple-700';
+        default:
+          return 'bg-gradient-to-r from-gray-500 to-gray-700';
+      }
+    };
+    
     return (
       <Button
         size="sm"
         onClick={() => handleQuickAction(action.action)}
-        className={`${isMobile ? 'w-full justify-start' : ''} bg-gradient-to-r ${theme.gradient} text-white hover:opacity-90`}
+        className={`${isMobile ? 'w-full justify-start' : ''} ${getGradientClass()} text-white hover:opacity-90`}
       >
         {IconComponent && <IconComponent className="w-4 h-4 mr-2" />}
         {action.label}
       </Button>
     );
   };
+
+  const getThemeClasses = () => {
+    switch (theme.primary) {
+      case 'blue':
+        return {
+          gradient: 'from-blue-500 to-blue-700',
+          hover: 'hover:bg-blue-50'
+        };
+      case 'emerald':
+        return {
+          gradient: 'from-emerald-500 to-emerald-700',
+          hover: 'hover:bg-emerald-50'
+        };
+      case 'amber':
+        return {
+          gradient: 'from-amber-500 to-amber-700',
+          hover: 'hover:bg-amber-50'
+        };
+      case 'purple':
+        return {
+          gradient: 'from-purple-500 to-purple-700',
+          hover: 'hover:bg-purple-50'
+        };
+      default:
+        return {
+          gradient: 'from-gray-500 to-gray-700',
+          hover: 'hover:bg-gray-50'
+        };
+    }
+  };
+
+  const themeClasses = getThemeClasses();
 
   return (
     <nav className="bg-white shadow-sm border-b sticky top-0 z-40">
@@ -123,7 +183,7 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
             <Button
               variant="ghost"
               onClick={() => navigate('/')}
-              className={theme.hoverBg}
+              className={themeClasses.hover}
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
               <span className="hidden sm:inline">Home</span>
@@ -133,7 +193,7 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
             
             {/* Role Title */}
             <div className="flex items-center space-x-3">
-              <div className={`bg-gradient-to-r ${theme.gradient} rounded-xl p-2`}>
+              <div className={`bg-gradient-to-r ${themeClasses.gradient} rounded-xl p-2`}>
                 <Home className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-xl font-bold text-gray-900 hidden md:block">
@@ -150,11 +210,10 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
               {/* More menu for additional items */}
               {roleConfig.navigationItems.length > 4 && (
                 <div className="relative">
-                  <Button variant="ghost" className={theme.hoverBg}>
+                  <Button variant="ghost" className={themeClasses.hover}>
                     More
                     <ChevronDown className="w-4 h-4 ml-1" />
                   </Button>
-                  {/* Dropdown menu would go here */}
                 </div>
               )}
             </div>
