@@ -1375,7 +1375,8 @@ async def get_patient_analytics(user_id: str):
     }
     
     try:
-        ai_correlations = await get_health_correlations(health_data)
+        # ai_correlations = await get_health_correlations(health_data)
+        ai_correlations = {"correlations": []}
     except Exception as e:
         logger.error(f"AI correlations error: {e}")
         ai_correlations = {"correlations": []}
