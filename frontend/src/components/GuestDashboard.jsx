@@ -437,6 +437,36 @@ const GuestDashboard = () => {
           <NutritionTips handleUpgradeAction={handleUpgradeAction} />
         </div>
       </div>
+
+      {/* Real-time Feedback */}
+      {realtimeFeedback && (
+        <RealTimeFeedback
+          type="health_tip"
+          data={realtimeFeedback}
+          onAction={(action) => {
+            console.log('Dashboard feedback action:', action);
+            if (action === 'learn_more') {
+              setShowUpgradePrompt(true);
+            }
+          }}
+          onDismiss={() => setRealtimeFeedback(null)}
+          position="bottom-right"
+        />
+      )}
+
+      {/* Upgrade Modal */}
+      {showUpgradePrompt && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="max-w-lg">
+            <UpgradePrompt
+              type="data_persistence"
+              context={`You've been exploring for ${Math.floor(sessionTime / 60)} minutes and visited ${visitCount} times. Don't lose your progress - create a free account to save everything!`}
+              triggerAction={handleUpgradeAction}
+              onClose={() => setShowUpgradePrompt(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
