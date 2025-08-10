@@ -24,6 +24,7 @@ import PatientHealthTimeline from "./components/PatientHealthTimeline";
 import ProviderPatients from "./components/ProviderPatients";
 import ProviderTools from "./components/ProviderTools";
 import ProviderAnalytics from "./components/ProviderAnalytics";
+import ProviderEducation from "./components/ProviderEducation";
 
 // Guest navigation pages
 import GuestFoodLog from "./components/GuestFoodLog";
