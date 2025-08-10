@@ -25,6 +25,7 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentRole, getRoleConfig, getCurrentTheme } = useRole();
+  const { isMobile, isTablet, breakpoint } = useResponsive();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isRoleSwitcherOpen, setIsRoleSwitcherOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
