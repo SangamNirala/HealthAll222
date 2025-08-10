@@ -11,29 +11,29 @@ const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || '';
 const getPatientUserId = () => {
   try {
     const saved = localStorage.getItem('patient_user_id');
-    if (saved && typeof saved === 'string' && saved.trim().length &gt; 0) return saved;
+    if (saved && typeof saved === 'string' && saved.trim().length > 0) return saved;
   } catch (e) {}
   return 'demo-patient-123';
 };
 
-const StatTile = ({ title, value, subtitle, color = 'blue' }) =&gt; (
-  <Card className={`border-2 bg-${color}-50 border-${color}-200`} &gt;
-    <CardContent className="pt-5"&gt;
-      <div className={`text-2xl font-bold text-${color}-600`}&gt;{value}</div&gt;
-      <div className="text-sm text-gray-600"&gt;{title}</div&gt;
-      {subtitle ? <div className={`text-xs text-${color}-700 mt-1`}&gt;{subtitle}</div&gt; : null}
-    </CardContent&gt;
-  </Card&gt;
+const StatTile = ({ title, value, subtitle, color = 'blue' }) => (
+  <Card className={`border-2 bg-${color}-50 border-${color}-200`} >
+    <CardContent className="pt-5">
+      <div className={`text-2xl font-bold text-${color}-600`}>{value}</div>
+      <div className="text-sm text-gray-600">{title}</div>
+      {subtitle ? <div className={`text-xs text-${color}-700 mt-1`}>{subtitle}</div> : null}
+    </CardContent>
+  </Card>
 );
 
-const SimpleBarChart = ({ data = [], dataKey = 'calories', labelKey = 'date', barColor = '#3b82f6' }) =&gt; {
+const SimpleBarChart = ({ data = [], dataKey = 'calories', labelKey = 'date', barColor = '#3b82f6' }) => {
   // Pure CSS lightweight bars
-  const maxVal = useMemo(() =&gt; (data.length ? Math.max(...data.map(d =&gt; d[dataKey] || 0)) : 0), [data, dataKey]);
+  const maxVal = useMemo(() => (data.length ? Math.max(...data.map(d => d[dataKey] || 0)) : 0), [data, dataKey]);
   return (
-    <div className="w-full"&gt;
-      <div className="grid grid-cols-5 gap-3 items-end h-40"&gt;
-        {data.map((d, idx) =&gt; (
-          <div key={idx} className="flex flex-col items-center justify-end"&gt;
+    <div className="w-full">
+      <div className="grid grid-cols-5 gap-3 items-end h-40">
+        {data.map((d, idx) => (
+          <div key={idx} className="flex flex-col items-center justify-end">
             <div
               className="w-8 rounded-md"
               style={{
@@ -42,16 +42,16 @@ const SimpleBarChart = ({ data = [], dataKey = 'calories', labelKey = 'date', ba
                 opacity: 0.9
               }}
               title={`${d[labelKey]}: ${d[dataKey]}`}
-            /&gt;
-            <div className="text-[10px] text-gray-500 mt-1"&gt;{(d[labelKey] || '').slice(5)}</div&gt;
-          </div&gt;
+            />
+            <div className="text-[10px] text-gray-500 mt-1">{(d[labelKey] || '').slice(5)}</div>
+          </div>
         ))}
-      </div&gt;
-    </div&gt;
+      </div>
+    </div>
   );
 };
 
-const PatientAnalytics = () =&gt; {
+const PatientAnalytics = () => {
   const { switchRole } = useRole();
   const [userId, setUserId] = useState(getPatientUserId());
 
@@ -63,21 +63,21 @@ const PatientAnalytics = () =&gt; {
   const [correlations, setCorrelations] = useState(null);
   const [actionMessage, setActionMessage] = useState('');
 
-  useEffect(() =&gt; {
+  useEffect(() => {
     switchRole('patient');
     setUserId(getPatientUserId());
   }, [switchRole]);
 
-  useEffect(() =&gt; {
+  useEffect(() => {
     let ignore = false;
-    const fetchAll = async () =&gt; {
+    const fetchAll = async () => {
       setLoading(true);
       setError('');
       try {
         const [a, s, c] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/patient/analytics/${userId}`).then(r =&gt; r.json()),
-          fetch(`${API_BASE_URL}/api/patient/smart-suggestions/${userId}`).then(r =&gt; r.json()),
-          fetch(`${API_BASE_URL}/api/patient/symptoms-correlation/${userId}`).then(r =&gt; r.json())
+          fetch(`${API_BASE_URL}/api/patient/analytics/${userId}`).then(r => r.json()),
+          fetch(`${API_BASE_URL}/api/patient/smart-suggestions/${userId}`).then(r => r.json()),
+          fetch(`${API_BASE_URL}/api/patient/symptoms-correlation/${userId}`).then(r => r.json())
         ]);
         if (ignore) return;
         setAnalytics(a);
@@ -91,10 +91,10 @@ const PatientAnalytics = () =&gt; {
       }
     };
     fetchAll();
-    return () =&gt; { ignore = true; };
+    return () => { ignore = true; };
   }, [userId]);
 
-  const handleQuickAdd = async (item) =&gt; {
+  const handleQuickAdd = async (item) => {
     try {
       setActionMessage('Adding food...');
       const res = await fetch(`${API_BASE_URL}/api/patient/food-log`, {
@@ -111,10 +111,10 @@ const PatientAnalytics = () =&gt; {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.detail || 'Save failed');
       setActionMessage('✓ Added to today\'s log');
-      setTimeout(() =&gt; setActionMessage(''), 2000);
+      setTimeout(() => setActionMessage(''), 2000);
     } catch (e) {
       setActionMessage(`Save failed: ${e.message}`);
-      setTimeout(() =&gt; setActionMessage(''), 3000);
+      setTimeout(() => setActionMessage(''), 3000);
     }
   };
 
@@ -123,167 +123,167 @@ const PatientAnalytics = () =&gt; {
   const ai = analytics?.ai_powered_insights;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100"&gt;
-      <SmartNavigation /&gt;
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <SmartNavigation />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"&gt;
-        <div className="mb-6"&gt;
-          <h1 className="text-3xl font-bold text-gray-900 mb-1"&gt;Patient Analytics</h1&gt;
-          <p className="text-gray-600"&gt;Personal health analytics, AI insights, and smart suggestions</p&gt;
-        </div&gt;
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">Patient Analytics</h1>
+          <p className="text-gray-600">Personal health analytics, AI insights, and smart suggestions</p>
+        </div>
 
         {loading &amp;&amp; (
-          <div className="p-6 bg-white rounded-lg border text-gray-600"&gt;Loading analytics...</div&gt;
+          <div className="p-6 bg-white rounded-lg border text-gray-600">Loading analytics...</div>
         )}
         {!!error &amp;&amp; (
-          <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg mb-6"&gt;{error}</div&gt;
+          <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg mb-6">{error}</div>
         )}
 
         {!loading &amp;&amp; !error &amp;&amp; (
-          <div className="space-y-8"&gt;
+          <div className="space-y-8">
             {/* Top stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6"&gt;
-              <StatTile title="Avg Calories" value={(weekly?.average_calories || 0)} subtitle="last 7 days" color="blue" /&gt;
-              <StatTile title="Protein Goal Met" value={`${weekly?.protein_goal_met || 0}/7`} subtitle="days this week" color="purple" /&gt;
-              <StatTile title="Exercise Sessions" value={weekly?.exercise_sessions || 0} subtitle="this week" color="green" /&gt;
-              <StatTile title="Weight Change" value={`${weekly?.weight_change || 0} kg`} subtitle="last 7 days" color="indigo" /&gt;
-            </div&gt;
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <StatTile title="Avg Calories" value={(weekly?.average_calories || 0)} subtitle="last 7 days" color="blue" />
+              <StatTile title="Protein Goal Met" value={`${weekly?.protein_goal_met || 0}/7`} subtitle="days this week" color="purple" />
+              <StatTile title="Exercise Sessions" value={weekly?.exercise_sessions || 0} subtitle="this week" color="green" />
+              <StatTile title="Weight Change" value={`${weekly?.weight_change || 0} kg`} subtitle="last 7 days" color="indigo" />
+            </div>
 
             {/* Nutrition trends chart */}
-            <Card className="col-span-full"&gt;
-              <CardHeader&gt;
-                <CardTitle className="flex items-center"&gt;
-                  <BarChart3 className="w-5 h-5 mr-2 text-blue-600" /&gt;
+            <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <BarChart3 className="w-5 h-5 mr-2 text-blue-600" />
                   Calories - Last 5 Days
-                </CardTitle&gt;
-              </CardHeader&gt;
-              <CardContent&gt;
-                <SimpleBarChart data={nutritionTrends} dataKey="calories" labelKey="date" /&gt;
-              </CardContent&gt;
-            </Card&gt;
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SimpleBarChart data={nutritionTrends} dataKey="calories" labelKey="date" />
+              </CardContent>
+            </Card>
 
             {/* AI Insights and Recommendations */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6"&gt;
-              <Card&gt;
-                <CardHeader&gt;
-                  <CardTitle className="flex items-center"&gt;
-                    <Brain className="w-5 h-5 mr-2 text-purple-600" /&gt;
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Brain className="w-5 h-5 mr-2 text-purple-600" />
                     AI Insights
-                  </CardTitle&gt;
-                </CardHeader&gt;
-                <CardContent className="space-y-3"&gt;
-                  <div className="text-sm text-gray-500"&gt;
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="text-sm text-gray-500">
                     Source: {ai?.source || 'default'} • Confidence: {(ai?.confidence ?? 0) * 100}%
-                  </div&gt;
-                  <div className="space-y-2"&gt;
-                    {(ai?.insights || []).map((msg, idx) =&gt; (
-                      <div key={idx} className="p-3 bg-purple-50 rounded-md text-purple-900"&gt;{typeof msg === 'string' ? msg : JSON.stringify(msg)}</div&gt;
+                  </div>
+                  <div className="space-y-2">
+                    {(ai?.insights || []).map((msg, idx) => (
+                      <div key={idx} className="p-3 bg-purple-50 rounded-md text-purple-900">{typeof msg === 'string' ? msg : JSON.stringify(msg)}</div>
                     ))}
-                  </div&gt;
-                  <div className="pt-2"&gt;
-                    <div className="text-xs uppercase text-gray-500 mb-2"&gt;Recommendations</div&gt;
-                    <div className="grid gap-2"&gt;
-                      {(ai?.recommendations || []).map((r, idx) =&gt; (
-                        <div key={idx} className="p-3 bg-blue-50 rounded-md text-blue-900"&gt;{typeof r === 'string' ? r : JSON.stringify(r)}</div&gt;
+                  </div>
+                  <div className="pt-2">
+                    <div className="text-xs uppercase text-gray-500 mb-2">Recommendations</div>
+                    <div className="grid gap-2">
+                      {(ai?.recommendations || []).map((r, idx) => (
+                        <div key={idx} className="p-3 bg-blue-50 rounded-md text-blue-900">{typeof r === 'string' ? r : JSON.stringify(r)}</div>
                       ))}
-                    </div&gt;
-                  </div&gt;
-                </CardContent&gt;
-              </Card&gt;
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-              <Card&gt;
-                <CardHeader&gt;
-                  <CardTitle className="flex items-center"&gt;
-                    <Sparkles className="w-5 h-5 mr-2 text-amber-600" /&gt;
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Sparkles className="w-5 h-5 mr-2 text-amber-600" />
                     Personal Insights
-                  </CardTitle&gt;
-                </CardHeader&gt;
-                <CardContent className="space-y-2"&gt;
-                  {(analytics?.personal_insights || []).map((it, idx) =&gt; (
-                    <div key={idx} className="p-3 bg-amber-50 rounded-md"&gt;
-                      <div className="text-sm font-medium text-amber-900"&gt;{it.title || it.type || 'Insight'}</div&gt;
-                      <div className="text-sm text-amber-800"&gt;{it.message || (typeof it === 'string' ? it : JSON.stringify(it))}</div&gt;
-                      {it.date ? <div className="text-xs text-amber-700 mt-1"&gt;{it.date}</div&gt; : null}
-                    </div&gt;
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {(analytics?.personal_insights || []).map((it, idx) => (
+                    <div key={idx} className="p-3 bg-amber-50 rounded-md">
+                      <div className="text-sm font-medium text-amber-900">{it.title || it.type || 'Insight'}</div>
+                      <div className="text-sm text-amber-800">{it.message || (typeof it === 'string' ? it : JSON.stringify(it))}</div>
+                      {it.date ? <div className="text-xs text-amber-700 mt-1">{it.date}</div> : null}
+                    </div>
                   ))}
-                </CardContent&gt;
-              </Card&gt;
-            </div&gt;
+                </CardContent>
+              </Card>
+            </div>
 
             {/* Smart Food Suggestions */}
-            <Card&gt;
-              <CardHeader&gt;
-                <CardTitle className="flex items-center justify-between"&gt;
-                  <span className="flex items-center"&gt;
-                    <Activity className="w-5 h-5 mr-2 text-green-600" /&gt;
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center">
+                    <Activity className="w-5 h-5 mr-2 text-green-600" />
                     Smart Food Suggestions
-                  </span&gt;
-                  {actionMessage ? <Badge variant="secondary"&gt;{actionMessage}</Badge&gt; : null}
-                </CardTitle&gt;
-              </CardHeader&gt;
-              <CardContent&gt;
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"&gt;
-                  {(suggestions?.quick_add_suggestions || []).map((sug, idx) =&gt; (
-                    <div key={idx} className="border rounded-lg p-4 bg-white hover:bg-gray-50"&gt;
-                      <div className="font-semibold text-gray-900"&gt;{sug.name}</div&gt;
-                      <div className="text-sm text-gray-600"&gt;{sug.reason}</div&gt;
-                      <div className="text-xs text-gray-500 mt-1"&gt;{sug.calories} kcal</div&gt;
-                      <Button onClick={() =&gt; handleQuickAdd(sug)} className="mt-3 bg-blue-600 hover:bg-blue-700" size="sm"&gt;
-                        <Plus className="w-4 h-4 mr-2" /&gt;
+                  </span>
+                  {actionMessage ? <Badge variant="secondary">{actionMessage}</Badge> : null}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {(suggestions?.quick_add_suggestions || []).map((sug, idx) => (
+                    <div key={idx} className="border rounded-lg p-4 bg-white hover:bg-gray-50">
+                      <div className="font-semibold text-gray-900">{sug.name}</div>
+                      <div className="text-sm text-gray-600">{sug.reason}</div>
+                      <div className="text-xs text-gray-500 mt-1">{sug.calories} kcal</div>
+                      <Button onClick={() => handleQuickAdd(sug)} className="mt-3 bg-blue-600 hover:bg-blue-700" size="sm">
+                        <Plus className="w-4 h-4 mr-2" />
                         Quick Add
-                      </Button&gt;
-                    </div&gt;
+                      </Button>
+                    </div>
                   ))}
-                </div&gt;
-              </CardContent&gt;
-            </Card&gt;
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Symptom Correlations */}
-            <Card&gt;
-              <CardHeader&gt;
-                <CardTitle className="flex items-center"&gt;
-                  <Target className="w-5 h-5 mr-2 text-red-600" /&gt;
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Target className="w-5 h-5 mr-2 text-red-600" />
                   Symptom Correlation Tracker
-                </CardTitle&gt;
-              </CardHeader&gt;
-              <CardContent className="space-y-4"&gt;
-                {(correlations?.correlations || []).map((co, idx) =&gt; (
-                  <div key={idx} className="border rounded-lg p-4 bg-gray-50"&gt;
-                    <div className="font-semibold text-gray-900 mb-1"&gt;{co.symptom}</div&gt;
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm"&gt;
-                      <div&gt;
-                        <div className="text-gray-600 mb-1"&gt;Strong Positive</div&gt;
-                        <div className="flex flex-wrap gap-2"&gt;
-                          {(co.strong_positive || []).map((t, i) =&gt; (
-                            <Badge key={i} variant="secondary"&gt;{t}</Badge&gt;
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {(correlations?.correlations || []).map((co, idx) => (
+                  <div key={idx} className="border rounded-lg p-4 bg-gray-50">
+                    <div className="font-semibold text-gray-900 mb-1">{co.symptom}</div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                      <div>
+                        <div className="text-gray-600 mb-1">Strong Positive</div>
+                        <div className="flex flex-wrap gap-2">
+                          {(co.strong_positive || []).map((t, i) => (
+                            <Badge key={i} variant="secondary">{t}</Badge>
                           ))}
-                        </div&gt;
-                      </div&gt;
-                      <div&gt;
-                        <div className="text-gray-600 mb-1"&gt;Strong Negative</div&gt;
-                        <div className="flex flex-wrap gap-2"&gt;
-                          {(co.strong_negative || []).map((t, i) =&gt; (
-                            <Badge key={i} className="bg-red-100 text-red-800"&gt;{t}</Badge&gt;
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 mb-1">Strong Negative</div>
+                        <div className="flex flex-wrap gap-2">
+                          {(co.strong_negative || []).map((t, i) => (
+                            <Badge key={i} className="bg-red-100 text-red-800">{t}</Badge>
                           ))}
-                        </div&gt;
-                      </div&gt;
-                      <div&gt;
-                        <div className="text-gray-600 mb-1"&gt;Insights</div&gt;
-                        <ul className="list-disc pl-5 text-gray-800"&gt;
-                          {(co.insights || []).map((t, i) =&gt; (
-                            <li key={i}&gt;{t}</li&gt;
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 mb-1">Insights</div>
+                        <ul className="list-disc pl-5 text-gray-800">
+                          {(co.insights || []).map((t, i) => (
+                            <li key={i}>{t}</li>
                           ))}
-                        </ul&gt;
-                      </div&gt;
-                    </div&gt;
-                  </div&gt;
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </CardContent&gt;
-            </Card&gt;
-          </div&gt;
+              </CardContent>
+            </Card>
+          </div>
         )}
-      </div&gt;
-    </div&gt;
+      </div>
+    </div>
   );
 };
 
