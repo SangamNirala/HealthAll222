@@ -211,10 +211,35 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
               {/* More menu for additional items */}
               {roleConfig.navigationItems.length > 4 && (
                 <div className="relative">
-                  <Button variant="ghost" className={themeClasses.hover}>
+                  <Button 
+                    variant="ghost" 
+                    className={themeClasses.hover}
+                    onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
+                  >
                     More
                     <ChevronDown className="w-4 h-4 ml-1" />
                   </Button>
+                  
+                  {/* More dropdown menu */}
+                  {isMoreMenuOpen && (
+                    <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                      <div className="py-2">
+                        {roleConfig.navigationItems.slice(4).map((item) => (
+                          <button
+                            key={item.path}
+                            onClick={() => {
+                              handleNavigation(item.path);
+                              setIsMoreMenuOpen(false);
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700 hover:text-gray-900 flex items-center"
+                          >
+                            {ICON_MAP[item.icon] && React.createElement(ICON_MAP[item.icon], { className: "w-4 h-4 mr-2" })}
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
