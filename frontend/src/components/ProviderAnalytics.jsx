@@ -4,7 +4,7 @@ import SmartNavigation from './shared/SmartNavigation';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { BarChart3, TrendingUp, Users, Calendar, Target, AlertTriangle, Download, Filter, Activity, Heart, Brain } from 'lucide-react';
+import { BarChart3, TrendingUp, Users, Calendar, Target, AlertTriangle, Download, Filter, Activity, Heart, Brain, Lightbulb } from 'lucide-react';
 
 const ProviderAnalytics = () => {
   const { switchRole } = useRole();
