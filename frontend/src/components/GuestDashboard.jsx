@@ -382,17 +382,17 @@ const GuestDashboard = () => {
     setVisitCount(currentVisits);
     localStorage.setItem('guest_visit_count', currentVisits.toString());
     
+    // Update session time every 30 seconds
+    const sessionTimer = setInterval(() => {
+      setSessionTime(Math.floor((Date.now() - startTime) / 1000));
+    }, 30000);
+    
     // Show upgrade prompt after 2 minutes or 3rd visit
     const timer = setTimeout(() => {
       if (currentVisits >= 3 || sessionTime > 120) {
         setShowUpgradePrompt(true);
       }
     }, 120000); // 2 minutes
-    
-    // Update session time every 30 seconds
-    const sessionTimer = setInterval(() => {
-      setSessionTime(Math.floor((Date.now() - startTime) / 1000));
-    }, 30000);
     
     // Show welcome feedback for new users
     if (currentVisits === 1) {
@@ -413,7 +413,7 @@ const GuestDashboard = () => {
       clearTimeout(timer);
       clearInterval(sessionTimer);
     };
-  }, [switchRole]);
+  }, [switchRole, sessionTime]);
 
   const handleUpgradeAction = () => {
     console.log('Upgrade action triggered from dashboard');
