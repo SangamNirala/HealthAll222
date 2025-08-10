@@ -27,7 +27,9 @@ const ROLE_CONFIG = {
       { label: 'Food Log', path: '/patient-food-log', icon: 'Apple' },
       { label: 'Health Metrics', path: '/patient-metrics', icon: 'Activity' },
       { label: 'Goals', path: '/patient-goals', icon: 'Target' },
-      { label: 'Analytics', path: '/patient-analytics', icon: 'BarChart3' }
+      { label: 'Analytics', path: '/patient-analytics', icon: 'BarChart3' },
+      { label: 'Medications', path: '/patient-medications', icon: 'Pill' },
+      { label: 'Health Timeline', path: '/patient-timeline', icon: 'Timeline' }
     ],
     quickActions: [
       { label: 'Quick Log', icon: 'Plus', action: 'quickLog' },
