@@ -6,7 +6,6 @@ import { Input } from './ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { 
-  Timeline, 
   Calendar, 
   TrendingUp, 
   TrendingDown,
