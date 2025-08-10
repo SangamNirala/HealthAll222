@@ -1,44 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useRole } from '../context/RoleContext';
+import SmartNavigation from './shared/SmartNavigation';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 import { 
-  ArrowLeft, Activity, Apple, Target, TrendingUp, Camera, 
+  Activity, Apple, Target, TrendingUp, Camera, 
   Scale, Heart, Droplets, Plus, Clock, Award, ChevronRight 
 } from 'lucide-react';
-
-// Component: Patient Header
-const PatientHeader = () => {
-  const navigate = useNavigate();
-  
-  return (
-    <header className="bg-white shadow-sm border-b">
-      <div className="max-w-7xl mx-auto px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/')}
-              className="hover:bg-blue-50"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Back to Home
-            </Button>
-            <div className="h-6 w-px bg-gray-300" />
-            <h1 className="text-2xl font-bold text-gray-900">Personal Health Dashboard</h1>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Button size="sm" className="bg-blue-500 hover:bg-blue-600">
-              <Plus className="w-4 h-4 mr-2" />
-              Quick Log
-            </Button>
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-};
 
 // Component: Welcome Card
 const WelcomeCard = () => (
