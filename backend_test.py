@@ -1064,6 +1064,328 @@ class HealthPlatformAPITester:
         
         return success1 and success2 and success3
 
+    def test_phase3_patient_apis(self):
+        """Test Phase 3 Patient APIs: Medications, Health Timeline, and Enhanced Food Logging"""
+        print("\n📋 Testing Phase 3 Patient APIs...")
+        
+        test_user_id = "demo-patient-123"
+        
+        # Test Patient Medication APIs
+        medication_success = self.test_patient_medication_apis(test_user_id)
+        
+        # Test Patient Health Timeline APIs
+        timeline_success = self.test_patient_health_timeline_apis(test_user_id)
+        
+        # Test Enhanced Food Logging API
+        food_logging_success = self.test_enhanced_food_logging_api()
+        
+        return medication_success and timeline_success and food_logging_success
+
+    def test_patient_medication_apis(self, user_id):
+        """Test Patient Medication API endpoints"""
+        print("\n💊 Testing Patient Medication APIs...")
+        
+        # Test 1: GET /api/patient/medications/{user_id}
+        success1, medications_data = self.run_test(
+            "Get Patient Medications",
+            "GET",
+            f"patient/medications/{user_id}",
+            200
+        )
+        
+        # Validate medications response structure
+        if success1 and medications_data:
+            expected_keys = ['medications', 'reminders', 'adherence_stats', 'ai_insights']
+            missing_keys = [key for key in expected_keys if key not in medications_data]
+            if not missing_keys:
+                print(f"   ✅ Medications response contains all required keys: {expected_keys}")
+                
+                # Validate medications array structure
+                medications = medications_data.get('medications', [])
+                if medications and len(medications) > 0:
+                    med = medications[0]
+                    med_keys = ['id', 'name', 'dosage', 'frequency', 'times', 'adherence_rate', 'status']
+                    missing_med_keys = [key for key in med_keys if key not in med]
+                    if not missing_med_keys:
+                        print(f"   ✅ Medication object structure valid")
+                    else:
+                        print(f"   ❌ Medication object missing keys: {missing_med_keys}")
+                        success1 = False
+            else:
+                print(f"   ❌ Medications response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: POST /api/patient/medications/{user_id}/take
+        sample_medication_take_data = {
+            "medication_id": "med_001",
+            "taken_at": datetime.utcnow().isoformat(),
+            "notes": "Taken with breakfast as prescribed"
+        }
+        
+        success2, take_response = self.run_test(
+            "Mark Medication as Taken",
+            "POST",
+            f"patient/medications/{user_id}/take",
+            200,
+            data=sample_medication_take_data
+        )
+        
+        # Validate take medication response
+        if success2 and take_response:
+            expected_keys = ['success', 'medication_id', 'taken_at']
+            missing_keys = [key for key in expected_keys if key not in take_response]
+            if not missing_keys:
+                print(f"   ✅ Take medication response contains required keys: {expected_keys}")
+            else:
+                print(f"   ❌ Take medication response missing keys: {missing_keys}")
+                success2 = False
+        
+        # Test 3: POST /api/patient/medications/{user_id} (Add new medication)
+        sample_new_medication = {
+            "name": "Vitamin D3",
+            "dosage": "2000 IU",
+            "frequency": "daily",
+            "times": ["09:00"],
+            "with_food": False,
+            "condition": "Vitamin D Deficiency",
+            "prescriber": "Dr. Johnson",
+            "start_date": "2024-01-16",
+            "end_date": None
+        }
+        
+        success3, add_response = self.run_test(
+            "Add New Medication",
+            "POST",
+            f"patient/medications/{user_id}",
+            200,
+            data=sample_new_medication
+        )
+        
+        # Validate add medication response
+        if success3 and add_response:
+            expected_keys = ['success', 'medication', 'message']
+            missing_keys = [key for key in expected_keys if key not in add_response]
+            if not missing_keys:
+                print(f"   ✅ Add medication response contains required keys: {expected_keys}")
+                
+                # Validate the medication object in response
+                medication = add_response.get('medication', {})
+                if medication:
+                    med_keys = ['id', 'name', 'dosage', 'frequency', 'status']
+                    missing_med_keys = [key for key in med_keys if key not in medication]
+                    if not missing_med_keys:
+                        print(f"   ✅ Added medication object structure valid")
+                    else:
+                        print(f"   ❌ Added medication object missing keys: {missing_med_keys}")
+                        success3 = False
+            else:
+                print(f"   ❌ Add medication response missing keys: {missing_keys}")
+                success3 = False
+        
+        return success1 and success2 and success3
+
+    def test_patient_health_timeline_apis(self, user_id):
+        """Test Patient Health Timeline API endpoints"""
+        print("\n📅 Testing Patient Health Timeline APIs...")
+        
+        # Test 1: GET /api/patient/timeline/{user_id}
+        success1, timeline_data = self.run_test(
+            "Get Patient Health Timeline",
+            "GET",
+            f"patient/timeline/{user_id}",
+            200
+        )
+        
+        # Validate timeline response structure
+        if success1 and timeline_data:
+            expected_keys = ['timeline_events', 'patterns', 'milestones', 'ai_insights', 'categories_summary']
+            missing_keys = [key for key in expected_keys if key not in timeline_data]
+            if not missing_keys:
+                print(f"   ✅ Timeline response contains all required keys: {expected_keys}")
+                
+                # Validate timeline events structure
+                events = timeline_data.get('timeline_events', [])
+                if events and len(events) > 0:
+                    event = events[0]
+                    event_keys = ['id', 'date', 'type', 'title', 'value', 'category', 'impact']
+                    missing_event_keys = [key for key in event_keys if key not in event]
+                    if not missing_event_keys:
+                        print(f"   ✅ Timeline event structure valid")
+                    else:
+                        print(f"   ❌ Timeline event missing keys: {missing_event_keys}")
+                        success1 = False
+                
+                # Validate patterns structure
+                patterns = timeline_data.get('patterns', {})
+                if patterns:
+                    pattern_keys = ['energy_correlation', 'sleep_impact', 'nutrition_consistency']
+                    missing_pattern_keys = [key for key in pattern_keys if key not in patterns]
+                    if not missing_pattern_keys:
+                        print(f"   ✅ Timeline patterns structure valid")
+                    else:
+                        print(f"   ❌ Timeline patterns missing keys: {missing_pattern_keys}")
+            else:
+                print(f"   ❌ Timeline response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: POST /api/patient/timeline/{user_id}/event
+        sample_timeline_event = {
+            "type": "exercise",
+            "title": "Morning Yoga Session",
+            "value": "30 minutes",
+            "category": "activity",
+            "details": "Completed 30-minute yoga session focusing on flexibility and mindfulness",
+            "impact": "positive",
+            "date": datetime.utcnow().date().isoformat()
+        }
+        
+        success2, event_response = self.run_test(
+            "Add Timeline Event",
+            "POST",
+            f"patient/timeline/{user_id}/event",
+            200,
+            data=sample_timeline_event
+        )
+        
+        # Validate add event response
+        if success2 and event_response:
+            expected_keys = ['success', 'event', 'message']
+            missing_keys = [key for key in expected_keys if key not in event_response]
+            if not missing_keys:
+                print(f"   ✅ Add timeline event response contains required keys: {expected_keys}")
+                
+                # Validate the event object in response
+                event = event_response.get('event', {})
+                if event:
+                    event_keys = ['id', 'date', 'type', 'title', 'value', 'category']
+                    missing_event_keys = [key for key in event_keys if key not in event]
+                    if not missing_event_keys:
+                        print(f"   ✅ Added timeline event structure valid")
+                    else:
+                        print(f"   ❌ Added timeline event missing keys: {missing_event_keys}")
+                        success2 = False
+            else:
+                print(f"   ❌ Add timeline event response missing keys: {missing_keys}")
+                success2 = False
+        
+        return success1 and success2
+
+    def test_enhanced_food_logging_api(self):
+        """Test Enhanced Food Logging API with AI pattern recognition"""
+        print("\n🍎 Testing Enhanced Food Logging API...")
+        
+        # Test various food names to verify AI pattern recognition
+        test_foods = [
+            {
+                "food_name": "Grilled Chicken Breast",
+                "meal_type": "lunch",
+                "quantity": 150,
+                "unit": "grams"
+            },
+            {
+                "food_name": "Greek Yogurt with Berries",
+                "meal_type": "breakfast",
+                "quantity": 200,
+                "unit": "grams"
+            },
+            {
+                "food_name": "Quinoa Salad",
+                "meal_type": "dinner",
+                "quantity": 250,
+                "unit": "grams"
+            },
+            {
+                "food_name": "Avocado Toast",
+                "meal_type": "breakfast",
+                "quantity": 1,
+                "unit": "slice"
+            },
+            {
+                "food_name": "Salmon Fillet",
+                "meal_type": "dinner",
+                "quantity": 180,
+                "unit": "grams"
+            }
+        ]
+        
+        all_tests_passed = True
+        
+        for i, food_data in enumerate(test_foods, 1):
+            success, response = self.run_test(
+                f"Enhanced Food Logging - {food_data['food_name']}",
+                "POST",
+                "patient/food-log",
+                200,
+                data=food_data
+            )
+            
+            if success and response:
+                # Validate enhanced food logging response structure
+                expected_keys = ['success', 'food_entry', 'daily_totals', 'ai_insights', 'pattern_recognition', 'smart_suggestions']
+                missing_keys = [key for key in expected_keys if key not in response]
+                
+                if not missing_keys:
+                    print(f"   ✅ Enhanced food logging response contains all required keys")
+                    
+                    # Validate food_entry structure
+                    food_entry = response.get('food_entry', {})
+                    entry_keys = ['id', 'food_name', 'calories', 'protein', 'carbs', 'fat', 'confidence', 'ai_enhanced']
+                    missing_entry_keys = [key for key in entry_keys if key not in food_entry]
+                    
+                    if not missing_entry_keys:
+                        print(f"   ✅ Food entry structure valid with AI enhancement")
+                        
+                        # Check AI enhancement indicators
+                        ai_enhanced = food_entry.get('ai_enhanced', False)
+                        confidence = food_entry.get('confidence', 0)
+                        print(f"   ✅ AI Enhanced: {ai_enhanced}, Confidence: {confidence}")
+                    else:
+                        print(f"   ❌ Food entry missing keys: {missing_entry_keys}")
+                        all_tests_passed = False
+                    
+                    # Validate AI insights
+                    ai_insights = response.get('ai_insights', [])
+                    if ai_insights:
+                        print(f"   ✅ AI insights provided: {len(ai_insights)} insights")
+                    else:
+                        print(f"   ⚠️  No AI insights provided")
+                    
+                    # Validate pattern recognition
+                    pattern_recognition = response.get('pattern_recognition', {})
+                    pattern_keys = ['meal_timing_pattern', 'nutrition_balance', 'suggestions']
+                    missing_pattern_keys = [key for key in pattern_keys if key not in pattern_recognition]
+                    
+                    if not missing_pattern_keys:
+                        print(f"   ✅ Pattern recognition structure valid")
+                        suggestions = pattern_recognition.get('suggestions', [])
+                        if suggestions:
+                            print(f"   ✅ Pattern-based suggestions: {len(suggestions)} suggestions")
+                    else:
+                        print(f"   ❌ Pattern recognition missing keys: {missing_pattern_keys}")
+                        all_tests_passed = False
+                    
+                    # Validate smart suggestions
+                    smart_suggestions = response.get('smart_suggestions', {})
+                    smart_keys = ['complementary_foods', 'portion_feedback', 'timing_feedback']
+                    missing_smart_keys = [key for key in smart_keys if key not in smart_suggestions]
+                    
+                    if not missing_smart_keys:
+                        print(f"   ✅ Smart suggestions structure valid")
+                        complementary_foods = smart_suggestions.get('complementary_foods', [])
+                        if complementary_foods:
+                            print(f"   ✅ Complementary food suggestions: {len(complementary_foods)} suggestions")
+                    else:
+                        print(f"   ❌ Smart suggestions missing keys: {missing_smart_keys}")
+                        all_tests_passed = False
+                        
+                else:
+                    print(f"   ❌ Enhanced food logging response missing keys: {missing_keys}")
+                    all_tests_passed = False
+            else:
+                all_tests_passed = False
+        
+        return all_tests_passed
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
