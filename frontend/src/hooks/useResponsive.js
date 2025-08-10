@@ -240,10 +240,10 @@ export const usePerformanceMonitor = () => {
     observer.observe({ entryTypes: ['measure'] });
 
     // Monitor memory usage (if available)
-    if ('memory' in performance) {
+    if (performance.memory) {
       setMetrics(prev => ({
         ...prev,
-        memoryUsage: (performance as any).memory.usedJSHeapSize
+        memoryUsage: performance.memory.usedJSHeapSize
       }));
     }
 
