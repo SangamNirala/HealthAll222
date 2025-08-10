@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useRole } from '../../context/RoleContext';
+import SmartNavigation from '../shared/SmartNavigation';
+import Breadcrumb from '../shared/Breadcrumb';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { ArrowLeft, User, Activity, Heart, Target, Utensils, Settings, CheckCircle, Clock } from 'lucide-react';
+import { User, Activity, Heart, Target, Utensils, Settings, CheckCircle, Clock } from 'lucide-react';
 import ProgressIndicator from '../shared/ProgressIndicator';
 import WizardNavigation from '../shared/WizardNavigation';
 import useAutoSave from '../../hooks/useAutoSave';
