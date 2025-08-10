@@ -4,11 +4,12 @@ import { useRole } from '../../context/RoleContext';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import RoleSwitcher from './RoleSwitcher';
+import DataExport from './DataExport';
 import { 
   ArrowLeft, LayoutDashboard, User, Users, Apple, Activity, Target, 
   Stethoscope, BarChart3, BookOpen, FileText, UserPlus, ChefHat, 
   Calendar, Shield, Settings, Plus, Camera, Menu, X, Home, ChevronDown,
-  Pill, Timeline
+  Pill, Timeline, Download
 } from 'lucide-react';
 
 
