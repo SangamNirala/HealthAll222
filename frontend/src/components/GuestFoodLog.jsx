@@ -373,9 +373,18 @@ const GuestFoodLog = () => {
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Plus className="w-5 h-5 mr-2 text-purple-600" />
-                  Add Food
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center">
+                    <Plus className="w-5 h-5 mr-2 text-purple-600" />
+                    Add Food
+                  </span>
+                  {loggedFoods.length >= 3 && (
+                    <UpgradePrompt
+                      type="food_logging_limit"
+                      compact={true}
+                      triggerAction={() => setShowUpgradePrompt(true)}
+                    />
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
