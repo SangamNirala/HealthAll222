@@ -268,50 +268,72 @@ const PatientProfileWizard = () => {
     }
   };
 
+  // Create breadcrumb items for wizard steps
+  const breadcrumbItems = stepLabels.map((label, index) => {
+    const stepNumber = index + 1;
+    const isCompleted = stepNumber < currentStep;
+    const isCurrent = stepNumber === currentStep;
+    
+    let status = 'pending';
+    if (isCompleted) status = 'completed';
+    else if (isCurrent) status = 'current';
+    
+    return {
+      label: `${stepNumber}. ${label}`,
+      status,
+      description: stepNumber === currentStep ? 'Complete this section to continue' : undefined,
+      onClick: () => {
+        // Allow clicking to completed steps
+        if (stepNumber < currentStep || stepNumber === currentStep) {
+          setCurrentStep(stepNumber);
+        }
+      }
+    };
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate('/')}
-                className="hover:bg-blue-50"
-              >
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Back to Home
-              </Button>
-              <div className="h-6 w-px bg-gray-300" />
-              <h1 className="text-2xl font-bold text-gray-900">
-                {isEditing ? 'Edit Health Profile' : 'Create Your Health Profile'}
-              </h1>
-            </div>
-            
-            {/* Save Status and Section Completion */}
-            <div className="flex items-center space-x-4">
-              {Object.values(sectionCompletion).some(complete => complete) && (
-                <div className="flex items-center text-green-600 text-sm">
-                  <CheckCircle className="w-4 h-4 mr-1" />
-                  Auto-save enabled
-                </div>
-              )}
-              
-              {saveError && (
-                <div className="text-red-600 text-sm max-w-xs">
-                  Save failed: {typeof saveError === 'string' ? saveError : 'Please complete required fields before saving'}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Smart Navigation with Breadcrumbs */}
+      <SmartNavigation 
+        breadcrumbs={
+          <Breadcrumb 
+            items={breadcrumbItems}
+            currentStep={currentStep - 1}
+            showProgress={true}
+          />
+        }
+        showRoleSwitcher={true}
+      />
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-6 py-8">
         <Card className="shadow-lg">
           <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl text-gray-900">
+                  {isEditing ? 'Edit Health Profile' : 'Create Your Health Profile'}
+                </CardTitle>
+                <p className="text-gray-600 mt-2">Step {currentStep} of {totalSteps}</p>
+              </div>
+              
+              {/* Save Status */}
+              <div className="flex items-center space-x-4">
+                {Object.values(sectionCompletion).some(complete => complete) && (
+                  <div className="flex items-center text-green-600 text-sm">
+                    <CheckCircle className="w-4 h-4 mr-1" />
+                    Auto-save enabled
+                  </div>
+                )}
+                
+                {saveError && (
+                  <div className="text-red-600 text-sm max-w-xs">
+                    Save failed: {typeof saveError === 'string' ? saveError : 'Please complete required fields before saving'}
+                  </div>
+                )}
+              </div>
+            </div>
+            
             <ProgressIndicator 
               currentStep={currentStep} 
               totalSteps={totalSteps}
