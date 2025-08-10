@@ -351,11 +351,58 @@ const HealthCalculatorCard = () => {
 // Main Guest Dashboard Component
 const GuestDashboard = () => {
   const { switchRole } = useRole();
+  const [sessionTime, setSessionTime] = useState(0);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [realtimeFeedback, setRealtimeFeedback] = useState(null);
+  const [visitCount, setVisitCount] = useState(0);
 
   // Set role to guest when component mounts
   useEffect(() => {
     switchRole('guest');
+    
+    // Track session time and visit count for upgrade triggers
+    const startTime = Date.now();
+    const currentVisits = parseInt(localStorage.getItem('guest_visit_count') || '0') + 1;
+    setVisitCount(currentVisits);
+    localStorage.setItem('guest_visit_count', currentVisits.toString());
+    
+    // Show upgrade prompt after 2 minutes or 3rd visit
+    const timer = setTimeout(() => {
+      if (currentVisits >= 3 || sessionTime > 120) {
+        setShowUpgradePrompt(true);
+      }
+    }, 120000); // 2 minutes
+    
+    // Update session time every 30 seconds
+    const sessionTimer = setInterval(() => {
+      setSessionTime(Math.floor((Date.now() - startTime) / 1000));
+    }, 30000);
+    
+    // Show welcome feedback for new users
+    if (currentVisits === 1) {
+      setTimeout(() => {
+        setRealtimeFeedback({
+          type: 'welcome_tip',
+          title: 'Welcome to Guest Mode!',
+          insights: [
+            'Start by calculating your BMI for personalized insights',
+            'Log your first meal to see instant nutrition feedback',
+            'Set simple goals to track your progress'
+          ]
+        });
+      }, 3000);
+    }
+    
+    return () => {
+      clearTimeout(timer);
+      clearInterval(sessionTimer);
+    };
   }, [switchRole]);
+
+  const handleUpgradeAction = () => {
+    console.log('Upgrade action triggered from dashboard');
+    // Implement upgrade flow
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-violet-100">
