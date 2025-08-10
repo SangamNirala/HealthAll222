@@ -225,7 +225,7 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
               
               {/* More menu for additional items */}
               {roleConfig.navigationItems.length > 4 && (
-                <div className="relative">
+                <div className="relative" ref={moreMenuRef}>
                   <Button 
                     variant="ghost" 
                     className={themeClasses.hover}
