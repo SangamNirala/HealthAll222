@@ -3461,8 +3461,8 @@ async def export_family_data(family_id: str, format: str = "json"):
                     {"member": "Emma", "date": "2024-07-20", "type": "Pediatric checkup", "provider": "Dr. Smith"},
                     {"member": "John", "date": "2024-07-18", "type": "Cardiology follow-up", "provider": "Dr. Johnson"}
                 ],
-                "emergency_contacts": profile.get("care_coordination", {}).get("emergency_contacts", []),
-                "healthcare_providers": profile.get("care_coordination", {}).get("healthcare_providers", [])
+                "emergency_contacts": (profile.get("care_coordination") or {}).get("emergency_contacts", []),
+                "healthcare_providers": (profile.get("care_coordination") or {}).get("healthcare_providers", [])
             }
         }
         
