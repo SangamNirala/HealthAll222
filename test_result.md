@@ -974,14 +974,7 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Phase 5 - Family Calendar Integration API"
-    - "Phase 5 - Child Nutrition Education API" 
-    - "Phase 5 - Advanced Caregiver Tools API"
-    - "Phase 5 - Family Goals Coordination API"
-    - "Phase 5 - Multi-Profile Management API"
-    - "Phase 5 - Family Health Overview API"
-    - "Phase 5 - Advanced Meal Planning API"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
