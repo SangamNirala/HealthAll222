@@ -4049,6 +4049,10 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Phase 7 Data Export Endpoints...")
         phase7_success = self.test_phase7_data_export_endpoints()
 
+        # Test Guest Session Management and Export (PRIORITY TEST)
+        print("\n📋 Testing Guest Session Management & Export (PRIORITY)...")
+        guest_session_success = self.test_guest_session_management_and_export()
+
         # Print final results
         print("\n" + "=" * 60)
         print(f"📊 FINAL RESULTS")
