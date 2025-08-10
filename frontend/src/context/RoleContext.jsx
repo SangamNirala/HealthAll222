@@ -51,7 +51,7 @@ const ROLE_CONFIG = {
       { label: 'Patients', path: '/provider-patients', icon: 'Users' },
       { label: 'Clinical Tools', path: '/provider-tools', icon: 'Stethoscope' },
       { label: 'Analytics', path: '/provider-analytics', icon: 'BarChart3' },
-      { label: 'Research', path: '/provider-research', icon: 'BookOpen' }
+      { label: 'Education', path: '/provider-education', icon: 'BookOpen' }
     ],
     quickActions: [
       { label: 'New Patient', icon: 'UserPlus', action: 'newPatient' },
