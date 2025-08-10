@@ -23,10 +23,16 @@ import GoalsPreferencesStep from './patient-steps/GoalsPreferencesStep';
 const PatientProfileWizard = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { switchRole } = useRole();
   const [currentStep, setCurrentStep] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const [userId, setUserId] = useState(null);
   const [sectionCompletion, setSectionCompletion] = useState({});
+
+  // Set role to patient when component mounts
+  useEffect(() => {
+    switchRole('patient');
+  }, [switchRole]);
 
   // Profile data state
   const [profileData, setProfileData] = useState({
