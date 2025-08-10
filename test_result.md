@@ -890,6 +890,9 @@ backend:
       - working: false
         agent: "main"
         comment: "PHASE 7 IMPLEMENTED: Added comprehensive data export API endpoints for all 4 roles - /api/patient/export/{user_id}, /api/provider/export/{user_id}, /api/family/export/{family_id}, /api/guest/export/{session_id}. Each endpoint returns role-specific data including profiles, health data, analytics, and insights. Supports JSON format with comprehensive data structures. Ready for backend testing."
+      - working: false
+        agent: "main"
+        comment: "BACKEND DEPENDENCY FIXED: Resolved googleapis-common-protos missing dependency issue that was preventing backend from starting. Added googleapis-common-protos>=1.60.0 to requirements.txt and installed. Backend service now responds properly to HTTP requests (GET /api/ returns 'Health & Nutrition Platform API'). Ready for Phase 7 data export endpoints testing."
 
   - task: "Phase 7: Data Export Frontend Components"
     implemented: true
