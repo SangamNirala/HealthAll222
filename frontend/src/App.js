@@ -91,6 +91,7 @@ function App() {
             
             {/* Guest Navigation Routes */}
             <Route path="/guest-food-log" element={<GuestFoodLog />} />
+            <Route path="/guest-calculator" element={<GuestHealthCalculator />} />
             <Route path="/guest-tips" element={<GuestNutritionTips />} />
           </Routes>
         </BrowserRouter>
