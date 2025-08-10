@@ -491,4 +491,6 @@ const PatientFoodLog = () => {
       </div>
     </div>
   );
+};
+
 export default PatientFoodLog;
