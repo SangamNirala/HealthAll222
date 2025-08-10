@@ -287,6 +287,48 @@ const NutritionTips = () => (
   </Card>
 );
 
+// Component: Health Calculator Quick Access
+const HealthCalculatorCard = () => {
+  const navigate = useNavigate();
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <Calculator className="w-5 h-5 mr-2 text-orange-500" />
+          Health Calculator
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="p-3 bg-orange-50 rounded-lg">
+          <div className="font-medium text-orange-900 mb-2">Calculate Your Health Metrics</div>
+          <div className="space-y-1 text-sm text-orange-700">
+            <div>• BMI (Body Mass Index)</div>
+            <div>• BMR (Basal Metabolic Rate)</div>
+            <div>• Daily Calorie Needs</div>
+            <div>• Nutrition Recommendations</div>
+          </div>
+        </div>
+        
+        <div className="p-3 bg-gradient-to-r from-purple-100 to-violet-100 rounded-lg">
+          <div className="font-medium text-purple-900 mb-1">Instant Results</div>
+          <div className="text-sm text-purple-700">
+            Get personalized health insights based on your age, gender, height, weight, and activity level.
+          </div>
+        </div>
+        
+        <Button 
+          onClick={() => navigate('/guest-calculator')}
+          className="w-full bg-orange-500 hover:bg-orange-600"
+        >
+          <Calculator className="w-4 h-4 mr-2" />
+          Calculate Now
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
+
 // Main Guest Dashboard Component
 const GuestDashboard = () => {
   const { switchRole } = useRole();
