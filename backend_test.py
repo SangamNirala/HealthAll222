@@ -1386,6 +1386,471 @@ class HealthPlatformAPITester:
         
         return all_tests_passed
 
+    def test_phase5_family_features(self):
+        """Test Phase 5 Comprehensive Family Features endpoints"""
+        print("\n📋 Testing Phase 5 Comprehensive Family Features...")
+        
+        test_family_id = "demo-family-123"
+        
+        # Test 1: Family Calendar Integration
+        calendar_success = self.test_family_calendar_integration(test_family_id)
+        
+        # Test 2: Child Nutrition Education
+        nutrition_education_success = self.test_child_nutrition_education(test_family_id)
+        
+        # Test 3: Caregiver Tools
+        caregiver_tools_success = self.test_caregiver_tools(test_family_id)
+        
+        # Test 4: Goals Coordination
+        goals_coordination_success = self.test_goals_coordination(test_family_id)
+        
+        # Test 5: Multi-Profile Management
+        multi_profile_success = self.test_multi_profile_management(test_family_id)
+        
+        # Test 6: Family Health Overview (existing)
+        health_overview_success = self.test_family_health_overview(test_family_id)
+        
+        # Test 7: Advanced Meal Planning (existing)
+        meal_planning_success = self.test_family_meal_planning_advanced(test_family_id)
+        
+        return (calendar_success and nutrition_education_success and caregiver_tools_success and 
+                goals_coordination_success and multi_profile_success and health_overview_success and 
+                meal_planning_success)
+
+    def test_family_calendar_integration(self, family_id):
+        """Test Family Calendar Integration with Health Events Coordination"""
+        print("\n📅 Testing Family Calendar Integration...")
+        
+        success, calendar_data = self.run_test(
+            "Family Calendar Integration",
+            "GET",
+            f"family/calendar-integration/{family_id}",
+            200
+        )
+        
+        # Validate calendar response structure
+        if success and calendar_data:
+            expected_keys = ['family_id', 'calendar_overview', 'health_events', 'upcoming_appointments', 'medication_schedules', 'family_activities', 'coordination_tools']
+            missing_keys = [key for key in expected_keys if key not in calendar_data]
+            
+            if not missing_keys:
+                print(f"   ✅ Family calendar response contains all required keys: {expected_keys}")
+                
+                # Validate health events structure
+                health_events = calendar_data.get('health_events', [])
+                if health_events and len(health_events) > 0:
+                    event = health_events[0]
+                    event_keys = ['id', 'member', 'type', 'title', 'date', 'time', 'priority', 'status']
+                    missing_event_keys = [key for key in event_keys if key not in event]
+                    
+                    if not missing_event_keys:
+                        print(f"   ✅ Health event structure valid")
+                        print(f"   📅 Sample event: {event.get('member')} - {event.get('title')} on {event.get('date')}")
+                    else:
+                        print(f"   ❌ Health event missing keys: {missing_event_keys}")
+                        success = False
+                
+                # Validate medication schedules
+                medication_schedules = calendar_data.get('medication_schedules', {})
+                if medication_schedules:
+                    print(f"   ✅ Medication schedules provided for family members")
+                    member_count = len(medication_schedules)
+                    print(f"   💊 Medication schedules for {member_count} family members")
+                
+            else:
+                print(f"   ❌ Family calendar response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
+    def test_child_nutrition_education(self, family_id):
+        """Test Child Nutrition Education Portal"""
+        print("\n🍎 Testing Child Nutrition Education...")
+        
+        success, education_data = self.run_test(
+            "Child Nutrition Education Portal",
+            "GET",
+            f"family/child-nutrition-education/{family_id}",
+            200
+        )
+        
+        # Validate education response structure
+        if success and education_data:
+            expected_keys = ['family_id', 'education_overview', 'age_appropriate_content', 'interactive_activities', 'progress_tracking', 'parent_resources', 'meal_planning_for_kids']
+            missing_keys = [key for key in expected_keys if key not in education_data]
+            
+            if not missing_keys:
+                print(f"   ✅ Child nutrition education response contains all required keys: {expected_keys}")
+                
+                # Validate age-appropriate content structure
+                age_content = education_data.get('age_appropriate_content', {})
+                if age_content:
+                    age_groups = list(age_content.keys())
+                    print(f"   ✅ Age-appropriate content available for: {age_groups}")
+                    
+                    # Check if content has proper structure
+                    if age_groups:
+                        sample_content = age_content[age_groups[0]]
+                        content_keys = ['lessons', 'activities', 'goals']
+                        missing_content_keys = [key for key in content_keys if key not in sample_content]
+                        
+                        if not missing_content_keys:
+                            print(f"   ✅ Age-appropriate content structure valid")
+                        else:
+                            print(f"   ❌ Age-appropriate content missing keys: {missing_content_keys}")
+                            success = False
+                
+                # Validate interactive activities
+                activities = education_data.get('interactive_activities', [])
+                if activities and len(activities) > 0:
+                    activity = activities[0]
+                    activity_keys = ['id', 'title', 'age_range', 'type', 'duration', 'learning_objectives']
+                    missing_activity_keys = [key for key in activity_keys if key not in activity]
+                    
+                    if not missing_activity_keys:
+                        print(f"   ✅ Interactive activity structure valid")
+                        print(f"   🎮 Sample activity: {activity.get('title')} for ages {activity.get('age_range')}")
+                    else:
+                        print(f"   ❌ Interactive activity missing keys: {missing_activity_keys}")
+                        success = False
+                
+            else:
+                print(f"   ❌ Child nutrition education response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
+    def test_caregiver_tools(self, family_id):
+        """Test Advanced Caregiver Tools and Emergency Management"""
+        print("\n🚑 Testing Caregiver Tools...")
+        
+        success, caregiver_data = self.run_test(
+            "Advanced Caregiver Tools",
+            "GET",
+            f"family/caregiver-tools/{family_id}",
+            200
+        )
+        
+        # Validate caregiver tools response structure
+        if success and caregiver_data:
+            expected_keys = ['family_id', 'caregiver_dashboard', 'emergency_management', 'health_monitoring', 'medication_management', 'care_coordination', 'support_resources']
+            missing_keys = [key for key in expected_keys if key not in caregiver_data]
+            
+            if not missing_keys:
+                print(f"   ✅ Caregiver tools response contains all required keys: {expected_keys}")
+                
+                # Validate emergency management structure
+                emergency_mgmt = caregiver_data.get('emergency_management', {})
+                if emergency_mgmt:
+                    emergency_keys = ['emergency_contacts', 'medical_information', 'action_plans', 'emergency_kit']
+                    missing_emergency_keys = [key for key in emergency_keys if key not in emergency_mgmt]
+                    
+                    if not missing_emergency_keys:
+                        print(f"   ✅ Emergency management structure valid")
+                        
+                        # Check emergency contacts
+                        emergency_contacts = emergency_mgmt.get('emergency_contacts', [])
+                        if emergency_contacts:
+                            print(f"   📞 Emergency contacts configured: {len(emergency_contacts)} contacts")
+                    else:
+                        print(f"   ❌ Emergency management missing keys: {missing_emergency_keys}")
+                        success = False
+                
+                # Validate health monitoring
+                health_monitoring = caregiver_data.get('health_monitoring', {})
+                if health_monitoring:
+                    monitoring_keys = ['vital_signs_tracking', 'symptom_monitoring', 'medication_adherence', 'appointment_tracking']
+                    missing_monitoring_keys = [key for key in monitoring_keys if key not in health_monitoring]
+                    
+                    if not missing_monitoring_keys:
+                        print(f"   ✅ Health monitoring structure valid")
+                        print(f"   💓 Health monitoring tools available")
+                    else:
+                        print(f"   ❌ Health monitoring missing keys: {missing_monitoring_keys}")
+                        success = False
+                
+            else:
+                print(f"   ❌ Caregiver tools response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
+    def test_goals_coordination(self, family_id):
+        """Test Family Goal Setting and Progress Coordination"""
+        print("\n🎯 Testing Goals Coordination...")
+        
+        # Test 1: Get family goals coordination
+        success1, goals_data = self.run_test(
+            "Family Goals Coordination",
+            "GET",
+            f"family/goals-coordination/{family_id}",
+            200
+        )
+        
+        # Validate goals coordination response structure
+        if success1 and goals_data:
+            expected_keys = ['family_id', 'goals_overview', 'active_goals', 'completed_goals', 'goal_categories', 'progress_tracking', 'motivation_tools']
+            missing_keys = [key for key in expected_keys if key not in goals_data]
+            
+            if not missing_keys:
+                print(f"   ✅ Goals coordination response contains all required keys: {expected_keys}")
+                
+                # Validate active goals structure
+                active_goals = goals_data.get('active_goals', [])
+                if active_goals and len(active_goals) > 0:
+                    goal = active_goals[0]
+                    goal_keys = ['id', 'title', 'category', 'participants', 'target', 'current_progress', 'deadline', 'status']
+                    missing_goal_keys = [key for key in goal_keys if key not in goal]
+                    
+                    if not missing_goal_keys:
+                        print(f"   ✅ Active goal structure valid")
+                        print(f"   🎯 Sample goal: {goal.get('title')} - {goal.get('current_progress')}% complete")
+                    else:
+                        print(f"   ❌ Active goal missing keys: {missing_goal_keys}")
+                        success1 = False
+                
+                # Validate progress tracking
+                progress_tracking = goals_data.get('progress_tracking', {})
+                if progress_tracking:
+                    tracking_keys = ['weekly_progress', 'member_contributions', 'milestone_achievements']
+                    missing_tracking_keys = [key for key in tracking_keys if key not in progress_tracking]
+                    
+                    if not missing_tracking_keys:
+                        print(f"   ✅ Progress tracking structure valid")
+                    else:
+                        print(f"   ❌ Progress tracking missing keys: {missing_tracking_keys}")
+                        success1 = False
+                
+            else:
+                print(f"   ❌ Goals coordination response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: Update goal progress
+        sample_progress_data = {
+            "member": "Emma",
+            "progress": 85,
+            "notes": "Great progress this week with daily vegetable intake",
+            "date": "2024-01-16"
+        }
+        
+        success2, progress_response = self.run_test(
+            "Update Family Goal Progress",
+            "POST",
+            "family/goals/goal_nutrition_2024/update-progress",
+            200,
+            data=sample_progress_data
+        )
+        
+        # Validate progress update response
+        if success2 and progress_response:
+            expected_keys = ['success', 'goal_id', 'updated_progress', 'member', 'message']
+            missing_keys = [key for key in expected_keys if key not in progress_response]
+            
+            if not missing_keys:
+                print(f"   ✅ Goal progress update response contains required keys: {expected_keys}")
+                updated_progress = progress_response.get('updated_progress', 0)
+                member = progress_response.get('member', '')
+                print(f"   📈 Progress updated: {member} - {updated_progress}%")
+            else:
+                print(f"   ❌ Goal progress update response missing keys: {missing_keys}")
+                success2 = False
+        
+        return success1 and success2
+
+    def test_multi_profile_management(self, family_id):
+        """Test Multi-Profile Management System"""
+        print("\n👥 Testing Multi-Profile Management...")
+        
+        success, profile_data = self.run_test(
+            "Multi-Profile Management System",
+            "GET",
+            f"family/multi-profile-management/{family_id}",
+            200
+        )
+        
+        # Validate multi-profile management response structure
+        if success and profile_data:
+            expected_keys = ['family_id', 'profile_overview', 'family_members', 'health_profiles', 'privacy_settings', 'data_sharing', 'profile_synchronization']
+            missing_keys = [key for key in expected_keys if key not in profile_data]
+            
+            if not missing_keys:
+                print(f"   ✅ Multi-profile management response contains all required keys: {expected_keys}")
+                
+                # Validate family members structure
+                family_members = profile_data.get('family_members', [])
+                if family_members and len(family_members) > 0:
+                    member = family_members[0]
+                    member_keys = ['id', 'name', 'role', 'age', 'profile_completion', 'health_status', 'permissions']
+                    missing_member_keys = [key for key in member_keys if key not in member]
+                    
+                    if not missing_member_keys:
+                        print(f"   ✅ Family member profile structure valid")
+                        print(f"   👤 Sample member: {member.get('name')} - {member.get('profile_completion')}% complete")
+                    else:
+                        print(f"   ❌ Family member profile missing keys: {missing_member_keys}")
+                        success = False
+                
+                # Validate health profiles structure
+                health_profiles = profile_data.get('health_profiles', {})
+                if health_profiles:
+                    profile_keys = list(health_profiles.keys())
+                    print(f"   ✅ Health profiles available for: {profile_keys}")
+                    
+                    # Check individual health profile structure
+                    if profile_keys:
+                        sample_profile = health_profiles[profile_keys[0]]
+                        health_keys = ['basic_info', 'health_metrics', 'medications', 'allergies', 'conditions']
+                        missing_health_keys = [key for key in health_keys if key not in sample_profile]
+                        
+                        if not missing_health_keys:
+                            print(f"   ✅ Individual health profile structure valid")
+                        else:
+                            print(f"   ❌ Individual health profile missing keys: {missing_health_keys}")
+                            success = False
+                
+                # Validate privacy settings
+                privacy_settings = profile_data.get('privacy_settings', {})
+                if privacy_settings:
+                    privacy_keys = ['data_sharing_consent', 'profile_visibility', 'emergency_access', 'provider_access']
+                    missing_privacy_keys = [key for key in privacy_keys if key not in privacy_settings]
+                    
+                    if not missing_privacy_keys:
+                        print(f"   ✅ Privacy settings structure valid")
+                        print(f"   🔒 Privacy controls configured")
+                    else:
+                        print(f"   ❌ Privacy settings missing keys: {missing_privacy_keys}")
+                        success = False
+                
+            else:
+                print(f"   ❌ Multi-profile management response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
+    def test_family_health_overview(self, family_id):
+        """Test Family Health Coordination (existing endpoint)"""
+        print("\n🏥 Testing Family Health Overview...")
+        
+        success, health_data = self.run_test(
+            "Family Health Overview",
+            "GET",
+            f"family/health-overview/{family_id}",
+            200
+        )
+        
+        # Validate health overview response structure
+        if success and health_data:
+            expected_keys = ['family_id', 'health_summary', 'member_health_status', 'upcoming_appointments', 'health_alerts', 'vaccination_status', 'care_coordination']
+            missing_keys = [key for key in expected_keys if key not in health_data]
+            
+            if not missing_keys:
+                print(f"   ✅ Family health overview response contains all required keys: {expected_keys}")
+                
+                # Validate member health status
+                member_health = health_data.get('member_health_status', [])
+                if member_health and len(member_health) > 0:
+                    member = member_health[0]
+                    member_keys = ['name', 'age', 'overall_status', 'recent_vitals', 'medications', 'upcoming_appointments']
+                    missing_member_keys = [key for key in member_keys if key not in member]
+                    
+                    if not missing_member_keys:
+                        print(f"   ✅ Member health status structure valid")
+                        print(f"   👤 Sample member: {member.get('name')} - Status: {member.get('overall_status')}")
+                    else:
+                        print(f"   ❌ Member health status missing keys: {missing_member_keys}")
+                        success = False
+                
+                # Validate health alerts
+                health_alerts = health_data.get('health_alerts', [])
+                if health_alerts:
+                    print(f"   ✅ Health alerts available: {len(health_alerts)} alerts")
+                    if len(health_alerts) > 0:
+                        alert = health_alerts[0]
+                        alert_keys = ['id', 'member', 'type', 'priority', 'message', 'date']
+                        missing_alert_keys = [key for key in alert_keys if key not in alert]
+                        
+                        if not missing_alert_keys:
+                            print(f"   ✅ Health alert structure valid")
+                        else:
+                            print(f"   ❌ Health alert missing keys: {missing_alert_keys}")
+                            success = False
+                
+            else:
+                print(f"   ❌ Family health overview response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
+    def test_family_meal_planning_advanced(self, family_id):
+        """Test Advanced Meal Planning (existing endpoint)"""
+        print("\n🍽️ Testing Advanced Meal Planning...")
+        
+        success, meal_data = self.run_test(
+            "Advanced Family Meal Planning",
+            "GET",
+            f"family/meal-planning-advanced/{family_id}",
+            200
+        )
+        
+        # Validate advanced meal planning response structure
+        if success and meal_data:
+            expected_keys = ['family_id', 'meal_planning_overview', 'weekly_meal_plans', 'nutritional_analysis', 'shopping_lists', 'recipe_recommendations', 'dietary_accommodations']
+            missing_keys = [key for key in expected_keys if key not in meal_data]
+            
+            if not missing_keys:
+                print(f"   ✅ Advanced meal planning response contains all required keys: {expected_keys}")
+                
+                # Validate weekly meal plans
+                weekly_plans = meal_data.get('weekly_meal_plans', {})
+                if weekly_plans:
+                    days = list(weekly_plans.keys())
+                    print(f"   ✅ Weekly meal plans available for: {days}")
+                    
+                    # Check meal plan structure for a day
+                    if days:
+                        day_plan = weekly_plans[days[0]]
+                        meal_keys = ['breakfast', 'lunch', 'dinner', 'snacks']
+                        available_meals = [meal for meal in meal_keys if meal in day_plan]
+                        
+                        if available_meals:
+                            print(f"   ✅ Daily meal plan structure valid with meals: {available_meals}")
+                        else:
+                            print(f"   ❌ Daily meal plan missing meal types")
+                            success = False
+                
+                # Validate nutritional analysis
+                nutrition_analysis = meal_data.get('nutritional_analysis', {})
+                if nutrition_analysis:
+                    nutrition_keys = ['daily_totals', 'member_specific_needs', 'nutrient_balance', 'recommendations']
+                    missing_nutrition_keys = [key for key in nutrition_keys if key not in nutrition_analysis]
+                    
+                    if not missing_nutrition_keys:
+                        print(f"   ✅ Nutritional analysis structure valid")
+                        print(f"   📊 Nutritional analysis includes daily totals and member-specific needs")
+                    else:
+                        print(f"   ❌ Nutritional analysis missing keys: {missing_nutrition_keys}")
+                        success = False
+                
+                # Validate recipe recommendations
+                recipe_recommendations = meal_data.get('recipe_recommendations', [])
+                if recipe_recommendations and len(recipe_recommendations) > 0:
+                    recipe = recipe_recommendations[0]
+                    recipe_keys = ['id', 'name', 'category', 'prep_time', 'servings', 'difficulty', 'family_friendly', 'nutritional_info']
+                    missing_recipe_keys = [key for key in recipe_keys if key not in recipe]
+                    
+                    if not missing_recipe_keys:
+                        print(f"   ✅ Recipe recommendation structure valid")
+                        print(f"   🍳 Sample recipe: {recipe.get('name')} - {recipe.get('prep_time')} min, serves {recipe.get('servings')}")
+                    else:
+                        print(f"   ❌ Recipe recommendation missing keys: {missing_recipe_keys}")
+                        success = False
+                
+            else:
+                print(f"   ❌ Advanced meal planning response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
     def test_phase4_provider_features(self):
         """Test Phase 4 Advanced Provider Features endpoints"""
         print("\n📋 Testing Phase 4 Advanced Provider Features...")
