@@ -178,52 +178,69 @@ const TodayCalories = () => (
 );
 
 // Component: Simple Goals
-const SimpleGoals = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle className="flex items-center">
-        <Target className="w-5 h-5 mr-2 text-green-500" />
-        Simple Goals
-      </CardTitle>
-    </CardHeader>
-    <CardContent className="space-y-4">
-      <div className="p-3 bg-green-50 rounded-lg">
-        <div className="flex items-center justify-between mb-2">
-          <span className="font-medium text-green-900">Eat 5 servings of fruits/vegetables</span>
-          <Badge className="bg-green-100 text-green-800">2/5</Badge>
+const SimpleGoals = () => {
+  const navigate = useNavigate();
+  
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span className="flex items-center">
+            <Target className="w-5 h-5 mr-2 text-green-500" />
+            Simple Goals
+          </span>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => navigate('/guest-goals')}
+            className="text-xs text-purple-600 hover:text-purple-800"
+          >
+            View All →
+          </Button>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="p-3 bg-green-50 rounded-lg">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-medium text-green-900">Eat 5 servings of fruits/vegetables</span>
+            <Badge className="bg-green-100 text-green-800">2/5</Badge>
+          </div>
+          <div className="w-full bg-green-200 rounded-full h-2">
+            <div className="bg-green-500 h-2 rounded-full w-2/5"></div>
+          </div>
         </div>
-        <div className="w-full bg-green-200 rounded-full h-2">
-          <div className="bg-green-500 h-2 rounded-full w-2/5"></div>
+        
+        <div className="p-3 bg-blue-50 rounded-lg">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-medium text-blue-900">Drink 8 glasses of water</span>
+            <Badge className="bg-blue-100 text-blue-800">3/8</Badge>
+          </div>
+          <div className="w-full bg-blue-200 rounded-full h-2">
+            <div className="bg-blue-500 h-2 rounded-full w-3/8"></div>
+          </div>
         </div>
-      </div>
-      
-      <div className="p-3 bg-blue-50 rounded-lg">
-        <div className="flex items-center justify-between mb-2">
-          <span className="font-medium text-blue-900">Drink 8 glasses of water</span>
-          <Badge className="bg-blue-100 text-blue-800">3/8</Badge>
+        
+        <div className="p-3 bg-purple-50 rounded-lg">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-medium text-purple-900">Log all meals today</span>
+            <Badge className="bg-purple-100 text-purple-800">1/3</Badge>
+          </div>
+          <div className="w-full bg-purple-200 rounded-full h-2">
+            <div className="bg-purple-500 h-2 rounded-full w-1/3"></div>
+          </div>
         </div>
-        <div className="w-full bg-blue-200 rounded-full h-2">
-          <div className="bg-blue-500 h-2 rounded-full w-3/8"></div>
-        </div>
-      </div>
-      
-      <div className="p-3 bg-purple-50 rounded-lg">
-        <div className="flex items-center justify-between mb-2">
-          <span className="font-medium text-purple-900">Log all meals today</span>
-          <Badge className="bg-purple-100 text-purple-800">1/3</Badge>
-        </div>
-        <div className="w-full bg-purple-200 rounded-full h-2">
-          <div className="bg-purple-500 h-2 rounded-full w-1/3"></div>
-        </div>
-      </div>
-      
-      <Button className="w-full bg-green-500 hover:bg-green-600">
-        <Target className="w-4 h-4 mr-2" />
-        Set New Goal
-      </Button>
-    </CardContent>
-  </Card>
-);
+        
+        <Button 
+          onClick={() => navigate('/guest-goals')}
+          className="w-full bg-green-500 hover:bg-green-600"
+        >
+          <Target className="w-4 h-4 mr-2" />
+          Manage Goals
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
 
 // Component: Nutrition Tips
 const NutritionTips = () => (
