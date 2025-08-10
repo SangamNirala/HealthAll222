@@ -3267,9 +3267,6 @@ def get_next_action_suggestions(goals):
     
     return suggestions[:3]  # Limit to 3 suggestions
 
-# Include the router in the main app
-app.include_router(api_router)
-
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
