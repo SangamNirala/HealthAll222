@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRole } from '../context/RoleContext';
 import SmartNavigation from './shared/SmartNavigation';
+import UpgradePrompt from './shared/UpgradePrompt';
+import RealTimeFeedback from './shared/RealTimeFeedback';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { 
   Zap, Clock, Eye, UserX, Plus, Apple, 
   Target, Info, BookOpen, TrendingUp, Award,
-  Camera, Search, Edit, Heart, Calculator
+  Camera, Search, Edit, Heart, Calculator, Crown
 } from 'lucide-react';
 
 // Component: Quick Start Guide
