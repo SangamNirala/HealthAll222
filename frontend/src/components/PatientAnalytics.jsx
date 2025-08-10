@@ -132,14 +132,14 @@ const PatientAnalytics = () => {
           <p className="text-gray-600">Personal health analytics, AI insights, and smart suggestions</p>
         </div>
 
-        {loading &amp;&amp; (
+        {loading && (
           <div className="p-6 bg-white rounded-lg border text-gray-600">Loading analytics...</div>
         )}
-        {!!error &amp;&amp; (
+        {!!error && (
           <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg mb-6">{error}</div>
         )}
 
-        {!loading &amp;&amp; !error &amp;&amp; (
+        {!loading && !error && (
           <div className="space-y-8">
             {/* Top stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
