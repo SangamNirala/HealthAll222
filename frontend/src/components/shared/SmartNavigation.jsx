@@ -62,9 +62,6 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
       case 'quickLog':
         console.log('Quick log action triggered');
         break;
-      case 'photoLog':
-        console.log('Photo log action triggered');
-        break;
       case 'newPatient':
         console.log('New patient action triggered');
         break;
