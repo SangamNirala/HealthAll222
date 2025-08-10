@@ -145,21 +145,7 @@ const Breadcrumb = ({ items = [], currentStep = 0, showProgress = true }) => {
       </div>
 
       {/* Current Step Details */}
-      {items[currentStep]?.description && (
-        <div className={`p-3 rounded-lg bg-${theme.primary}-50 border border-${theme.primary}-200`}>
-          <div className="flex items-start space-x-2">
-            <Clock className={`w-5 h-5 text-${theme.primary}-600 mt-0.5 flex-shrink-0`} />
-            <div>
-              <h4 className={`font-semibold text-${theme.primary}-900`}>
-                {items[currentStep].label}
-              </h4>
-              <p className={`text-sm text-${theme.primary}-700 mt-1`}>
-                {items[currentStep].description}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* REMOVED: Current step details box per user request */}
     </nav>
   );
 };
