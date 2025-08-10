@@ -399,7 +399,7 @@ const GuestHealthCalculator = () => {
                   <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="text-center p-3 rounded-lg bg-blue-50">
-                        <div className="font-semibold text-blue-800">< 18.5</div>
+                        <div className="font-semibold text-blue-800">&lt; 18.5</div>
                         <div className="text-sm text-blue-600">Underweight</div>
                       </div>
                       <div className="text-center p-3 rounded-lg bg-green-50">
@@ -411,7 +411,7 @@ const GuestHealthCalculator = () => {
                         <div className="text-sm text-yellow-600">Overweight</div>
                       </div>
                       <div className="text-center p-3 rounded-lg bg-red-50">
-                        <div className="font-semibold text-red-800">≥ 30</div>
+                        <div className="font-semibold text-red-800">&ge; 30</div>
                         <div className="text-sm text-red-600">Obese</div>
                       </div>
                     </div>
