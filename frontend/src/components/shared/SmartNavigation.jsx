@@ -76,15 +76,35 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
       case 'planMeals':
         console.log('Plan meals action triggered');
         break;
+      case 'emergencyInfo':
+        console.log('Emergency info action triggered');
+        break;
+      case 'healthCheck':
+        console.log('Health check action triggered');
+        break;
       case 'logFood':
         console.log('Log food action triggered');
         break;
       case 'setGoal':
         console.log('Set goal action triggered');
         break;
+      case 'exportData':
+        setShowExportModal(true);
+        break;
       default:
         console.log(`Unhandled action: ${action}`);
     }
+  };
+
+  // Get user ID for current role
+  const getUserId = () => {
+    const storedIds = {
+      patient: localStorage.getItem('patient_user_id'),
+      provider: localStorage.getItem('provider_user_id'),
+      family: localStorage.getItem('family_user_id'),
+      guest: localStorage.getItem('guest_session_id')
+    };
+    return storedIds[currentRole] || `demo-${currentRole}-123`;
   };
 
   const NavigationItem = ({ item, isMobile = false }) => {
