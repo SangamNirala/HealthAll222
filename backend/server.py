@@ -2983,9 +2983,27 @@ async def get_role_usage_analytics():
 async def create_guest_session():
     """Create a new guest session"""
     session_id = f"guest_{int(datetime.utcnow().timestamp())}_{uuid.uuid4().hex[:8]}"
+    session_expires = datetime.utcnow() + timedelta(hours=24)
+    
+    # Create a basic guest profile in database to enable data export
+    guest_profile = GuestProfile(
+        session_id=session_id,
+        role="GUEST",
+        basic_demographics=None,  # Will be filled when user provides info
+        simple_goals=None,  # Will be filled when user provides info
+        session_expires=session_expires,
+        created_at=datetime.utcnow()
+    )
+    
+    # Clean up expired guest profiles periodically
+    await db.guest_profiles.delete_many({"session_expires": {"$lt": datetime.utcnow()}})
+    
+    # Insert the new guest profile
+    await db.guest_profiles.insert_one(guest_profile.dict())
+    
     return {
         "session_id": session_id,
-        "expires_at": (datetime.utcnow().timestamp() + 86400),  # 24 hours
+        "expires_at": (session_expires.timestamp()),  # 24 hours
         "features_available": [
             "instant_food_logging",
             "basic_nutrition_info",
