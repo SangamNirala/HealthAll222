@@ -1128,6 +1128,254 @@ async def get_symptoms_correlation(user_id: str):
         ]
     }
 
+# Patient Medication Reminder Endpoints
+@api_router.get("/patient/medications/{user_id}")
+async def get_patient_medications(user_id: str):
+    """Get patient's medication reminders and schedule"""
+    return {
+        "user_id": user_id,
+        "medications": [
+            {
+                "id": "med_001",
+                "name": "Metformin",
+                "dosage": "500mg",
+                "frequency": "twice_daily",
+                "times": ["08:00", "20:00"],
+                "with_food": True,
+                "condition": "Type 2 Diabetes",
+                "prescriber": "Dr. Smith",
+                "start_date": "2024-01-01",
+                "end_date": "2024-06-01",
+                "adherence_rate": 95,
+                "last_taken": "2024-01-15 20:00",
+                "next_due": "2024-01-16 08:00",
+                "status": "active"
+            },
+            {
+                "id": "med_002", 
+                "name": "Omega-3 Supplement",
+                "dosage": "1000mg",
+                "frequency": "daily",
+                "times": ["08:00"],
+                "with_food": True,
+                "condition": "Heart Health",
+                "prescriber": "Self-prescribed",
+                "start_date": "2024-01-01",
+                "end_date": None,
+                "adherence_rate": 87,
+                "last_taken": "2024-01-15 08:15",
+                "next_due": "2024-01-16 08:00",
+                "status": "active"
+            }
+        ],
+        "reminders": [
+            {
+                "id": "rem_001",
+                "medication_id": "med_001",
+                "time": "08:00",
+                "status": "completed",
+                "completed_at": "2024-01-16 08:05"
+            },
+            {
+                "id": "rem_002",
+                "medication_id": "med_002",
+                "time": "08:00", 
+                "status": "pending",
+                "due_in_minutes": 45
+            }
+        ],
+        "adherence_stats": {
+            "overall_adherence": 91,
+            "weekly_adherence": 95,
+            "missed_doses_week": 1,
+            "streak_days": 12
+        },
+        "ai_insights": [
+            "Your adherence rate is excellent! Keep up the good work.",
+            "Taking medications with food helps with absorption and reduces side effects.",
+            "Consider setting phone reminders for the evening dose of Metformin."
+        ]
+    }
+
+@api_router.post("/patient/medications/{user_id}/take")
+async def mark_medication_taken(user_id: str, medication_data: dict):
+    """Mark a medication as taken"""
+    return {
+        "success": True,
+        "medication_id": medication_data.get("medication_id"),
+        "taken_at": datetime.utcnow().isoformat(),
+        "next_reminder": "2024-01-16 20:00",
+        "streak_updated": True,
+        "new_streak": 13
+    }
+
+@api_router.post("/patient/medications/{user_id}")
+async def add_medication(user_id: str, medication: dict):
+    """Add new medication to patient's list"""
+    new_med = {
+        "id": f"med_{uuid.uuid4()}",
+        "name": medication.get("name"),
+        "dosage": medication.get("dosage"),
+        "frequency": medication.get("frequency"),
+        "times": medication.get("times", []),
+        "with_food": medication.get("with_food", False),
+        "condition": medication.get("condition", ""),
+        "prescriber": medication.get("prescriber", ""),
+        "start_date": medication.get("start_date"),
+        "end_date": medication.get("end_date"),
+        "status": "active",
+        "adherence_rate": 0
+    }
+    
+    return {
+        "success": True,
+        "medication": new_med,
+        "message": "Medication added successfully"
+    }
+
+# Patient Health Timeline Endpoints
+@api_router.get("/patient/timeline/{user_id}")
+async def get_health_timeline(user_id: str):
+    """Get comprehensive health timeline with AI insights"""
+    return {
+        "user_id": user_id,
+        "timeline_events": [
+            {
+                "id": "evt_001",
+                "date": "2024-01-15",
+                "type": "weight_measurement",
+                "title": "Weight Check",
+                "value": "68.5 kg",
+                "category": "metrics",
+                "details": "Lost 0.3kg from last week",
+                "impact": "positive",
+                "ai_note": "Consistent progress toward weight goal"
+            },
+            {
+                "id": "evt_002",
+                "date": "2024-01-14",
+                "type": "exercise",
+                "title": "Cardio Workout",
+                "value": "45 minutes",
+                "category": "activity",
+                "details": "Running + strength training",
+                "impact": "positive",
+                "ai_note": "Excellent workout intensity for heart health"
+            },
+            {
+                "id": "evt_003",
+                "date": "2024-01-13",
+                "type": "meal_log",
+                "title": "High Protein Day",
+                "value": "105g protein",
+                "category": "nutrition",
+                "details": "Exceeded daily protein goal by 15g",
+                "impact": "positive",
+                "ai_note": "Perfect protein intake for muscle maintenance"
+            },
+            {
+                "id": "evt_004",
+                "date": "2024-01-12",
+                "type": "symptom",
+                "title": "Low Energy",
+                "value": "4/10 energy",
+                "category": "symptoms",
+                "details": "Felt tired throughout afternoon",
+                "impact": "negative",
+                "ai_note": "May be related to insufficient sleep (5.5 hours)"
+            },
+            {
+                "id": "evt_005",
+                "date": "2024-01-11",
+                "type": "medication",
+                "title": "Missed Evening Dose",
+                "value": "Metformin 500mg",
+                "category": "medication",
+                "details": "Forgot to take evening medication",
+                "impact": "negative",
+                "ai_note": "Set consistent reminders to improve adherence"
+            },
+            {
+                "id": "evt_006",
+                "date": "2024-01-10",
+                "type": "achievement",
+                "title": "Weekly Goal Met",
+                "value": "3/3 workouts completed",
+                "category": "goals",
+                "details": "Successfully completed weekly exercise goal",
+                "impact": "positive",
+                "ai_note": "Consistent exercise is improving overall health metrics"
+            }
+        ],
+        "patterns": {
+            "energy_correlation": {
+                "pattern": "Energy levels higher on exercise days",
+                "confidence": 0.82,
+                "recommendation": "Maintain regular exercise schedule"
+            },
+            "sleep_impact": {
+                "pattern": "Sleep <6 hours leads to poor energy next day",
+                "confidence": 0.91,
+                "recommendation": "Aim for 7-8 hours of sleep nightly"
+            },
+            "nutrition_consistency": {
+                "pattern": "Protein goals met 5/7 days this week",
+                "confidence": 0.95,
+                "recommendation": "Plan protein sources in advance"
+            }
+        },
+        "milestones": [
+            {
+                "date": "2024-01-15",
+                "type": "weight_goal",
+                "title": "Lost 2kg in 6 weeks",
+                "description": "Reached intermediate weight loss milestone",
+                "celebration": "Great progress! You're 40% toward your target."
+            },
+            {
+                "date": "2024-01-10",
+                "type": "consistency",
+                "title": "30-day Exercise Streak",
+                "description": "Completed 30 consecutive days with some form of exercise",
+                "celebration": "Amazing dedication to your fitness journey!"
+            }
+        ],
+        "ai_insights": [
+            "Your energy levels correlate strongly with sleep duration - prioritize 7+ hours",
+            "Exercise days show 30% better mood scores than sedentary days",
+            "Medication adherence improved 15% since starting reminders"
+        ],
+        "categories_summary": {
+            "metrics": {"total": 15, "positive_trend": 12},
+            "activity": {"total": 23, "weekly_average": 5.2},
+            "nutrition": {"total": 45, "goals_met": 38},
+            "symptoms": {"total": 8, "resolved": 6},
+            "medication": {"total": 12, "adherence_rate": 91},
+            "goals": {"total": 6, "achieved": 4}
+        }
+    }
+
+@api_router.post("/patient/timeline/{user_id}/event")
+async def add_timeline_event(user_id: str, event: dict):
+    """Add new event to health timeline"""
+    new_event = {
+        "id": f"evt_{uuid.uuid4()}",
+        "date": event.get("date", datetime.utcnow().date().isoformat()),
+        "type": event.get("type"),
+        "title": event.get("title"),
+        "value": event.get("value"),
+        "category": event.get("category"),
+        "details": event.get("details", ""),
+        "impact": event.get("impact", "neutral"),
+        "ai_note": ""  # Would be generated by AI
+    }
+    
+    return {
+        "success": True,
+        "event": new_event,
+        "message": "Timeline event added successfully"
+    }
+
 # Provider Clinical Endpoints
 @api_router.get("/provider/clinical-insights/{provider_id}")
 async def get_clinical_insights(provider_id: str):
