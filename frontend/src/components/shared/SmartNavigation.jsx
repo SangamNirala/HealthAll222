@@ -376,6 +376,26 @@ const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
           onClose={() => setIsRoleSwitcherOpen(false)}
         />
       )}
+
+      {/* Data Export Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b">
+              <h2 className="text-xl font-bold text-gray-900">Export Your Data</h2>
+              <Button variant="ghost" onClick={() => setShowExportModal(false)} className="hover:bg-gray-100">
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[70vh]">
+              <DataExport 
+                userId={getUserId()}
+                showFullInterface={true}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
