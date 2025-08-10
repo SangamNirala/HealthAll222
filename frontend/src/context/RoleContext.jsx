@@ -55,7 +55,7 @@ const ROLE_CONFIG = {
     ],
     quickActions: [
       { label: 'New Patient', icon: 'UserPlus', action: 'newPatient' },
-      { label: 'Prescriptions', icon: 'FileText', action: 'prescriptions' }
+      { label: 'Export Data', icon: 'Download', action: 'exportData' }
     ]
   },
   family: {
