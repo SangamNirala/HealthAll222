@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRole } from '../context/RoleContext';
 import SmartNavigation from './shared/SmartNavigation';
+import UpgradePrompt from './shared/UpgradePrompt';
+import RealTimeFeedback from './shared/RealTimeFeedback';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -8,7 +10,7 @@ import { Badge } from './ui/badge';
 import { 
   Calculator, Activity, Heart, TrendingUp, Info, 
   User, Ruler, Weight, Target, AlertTriangle, 
-  CheckCircle, Zap, Clock, Apple
+  CheckCircle, Zap, Clock, Apple, Sparkles
 } from 'lucide-react';
 
 const GuestHealthCalculator = () => {
