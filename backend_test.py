@@ -2398,6 +2398,10 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Phase 4 Advanced Provider Features...")
         self.test_phase4_provider_features()
 
+        # Test Phase 5 Comprehensive Family Features
+        print("\n📋 Testing Phase 5 Comprehensive Family Features...")
+        self.test_phase5_family_features()
+
         # Print final results
         print("\n" + "=" * 60)
         print(f"📊 FINAL RESULTS")
