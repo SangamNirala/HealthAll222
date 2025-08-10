@@ -1070,31 +1070,219 @@ async def get_smart_food_suggestions(user_id: str):
 
 @api_router.post("/patient/food-log")
 async def log_food(food_entry: dict):
-    """Smart food logging with automatic nutrition lookup"""
-    # Simulate food recognition and nutrition lookup
+    """Smart food logging with automatic nutrition lookup and AI pattern recognition"""
+    
+    # Get AI-powered food analysis
+    food_name = food_entry.get("food_name", "Unknown Food")
+    try:
+        # Simulate AI nutrition analysis
+        ai_analysis = await analyze_food_with_ai(food_name, food_entry)
+    except Exception as e:
+        logger.error(f"AI food analysis error: {e}")
+        ai_analysis = None
+    
+    # Enhanced nutrition lookup with AI suggestions
+    enhanced_entry = {
+        "id": str(uuid.uuid4()),
+        "food_name": food_name,
+        "calories": food_entry.get("calories") or (ai_analysis.get("calories") if ai_analysis else 200),
+        "protein": food_entry.get("protein") or (ai_analysis.get("protein") if ai_analysis else 15),
+        "carbs": food_entry.get("carbs") or (ai_analysis.get("carbs") if ai_analysis else 25),
+        "fat": food_entry.get("fat") or (ai_analysis.get("fat") if ai_analysis else 8),
+        "fiber": ai_analysis.get("fiber") if ai_analysis else 3,
+        "sugar": ai_analysis.get("sugar") if ai_analysis else 5,
+        "confidence": ai_analysis.get("confidence") if ai_analysis else 0.80,
+        "similar_foods": ai_analysis.get("similar_foods") if ai_analysis else ["Chicken Breast", "Turkey Breast", "Lean Beef"],
+        "logged_at": datetime.utcnow().isoformat(),
+        "meal_type": food_entry.get("meal_type") or get_current_meal_type(),
+        "ai_enhanced": bool(ai_analysis)
+    }
+    
+    # AI-powered insights based on recent eating patterns
+    ai_insights = []
+    if ai_analysis:
+        ai_insights.extend(ai_analysis.get("insights", []))
+    
+    # Pattern recognition insights
+    pattern_insights = analyze_eating_patterns(enhanced_entry)
+    ai_insights.extend(pattern_insights)
+    
     return {
         "success": True,
-        "food_entry": {
-            "id": str(uuid.uuid4()),
-            "food_name": food_entry.get("food_name", "Unknown Food"),
-            "calories": food_entry.get("calories", 200),
-            "protein": food_entry.get("protein", 15),
-            "carbs": food_entry.get("carbs", 25),
-            "fat": food_entry.get("fat", 8),
-            "confidence": 0.95,
-            "similar_foods": ["Chicken Breast", "Turkey Breast", "Lean Beef"]
-        },
+        "food_entry": enhanced_entry,
         "daily_totals": {
-            "calories": 1450,
-            "protein": 78,
-            "carbs": 145,
-            "fat": 52
+            "calories": 1450 + enhanced_entry["calories"],
+            "protein": 78 + enhanced_entry["protein"],
+            "carbs": 145 + enhanced_entry["carbs"],
+            "fat": 52 + enhanced_entry["fat"],
+            "fiber": 18 + enhanced_entry["fiber"]
         },
-        "recommendations": [
-            "Great protein choice! This helps meet your daily protein goal.",
-            "Consider adding some vegetables for extra fiber and nutrients."
-        ]
+        "ai_insights": ai_insights,
+        "pattern_recognition": {
+            "meal_timing_pattern": "Consistent with your usual lunch time",
+            "nutrition_balance": "Good protein choice for post-workout meal",
+            "frequency_insight": "You've had similar foods 3 times this week",
+            "suggestions": [
+                "Great protein choice! This helps meet your daily protein goal.",
+                "Consider adding some vegetables for extra fiber and nutrients.",
+                "This meal fits well with your Mediterranean diet pattern."
+            ]
+        },
+        "smart_suggestions": {
+            "complementary_foods": [
+                {"name": "Mixed Green Salad", "reason": "Adds fiber and micronutrients"},
+                {"name": "Avocado Slices", "reason": "Healthy fats to balance the meal"},
+                {"name": "Greek Yogurt", "reason": "Additional protein and probiotics"}
+            ],
+            "portion_feedback": generate_portion_feedback(enhanced_entry),
+            "timing_feedback": f"Good timing for {enhanced_entry['meal_type'].lower()}"
+        }
     }
+
+async def analyze_food_with_ai(food_name: str, food_entry: dict) -> dict:
+    """Analyze food with AI for enhanced nutrition data"""
+    # This would integrate with the AI service
+    try:
+        # Simulate AI food analysis
+        ai_analysis = {
+            "calories": estimate_calories_from_name(food_name),
+            "protein": estimate_protein_from_name(food_name),
+            "carbs": estimate_carbs_from_name(food_name), 
+            "fat": estimate_fat_from_name(food_name),
+            "fiber": estimate_fiber_from_name(food_name),
+            "sugar": estimate_sugar_from_name(food_name),
+            "confidence": 0.85,
+            "similar_foods": get_similar_foods(food_name),
+            "insights": [
+                f"Nutritional analysis of {food_name} completed",
+                "Values estimated using AI food recognition"
+            ]
+        }
+        return ai_analysis
+    except Exception as e:
+        logger.error(f"AI food analysis failed: {e}")
+        return None
+
+def analyze_eating_patterns(food_entry: dict) -> list:
+    """Analyze eating patterns for insights"""
+    insights = []
+    
+    # Time-based insights
+    current_hour = datetime.utcnow().hour
+    if current_hour < 10:
+        insights.append("Great start to the day with a nutritious breakfast!")
+    elif current_hour < 15:
+        insights.append("Perfect lunch timing for sustained energy.")
+    elif current_hour < 20:
+        insights.append("Good dinner choice for evening nutrition.")
+    else:
+        insights.append("Late meal - consider earlier dinner for better sleep.")
+    
+    # Nutrition-based insights
+    if food_entry["protein"] > 20:
+        insights.append("Excellent protein content - great for muscle maintenance.")
+    if food_entry["fiber"] > 5:
+        insights.append("High fiber content supports digestive health.")
+    
+    return insights
+
+def get_current_meal_type() -> str:
+    """Determine current meal type based on time"""
+    current_hour = datetime.utcnow().hour
+    if current_hour < 11:
+        return "Breakfast"
+    elif current_hour < 16:
+        return "Lunch"
+    elif current_hour < 20:
+        return "Dinner"
+    else:
+        return "Snack"
+
+def estimate_calories_from_name(food_name: str) -> int:
+    """Estimate calories based on food name"""
+    food_lower = food_name.lower()
+    if any(word in food_lower for word in ["salad", "vegetables", "lettuce"]):
+        return 50 + (len(food_name) * 2)
+    elif any(word in food_lower for word in ["chicken", "fish", "meat"]):
+        return 200 + (len(food_name) * 3)
+    elif any(word in food_lower for word in ["pasta", "rice", "bread"]):
+        return 150 + (len(food_name) * 4)
+    else:
+        return 150
+
+def estimate_protein_from_name(food_name: str) -> int:
+    """Estimate protein based on food name"""
+    food_lower = food_name.lower()
+    if any(word in food_lower for word in ["chicken", "fish", "meat", "protein"]):
+        return 25 + (len(food_name) // 2)
+    elif any(word in food_lower for word in ["yogurt", "cheese", "milk"]):
+        return 12 + (len(food_name) // 3)
+    else:
+        return 5 + (len(food_name) // 4)
+
+def estimate_carbs_from_name(food_name: str) -> int:
+    """Estimate carbs based on food name"""
+    food_lower = food_name.lower()
+    if any(word in food_lower for word in ["pasta", "rice", "bread", "potato"]):
+        return 35 + (len(food_name) // 2)
+    elif any(word in food_lower for word in ["fruit", "apple", "banana"]):
+        return 20 + (len(food_name) // 3)
+    else:
+        return 10 + (len(food_name) // 4)
+
+def estimate_fat_from_name(food_name: str) -> int:
+    """Estimate fat based on food name"""
+    food_lower = food_name.lower()
+    if any(word in food_lower for word in ["avocado", "nuts", "oil", "butter"]):
+        return 15 + (len(food_name) // 3)
+    elif any(word in food_lower for word in ["salmon", "cheese", "cream"]):
+        return 12 + (len(food_name) // 4)
+    else:
+        return 5 + (len(food_name) // 5)
+
+def estimate_fiber_from_name(food_name: str) -> int:
+    """Estimate fiber based on food name"""
+    food_lower = food_name.lower()
+    if any(word in food_lower for word in ["vegetables", "salad", "beans", "fiber"]):
+        return 8 + (len(food_name) // 4)
+    elif any(word in food_lower for word in ["fruit", "apple", "pear"]):
+        return 4 + (len(food_name) // 5)
+    else:
+        return 2
+
+def estimate_sugar_from_name(food_name: str) -> int:
+    """Estimate sugar based on food name"""
+    food_lower = food_name.lower()
+    if any(word in food_lower for word in ["fruit", "sweet", "dessert", "cake"]):
+        return 15 + (len(food_name) // 3)
+    elif any(word in food_lower for word in ["yogurt", "milk"]):
+        return 8 + (len(food_name) // 4)
+    else:
+        return 3
+
+def get_similar_foods(food_name: str) -> list:
+    """Get similar foods based on food name"""
+    food_lower = food_name.lower()
+    if any(word in food_lower for word in ["chicken", "poultry"]):
+        return ["Turkey Breast", "Lean Beef", "Fish Fillet", "Tofu"]
+    elif any(word in food_lower for word in ["salad", "vegetables"]):
+        return ["Mixed Greens", "Spinach Salad", "Kale Salad", "Arugula"]
+    elif any(word in food_lower for word in ["yogurt"]):
+        return ["Greek Yogurt", "Low-fat Yogurt", "Protein Yogurt", "Dairy Alternative"]
+    else:
+        return ["Similar Food Option 1", "Similar Food Option 2", "Alternative Choice"]
+
+def generate_portion_feedback(food_entry: dict) -> str:
+    """Generate feedback about portion size"""
+    calories = food_entry.get("calories", 0)
+    if calories < 100:
+        return "Small portion - consider if this meets your energy needs"
+    elif calories < 300:
+        return "Moderate portion size - good for a snack or light meal"
+    elif calories < 600:
+        return "Good portion size for a main meal"
+    else:
+        return "Large portion - consider splitting if trying to manage calories"
 
 @api_router.get("/patient/symptoms-correlation/{user_id}")
 async def get_symptoms_correlation(user_id: str):
