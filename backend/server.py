@@ -364,6 +364,106 @@ def calculate_profile_completion(profile: dict, profile_type: str) -> float:
     
     return (completed_sections / len(sections)) * 100.0
 
+# ===== GOAL TRACKING AND ACHIEVEMENT MODELS =====
+
+class GoalTypeEnum(str, Enum):
+    NUTRITION = "NUTRITION"
+    FITNESS = "FITNESS"
+    WEIGHT_MANAGEMENT = "WEIGHT_MANAGEMENT"
+    SLEEP = "SLEEP"
+    HYDRATION = "HYDRATION"
+    WELLNESS = "WELLNESS"
+    MEDICAL_COMPLIANCE = "MEDICAL_COMPLIANCE"
+    HABIT_BUILDING = "HABIT_BUILDING"
+
+class GoalStatusEnum(str, Enum):
+    ACTIVE = "ACTIVE"
+    COMPLETED = "COMPLETED"
+    PAUSED = "PAUSED"
+    CANCELLED = "CANCELLED"
+
+class GoalPriorityEnum(str, Enum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+
+class Goal(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    title: str
+    description: Optional[str] = None
+    goal_type: GoalTypeEnum
+    status: GoalStatusEnum = GoalStatusEnum.ACTIVE
+    priority: GoalPriorityEnum = GoalPriorityEnum.MEDIUM
+    target_value: Optional[float] = None
+    current_value: Optional[float] = 0.0
+    target_unit: Optional[str] = None
+    target_date: Optional[datetime] = None
+    start_date: datetime = Field(default_factory=datetime.utcnow)
+    completion_date: Optional[datetime] = None
+    milestones: List[Dict[str, Any]] = []
+    progress_history: List[Dict[str, Any]] = []
+    success_probability: Optional[float] = None
+    ai_insights: List[str] = []
+    streak_count: int = 0
+    longest_streak: int = 0
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class GoalCreate(BaseModel):
+    user_id: str
+    title: str
+    description: Optional[str] = None
+    goal_type: GoalTypeEnum
+    priority: GoalPriorityEnum = GoalPriorityEnum.MEDIUM
+    target_value: Optional[float] = None
+    target_unit: Optional[str] = None
+    target_date: Optional[datetime] = None
+    milestones: List[Dict[str, Any]] = []
+
+class GoalUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[GoalStatusEnum] = None
+    priority: Optional[GoalPriorityEnum] = None
+    target_value: Optional[float] = None
+    current_value: Optional[float] = None
+    target_date: Optional[datetime] = None
+    milestones: Optional[List[Dict[str, Any]]] = None
+
+class AchievementTypeEnum(str, Enum):
+    GOAL_COMPLETION = "GOAL_COMPLETION"
+    STREAK_MILESTONE = "STREAK_MILESTONE"
+    PROGRESS_MILESTONE = "PROGRESS_MILESTONE"
+    CATEGORY_ACHIEVEMENT = "CATEGORY_ACHIEVEMENT"
+    SPECIAL_RECOGNITION = "SPECIAL_RECOGNITION"
+
+class Achievement(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    achievement_type: AchievementTypeEnum
+    title: str
+    description: str
+    badge_icon: str
+    badge_color: str
+    points_awarded: int = 0
+    rarity_level: str = "COMMON"  # COMMON, RARE, EPIC, LEGENDARY
+    unlock_criteria: Dict[str, Any] = {}
+    unlocked_at: datetime = Field(default_factory=datetime.utcnow)
+    related_goal_id: Optional[str] = None
+    category: str
+    shareable: bool = True
+    celebration_message: str
+    milestone_data: Dict[str, Any] = {}
+
+class GoalCorrelation(BaseModel):
+    user_id: str
+    goal_correlations: List[Dict[str, Any]] = []
+    behavior_patterns: Dict[str, Any] = {}
+    success_factors: List[str] = []
+    recommendations: List[Dict[str, Any]] = []
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
