@@ -3615,6 +3615,444 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ===== PHASE 2.3: ADVANCED GOAL TRACKING API ENDPOINTS =====
+
+# Goal Management CRUD Endpoints
+@api_router.post("/patient/goals", response_model=Goal)
+async def create_goal(goal: GoalCreate):
+    """Create a new goal for a patient"""
+    goal_dict = goal.dict()
+    goal_obj = Goal(**goal_dict)
+    
+    # Add initial AI insights about success probability
+    try:
+        goal_data = {
+            "goal_type": goal.goal_type,
+            "target_value": goal.target_value,
+            "user_id": goal.user_id,
+            "target_date": goal.target_date
+        }
+        ai_insights = await get_goal_insights(goal_data)
+        goal_obj.success_probability = ai_insights.get("success_probability", 0.7)
+        goal_obj.ai_insights = ai_insights.get("insights", [])
+    except Exception as e:
+        logger.error(f"AI goal insights error: {e}")
+        goal_obj.success_probability = 0.7
+    
+    await db.patient_goals.insert_one(goal_obj.dict())
+    return goal_obj
+
+@api_router.get("/patient/goals/{user_id}")
+async def get_user_goals(user_id: str, status: Optional[str] = None):
+    """Get all goals for a user, optionally filtered by status"""
+    query = {"user_id": user_id}
+    if status:
+        query["status"] = status.upper()
+    
+    goals = await db.patient_goals.find(query).sort("created_at", -1).to_list(100)
+    return [Goal(**goal) for goal in goals]
+
+@api_router.get("/patient/goals/goal/{goal_id}", response_model=Goal)
+async def get_goal_by_id(goal_id: str):
+    """Get a specific goal by ID"""
+    goal = await db.patient_goals.find_one({"id": goal_id})
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    return Goal(**goal)
+
+@api_router.put("/patient/goals/{goal_id}", response_model=Goal)
+async def update_goal(goal_id: str, update: GoalUpdate):
+    """Update an existing goal"""
+    existing = await db.patient_goals.find_one({"id": goal_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    
+    update_dict = {k: v for k, v in update.dict().items() if v is not None}
+    update_dict["updated_at"] = datetime.utcnow()
+    
+    # Check for completion
+    if update_dict.get("status") == "COMPLETED" and existing.get("status") != "COMPLETED":
+        update_dict["completion_date"] = datetime.utcnow()
+        
+        # Create achievement for goal completion
+        try:
+            achievement = Achievement(
+                user_id=existing["user_id"],
+                achievement_type=AchievementTypeEnum.GOAL_COMPLETION,
+                title=f"Goal Completed: {existing['title']}",
+                description=f"Successfully completed the goal: {existing['title']}",
+                badge_icon="🏆",
+                badge_color="#FFD700",
+                points_awarded=100,
+                rarity_level="COMMON",
+                related_goal_id=goal_id,
+                category=existing["goal_type"],
+                celebration_message=f"Congratulations! You've completed your {existing['goal_type'].lower()} goal!"
+            )
+            await db.patient_achievements.insert_one(achievement.dict())
+        except Exception as e:
+            logger.error(f"Error creating completion achievement: {e}")
+    
+    await db.patient_goals.update_one(
+        {"id": goal_id},
+        {"$set": update_dict}
+    )
+    
+    updated_goal = await db.patient_goals.find_one({"id": goal_id})
+    return Goal(**updated_goal)
+
+@api_router.delete("/patient/goals/{goal_id}")
+async def delete_goal(goal_id: str):
+    """Delete a goal"""
+    result = await db.patient_goals.delete_one({"id": goal_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    return {"message": "Goal deleted successfully"}
+
+@api_router.post("/patient/goals/{goal_id}/progress")
+async def update_goal_progress(goal_id: str, progress_data: dict):
+    """Update progress for a specific goal"""
+    goal = await db.patient_goals.find_one({"id": goal_id})
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    
+    new_value = progress_data.get("current_value", goal.get("current_value", 0))
+    progress_entry = {
+        "date": datetime.utcnow().isoformat(),
+        "value": new_value,
+        "notes": progress_data.get("notes", ""),
+        "source": progress_data.get("source", "manual")
+    }
+    
+    # Calculate progress percentage
+    target_value = goal.get("target_value", 100)
+    if target_value > 0:
+        progress_percentage = min((new_value / target_value) * 100, 100)
+    else:
+        progress_percentage = 0
+    
+    # Update streak count
+    current_streak = goal.get("streak_count", 0)
+    if progress_data.get("daily_completion", False):
+        current_streak += 1
+    
+    # Check for milestone achievements
+    milestones = goal.get("milestones", [])
+    for milestone in milestones:
+        if not milestone.get("achieved", False) and progress_percentage >= milestone.get("percentage", 100):
+            milestone["achieved"] = True
+            milestone["achieved_date"] = datetime.utcnow().isoformat()
+            
+            # Create milestone achievement
+            try:
+                achievement = Achievement(
+                    user_id=goal["user_id"],
+                    achievement_type=AchievementTypeEnum.PROGRESS_MILESTONE,
+                    title=f"Milestone Reached: {milestone.get('title', 'Progress Milestone')}",
+                    description=f"Reached {milestone.get('percentage', 0)}% of your goal: {goal['title']}",
+                    badge_icon="🎯",
+                    badge_color="#4CAF50",
+                    points_awarded=50,
+                    rarity_level="COMMON",
+                    related_goal_id=goal_id,
+                    category=goal["goal_type"],
+                    celebration_message=f"Great progress! You've reached a major milestone!",
+                    milestone_data=milestone
+                )
+                await db.patient_achievements.insert_one(achievement.dict())
+            except Exception as e:
+                logger.error(f"Error creating milestone achievement: {e}")
+    
+    # Update the goal
+    update_dict = {
+        "current_value": new_value,
+        "streak_count": current_streak,
+        "longest_streak": max(goal.get("longest_streak", 0), current_streak),
+        "milestones": milestones,
+        "$push": {"progress_history": progress_entry},
+        "updated_at": datetime.utcnow()
+    }
+    
+    await db.patient_goals.update_one(
+        {"id": goal_id},
+        {"$set": update_dict}
+    )
+    
+    return {
+        "goal_id": goal_id,
+        "new_progress": progress_percentage,
+        "current_value": new_value,
+        "streak_count": current_streak,
+        "milestone_reached": any(m.get("achieved") and not m.get("previously_achieved") for m in milestones),
+        "message": "Progress updated successfully"
+    }
+
+# Achievement Management Endpoints
+@api_router.get("/patient/achievements/{user_id}")
+async def get_user_achievements(user_id: str, category: Optional[str] = None):
+    """Get all achievements for a user"""
+    query = {"user_id": user_id}
+    if category:
+        query["category"] = category.upper()
+    
+    achievements = await db.patient_achievements.find(query).sort("unlocked_at", -1).to_list(100)
+    
+    # Get achievement insights
+    try:
+        achievement_data = {
+            "user_id": user_id,
+            "recent_achievements": achievements[:5],
+            "total_achievements": len(achievements),
+            "categories": list(set([a.get("category") for a in achievements])),
+            "points": sum([a.get("points_awarded", 0) for a in achievements])
+        }
+        ai_insights = await get_achievement_insights(achievement_data)
+    except Exception as e:
+        logger.error(f"AI achievement insights error: {e}")
+        ai_insights = {"achievement_insights": {"achievements": [], "motivation_tips": []}}
+    
+    # Organize achievements by category
+    achievements_by_category = {}
+    for achievement in achievements:
+        category = achievement.get("category", "OTHER")
+        if category not in achievements_by_category:
+            achievements_by_category[category] = []
+        achievements_by_category[category].append(Achievement(**achievement))
+    
+    return {
+        "user_id": user_id,
+        "total_achievements": len(achievements),
+        "total_points": sum([a.get("points_awarded", 0) for a in achievements]),
+        "achievements_by_category": achievements_by_category,
+        "recent_achievements": [Achievement(**a) for a in achievements[:10]],
+        "ai_insights": ai_insights.get("achievement_insights", {}),
+        "badge_summary": {
+            "common": len([a for a in achievements if a.get("rarity_level") == "COMMON"]),
+            "rare": len([a for a in achievements if a.get("rarity_level") == "RARE"]),
+            "epic": len([a for a in achievements if a.get("rarity_level") == "EPIC"]),
+            "legendary": len([a for a in achievements if a.get("rarity_level") == "LEGENDARY"])
+        }
+    }
+
+@api_router.post("/patient/achievements/{achievement_id}/share")
+async def share_achievement(achievement_id: str, share_data: dict):
+    """Share an achievement on social platforms"""
+    achievement = await db.patient_achievements.find_one({"id": achievement_id})
+    if not achievement:
+        raise HTTPException(status_code=404, detail="Achievement not found")
+    
+    if not achievement.get("shareable", True):
+        raise HTTPException(status_code=400, detail="This achievement is not shareable")
+    
+    platform = share_data.get("platform", "general")
+    custom_message = share_data.get("message", "")
+    
+    # Generate share content based on platform
+    share_content = {
+        "title": achievement["title"],
+        "description": achievement["description"],
+        "badge_icon": achievement["badge_icon"],
+        "points": achievement["points_awarded"],
+        "rarity": achievement["rarity_level"],
+        "celebration_message": achievement["celebration_message"]
+    }
+    
+    if platform == "twitter":
+        share_content["tweet_text"] = f"🎉 {achievement['title']} {achievement['badge_icon']} Just earned {achievement['points_awarded']} points on my health journey! #HealthGoals #Achievement"
+        share_content["url"] = f"https://twitter.com/intent/tweet?text={share_content['tweet_text']}"
+    elif platform == "facebook":
+        share_content["post_text"] = f"I'm proud to share that I just unlocked: {achievement['title']}! {achievement['description']} 💪 #HealthJourney"
+        share_content["url"] = f"https://www.facebook.com/sharer/sharer.php?quote={share_content['post_text']}"
+    elif platform == "linkedin":
+        share_content["post_text"] = f"Celebrating a health milestone: {achievement['title']}. {achievement['description']} Consistency and dedication paying off! 🏆"
+        share_content["url"] = f"https://www.linkedin.com/sharing/share-offsite/?summary={share_content['post_text']}"
+    
+    if custom_message:
+        share_content["custom_message"] = custom_message
+    
+    # Log the share activity
+    share_log = {
+        "achievement_id": achievement_id,
+        "user_id": achievement["user_id"],
+        "platform": platform,
+        "shared_at": datetime.utcnow().isoformat(),
+        "content": share_content
+    }
+    await db.achievement_shares.insert_one(share_log)
+    
+    return {
+        "success": True,
+        "platform": platform,
+        "share_content": share_content,
+        "message": "Achievement sharing content generated successfully"
+    }
+
+# AI-Powered Goal and Achievement Insights
+@api_router.post("/ai/goal-suggestions")
+async def get_ai_goal_suggestions(request_data: dict):
+    """Get AI-powered goal suggestions based on user profile and history"""
+    user_id = request_data.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="user_id is required")
+    
+    # Gather user data
+    goals = await db.patient_goals.find({"user_id": user_id}).to_list(50)
+    achievements = await db.patient_achievements.find({"user_id": user_id}).to_list(50)
+    
+    goal_data = {
+        "user_id": user_id,
+        "current_goals": goals,
+        "achievements": achievements,
+        "completion_rate": sum(1 for g in goals if g.get("status") == "COMPLETED") / max(len(goals), 1) * 100,
+        "successful_types": list(set([g.get("goal_type") for g in goals if g.get("status") == "COMPLETED"])),
+        "current_streak": max([g.get("streak_count", 0) for g in goals] + [0]),
+        "preferences": request_data.get("preferences", {}),
+        "health_conditions": request_data.get("health_conditions", [])
+    }
+    
+    try:
+        ai_suggestions = await get_goal_insights(goal_data)
+    except Exception as e:
+        logger.error(f"AI goal suggestions error: {e}")
+        ai_suggestions = {
+            "recommendations": [
+                {
+                    "title": "Hydration Goal",
+                    "description": "Drink 8 glasses of water daily",
+                    "goal_type": "HYDRATION",
+                    "target_value": 8,
+                    "target_unit": "glasses",
+                    "priority": "MEDIUM",
+                    "success_probability": 0.8
+                }
+            ]
+        }
+    
+    return {
+        "user_id": user_id,
+        "suggested_goals": ai_suggestions.get("recommendations", []),
+        "goal_adjustments": ai_suggestions.get("goal_adjustments", []),
+        "insights": ai_suggestions.get("insights", []),
+        "confidence": ai_suggestions.get("confidence", 0.7),
+        "personalization_factors": [
+            "Past goal completion rate",
+            "Preferred goal categories",
+            "Current health status",
+            "Available time commitment"
+        ]
+    }
+
+@api_router.post("/ai/goal-insights")
+async def get_ai_goal_analysis(request_data: dict):
+    """Get AI-powered analysis of current goals"""
+    user_id = request_data.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="user_id is required")
+    
+    # Get current goals
+    goals = await db.patient_goals.find({"user_id": user_id, "status": "ACTIVE"}).to_list(20)
+    
+    analysis_data = {
+        "user_id": user_id,
+        "active_goals": goals,
+        "analysis_type": request_data.get("analysis_type", "comprehensive"),
+        "timeframe": request_data.get("timeframe", "monthly")
+    }
+    
+    try:
+        ai_analysis = await get_goal_insights(analysis_data)
+    except Exception as e:
+        logger.error(f"AI goal analysis error: {e}")
+        ai_analysis = {
+            "insights": ["Goals analysis completed"],
+            "recommendations": []
+        }
+    
+    return {
+        "user_id": user_id,
+        "analysis_date": datetime.utcnow().isoformat(),
+        "goal_performance": {
+            "total_active_goals": len(goals),
+            "on_track": sum(1 for g in goals if g.get("current_value", 0) / g.get("target_value", 1) >= 0.7),
+            "needs_attention": sum(1 for g in goals if g.get("current_value", 0) / g.get("target_value", 1) < 0.5),
+            "average_progress": sum(g.get("current_value", 0) / g.get("target_value", 1) for g in goals) / max(len(goals), 1) * 100
+        },
+        "ai_insights": ai_analysis.get("insights", []),
+        "recommendations": ai_analysis.get("recommendations", []),
+        "optimization_suggestions": ai_analysis.get("goal_adjustments", []),
+        "confidence": ai_analysis.get("confidence", 0.7)
+    }
+
+@api_router.get("/patient/goal-correlations/{user_id}")
+async def get_goal_correlations(user_id: str):
+    """Get correlations between goals and other health factors"""
+    
+    # Get user's goals and related data
+    goals = await db.patient_goals.find({"user_id": user_id}).to_list(50)
+    achievements = await db.patient_achievements.find({"user_id": user_id}).to_list(50)
+    
+    correlation_data = {
+        "user_id": user_id,
+        "goals": goals,
+        "achievements": achievements,
+        "analysis_period": "90_days"
+    }
+    
+    # Mock correlation analysis (in real app, this would be more sophisticated)
+    correlations = []
+    if goals:
+        goal_types = list(set([g.get("goal_type") for g in goals]))
+        for goal_type in goal_types:
+            type_goals = [g for g in goals if g.get("goal_type") == goal_type]
+            avg_completion = sum(1 for g in type_goals if g.get("status") == "COMPLETED") / len(type_goals)
+            
+            correlations.append({
+                "goal_type": goal_type,
+                "completion_rate": avg_completion * 100,
+                "average_duration": 21,  # Mock data
+                "success_factors": [
+                    "Setting realistic targets",
+                    "Daily tracking",
+                    "Social support"
+                ],
+                "common_obstacles": [
+                    "Time management",
+                    "Motivation fluctuations",
+                    "Unrealistic expectations"
+                ]
+            })
+    
+    return GoalCorrelation(
+        user_id=user_id,
+        goal_correlations=correlations,
+        behavior_patterns={
+            "most_successful_goal_type": max(correlations, key=lambda x: x["completion_rate"])["goal_type"] if correlations else "NUTRITION",
+            "optimal_goal_duration": "3-4 weeks",
+            "best_start_day": "Monday",
+            "success_streak_average": 12
+        },
+        success_factors=[
+            "Consistent daily tracking",
+            "Realistic target setting", 
+            "Regular progress reviews",
+            "Social accountability"
+        ],
+        recommendations=[
+            {
+                "type": "goal_setting",
+                "title": "Optimize Goal Duration",
+                "description": "Your data shows better success with 3-4 week goals vs longer term goals",
+                "priority": "HIGH"
+            },
+            {
+                "type": "tracking",
+                "title": "Daily Check-ins",
+                "description": "Users with daily tracking show 40% higher completion rates",
+                "priority": "MEDIUM"
+            }
+        ]
+    )
+
 # ========================================
 # PHASE 7: DATA EXPORT ENDPOINTS
 # ========================================
