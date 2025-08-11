@@ -187,7 +187,30 @@ const SocialSharing = ({ achievements = [], goals = [] }) => {
         document.body.removeChild(textArea);
       }
 
-      // Record the share
+      // Record the share via backend API
+      try {
+        const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+        
+        const shareResponse = await fetch(`${API_BASE_URL}/api/patient/achievements/${achievement.id}/share`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            platform: 'copied',
+            message: shareText
+          })
+        });
+
+        if (shareResponse.ok) {
+          const shareData = await shareResponse.json();
+          console.log('Achievement copy recorded:', shareData);
+        }
+      } catch (error) {
+        console.error('Error recording copy share:', error);
+      }
+
+      // Update local state
       const newShare = {
         id: `share_${Date.now()}`,
         achievement_id: achievement.id,
