@@ -5921,6 +5921,10 @@ class HealthPlatformAPITester:
         # Test AI API Endpoints (NEW - PRIORITY TEST)
         print("\n📋 Testing AI API Endpoints (PRIORITY)...")
         ai_success = self.test_ai_api_endpoints()
+        
+        # Test Phase 3 AI Integration for PersonalInsights (NEW - FOCUS TEST)
+        print("\n📋 Testing Phase 3 AI Integration - PersonalInsights (FOCUS)...")
+        phase3_ai_success = self.test_phase3_ai_integration_personalinsights()
 
         # Test Guest Session Management and Export (PRIORITY TEST)
         print("\n📋 Testing Guest Session Management & Export (PRIORITY)...")
