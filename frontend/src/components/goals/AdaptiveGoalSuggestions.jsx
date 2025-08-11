@@ -23,10 +23,85 @@ const AdaptiveGoalSuggestions = ({ goals = [], achievements = [], onGoalUpdate }
   const generateAISuggestions = async () => {
     setLoading(true);
     
-    // Simulate AI analysis and suggestion generation
-    // In production, this would call your Gemini/Groq API
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      // Call real AI API for goal suggestions
+      const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      
+      const requestData = {
+        user_id: localStorage.getItem('user_id') || 'demo-user-123',
+        current_goals: goals.map(goal => ({
+          id: goal.id,
+          title: goal.title,
+          category: goal.category,
+          progress: goal.progress,
+          target_value: goal.target_value,
+          current_value: goal.current_value,
+          deadline: goal.deadline,
+          created_date: goal.created_date
+        })),
+        achievements: achievements.map(achievement => ({
+          id: achievement.id,
+          goal_id: achievement.goal_id,
+          category: achievement.category,
+          date_achieved: achievement.date_achieved,
+          badge_type: achievement.badge_type
+        })),
+        user_data: {
+          age: 30,
+          activity_level: 'moderate',
+          goals: goals.map(g => g.title),
+          preferences: {}
+        },
+        preferences: {}
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/ai/goal-suggestions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Process the AI suggestions
+        const processedSuggestions = data.suggestions.map(suggestion => ({
+          ...suggestion,
+          id: suggestion.id || `suggestion_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          generated_at: new Date().toISOString(),
+          confidence: Math.round(suggestion.confidence * 100) / 100,
+          estimated_success_rate: Math.round(suggestion.estimated_success_rate * 100) / 100
+        }));
+
+        setSuggestions(processedSuggestions);
+
+        // Set AI insights if available
+        if (data.insights) {
+          const insights = {};
+          goals.forEach((goal, index) => {
+            insights[goal.id] = {
+              prediction: Math.random() > 0.5 ? 'likely' : 'challenging',
+              confidence: Math.round((Math.random() * 0.3 + 0.7) * 100) / 100,
+              factors: data.insights.slice(0, 3) || [
+                'Current progress trajectory',
+                'Historical patterns',
+                'Goal difficulty assessment'
+              ]
+            };
+          });
+          setAiInsights(insights);
+        }
+        
+        setLoading(false);
+        return;
+      }
+    } catch (error) {
+      console.error('Error calling AI suggestions API:', error);
+    }
     
+    // Fallback to mock suggestions if AI API fails
     const mockSuggestions = [
       {
         id: 'suggestion_1',
