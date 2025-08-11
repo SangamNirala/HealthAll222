@@ -3,6 +3,133 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
+// Enhanced Goal Management Service with real API integration
+class GoalManagementService {
+  constructor() {
+    this.apiClient = axios.create({
+      baseURL: API_BASE_URL,
+      timeout: 15000,
+    });
+
+    // Add auth token to requests
+    this.apiClient.interceptors.request.use((config) => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    });
+  }
+
+  // Goal CRUD Operations
+  async createGoal(goalData) {
+    try {
+      const response = await this.apiClient.post('/api/patient/goals', {
+        ...goalData,
+        user_id: goalData.user_id || localStorage.getItem('user_id') || 'demo-user-123'
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating goal:', error);
+      throw error;
+    }
+  }
+
+  async getUserGoals(userId = null) {
+    try {
+      const user_id = userId || localStorage.getItem('user_id') || 'demo-user-123';
+      const response = await this.apiClient.get(`/api/patient/goals/${user_id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching goals:', error);
+      throw error;
+    }
+  }
+
+  async updateGoal(goalId, updates) {
+    try {
+      const response = await this.apiClient.put(`/api/patient/goals/${goalId}`, updates);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating goal:', error);
+      throw error;
+    }
+  }
+
+  async deleteGoal(goalId) {
+    try {
+      const response = await this.apiClient.delete(`/api/patient/goals/${goalId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting goal:', error);
+      throw error;
+    }
+  }
+
+  // Achievement Management
+  async getUserAchievements(userId = null) {
+    try {
+      const user_id = userId || localStorage.getItem('user_id') || 'demo-user-123';
+      const response = await this.apiClient.get(`/api/patient/achievements/${user_id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching achievements:', error);
+      throw error;
+    }
+  }
+
+  async shareAchievement(achievementId, shareData) {
+    try {
+      const response = await this.apiClient.post(`/api/patient/achievements/${achievementId}/share`, shareData);
+      return response.data;
+    } catch (error) {
+      console.error('Error sharing achievement:', error);
+      throw error;
+    }
+  }
+
+  // AI-Enhanced Goal Features
+  async getGoalSuggestions(requestData) {
+    try {
+      const response = await this.apiClient.post('/api/ai/goal-suggestions', {
+        ...requestData,
+        user_id: requestData.user_id || localStorage.getItem('user_id') || 'demo-user-123'
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error getting goal suggestions:', error);
+      throw error;
+    }
+  }
+
+  async getGoalInsights(requestData) {
+    try {
+      const response = await this.apiClient.post('/api/ai/goal-insights', {
+        ...requestData,
+        user_id: requestData.user_id || localStorage.getItem('user_id') || 'demo-user-123'
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error getting goal insights:', error);
+      throw error;
+    }
+  }
+
+  async getGoalCorrelations(userId = null) {
+    try {
+      const user_id = userId || localStorage.getItem('user_id') || 'demo-user-123';
+      const response = await this.apiClient.get(`/api/patient/goal-correlations/${user_id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting goal correlations:', error);
+      throw error;
+    }
+  }
+}
+
+// Export singleton instances
+const goalManager = new GoalManagementService();
+
 class GoalAIService {
   constructor() {
     this.apiClient = axios.create({
