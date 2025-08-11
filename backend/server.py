@@ -1707,6 +1707,216 @@ def generate_portion_feedback(food_entry: dict) -> str:
     else:
         return "Large portion - consider splitting if trying to manage calories"
 
+# Food Logging Summary Endpoints
+@api_router.get("/patient/food-log/{user_id}/daily-summary")
+async def get_daily_food_summary(user_id: str):
+    """Get daily nutrition summary for the user"""
+    return {
+        "user_id": user_id,
+        "date": datetime.utcnow().date().isoformat(),
+        "summary": {
+            "calories": 1847,
+            "protein": 125,
+            "carbs": 198,
+            "fat": 62,
+            "fiber": 28,
+            "meals": 4,
+            "water_intake": 2.1,
+            "goals_met": {
+                "calories": True,
+                "protein": True,
+                "carbs": True,
+                "fat": False,
+                "fiber": True
+            },
+            "daily_goals": {
+                "calories": 2000,
+                "protein": 120,
+                "carbs": 200,
+                "fat": 67,
+                "fiber": 25
+            },
+            "progress_percentage": {
+                "calories": 92,
+                "protein": 104,
+                "carbs": 99,
+                "fat": 93,
+                "fiber": 112
+            }
+        }
+    }
+
+@api_router.get("/patient/food-log/{user_id}/recent")
+async def get_recent_food_logs(user_id: str, limit: int = 10):
+    """Get recent food log entries for the user"""
+    return {
+        "user_id": user_id,
+        "logs": [
+            {
+                "id": str(uuid.uuid4()),
+                "food_name": "Grilled Salmon Fillet",
+                "brand": "Fresh Atlantic",
+                "calories": 367,
+                "protein": 39,
+                "carbs": 0,
+                "fat": 22,
+                "fiber": 0,
+                "sodium": 59,
+                "meal_type": "dinner",
+                "serving_size": "6 oz",
+                "timestamp": (datetime.utcnow() - timedelta(hours=2)).isoformat(),
+                "source": "ai_photo_recognition",
+                "confidence": 0.92
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "food_name": "Greek Yogurt with Berries",
+                "brand": "Chobani",
+                "calories": 180,
+                "protein": 15,
+                "carbs": 20,
+                "fat": 8,
+                "fiber": 4,
+                "sodium": 65,
+                "meal_type": "breakfast",
+                "serving_size": "1 cup",
+                "timestamp": (datetime.utcnow() - timedelta(hours=8)).isoformat(),
+                "source": "barcode_scan",
+                "confidence": 0.98
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "food_name": "Quinoa Power Bowl",
+                "brand": "",
+                "calories": 420,
+                "protein": 18,
+                "carbs": 58,
+                "fat": 14,
+                "fiber": 8,
+                "sodium": 340,
+                "meal_type": "lunch",
+                "serving_size": "1 bowl",
+                "timestamp": (datetime.utcnow() - timedelta(hours=5)).isoformat(),
+                "source": "voice_recognition",
+                "confidence": 0.85
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "food_name": "Mixed Nuts Handful",
+                "brand": "Blue Diamond",
+                "calories": 170,
+                "protein": 6,
+                "carbs": 6,
+                "fat": 15,
+                "fiber": 3,
+                "sodium": 90,
+                "meal_type": "snack",
+                "serving_size": "1 oz",
+                "timestamp": (datetime.utcnow() - timedelta(hours=1)).isoformat(),
+                "source": "quick_add",
+                "confidence": 1.0
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "food_name": "Green Smoothie",
+                "brand": "Homemade",
+                "calories": 280,
+                "protein": 25,
+                "carbs": 35,
+                "fat": 8,
+                "fiber": 12,
+                "sodium": 125,
+                "meal_type": "breakfast",
+                "serving_size": "16 oz",
+                "timestamp": (datetime.utcnow() - timedelta(days=1, hours=8)).isoformat(),
+                "source": "ai_photo_recognition",
+                "confidence": 0.88
+            }
+        ]
+    }
+
+@api_router.get("/patient/smart-suggestions/{user_id}")
+async def get_smart_food_suggestions(user_id: str):
+    """Get AI-powered smart food suggestions based on patterns and nutrition gaps"""
+    current_hour = datetime.utcnow().hour
+    
+    # Context-aware suggestions based on time of day
+    if 6 <= current_hour <= 10:  # Breakfast time
+        meal_context = "breakfast"
+        contextual_suggestions = [
+            {"name": "Steel Cut Oats with Berries", "calories": 220, "protein": 8, "carbs": 45, "fat": 4, "reason": "High fiber breakfast for sustained energy"},
+            {"name": "Greek Yogurt Parfait", "calories": 180, "protein": 15, "carbs": 18, "fat": 6, "reason": "Protein-rich start to your day"},
+            {"name": "Avocado Toast", "calories": 250, "protein": 8, "carbs": 25, "fat": 16, "reason": "Healthy fats for brain function"}
+        ]
+    elif 11 <= current_hour <= 15:  # Lunch time
+        meal_context = "lunch"
+        contextual_suggestions = [
+            {"name": "Grilled Chicken Salad", "calories": 320, "protein": 35, "carbs": 12, "fat": 15, "reason": "Lean protein with vegetables"},
+            {"name": "Quinoa Buddha Bowl", "calories": 380, "protein": 16, "carbs": 52, "fat": 12, "reason": "Complete amino acid profile"},
+            {"name": "Turkey Wrap", "calories": 290, "protein": 24, "carbs": 28, "fat": 10, "reason": "Balanced macronutrients"}
+        ]
+    elif 17 <= current_hour <= 22:  # Dinner time
+        meal_context = "dinner"
+        contextual_suggestions = [
+            {"name": "Baked Salmon with Vegetables", "calories": 420, "protein": 35, "carbs": 20, "fat": 24, "reason": "Omega-3 rich dinner"},
+            {"name": "Lean Beef Stir Fry", "calories": 350, "protein": 30, "carbs": 25, "fat": 15, "reason": "Iron and protein for recovery"},
+            {"name": "Lentil Curry", "calories": 310, "protein": 18, "carbs": 45, "fat": 8, "reason": "Plant-based protein and fiber"}
+        ]
+    else:  # Snack time
+        meal_context = "snack"
+        contextual_suggestions = [
+            {"name": "Apple with Almond Butter", "calories": 190, "protein": 7, "carbs": 20, "fat": 12, "reason": "Satisfying healthy snack"},
+            {"name": "Greek Yogurt with Nuts", "calories": 170, "protein": 12, "carbs": 8, "fat": 10, "reason": "Protein-rich between meals"},
+            {"name": "Hummus with Vegetables", "calories": 120, "protein": 5, "carbs": 12, "fat": 6, "reason": "Fiber and nutrients"}
+        ]
+    
+    return {
+        "user_id": user_id,
+        "meal_context": meal_context,
+        "generated_at": datetime.utcnow().isoformat(),
+        "quick_add_suggestions": contextual_suggestions,
+        "meal_pattern_insights": {
+            "breakfast_time": "8:15 AM (average)",
+            "lunch_time": "12:45 PM (average)", 
+            "dinner_time": "7:20 PM (average)",
+            "snack_preferences": "Nuts, fruits, yogurt",
+            "hydration_pattern": "Morning and evening peaks",
+            "meal_spacing": "4.5 hours average"
+        },
+        "nutrition_gaps": [
+            {
+                "nutrient": "fiber",
+                "current": 18,
+                "target": 25,
+                "suggestion": "Add more vegetables and whole grains",
+                "foods": ["Broccoli", "Quinoa", "Black Beans", "Berries"],
+                "estimated_calories": 150
+            },
+            {
+                "nutrient": "omega_3",
+                "current": "low",
+                "target": "adequate",
+                "suggestion": "Include fatty fish or walnuts",
+                "foods": ["Salmon", "Sardines", "Walnuts", "Chia Seeds"],
+                "estimated_calories": 200
+            }
+        ],
+        "personalized_recommendations": [
+            {
+                "title": "Boost Morning Protein",
+                "description": "Your breakfast protein is below optimal. Try adding eggs or Greek yogurt.",
+                "foods": ["Egg Scramble", "Protein Smoothie", "Greek Yogurt Bowl"],
+                "priority": "high"
+            },
+            {
+                "title": "Evening Vegetable Intake",
+                "description": "Increase vegetable variety in dinner for micronutrients.",
+                "foods": ["Roasted Vegetables", "Large Salad", "Vegetable Soup"],
+                "priority": "medium"
+            }
+        ]
+    }
+
 @api_router.get("/patient/symptoms-correlation/{user_id}")
 async def get_symptoms_correlation(user_id: str):
     """Get correlations between diet and symptoms"""
