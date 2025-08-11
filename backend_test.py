@@ -6414,7 +6414,7 @@ class HealthPlatformAPITester:
         
         # Validate meal suggestions response
         if success3 and meal_suggestions_response:
-            expected_keys = ['suggestions', 'reasoning', 'nutrition_info']
+            expected_keys = ['suggestions', 'reasoning', 'nutritionalBenefits']
             missing_keys = [key for key in expected_keys if key not in meal_suggestions_response]
             if not missing_keys:
                 print(f"   ✅ Meal suggestions response contains all required keys: {expected_keys}")
