@@ -19,6 +19,7 @@ import PatientGoals from "./components/PatientGoals";
 import PatientAnalytics from "./components/PatientAnalytics";
 import PatientMedicationReminder from "./components/PatientMedicationReminder";
 import PatientHealthTimeline from "./components/PatientHealthTimeline";
+import EnhancedMedicationManager from "./components/EnhancedMedicationManager";
 
 // Analytics components
 import PersonalInsights from "./components/analytics/PersonalInsights";
