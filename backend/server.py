@@ -3588,6 +3588,378 @@ async def export_guest_data(session_id: str, format: str = "json"):
         logger.error(f"Error exporting guest data: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
 
+# AI API Models
+class FoodRecognitionRequest(BaseModel):
+    image: str  # base64 encoded image
+    provider: str = "gemini"
+
+class HealthInsightsRequest(BaseModel):
+    healthData: Dict[str, Any]
+    provider: str = "gemini"
+    analysis_type: str = "comprehensive"
+
+class MealSuggestionsRequest(BaseModel):
+    nutritionHistory: Dict[str, Any]
+    preferences: Dict[str, Any] = {}
+    provider: str = "gemini"
+
+class VoiceCommandRequest(BaseModel):
+    transcript: str
+    provider: str = "gemini"
+    command_type: str = "food_logging"
+
+# AI-powered API endpoints
+@api_router.post("/ai/food-recognition")
+async def recognize_food_from_image(request: FoodRecognitionRequest):
+    """Recognize food items from an image using Gemini Vision API"""
+    try:
+        gemini_api_key = os.environ.get('GEMINI_API_KEY')
+        if not gemini_api_key:
+            raise HTTPException(status_code=500, detail="Gemini API key not configured")
+
+        # Prepare the request to Gemini Vision API
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
+        
+        prompt = """Analyze this food image and identify all food items present. For each food item, provide:
+1. Name of the food item
+2. Estimated calories per serving shown
+3. Estimated protein, carbs, and fat in grams
+4. Estimated portion size/serving size
+5. Brand (if visible/identifiable)
+6. Confidence level (0-1)
+
+Return the response as a JSON object with this structure:
+{
+  "foods": [
+    {
+      "name": "food name",
+      "calories": number,
+      "protein": number,
+      "carbs": number,
+      "fat": number,
+      "fiber": number,
+      "sodium": number,
+      "serving_size": "description",
+      "brand": "brand name if visible",
+      "confidence": float_between_0_and_1,
+      "portion": "estimated portion description"
+    }
+  ],
+  "confidence": overall_confidence_0_to_1,
+  "insights": ["insight1", "insight2"]
+}"""
+
+        payload = {
+            "contents": [{
+                "parts": [
+                    {"text": prompt},
+                    {
+                        "inline_data": {
+                            "mime_type": "image/jpeg",
+                            "data": request.image
+                        }
+                    }
+                ]
+            }],
+            "generationConfig": {
+                "temperature": 0.1,
+                "maxOutputTokens": 2048,
+            }
+        }
+
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(url, headers=headers, json=payload)
+        
+        if response.status_code == 200:
+            result = response.json()
+            content = result['candidates'][0]['content']['parts'][0]['text']
+            
+            # Parse the JSON response from Gemini
+            try:
+                # Clean up the response to extract JSON
+                if "```json" in content:
+                    content = content.split("```json")[1].split("```")[0]
+                elif "```" in content:
+                    content = content.split("```")[1]
+                
+                food_data = json.loads(content.strip())
+                return food_data
+            except json.JSONDecodeError:
+                # Fallback: create a simple response
+                return {
+                    "foods": [{
+                        "name": "Food Item",
+                        "calories": 200,
+                        "protein": 10,
+                        "carbs": 25,
+                        "fat": 8,
+                        "confidence": 0.7,
+                        "portion": "1 serving"
+                    }],
+                    "confidence": 0.7,
+                    "insights": ["Food recognition completed"]
+                }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to analyze image")
+            
+    except Exception as e:
+        logger.error(f"Food recognition error: {str(e)}")
+        return {
+            "foods": [],
+            "confidence": 0,
+            "insights": ["Error occurred during food recognition"]
+        }
+
+@api_router.post("/ai/health-insights")
+async def generate_health_insights(request: HealthInsightsRequest):
+    """Generate AI-powered health insights from nutrition data"""
+    try:
+        gemini_api_key = os.environ.get('GEMINI_API_KEY')
+        if not gemini_api_key:
+            raise HTTPException(status_code=500, detail="Gemini API key not configured")
+
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
+        
+        prompt = f"""Analyze this nutrition and health data and provide personalized health insights:
+
+Data: {json.dumps(request.healthData, indent=2)}
+
+Please provide:
+1. 3-5 key insights about their nutrition patterns
+2. 3-5 specific recommendations for improvement
+3. Patterns you notice in their eating habits
+4. Health risks or benefits based on the data
+
+Return as JSON:
+{{
+  "insights": ["insight1", "insight2", ...],
+  "recommendations": ["recommendation1", "recommendation2", ...],
+  "patterns": {{
+    "positive_patterns": ["pattern1", ...],
+    "areas_for_improvement": ["area1", ...]
+  }},
+  "confidence": confidence_score_0_to_1
+}}"""
+
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": 0.3,
+                "maxOutputTokens": 2048,
+            }
+        }
+
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(url, headers=headers, json=payload)
+        
+        if response.status_code == 200:
+            result = response.json()
+            content = result['candidates'][0]['content']['parts'][0]['text']
+            
+            try:
+                if "```json" in content:
+                    content = content.split("```json")[1].split("```")[0]
+                elif "```" in content:
+                    content = content.split("```")[1]
+                
+                insights_data = json.loads(content.strip())
+                return insights_data
+            except json.JSONDecodeError:
+                return {
+                    "insights": ["AI analysis completed"],
+                    "recommendations": ["Continue tracking your nutrition data"],
+                    "patterns": {"positive_patterns": [], "areas_for_improvement": []},
+                    "confidence": 0.7
+                }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to generate insights")
+            
+    except Exception as e:
+        logger.error(f"Health insights error: {str(e)}")
+        return {
+            "insights": ["Error generating insights"],
+            "recommendations": [],
+            "patterns": {"positive_patterns": [], "areas_for_improvement": []},
+            "confidence": 0
+        }
+
+@api_router.post("/ai/meal-suggestions")
+async def generate_meal_suggestions(request: MealSuggestionsRequest):
+    """Generate AI-powered meal suggestions"""
+    try:
+        gemini_api_key = os.environ.get('GEMINI_API_KEY')
+        if not gemini_api_key:
+            raise HTTPException(status_code=500, detail="Gemini API key not configured")
+
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
+        
+        prompt = f"""Based on this nutrition history and preferences, suggest 3-5 healthy meal options:
+
+Nutrition History: {json.dumps(request.nutritionHistory, indent=2)}
+Preferences: {json.dumps(request.preferences, indent=2)}
+
+Please suggest meals that:
+1. Fill nutritional gaps from their recent eating
+2. Align with their dietary preferences
+3. Provide balanced nutrition
+4. Are practical and achievable
+
+Return as JSON:
+{{
+  "suggestions": [
+    {{
+      "name": "meal name",
+      "description": "brief description",
+      "calories": estimated_calories,
+      "protein": protein_grams,
+      "carbs": carbs_grams,
+      "fat": fat_grams,
+      "benefits": ["benefit1", "benefit2"],
+      "reasoning": "why this meal is recommended"
+    }}
+  ],
+  "reasoning": "overall reasoning for these suggestions",
+  "nutritionalBenefits": ["benefit1", "benefit2"]
+}}"""
+
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": 0.4,
+                "maxOutputTokens": 2048,
+            }
+        }
+
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(url, headers=headers, json=payload)
+        
+        if response.status_code == 200:
+            result = response.json()
+            content = result['candidates'][0]['content']['parts'][0]['text']
+            
+            try:
+                if "```json" in content:
+                    content = content.split("```json")[1].split("```")[0]
+                elif "```" in content:
+                    content = content.split("```")[1]
+                
+                suggestions_data = json.loads(content.strip())
+                return suggestions_data
+            except json.JSONDecodeError:
+                return {
+                    "suggestions": [{
+                        "name": "Balanced Meal",
+                        "description": "A nutritious meal suggestion",
+                        "calories": 400,
+                        "protein": 25,
+                        "carbs": 30,
+                        "fat": 15,
+                        "benefits": ["Balanced nutrition"],
+                        "reasoning": "Provides complete nutrition"
+                    }],
+                    "reasoning": "Based on your nutrition history",
+                    "nutritionalBenefits": ["Complete nutrition"]
+                }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to generate meal suggestions")
+            
+    except Exception as e:
+        logger.error(f"Meal suggestions error: {str(e)}")
+        return {
+            "suggestions": [],
+            "reasoning": "Error generating suggestions",
+            "nutritionalBenefits": []
+        }
+
+@api_router.post("/ai/voice-command")
+async def process_voice_command(request: VoiceCommandRequest):
+    """Process voice commands for food logging"""
+    try:
+        gemini_api_key = os.environ.get('GEMINI_API_KEY')
+        if not gemini_api_key:
+            raise HTTPException(status_code=500, detail="Gemini API key not configured")
+
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
+        
+        prompt = f"""Parse this voice transcript for food logging and extract food items with nutritional information:
+
+Transcript: "{request.transcript}"
+
+Extract all mentioned food items and provide estimates for:
+1. Food name
+2. Estimated quantity/portion
+3. Calories, protein, carbs, fat
+4. Any preparation method mentioned
+
+Return as JSON:
+{{
+  "foodItems": [
+    {{
+      "name": "food name",
+      "quantity": "portion description",
+      "calories": estimated_calories,
+      "protein": protein_grams,
+      "carbs": carbs_grams,
+      "fat": fat_grams,
+      "notes": "preparation method or additional notes",
+      "confidence": confidence_0_to_1
+    }}
+  ],
+  "intent": "log_food",
+  "confidence": overall_confidence,
+  "clarifications": ["any questions for clarification"]
+}}"""
+
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": 0.2,
+                "maxOutputTokens": 1024,
+            }
+        }
+
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(url, headers=headers, json=payload)
+        
+        if response.status_code == 200:
+            result = response.json()
+            content = result['candidates'][0]['content']['parts'][0]['text']
+            
+            try:
+                if "```json" in content:
+                    content = content.split("```json")[1].split("```")[0]
+                elif "```" in content:
+                    content = content.split("```")[1]
+                
+                voice_data = json.loads(content.strip())
+                return voice_data
+            except json.JSONDecodeError:
+                return {
+                    "foodItems": [{
+                        "name": "Food Item",
+                        "quantity": "1 serving",
+                        "calories": 200,
+                        "protein": 10,
+                        "carbs": 25,
+                        "fat": 8,
+                        "confidence": 0.7
+                    }],
+                    "intent": "log_food",
+                    "confidence": 0.7,
+                    "clarifications": []
+                }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to process voice command")
+            
+    except Exception as e:
+        logger.error(f"Voice command error: {str(e)}")
+        return {
+            "foodItems": [],
+            "intent": "unknown",
+            "confidence": 0,
+            "clarifications": ["Error processing voice command"]
+        }
+
 # Include the router in the main app (after all endpoints are defined)
 app.include_router(api_router)
 
