@@ -1340,7 +1340,7 @@ class HealthPlatformAPITester:
         return medication_success and timeline_success and food_logging_success
 
     def test_patient_medication_apis(self, user_id):
-        """Test Patient Medication API endpoints"""
+        """Test Patient Medication API endpoints - Comprehensive Testing"""
         print("\n💊 Testing Patient Medication APIs...")
         
         # Test 1: GET /api/patient/medications/{user_id}
@@ -1353,7 +1353,7 @@ class HealthPlatformAPITester:
         
         # Validate medications response structure
         if success1 and medications_data:
-            expected_keys = ['medications', 'reminders', 'adherence_stats', 'ai_insights']
+            expected_keys = ['user_id', 'medications', 'reminders', 'adherence_stats', 'ai_insights']
             missing_keys = [key for key in expected_keys if key not in medications_data]
             if not missing_keys:
                 print(f"   ✅ Medications response contains all required keys: {expected_keys}")
@@ -1362,13 +1362,43 @@ class HealthPlatformAPITester:
                 medications = medications_data.get('medications', [])
                 if medications and len(medications) > 0:
                     med = medications[0]
-                    med_keys = ['id', 'name', 'dosage', 'frequency', 'times', 'adherence_rate', 'status']
+                    med_keys = ['id', 'name', 'dosage', 'frequency', 'times', 'adherence_rate', 'status', 'with_food', 'condition', 'prescriber']
                     missing_med_keys = [key for key in med_keys if key not in med]
                     if not missing_med_keys:
-                        print(f"   ✅ Medication object structure valid")
+                        print(f"   ✅ Medication object structure valid - Found {len(medications)} medications")
+                        print(f"   📋 Sample medication: {med['name']} ({med['dosage']}) - {med['frequency']}")
                     else:
                         print(f"   ❌ Medication object missing keys: {missing_med_keys}")
                         success1 = False
+                
+                # Validate reminders structure
+                reminders = medications_data.get('reminders', [])
+                if reminders and len(reminders) > 0:
+                    reminder = reminders[0]
+                    reminder_keys = ['id', 'medication_id', 'time', 'status']
+                    missing_reminder_keys = [key for key in reminder_keys if key not in reminder]
+                    if not missing_reminder_keys:
+                        print(f"   ✅ Reminders structure valid - Found {len(reminders)} reminders")
+                    else:
+                        print(f"   ❌ Reminder object missing keys: {missing_reminder_keys}")
+                
+                # Validate adherence stats
+                adherence_stats = medications_data.get('adherence_stats', {})
+                if adherence_stats:
+                    stats_keys = ['overall_adherence', 'weekly_adherence', 'missed_doses_week', 'streak_days']
+                    missing_stats_keys = [key for key in stats_keys if key not in adherence_stats]
+                    if not missing_stats_keys:
+                        print(f"   ✅ Adherence stats valid - Overall: {adherence_stats['overall_adherence']}%, Streak: {adherence_stats['streak_days']} days")
+                    else:
+                        print(f"   ❌ Adherence stats missing keys: {missing_stats_keys}")
+                
+                # Validate AI insights
+                ai_insights = medications_data.get('ai_insights', [])
+                if ai_insights and len(ai_insights) > 0:
+                    print(f"   ✅ AI insights provided - {len(ai_insights)} insights available")
+                    print(f"   💡 Sample insight: {ai_insights[0]}")
+                else:
+                    print(f"   ⚠️ No AI insights provided")
             else:
                 print(f"   ❌ Medications response missing keys: {missing_keys}")
                 success1 = False
@@ -1394,6 +1424,13 @@ class HealthPlatformAPITester:
             missing_keys = [key for key in expected_keys if key not in take_response]
             if not missing_keys:
                 print(f"   ✅ Take medication response contains required keys: {expected_keys}")
+                print(f"   📝 Medication {take_response['medication_id']} marked as taken at {take_response['taken_at']}")
+                
+                # Check for additional streak information
+                if 'new_streak' in take_response:
+                    print(f"   🔥 Streak updated to {take_response['new_streak']} days")
+                if 'next_reminder' in take_response:
+                    print(f"   ⏰ Next reminder scheduled for {take_response['next_reminder']}")
             else:
                 print(f"   ❌ Take medication response missing keys: {missing_keys}")
                 success2 = False
@@ -1425,14 +1462,18 @@ class HealthPlatformAPITester:
             missing_keys = [key for key in expected_keys if key not in add_response]
             if not missing_keys:
                 print(f"   ✅ Add medication response contains required keys: {expected_keys}")
+                print(f"   📄 Message: {add_response['message']}")
                 
                 # Validate the medication object in response
                 medication = add_response.get('medication', {})
                 if medication:
-                    med_keys = ['id', 'name', 'dosage', 'frequency', 'status']
+                    med_keys = ['id', 'name', 'dosage', 'frequency', 'status', 'times', 'with_food', 'condition', 'prescriber']
                     missing_med_keys = [key for key in med_keys if key not in medication]
                     if not missing_med_keys:
                         print(f"   ✅ Added medication object structure valid")
+                        print(f"   💊 New medication: {medication['name']} ({medication['dosage']}) - ID: {medication['id']}")
+                        print(f"   📅 Schedule: {medication['frequency']} at {medication['times']}")
+                        print(f"   👨‍⚕️ Prescribed by: {medication['prescriber']} for {medication['condition']}")
                     else:
                         print(f"   ❌ Added medication object missing keys: {missing_med_keys}")
                         success3 = False
@@ -1440,7 +1481,61 @@ class HealthPlatformAPITester:
                 print(f"   ❌ Add medication response missing keys: {missing_keys}")
                 success3 = False
         
-        return success1 and success2 and success3
+        # Test 4: Test with different medication data to verify flexibility
+        complex_medication = {
+            "name": "Metformin Extended Release",
+            "dosage": "1000mg",
+            "frequency": "twice_daily",
+            "times": ["08:00", "20:00"],
+            "with_food": True,
+            "condition": "Type 2 Diabetes Management",
+            "prescriber": "Dr. Sarah Wilson",
+            "start_date": "2024-01-16",
+            "end_date": "2024-07-16"
+        }
+        
+        success4, complex_response = self.run_test(
+            "Add Complex Medication (Twice Daily)",
+            "POST",
+            f"patient/medications/{user_id}",
+            200,
+            data=complex_medication
+        )
+        
+        if success4 and complex_response:
+            medication = complex_response.get('medication', {})
+            if medication:
+                print(f"   ✅ Complex medication added successfully")
+                print(f"   💊 {medication['name']} - {medication['frequency']} at {medication['times']}")
+                print(f"   🍽️ With food: {medication['with_food']}")
+        
+        # Test 5: Test marking different medication as taken
+        different_med_data = {
+            "medication_id": "med_002",
+            "taken_at": datetime.utcnow().isoformat(),
+            "notes": "Taken with morning vitamins"
+        }
+        
+        success5, different_take_response = self.run_test(
+            "Mark Different Medication as Taken",
+            "POST",
+            f"patient/medications/{user_id}/take",
+            200,
+            data=different_med_data
+        )
+        
+        if success5 and different_take_response:
+            print(f"   ✅ Different medication marked as taken successfully")
+            print(f"   📝 Medication {different_take_response['medication_id']} logged")
+        
+        print(f"\n📊 Medication API Test Summary:")
+        print(f"   ✅ Get medications: {'PASS' if success1 else 'FAIL'}")
+        print(f"   ✅ Mark medication taken (med_001): {'PASS' if success2 else 'FAIL'}")
+        print(f"   ✅ Add new medication (Vitamin D3): {'PASS' if success3 else 'FAIL'}")
+        print(f"   ✅ Add complex medication (Metformin): {'PASS' if success4 else 'FAIL'}")
+        print(f"   ✅ Mark different medication taken (med_002): {'PASS' if success5 else 'FAIL'}")
+        
+        return success1 and success2 and success3 and success4 and success5
 
     def test_patient_health_timeline_apis(self, user_id):
         """Test Patient Health Timeline API endpoints"""
