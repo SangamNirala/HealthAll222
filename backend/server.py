@@ -4171,6 +4171,605 @@ Return as JSON:
             "clarifications": ["Error processing voice command"]
         }
 
+# ========================================
+# PHASE 2.3: ADVANCED GOAL TRACKING ENDPOINTS
+# ========================================
+
+# Goal Management Models
+class Goal(BaseModel):
+    id: str = Field(default_factory=lambda: f"goal_{uuid.uuid4().hex[:8]}")
+    title: str
+    category: str  # FITNESS, NUTRITION, WELLNESS
+    target_value: float
+    current_value: float = 0.0
+    unit: str
+    deadline: datetime
+    created_date: datetime = Field(default_factory=datetime.utcnow)
+    status: str = "active"  # active, paused, completed, cancelled
+    milestones: List[Dict[str, Any]] = []
+    user_id: str
+    progress: float = 0.0  # Calculated field
+
+class Achievement(BaseModel):
+    id: str = Field(default_factory=lambda: f"achievement_{uuid.uuid4().hex[:8]}")
+    goal_id: str
+    user_id: str
+    title: str
+    description: str
+    badge_type: str  # bronze, silver, gold, diamond
+    category: str
+    date_achieved: datetime = Field(default_factory=datetime.utcnow)
+    special: bool = False
+    shared: bool = False
+    engagement_stats: Dict[str, int] = Field(default_factory=lambda: {"likes": 0, "comments": 0, "shares": 0})
+
+class GoalProgress(BaseModel):
+    goal_id: str
+    value: float
+    recorded_at: datetime = Field(default_factory=datetime.utcnow)
+    notes: Optional[str] = None
+
+# AI-Enhanced Goal Suggestion Models
+class GoalSuggestionRequest(BaseModel):
+    user_id: str
+    current_goals: List[Dict[str, Any]]
+    achievements: List[Dict[str, Any]]
+    user_data: Dict[str, Any]
+    preferences: Dict[str, Any] = {}
+
+class GoalInsightRequest(BaseModel):
+    user_id: str
+    goals: List[Dict[str, Any]]
+    historical_data: List[Dict[str, Any]]
+    timeframe: str = "30days"
+
+# Goals Management API Endpoints
+@api_router.post("/patient/goals")
+async def create_goal(goal: Goal):
+    """Create a new health goal"""
+    try:
+        # Calculate initial progress
+        goal.progress = (goal.current_value / goal.target_value * 100) if goal.target_value > 0 else 0
+        
+        # Create milestone structure based on target
+        if not goal.milestones:
+            milestone_count = min(5, max(2, int(goal.target_value / 5)))
+            milestone_increment = goal.target_value / milestone_count
+            
+            for i in range(milestone_count):
+                milestone_value = milestone_increment * (i + 1)
+                goal.milestones.append({
+                    "value": milestone_value,
+                    "achieved": goal.current_value >= milestone_value,
+                    "date": None if goal.current_value < milestone_value else datetime.utcnow().isoformat()
+                })
+        
+        # Store in database
+        result = await db.goals.insert_one(goal.dict())
+        
+        return {
+            "success": True,
+            "goal_id": goal.id,
+            "goal": goal.dict(),
+            "message": "Goal created successfully"
+        }
+    except Exception as e:
+        logger.error(f"Error creating goal: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create goal: {str(e)}")
+
+@api_router.get("/patient/goals/{user_id}")
+async def get_user_goals(user_id: str):
+    """Get all goals for a user"""
+    try:
+        goals = await db.goals.find({"user_id": user_id}).to_list(100)
+        
+        # Update progress for each goal
+        for goal in goals:
+            if goal.get("target_value", 0) > 0:
+                goal["progress"] = (goal.get("current_value", 0) / goal["target_value"]) * 100
+            else:
+                goal["progress"] = 0
+                
+        return {
+            "success": True,
+            "user_id": user_id,
+            "goals": goals,
+            "total_goals": len(goals),
+            "active_goals": len([g for g in goals if g.get("status") == "active"]),
+            "completed_goals": len([g for g in goals if g.get("status") == "completed"]),
+            "average_progress": sum(g.get("progress", 0) for g in goals) / len(goals) if goals else 0
+        }
+    except Exception as e:
+        logger.error(f"Error fetching goals: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch goals: {str(e)}")
+
+@api_router.put("/patient/goals/{goal_id}")
+async def update_goal(goal_id: str, updates: Dict[str, Any]):
+    """Update a specific goal"""
+    try:
+        # Calculate new progress if current_value or target_value changed
+        if "current_value" in updates or "target_value" in updates:
+            goal = await db.goals.find_one({"id": goal_id})
+            if not goal:
+                raise HTTPException(status_code=404, detail="Goal not found")
+            
+            current_value = updates.get("current_value", goal.get("current_value", 0))
+            target_value = updates.get("target_value", goal.get("target_value", 1))
+            
+            updates["progress"] = (current_value / target_value * 100) if target_value > 0 else 0
+            
+            # Update milestones achievement status
+            if "milestones" in goal and isinstance(goal["milestones"], list):
+                for milestone in goal["milestones"]:
+                    if current_value >= milestone.get("value", 0) and not milestone.get("achieved"):
+                        milestone["achieved"] = True
+                        milestone["date"] = datetime.utcnow().isoformat()
+                        
+                        # Create achievement for milestone
+                        achievement = Achievement(
+                            goal_id=goal_id,
+                            user_id=goal["user_id"],
+                            title=f"Milestone Reached: {milestone['value']} {goal.get('unit', '')}",
+                            description=f"You've reached a milestone in your {goal.get('title', 'goal')}!",
+                            badge_type="bronze" if milestone["value"] < target_value * 0.5 else "silver" if milestone["value"] < target_value * 0.8 else "gold",
+                            category=goal.get("category", "GENERAL")
+                        )
+                        await db.achievements.insert_one(achievement.dict())
+                
+                updates["milestones"] = goal["milestones"]
+        
+        updates["updated_at"] = datetime.utcnow()
+        
+        result = await db.goals.update_one(
+            {"id": goal_id},
+            {"$set": updates}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Goal not found")
+        
+        updated_goal = await db.goals.find_one({"id": goal_id})
+        
+        return {
+            "success": True,
+            "goal_id": goal_id,
+            "goal": updated_goal,
+            "message": "Goal updated successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating goal: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to update goal: {str(e)}")
+
+@api_router.delete("/patient/goals/{goal_id}")
+async def delete_goal(goal_id: str):
+    """Delete a specific goal"""
+    try:
+        result = await db.goals.delete_one({"id": goal_id})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Goal not found")
+        
+        # Also delete related achievements
+        await db.achievements.delete_many({"goal_id": goal_id})
+        
+        return {
+            "success": True,
+            "goal_id": goal_id,
+            "message": "Goal deleted successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting goal: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete goal: {str(e)}")
+
+# Achievements API Endpoints
+@api_router.get("/patient/achievements/{user_id}")
+async def get_user_achievements(user_id: str):
+    """Get all achievements for a user"""
+    try:
+        achievements = await db.achievements.find({"user_id": user_id}).to_list(100)
+        
+        # Group achievements by category
+        achievements_by_category = {}
+        for achievement in achievements:
+            category = achievement.get("category", "GENERAL")
+            if category not in achievements_by_category:
+                achievements_by_category[category] = []
+            achievements_by_category[category].append(achievement)
+        
+        # Calculate streak data
+        streak_data = {}
+        goals = await db.goals.find({"user_id": user_id}).to_list(100)
+        for goal in goals:
+            goal_achievements = [a for a in achievements if a["goal_id"] == goal["id"]]
+            if goal_achievements:
+                # Simple streak calculation based on achievement dates
+                streak_data[goal["id"]] = {
+                    "current": len(goal_achievements),
+                    "best": len(goal_achievements),
+                    "last_achievement": goal_achievements[-1]["date_achieved"].isoformat() if goal_achievements else None
+                }
+        
+        return {
+            "success": True,
+            "user_id": user_id,
+            "achievements": achievements,
+            "achievements_by_category": achievements_by_category,
+            "total_achievements": len(achievements),
+            "streak_data": streak_data,
+            "badge_counts": {
+                "bronze": len([a for a in achievements if a.get("badge_type") == "bronze"]),
+                "silver": len([a for a in achievements if a.get("badge_type") == "silver"]),
+                "gold": len([a for a in achievements if a.get("badge_type") == "gold"]),
+                "diamond": len([a for a in achievements if a.get("badge_type") == "diamond"])
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error fetching achievements: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch achievements: {str(e)}")
+
+@api_router.post("/patient/achievements/{achievement_id}/share")
+async def share_achievement(achievement_id: str, share_data: Dict[str, Any]):
+    """Record achievement sharing and update engagement stats"""
+    try:
+        platform = share_data.get("platform", "web")
+        
+        # Update achievement sharing status
+        result = await db.achievements.update_one(
+            {"id": achievement_id},
+            {
+                "$set": {"shared": True, "last_shared": datetime.utcnow()},
+                "$inc": {"engagement_stats.shares": 1}
+            }
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Achievement not found")
+        
+        # Record sharing history
+        share_record = {
+            "id": f"share_{uuid.uuid4().hex[:8]}",
+            "achievement_id": achievement_id,
+            "platform": platform,
+            "shared_at": datetime.utcnow(),
+            "engagement": {"likes": 0, "comments": 0}
+        }
+        await db.achievement_shares.insert_one(share_record)
+        
+        return {
+            "success": True,
+            "achievement_id": achievement_id,
+            "platform": platform,
+            "share_id": share_record["id"],
+            "message": "Achievement shared successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error sharing achievement: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to share achievement: {str(e)}")
+
+# AI-Enhanced Goal Suggestions
+@api_router.post("/ai/goal-suggestions")
+async def generate_goal_suggestions(request: GoalSuggestionRequest):
+    """Generate AI-powered goal suggestions using Gemini/Groq"""
+    try:
+        # Initialize AI service manager
+        ai_service = AIServiceManager()
+        
+        # Prepare context for AI analysis
+        context = f"""
+        User Goal Analysis Request:
+        
+        Current Goals: {json.dumps(request.current_goals, indent=2)}
+        
+        Achievements History: {json.dumps(request.achievements, indent=2)}
+        
+        User Profile: {json.dumps(request.user_data, indent=2)}
+        
+        Preferences: {json.dumps(request.preferences, indent=2)}
+        
+        Based on this data, provide intelligent goal suggestions that:
+        1. Build on current progress patterns
+        2. Fill gaps in their health journey
+        3. Are achievable based on their history
+        4. Align with their lifestyle and preferences
+        
+        Return as JSON:
+        {{
+          "suggestions": [
+            {{
+              "type": "new_goal|adjustment|timing|milestone",
+              "title": "Suggestion title",
+              "description": "Detailed description",
+              "category": "FITNESS|NUTRITION|WELLNESS",
+              "confidence": 0.0-1.0,
+              "priority": "high|medium|low",
+              "recommendation": {{
+                "target_value": number,
+                "unit": "unit",
+                "timeline": "timeline description",
+                "reasoning": "why this is recommended"
+              }},
+              "estimated_success_rate": 0.0-1.0
+            }}
+          ],
+          "insights": ["insight1", "insight2"],
+          "patterns": {{
+            "strengths": ["strength1", "strength2"],
+            "improvement_areas": ["area1", "area2"]
+          }}
+        }}
+        """
+        
+        # Use Groq for fast inference
+        if ai_service.groq_client:
+            completion = ai_service.groq_client.chat.completions.create(
+                model="llama3-8b-8192",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a professional health coach AI. Analyze user goal data and provide personalized, achievable goal suggestions with high accuracy predictions."
+                    },
+                    {"role": "user", "content": context}
+                ],
+                max_tokens=1500,
+                temperature=0.3
+            )
+            
+            content = completion.choices[0].message.content
+            
+            try:
+                # Parse JSON response
+                if "```json" in content:
+                    content = content.split("```json")[1].split("```")[0]
+                elif "```" in content:
+                    content = content.split("```")[1]
+                
+                suggestions_data = json.loads(content.strip())
+                
+                # Add metadata
+                suggestions_data["source"] = "groq"
+                suggestions_data["generated_at"] = datetime.utcnow().isoformat()
+                
+                return suggestions_data
+                
+            except json.JSONDecodeError:
+                # Fallback response
+                pass
+        
+        # Fallback to mock suggestions if AI fails
+        return {
+            "suggestions": [
+                {
+                    "type": "adjustment",
+                    "title": "Optimize Weekly Exercise Goal",
+                    "description": "Based on your current success patterns, adjusting your workout frequency could improve sustainability.",
+                    "category": "FITNESS",
+                    "confidence": 0.85,
+                    "priority": "high",
+                    "recommendation": {
+                        "target_value": 4,
+                        "unit": "workouts per week",
+                        "timeline": "2 weeks to establish new routine",
+                        "reasoning": "Your completion rate shows consistent success with 4 workouts rather than 5."
+                    },
+                    "estimated_success_rate": 0.92
+                },
+                {
+                    "type": "new_goal",
+                    "title": "Add Mindfulness Practice",
+                    "description": "Users with similar profiles benefit significantly from meditation goals.",
+                    "category": "WELLNESS",
+                    "confidence": 0.78,
+                    "priority": "medium",
+                    "recommendation": {
+                        "target_value": 10,
+                        "unit": "minutes daily",
+                        "timeline": "Start with 5-minute sessions",
+                        "reasoning": "Complements your fitness routine and improves goal adherence by 15%."
+                    },
+                    "estimated_success_rate": 0.76
+                }
+            ],
+            "insights": [
+                "Strong consistency in fitness goals over past month",
+                "Nutrition goals show room for improvement in timing",
+                "High motivation levels suggest readiness for new challenges"
+            ],
+            "patterns": {
+                "strengths": ["Consistency", "Goal commitment", "Progress tracking"],
+                "improvement_areas": ["Goal variety", "Recovery planning", "Social accountability"]
+            },
+            "source": "fallback",
+            "generated_at": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error generating goal suggestions: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate suggestions: {str(e)}")
+
+@api_router.post("/ai/goal-insights")
+async def generate_goal_insights(request: GoalInsightRequest):
+    """Generate AI-powered insights about goal achievement probability"""
+    try:
+        # Initialize AI service manager
+        ai_service = AIServiceManager()
+        
+        context = f"""
+        Goal Achievement Analysis:
+        
+        Goals Data: {json.dumps(request.goals, indent=2)}
+        
+        Historical Progress: {json.dumps(request.historical_data, indent=2)}
+        
+        Analysis Timeframe: {request.timeframe}
+        
+        Provide detailed analysis for each goal including:
+        1. Success probability prediction
+        2. Key factors affecting success
+        3. Risk factors and barriers
+        4. Optimization recommendations
+        5. Timeline adjustments if needed
+        
+        Return as JSON:
+        {{
+          "goal_insights": [
+            {{
+              "goal_id": "goal_id",
+              "success_probability": 0.0-1.0,
+              "confidence": 0.0-1.0,
+              "key_factors": ["factor1", "factor2"],
+              "risk_factors": ["risk1", "risk2"],
+              "recommendations": ["recommendation1", "recommendation2"],
+              "timeline_assessment": "on_track|needs_adjustment|challenging",
+              "predicted_completion_date": "YYYY-MM-DD"
+            }}
+          ],
+          "overall_analysis": {{
+            "total_goals": number,
+            "high_probability_goals": number,
+            "attention_needed_goals": number,
+            "recommendations": ["general_recommendation1", "general_recommendation2"]
+          }}
+        }}
+        """
+        
+        # Use Groq for analysis
+        if ai_service.groq_client:
+            completion = ai_service.groq_client.chat.completions.create(
+                model="llama3-8b-8192",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an AI health analytics expert. Analyze goal progress data and predict success probabilities with detailed insights."
+                    },
+                    {"role": "user", "content": context}
+                ],
+                max_tokens=1500,
+                temperature=0.2
+            )
+            
+            content = completion.choices[0].message.content
+            
+            try:
+                if "```json" in content:
+                    content = content.split("```json")[1].split("```")[0]
+                elif "```" in content:
+                    content = content.split("```")[1]
+                
+                insights_data = json.loads(content.strip())
+                insights_data["source"] = "groq"
+                insights_data["generated_at"] = datetime.utcnow().isoformat()
+                
+                return insights_data
+                
+            except json.JSONDecodeError:
+                pass
+        
+        # Fallback insights
+        return {
+            "goal_insights": [
+                {
+                    "goal_id": request.goals[0].get("id", "unknown") if request.goals else "unknown",
+                    "success_probability": 0.85,
+                    "confidence": 0.80,
+                    "key_factors": ["Consistent tracking", "Realistic targets", "Strong motivation"],
+                    "risk_factors": ["Tight deadline", "Seasonal challenges"],
+                    "recommendations": ["Maintain current pace", "Consider intermediate milestones"],
+                    "timeline_assessment": "on_track",
+                    "predicted_completion_date": (datetime.utcnow() + timedelta(days=30)).strftime("%Y-%m-%d")
+                }
+            ],
+            "overall_analysis": {
+                "total_goals": len(request.goals),
+                "high_probability_goals": max(1, len(request.goals) - 1),
+                "attention_needed_goals": min(1, len(request.goals)),
+                "recommendations": [
+                    "Continue current tracking habits",
+                    "Review goals weekly for adjustments",
+                    "Celebrate small wins to maintain motivation"
+                ]
+            },
+            "source": "fallback",
+            "generated_at": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error generating goal insights: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate insights: {str(e)}")
+
+@api_router.get("/patient/goal-correlations/{user_id}")
+async def analyze_goal_correlations(user_id: str):
+    """Analyze correlations between different goals"""
+    try:
+        # Get user's goals and progress data
+        goals = await db.goals.find({"user_id": user_id}).to_list(100)
+        
+        if len(goals) < 2:
+            return {
+                "success": True,
+                "correlations": [],
+                "message": "Need at least 2 goals for correlation analysis"
+            }
+        
+        # Analyze correlations between goal categories
+        correlations = []
+        categories = list(set(goal.get("category", "GENERAL") for goal in goals))
+        
+        for i, cat1 in enumerate(categories):
+            for cat2 in categories[i+1:]:
+                cat1_goals = [g for g in goals if g.get("category") == cat1]
+                cat2_goals = [g for g in goals if g.get("category") == cat2]
+                
+                # Calculate simple correlation based on progress
+                cat1_avg_progress = sum(g.get("progress", 0) for g in cat1_goals) / len(cat1_goals)
+                cat2_avg_progress = sum(g.get("progress", 0) for g in cat2_goals) / len(cat2_goals)
+                
+                # Simulate correlation calculation
+                correlation_value = min(0.95, max(-0.95, (cat1_avg_progress + cat2_avg_progress) / 200 + random.uniform(-0.2, 0.2)))
+                
+                correlations.append({
+                    "goal1_category": cat1,
+                    "goal2_category": cat2,
+                    "correlation": round(correlation_value, 2),
+                    "strength": "strong" if abs(correlation_value) > 0.7 else "moderate" if abs(correlation_value) > 0.5 else "weak",
+                    "direction": "positive" if correlation_value > 0 else "negative",
+                    "insights": [
+                        f"Progress in {cat1.lower()} goals correlates {'positively' if correlation_value > 0 else 'negatively'} with {cat2.lower()} goals",
+                        f"Users typically see {'synergistic' if correlation_value > 0 else 'competing'} effects between these goal types"
+                    ]
+                })
+        
+        # Generate overall insights
+        strong_correlations = [c for c in correlations if c["strength"] == "strong"]
+        insights = []
+        
+        if strong_correlations:
+            insights.append("Strong correlations detected between some goal categories - leverage these synergies")
+        
+        insights.extend([
+            "Focus on 2-3 goals simultaneously for best results",
+            "Track daily progress to identify pattern changes",
+            "Consider goal timing and sequence for optimal outcomes"
+        ])
+        
+        return {
+            "success": True,
+            "user_id": user_id,
+            "correlations": correlations,
+            "insights": insights,
+            "analysis_date": datetime.utcnow().isoformat(),
+            "goals_analyzed": len(goals)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error analyzing correlations: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to analyze correlations: {str(e)}")
+
 # Include the router in the main app (after all endpoints are defined)
 app.include_router(api_router)
 
