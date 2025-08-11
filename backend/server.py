@@ -362,7 +362,33 @@ def calculate_profile_completion(profile: dict, profile_type: str) -> float:
                 continue
             completed_sections += 1
     
-    return (completed_sections / len(sections)) * 100.0
+async def analyze_food_with_ai(food_name: str, food_entry: dict):
+    """Helper function to analyze food with AI"""
+    try:
+        # Basic nutrition estimation based on food name
+        # In a real application, this would use more sophisticated AI
+        nutrition_estimates = {
+            "apple": {"calories": 95, "protein": 0.5, "carbs": 25, "fat": 0.3},
+            "banana": {"calories": 105, "protein": 1.3, "carbs": 27, "fat": 0.4},
+            "chicken breast": {"calories": 165, "protein": 31, "carbs": 0, "fat": 3.6},
+            "rice": {"calories": 130, "protein": 2.7, "carbs": 28, "fat": 0.3},
+            "salmon": {"calories": 208, "protein": 22, "carbs": 0, "fat": 12}
+        }
+        
+        food_lower = food_name.lower()
+        for key, values in nutrition_estimates.items():
+            if key in food_lower:
+                return values
+        
+        # Default values if food not found
+        return {"calories": 200, "protein": 8, "carbs": 25, "fat": 8}
+    except Exception as e:
+        logger.error(f"Food analysis error: {e}")
+        return {"calories": 200, "protein": 8, "carbs": 25, "fat": 8}
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # ===== GOAL TRACKING AND ACHIEVEMENT MODELS =====
 
