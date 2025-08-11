@@ -6225,6 +6225,188 @@ class HealthPlatformAPITester:
         
         return all_tests_passed
 
+    def test_phase4_food_logging_endpoints(self):
+        """Test Phase 4 Food Logging endpoints after dependency updates"""
+        print("\n📋 Testing Phase 4 Food Logging Endpoints...")
+        
+        test_user_id = "demo-patient-123"
+        
+        # Test 1: GET /api/patient/food-log/{user_id}/daily-summary
+        success1, daily_summary_data = self.run_test(
+            "Phase 4: Daily Nutrition Summary",
+            "GET",
+            f"patient/food-log/{test_user_id}/daily-summary",
+            200
+        )
+        
+        # Validate daily summary response structure
+        if success1 and daily_summary_data:
+            expected_keys = ['calories', 'protein', 'carbs', 'fat', 'meals', 'water_intake', 'goals_met', 'daily_goals', 'progress_percentage']
+            missing_keys = [key for key in expected_keys if key not in daily_summary_data]
+            if not missing_keys:
+                print(f"   ✅ Daily summary contains all required keys: {expected_keys}")
+                
+                # Validate specific data types and ranges
+                calories = daily_summary_data.get('calories', 0)
+                progress = daily_summary_data.get('progress_percentage', 0)
+                print(f"   ✅ Daily calories: {calories}, Progress: {progress}%")
+            else:
+                print(f"   ❌ Daily summary missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: GET /api/patient/food-log/{user_id}/recent
+        success2, recent_data = self.run_test(
+            "Phase 4: Recent Food Log Entries",
+            "GET",
+            f"patient/food-log/{test_user_id}/recent",
+            200
+        )
+        
+        # Validate recent entries response structure
+        if success2 and recent_data:
+            expected_keys = ['recent_entries', 'nutrition_summary', 'ai_insights']
+            missing_keys = [key for key in expected_keys if key not in recent_data]
+            if not missing_keys:
+                print(f"   ✅ Recent entries contains all required keys: {expected_keys}")
+                
+                # Validate recent entries structure
+                entries = recent_data.get('recent_entries', [])
+                if entries and len(entries) > 0:
+                    entry = entries[0]
+                    entry_keys = ['id', 'food_name', 'calories', 'logged_at', 'source', 'confidence']
+                    missing_entry_keys = [key for key in entry_keys if key not in entry]
+                    if not missing_entry_keys:
+                        print(f"   ✅ Recent entry structure valid with timestamps and confidence scores")
+                    else:
+                        print(f"   ❌ Recent entry missing keys: {missing_entry_keys}")
+                        success2 = False
+            else:
+                print(f"   ❌ Recent entries missing keys: {missing_keys}")
+                success2 = False
+        
+        # Test 3: GET /api/patient/smart-suggestions/{user_id} (context-aware)
+        success3, smart_suggestions_data = self.run_test(
+            "Phase 4: Context-Aware Smart Suggestions",
+            "GET",
+            f"patient/smart-suggestions/{test_user_id}",
+            200
+        )
+        
+        # Validate smart suggestions response structure
+        if success3 and smart_suggestions_data:
+            expected_keys = ['quick_add_suggestions', 'meal_pattern_insights', 'nutrition_gaps']
+            missing_keys = [key for key in expected_keys if key not in smart_suggestions_data]
+            if not missing_keys:
+                print(f"   ✅ Smart suggestions contains all required keys: {expected_keys}")
+                
+                # Validate suggestions structure
+                suggestions = smart_suggestions_data.get('quick_add_suggestions', [])
+                if suggestions and len(suggestions) > 0:
+                    suggestion = suggestions[0]
+                    suggestion_keys = ['name', 'calories', 'reason']
+                    missing_suggestion_keys = [key for key in suggestion_keys if key not in suggestion]
+                    if not missing_suggestion_keys:
+                        print(f"   ✅ Smart suggestion structure valid with personalized recommendations")
+                    else:
+                        print(f"   ❌ Smart suggestion missing keys: {missing_suggestion_keys}")
+                        success3 = False
+                
+                # Validate nutrition gaps
+                gaps = smart_suggestions_data.get('nutrition_gaps', [])
+                if gaps and len(gaps) > 0:
+                    gap = gaps[0]
+                    gap_keys = ['nutrient', 'current', 'target', 'suggestion']
+                    missing_gap_keys = [key for key in gap_keys if key not in gap]
+                    if not missing_gap_keys:
+                        print(f"   ✅ Nutrition gap structure valid with personalized targets")
+                    else:
+                        print(f"   ❌ Nutrition gap missing keys: {missing_gap_keys}")
+            else:
+                print(f"   ❌ Smart suggestions missing keys: {missing_keys}")
+                success3 = False
+        
+        return success1 and success2 and success3
+
+    def test_ai_integration_endpoints_verification(self):
+        """Verify AI Integration endpoints are still working after dependency updates"""
+        print("\n📋 Verifying AI Integration Endpoints...")
+        
+        # Test 1: POST /api/ai/food-recognition
+        sample_food_image = {
+            "image": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=",
+            "user_id": "demo-patient-123"
+        }
+        
+        success1, food_recognition_response = self.run_test(
+            "AI: Food Recognition",
+            "POST",
+            "ai/food-recognition",
+            200,
+            data=sample_food_image
+        )
+        
+        # Validate food recognition response
+        if success1 and food_recognition_response:
+            expected_keys = ['foods', 'confidence', 'insights']
+            missing_keys = [key for key in expected_keys if key not in food_recognition_response]
+            if not missing_keys:
+                print(f"   ✅ Food recognition response contains all required keys: {expected_keys}")
+            else:
+                print(f"   ❌ Food recognition response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: POST /api/ai/voice-command
+        sample_voice_data = {
+            "transcript": "I had a grilled chicken breast with quinoa and steamed broccoli for lunch",
+            "user_id": "demo-patient-123"
+        }
+        
+        success2, voice_response = self.run_test(
+            "AI: Voice Command Processing",
+            "POST",
+            "ai/voice-command",
+            200,
+            data=sample_voice_data
+        )
+        
+        # Validate voice command response
+        if success2 and voice_response:
+            expected_keys = ['parsed_foods', 'intent', 'clarifications']
+            missing_keys = [key for key in expected_keys if key not in voice_response]
+            if not missing_keys:
+                print(f"   ✅ Voice command response contains all required keys: {expected_keys}")
+            else:
+                print(f"   ❌ Voice command response missing keys: {missing_keys}")
+                success2 = False
+        
+        # Test 3: POST /api/ai/meal-suggestions
+        sample_meal_request = {
+            "user_id": "demo-patient-123",
+            "meal_type": "dinner",
+            "dietary_preferences": ["low_carb", "high_protein"],
+            "available_time": 30
+        }
+        
+        success3, meal_suggestions_response = self.run_test(
+            "AI: Meal Suggestions",
+            "POST",
+            "ai/meal-suggestions",
+            200,
+            data=sample_meal_request
+        )
+        
+        # Validate meal suggestions response
+        if success3 and meal_suggestions_response:
+            expected_keys = ['suggestions', 'reasoning', 'nutrition_info']
+            missing_keys = [key for key in expected_keys if key not in meal_suggestions_response]
+            if not missing_keys:
+                print(f"   ✅ Meal suggestions response contains all required keys: {expected_keys}")
+            else:
+                print(f"   ❌ Meal suggestions response missing keys: {missing_keys}")
+                success3 = False
+        
+        return success1 and success2 and success3
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
