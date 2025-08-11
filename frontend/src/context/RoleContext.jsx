@@ -28,6 +28,7 @@ const ROLE_CONFIG = {
       { label: 'Health Metrics', path: '/patient-metrics', icon: 'Activity' },
       { label: 'Goals', path: '/patient-goals', icon: 'Target' },
       { label: 'Analytics', path: '/patient-analytics', icon: 'BarChart3' },
+      { label: 'AI Insights', path: '/personal-insights', icon: 'Sparkles' },
       { label: 'Medications', path: '/patient-medications', icon: 'Pill' },
       { label: 'Health Timeline', path: '/patient-timeline', icon: 'Calendar' }
     ],
