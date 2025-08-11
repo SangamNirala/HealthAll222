@@ -46,3 +46,6 @@ proto-plus>=1.22.0
 httplib2>=0.22.0
 google-api-python-client>=2.100.0
 tqdm>=4.65.0
+
+# Supabase client for file storage
+supabase>=2.0.0
