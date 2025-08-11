@@ -234,36 +234,8 @@ const PatientAnalytics = () => {
                     </CardContent>
                   </Card>
 
-                  {/* Personal Insights */}
-                  {ai?.personal_insights && ai.personal_insights.length > 0 && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Sparkles className="h-5 w-5" />
-                          Personal Health Insights
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          {ai.personal_insights.map((insight, idx) => (
-                            <div key={idx} className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                              <div className="flex items-start gap-3">
-                                <Sparkles className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0" />
-                                <div>
-                                  <p className="text-blue-900">{insight.insight || insight}</p>
-                                  {insight.recommendation && (
-                                    <p className="text-blue-700 text-sm mt-2">
-                                      <strong>Recommendation:</strong> {insight.recommendation}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
+                  {/* Enhanced Personal Insights Widget */}
+                  <PersonalInsights userId={userId} isWidget={true} className="mt-6" />
                 </div>
               </TabsContent>
             </Tabs>
