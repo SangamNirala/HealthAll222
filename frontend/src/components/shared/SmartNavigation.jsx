@@ -10,7 +10,7 @@ import {
   ArrowLeft, LayoutDashboard, User, Users, Apple, Activity, Target, 
   Stethoscope, BarChart3, BookOpen, FileText, UserPlus, ChefHat, 
   Calendar, Shield, Settings, Plus, Camera, Menu, X, Home, ChevronDown,
-  Pill, Timeline, Download, MoreHorizontal, Sparkles
+  Pill, Timeline, Download, MoreHorizontal, Sparkles, Zap, Calculator
 } from 'lucide-react';
 
 
@@ -18,7 +18,7 @@ import {
 const ICON_MAP = {
   LayoutDashboard, User, Users, Apple, Activity, Target, Stethoscope, 
   BarChart3, BookOpen, FileText, UserPlus, ChefHat, Calendar, Shield, 
-  Settings, Plus, Camera, Home, Pill, Download, MoreHorizontal, Sparkles
+  Settings, Plus, Camera, Home, Pill, Download, MoreHorizontal, Sparkles, Zap, Calculator
 };
 
 const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
