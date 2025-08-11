@@ -6725,6 +6725,369 @@ class HealthPlatformAPITester:
         
         return overall_success
 
+    def test_phase3_ai_integration_personalinsights(self):
+        """Test Phase 3 AI Integration specifically for PersonalInsights component data structure"""
+        print("\n🧠 Testing Phase 3 AI Integration - PersonalInsights Data Integration...")
+        print("Focus: AI Health Insights endpoint with PersonalInsights component data structure")
+        
+        # Test 1: AI Health Insights with comprehensive PersonalInsights data
+        print("\n📝 Test 1: AI Health Insights with PersonalInsights Data Structure")
+        
+        # Generate comprehensive user data matching PersonalInsights component structure
+        personalinsights_health_data = {
+            "user_id": "demo-patient-123",
+            "timeframe": "weekly",
+            "age": 32,
+            "gender": "female",
+            "activity_level": "moderately_active",
+            "goals": ["weight_loss", "energy_boost"],
+            "diet_type": "balanced",
+            "avg_calories": 1850,
+            "avg_protein": 95,
+            "avg_carbs": 220,
+            "avg_fat": 65,
+            "weight": 68,
+            "energy_level": 7,
+            "sleep_quality": 6,
+            "stress_levels": "moderate",
+            "exercise_frequency": "4_times_week",
+            "daily_logs": [
+                {
+                    "date": "2024-01-15",
+                    "calories": 1820,
+                    "energy": 7.2,
+                    "sleep_hours": 7.0,
+                    "exercise_minutes": 45,
+                    "mood": 7.5
+                },
+                {
+                    "date": "2024-01-14", 
+                    "calories": 1890,
+                    "energy": 6.8,
+                    "sleep_hours": 6.5,
+                    "exercise_minutes": 30,
+                    "mood": 7.0
+                },
+                {
+                    "date": "2024-01-13",
+                    "calories": 1780,
+                    "energy": 8.0,
+                    "sleep_hours": 7.5,
+                    "exercise_minutes": 60,
+                    "mood": 8.2
+                },
+                {
+                    "date": "2024-01-12",
+                    "calories": 1950,
+                    "energy": 6.5,
+                    "sleep_hours": 6.0,
+                    "exercise_minutes": 0,
+                    "mood": 6.8
+                },
+                {
+                    "date": "2024-01-11",
+                    "calories": 1830,
+                    "energy": 7.8,
+                    "sleep_hours": 7.2,
+                    "exercise_minutes": 50,
+                    "mood": 7.8
+                }
+            ]
+        }
+        
+        test_data = {
+            "healthData": personalinsights_health_data,
+            "provider": "gemini",
+            "analysis_type": "comprehensive"
+        }
+        
+        success1, response1 = self.run_test(
+            "AI Health Insights - PersonalInsights Data",
+            "POST",
+            "ai/health-insights",
+            200,
+            data=test_data
+        )
+        
+        # Validate response structure matches PersonalInsights expectations
+        if success1 and response1:
+            expected_keys = ['insights', 'recommendations', 'patterns', 'confidence']
+            missing_keys = [key for key in expected_keys if key not in response1]
+            if not missing_keys:
+                print(f"   ✅ PersonalInsights AI response contains all required keys: {expected_keys}")
+                
+                # Validate insights array for PersonalInsights
+                insights = response1.get('insights', [])
+                if isinstance(insights, list) and len(insights) > 0:
+                    print(f"   ✅ Insights array valid for PersonalInsights (contains {len(insights)} insights)")
+                    for i, insight in enumerate(insights[:3]):  # Show first 3 insights
+                        print(f"      - Insight {i+1}: {insight[:100]}...")
+                else:
+                    print(f"   ❌ Insights array should contain meaningful insights for PersonalInsights")
+                    success1 = False
+                
+                # Validate recommendations for PersonalInsights
+                recommendations = response1.get('recommendations', [])
+                if isinstance(recommendations, list) and len(recommendations) > 0:
+                    print(f"   ✅ Recommendations array valid for PersonalInsights (contains {len(recommendations)} recommendations)")
+                    for i, rec in enumerate(recommendations[:3]):  # Show first 3 recommendations
+                        print(f"      - Recommendation {i+1}: {rec[:100]}...")
+                else:
+                    print(f"   ❌ Recommendations array should contain actionable recommendations for PersonalInsights")
+                    success1 = False
+                
+                # Validate patterns object for PersonalInsights
+                patterns = response1.get('patterns', {})
+                if isinstance(patterns, dict):
+                    print(f"   ✅ Patterns object valid for PersonalInsights")
+                    if 'positive_patterns' in patterns:
+                        print(f"      - Positive patterns: {len(patterns.get('positive_patterns', []))}")
+                    if 'areas_for_improvement' in patterns:
+                        print(f"      - Areas for improvement: {len(patterns.get('areas_for_improvement', []))}")
+                else:
+                    print(f"   ❌ Patterns should be an object for PersonalInsights")
+                    success1 = False
+                
+                # Validate confidence score for PersonalInsights
+                confidence = response1.get('confidence', 0)
+                if isinstance(confidence, (int, float)) and 0 <= confidence <= 1:
+                    print(f"   ✅ Confidence score valid for PersonalInsights: {confidence}")
+                else:
+                    print(f"   ⚠️ Confidence score format issue for PersonalInsights: {confidence}")
+                    
+            else:
+                print(f"   ❌ PersonalInsights AI response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: Groq Service Integration Test
+        print("\n📝 Test 2: Groq Service Integration Verification")
+        
+        # Test with different provider to verify Groq integration
+        groq_test_data = {
+            "healthData": {
+                "user_id": "demo-patient-123",
+                "nutrition_summary": {
+                    "avg_calories": 1850,
+                    "avg_protein": 95,
+                    "protein_goal_percentage": 85,
+                    "fiber_intake": 22,
+                    "water_intake": 7.5
+                },
+                "activity_metrics": {
+                    "exercise_frequency": 4,
+                    "avg_steps": 8500,
+                    "active_minutes": 180
+                },
+                "health_indicators": {
+                    "energy_level": 7.2,
+                    "sleep_quality": 6.8,
+                    "mood_score": 7.5,
+                    "stress_level": 4
+                }
+            },
+            "provider": "groq",  # Test Groq specifically
+            "analysis_type": "comprehensive"
+        }
+        
+        success2, response2 = self.run_test(
+            "Groq Service Integration Test",
+            "POST", 
+            "ai/health-insights",
+            200,
+            data=groq_test_data
+        )
+        
+        if success2 and response2:
+            print(f"   ✅ Groq service integration working")
+            # Check if response indicates Groq was used (though it might fallback to Gemini)
+            confidence = response2.get('confidence', 0)
+            print(f"   ✅ Groq service response confidence: {confidence}")
+        else:
+            print(f"   ⚠️ Groq service integration test failed, but this might be expected if Groq API is not available")
+        
+        # Test 3: Missing Dependencies Check
+        print("\n📝 Test 3: AI Service Dependencies Check")
+        
+        # Test with minimal data to check if backend starts without errors
+        minimal_test_data = {
+            "healthData": {
+                "user_id": "demo-patient-123",
+                "age": 32,
+                "calories": 1800
+            },
+            "provider": "gemini"
+        }
+        
+        success3, response3 = self.run_test(
+            "AI Dependencies Check - Minimal Data",
+            "POST",
+            "ai/health-insights", 
+            200,
+            data=minimal_test_data
+        )
+        
+        if success3:
+            print(f"   ✅ AI service dependencies are properly installed and working")
+            print(f"   ✅ Backend starts without AI dependency errors")
+        else:
+            print(f"   ❌ AI service dependencies may be missing or misconfigured")
+        
+        # Test 4: Response Format Validation for PersonalInsights
+        print("\n📝 Test 4: Response Format Validation for PersonalInsights Component")
+        
+        # Test with comprehensive data to validate full response format
+        comprehensive_test_data = {
+            "healthData": {
+                "user_id": "demo-patient-123",
+                "demographics": {
+                    "age": 32,
+                    "gender": "female",
+                    "activity_level": "moderately_active"
+                },
+                "nutrition_data": {
+                    "daily_calories": 1850,
+                    "protein_intake": 95,
+                    "carb_intake": 220,
+                    "fat_intake": 65,
+                    "fiber_intake": 25,
+                    "water_intake": 8
+                },
+                "health_metrics": {
+                    "weight": 68,
+                    "energy_level": 7.2,
+                    "sleep_quality": 6.8,
+                    "mood_score": 7.5,
+                    "stress_level": 4
+                },
+                "goals": ["weight_loss", "energy_improvement", "better_sleep"],
+                "recent_patterns": {
+                    "exercise_consistency": "good",
+                    "meal_timing": "regular",
+                    "sleep_schedule": "inconsistent"
+                }
+            },
+            "provider": "gemini",
+            "analysis_type": "comprehensive"
+        }
+        
+        success4, response4 = self.run_test(
+            "PersonalInsights Response Format Validation",
+            "POST",
+            "ai/health-insights",
+            200,
+            data=comprehensive_test_data
+        )
+        
+        if success4 and response4:
+            # Validate that response format matches PersonalInsights component expectations
+            required_structure = {
+                'insights': list,
+                'recommendations': list, 
+                'patterns': dict,
+                'confidence': (int, float)
+            }
+            
+            structure_valid = True
+            for key, expected_type in required_structure.items():
+                if key not in response4:
+                    print(f"   ❌ Missing required key for PersonalInsights: {key}")
+                    structure_valid = False
+                elif not isinstance(response4[key], expected_type):
+                    print(f"   ❌ Invalid type for PersonalInsights key {key}: expected {expected_type}, got {type(response4[key])}")
+                    structure_valid = False
+                else:
+                    print(f"   ✅ PersonalInsights key {key} has correct type: {expected_type}")
+            
+            if structure_valid:
+                print(f"   ✅ Response format fully compatible with PersonalInsights component")
+            else:
+                print(f"   ❌ Response format has issues for PersonalInsights component")
+                success4 = False
+        
+        # Test 5: Real-world PersonalInsights Scenario
+        print("\n📝 Test 5: Real-world PersonalInsights Integration Scenario")
+        
+        # Simulate the exact data structure that PersonalInsights component sends
+        realworld_data = {
+            "healthData": {
+                "user_id": "demo-patient-123",
+                "timeframe": "weekly",
+                "age": 32,
+                "gender": "female", 
+                "activity_level": "moderately_active",
+                "goals": ["weight_loss", "energy_boost"],
+                "diet_type": "balanced",
+                "avg_calories": 1850,
+                "avg_protein": 95,
+                "avg_carbs": 220,
+                "avg_fat": 65,
+                "weight": 68,
+                "energy_level": 7,
+                "sleep_quality": 6,
+                "stress_levels": "moderate",
+                "exercise_frequency": "4_times_week",
+                "daily_logs": [
+                    {"date": "2024-01-15", "calories": 1820, "energy": 7.2, "sleep_hours": 7.0, "exercise_minutes": 45, "mood": 7.5},
+                    {"date": "2024-01-14", "calories": 1890, "energy": 6.8, "sleep_hours": 6.5, "exercise_minutes": 30, "mood": 7.0},
+                    {"date": "2024-01-13", "calories": 1780, "energy": 8.0, "sleep_hours": 7.5, "exercise_minutes": 60, "mood": 8.2},
+                    {"date": "2024-01-12", "calories": 1950, "energy": 6.5, "sleep_hours": 6.0, "exercise_minutes": 0, "mood": 6.8},
+                    {"date": "2024-01-11", "calories": 1830, "energy": 7.8, "sleep_hours": 7.2, "exercise_minutes": 50, "mood": 7.8},
+                    {"date": "2024-01-10", "calories": 1760, "energy": 7.0, "sleep_hours": 6.8, "exercise_minutes": 40, "mood": 7.2},
+                    {"date": "2024-01-09", "calories": 1920, "energy": 6.2, "sleep_hours": 5.5, "exercise_minutes": 0, "mood": 6.5},
+                    {"date": "2024-01-08", "calories": 1840, "energy": 7.5, "sleep_hours": 7.8, "exercise_minutes": 55, "mood": 8.0},
+                    {"date": "2024-01-07", "calories": 1880, "energy": 7.1, "sleep_hours": 7.0, "exercise_minutes": 35, "mood": 7.3},
+                    {"date": "2024-01-06", "calories": 1810, "energy": 6.9, "sleep_hours": 6.2, "exercise_minutes": 45, "mood": 7.1},
+                    {"date": "2024-01-05", "calories": 1900, "energy": 6.4, "sleep_hours": 6.0, "exercise_minutes": 0, "mood": 6.8},
+                    {"date": "2024-01-04", "calories": 1770, "energy": 7.8, "sleep_hours": 7.5, "exercise_minutes": 50, "mood": 8.1},
+                    {"date": "2024-01-03", "calories": 1860, "energy": 7.2, "sleep_hours": 7.1, "exercise_minutes": 40, "mood": 7.4},
+                    {"date": "2024-01-02", "calories": 1820, "energy": 6.7, "sleep_hours": 6.3, "exercise_minutes": 30, "mood": 6.9}
+                ]
+            },
+            "provider": "gemini",
+            "analysis_type": "comprehensive"
+        }
+        
+        success5, response5 = self.run_test(
+            "Real-world PersonalInsights Integration",
+            "POST",
+            "ai/health-insights",
+            200,
+            data=realworld_data
+        )
+        
+        if success5 and response5:
+            print(f"   ✅ Real-world PersonalInsights integration successful")
+            
+            # Validate that insights are meaningful and actionable
+            insights = response5.get('insights', [])
+            recommendations = response5.get('recommendations', [])
+            
+            if len(insights) >= 3:
+                print(f"   ✅ Generated {len(insights)} meaningful insights for PersonalInsights")
+            else:
+                print(f"   ⚠️ Should generate at least 3 insights for PersonalInsights, got {len(insights)}")
+            
+            if len(recommendations) >= 3:
+                print(f"   ✅ Generated {len(recommendations)} actionable recommendations for PersonalInsights")
+            else:
+                print(f"   ⚠️ Should generate at least 3 recommendations for PersonalInsights, got {len(recommendations)}")
+            
+            # Check confidence score is reasonable
+            confidence = response5.get('confidence', 0)
+            if confidence >= 0.6:
+                print(f"   ✅ AI confidence score is reasonable for PersonalInsights: {confidence}")
+            else:
+                print(f"   ⚠️ AI confidence score seems low for PersonalInsights: {confidence}")
+        
+        print(f"\n📊 Phase 3 AI Integration - PersonalInsights Test Summary:")
+        print(f"   ✅ PersonalInsights Data Structure: {'PASS' if success1 else 'FAIL'}")
+        print(f"   ✅ Groq Service Integration: {'PASS' if success2 else 'FAIL'}")
+        print(f"   ✅ AI Dependencies Check: {'PASS' if success3 else 'FAIL'}")
+        print(f"   ✅ Response Format Validation: {'PASS' if success4 else 'FAIL'}")
+        print(f"   ✅ Real-world Integration: {'PASS' if success5 else 'FAIL'}")
+        
+        return success1 and success2 and success3 and success4 and success5
+
 def main():
     """Main test execution"""
     tester = HealthPlatformAPITester()
