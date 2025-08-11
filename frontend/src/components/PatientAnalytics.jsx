@@ -10,6 +10,7 @@ import { BarChart3, Sparkles, Brain, Activity, Target, Calendar, Clock, Plus, Tr
 // Import our new enhanced analytics components
 import NutritionTrends from './analytics/NutritionTrends';
 import HealthMetricsCorrelation from './analytics/HealthMetricsCorrelation';
+import PersonalInsights from './analytics/PersonalInsights';
 import SmartFoodLogging from './food-logging/SmartFoodLogging';
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || '';
