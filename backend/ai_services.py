@@ -6,6 +6,7 @@ Provides intelligent suggestions and insights using multiple AI APIs
 import os
 import json
 import asyncio
+import random
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 import logging
@@ -20,11 +21,66 @@ from huggingface_hub import InferenceClient
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+class GeminiAPIRotator:
+    """Handles rotation and fallback for multiple Gemini API keys"""
+    
+    def __init__(self):
+        """Initialize with multiple Gemini API keys"""
+        self.api_keys = self._load_gemini_keys()
+        self.current_key_index = 0
+        self.failed_keys = set()
+        
+    def _load_gemini_keys(self) -> List[str]:
+        """Load Gemini API keys from environment"""
+        keys_str = os.getenv('GEMINI_API_KEYS', '')
+        if keys_str:
+            return [key.strip() for key in keys_str.split(',') if key.strip()]
+        
+        # Fallback to single key if no multiple keys provided
+        single_key = os.getenv('GEMINI_API_KEY')
+        return [single_key] if single_key else []
+    
+    def get_current_key(self) -> Optional[str]:
+        """Get current working API key"""
+        if not self.api_keys:
+            return None
+            
+        # Try to find a working key
+        attempts = 0
+        while attempts < len(self.api_keys):
+            current_key = self.api_keys[self.current_key_index]
+            
+            if current_key not in self.failed_keys:
+                return current_key
+                
+            # Move to next key
+            self.current_key_index = (self.current_key_index + 1) % len(self.api_keys)
+            attempts += 1
+        
+        # If all keys failed, reset and try again
+        if len(self.failed_keys) >= len(self.api_keys):
+            logger.warning("All Gemini API keys failed. Resetting failed keys list.")
+            self.failed_keys.clear()
+            return self.api_keys[0] if self.api_keys else None
+            
+        return None
+    
+    def mark_key_failed(self, api_key: str):
+        """Mark an API key as failed"""
+        self.failed_keys.add(api_key)
+        logger.warning(f"Marked Gemini API key as failed: {api_key[:20]}...")
+        
+    def rotate_key(self):
+        """Rotate to next API key"""
+        if len(self.api_keys) > 1:
+            self.current_key_index = (self.current_key_index + 1) % len(self.api_keys)
+            logger.info(f"Rotated to Gemini API key index: {self.current_key_index}")
+
 class AIServiceManager:
     def __init__(self):
         """Initialize AI service clients with API keys from environment"""
         self.groq_client = None
-        self.gemini_client = None
+        self.gemini_rotator = GeminiAPIRotator()
         self.openrouter_client = None
         self.hf_client = None
         
@@ -39,11 +95,8 @@ class AIServiceManager:
                 self.groq_client = Groq(api_key=os.getenv('GROQ_API_KEY'))
                 logger.info("Groq client initialized successfully")
             
-            # Gemini Client
-            if os.getenv('GEMINI_API_KEY'):
-                genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
-                self.gemini_client = genai.GenerativeModel('gemini-pro')
-                logger.info("Gemini client initialized successfully")
+            # Initialize Gemini with current key
+            self._initialize_gemini_client()
             
             # OpenRouter Client
             if os.getenv('OPENROUTER_API_KEY'):
@@ -60,6 +113,49 @@ class AIServiceManager:
                 
         except Exception as e:
             logger.error(f"Error initializing AI clients: {str(e)}")
+    
+    def _initialize_gemini_client(self):
+        """Initialize Gemini client with current API key"""
+        try:
+            current_key = self.gemini_rotator.get_current_key()
+            if current_key:
+                genai.configure(api_key=current_key)
+                self.gemini_client = genai.GenerativeModel('gemini-pro')
+                logger.info(f"Gemini client initialized with key index: {self.gemini_rotator.current_key_index}")
+            else:
+                logger.error("No valid Gemini API key available")
+                self.gemini_client = None
+        except Exception as e:
+            logger.error(f"Error initializing Gemini client: {str(e)}")
+            self.gemini_client = None
+    
+    def _retry_with_gemini_rotation(self, func, *args, **kwargs):
+        """Retry function with Gemini API key rotation on failure"""
+        max_retries = len(self.gemini_rotator.api_keys)
+        
+        for attempt in range(max_retries):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                error_msg = str(e).lower()
+                
+                # Check if it's a rate limit or quota error
+                if any(keyword in error_msg for keyword in ['quota', 'rate limit', 'exceeded', 'resource_exhausted']):
+                    current_key = self.gemini_rotator.get_current_key()
+                    if current_key:
+                        self.gemini_rotator.mark_key_failed(current_key)
+                        self.gemini_rotator.rotate_key()
+                        self._initialize_gemini_client()
+                        
+                        if attempt < max_retries - 1:
+                            logger.info(f"Retrying with next Gemini API key (attempt {attempt + 1}/{max_retries})")
+                            continue
+                
+                # If not a rotation-worthy error or last attempt, raise the error
+                if attempt == max_retries - 1:
+                    raise e
+        
+        raise Exception("All Gemini API keys exhausted")
 
     async def generate_nutrition_insights(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
         """Generate personalized nutrition insights using AI"""
@@ -72,9 +168,9 @@ class AIServiceManager:
                 response = await self._groq_nutrition_analysis(context)
                 return response
             
-            # Fallback to Gemini
+            # Fallback to Gemini with rotation
             elif self.gemini_client:
-                response = await self._gemini_nutrition_analysis(context)
+                response = await self._gemini_nutrition_analysis_with_rotation(context)
                 return response
             
             # Default fallback
@@ -83,6 +179,186 @@ class AIServiceManager:
         except Exception as e:
             logger.error(f"Error generating nutrition insights: {str(e)}")
             return self._default_nutrition_insights(user_data)
+
+    async def _gemini_nutrition_analysis_with_rotation(self, context: str) -> Dict[str, Any]:
+        """Use Gemini for nutrition analysis with API key rotation"""
+        def _gemini_call():
+            if not self.gemini_client:
+                raise Exception("Gemini client not initialized")
+                
+            prompt = f"""
+            As a professional nutritionist AI, analyze the following user data and provide personalized insights:
+            
+            {context}
+            
+            Please provide:
+            1. Key nutritional insights
+            2. Personalized recommendations
+            3. Health correlations identified
+            4. Actionable next steps
+            
+            Format your response as clear, actionable advice.
+            """
+            
+            response = self.gemini_client.generate_content(prompt)
+            return response
+        
+        try:
+            response = self._retry_with_gemini_rotation(_gemini_call)
+            
+            return {
+                "source": "gemini",
+                "model": "gemini-pro", 
+                "api_key_index": self.gemini_rotator.current_key_index,
+                "insights": self._parse_gemini_response(response.text),
+                "recommendations": [],
+                "correlations": [],
+                "action_items": [],
+                "confidence": 0.80
+            }
+            
+        except Exception as e:
+            logger.error(f"Gemini API error with rotation: {str(e)}")
+            raise
+
+    async def generate_goal_insights(self, goal_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Generate AI-powered goal insights and suggestions"""
+        try:
+            context = self._build_goal_context(goal_data)
+            
+            # Prefer Gemini for goal analysis
+            if self.gemini_client:
+                response = await self._gemini_goal_analysis_with_rotation(context)
+                return response
+            elif self.groq_client:
+                response = await self._groq_goal_analysis(context)
+                return response
+            else:
+                return self._default_goal_insights(goal_data)
+                
+        except Exception as e:
+            logger.error(f"Error generating goal insights: {str(e)}")
+            return self._default_goal_insights(goal_data)
+    
+    async def _gemini_goal_analysis_with_rotation(self, context: str) -> Dict[str, Any]:
+        """Use Gemini for goal analysis with API key rotation"""
+        def _gemini_goal_call():
+            if not self.gemini_client:
+                raise Exception("Gemini client not initialized")
+                
+            prompt = f"""
+            As an AI goal optimization expert, analyze the user's goal data and provide intelligent insights:
+            
+            {context}
+            
+            Provide a JSON response with the following structure:
+            {{
+                "insights": ["insight1", "insight2", "insight3"],
+                "recommendations": [
+                    {{
+                        "title": "recommendation title",
+                        "description": "detailed description", 
+                        "priority": "high|medium|low",
+                        "timeline": "timeframe",
+                        "success_probability": 0.85
+                    }}
+                ],
+                "goal_adjustments": [
+                    {{
+                        "current_goal": "current goal",
+                        "suggested_adjustment": "adjustment",
+                        "reason": "why adjust"
+                    }}
+                ],
+                "milestone_suggestions": [
+                    {{
+                        "milestone": "milestone name",
+                        "target_date": "date",
+                        "success_criteria": "criteria"
+                    }}
+                ]
+            }}
+            """
+            
+            response = self.gemini_client.generate_content(prompt)
+            return response
+        
+        try:
+            response = self._retry_with_gemini_rotation(_gemini_goal_call)
+            
+            # Try to parse JSON response
+            try:
+                parsed_response = json.loads(response.text)
+                return {
+                    "source": "gemini",
+                    "model": "gemini-pro",
+                    "api_key_index": self.gemini_rotator.current_key_index,
+                    "insights": parsed_response.get("insights", []),
+                    "recommendations": parsed_response.get("recommendations", []),
+                    "goal_adjustments": parsed_response.get("goal_adjustments", []),
+                    "milestone_suggestions": parsed_response.get("milestone_suggestions", []),
+                    "confidence": 0.85
+                }
+            except json.JSONDecodeError:
+                return self._parse_goal_text_response(response.text)
+                
+        except Exception as e:
+            logger.error(f"Gemini goal analysis error: {str(e)}")
+            raise
+
+    async def generate_achievement_insights(self, achievement_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Generate insights for achievement milestones"""
+        try:
+            context = self._build_achievement_context(achievement_data)
+            
+            if self.gemini_client:
+                response = await self._gemini_achievement_analysis_with_rotation(context)
+                return response
+            else:
+                return self._default_achievement_insights(achievement_data)
+                
+        except Exception as e:
+            logger.error(f"Error generating achievement insights: {str(e)}")
+            return self._default_achievement_insights(achievement_data)
+    
+    async def _gemini_achievement_analysis_with_rotation(self, context: str) -> Dict[str, Any]:
+        """Use Gemini for achievement analysis with API key rotation"""
+        def _gemini_achievement_call():
+            if not self.gemini_client:
+                raise Exception("Gemini client not initialized")
+                
+            prompt = f"""
+            As an AI achievement specialist, analyze the user's progress and suggest meaningful achievement milestones:
+            
+            {context}
+            
+            Provide insights on:
+            1. Recent achievements and their significance
+            2. Upcoming milestone opportunities
+            3. Motivation strategies based on progress patterns
+            4. Achievement badge suggestions with descriptions
+            5. Social sharing recommendations
+            
+            Format as actionable insights and specific achievement recommendations.
+            """
+            
+            response = self.gemini_client.generate_content(prompt)
+            return response
+        
+        try:
+            response = self._retry_with_gemini_rotation(_gemini_achievement_call)
+            
+            return {
+                "source": "gemini",
+                "model": "gemini-pro",
+                "api_key_index": self.gemini_rotator.current_key_index,
+                "achievement_insights": self._parse_achievement_response(response.text),
+                "confidence": 0.82
+            }
+            
+        except Exception as e:
+            logger.error(f"Gemini achievement analysis error: {str(e)}")
+            raise
 
     async def _groq_nutrition_analysis(self, context: str) -> Dict[str, Any]:
         """Use Groq for nutrition analysis"""
