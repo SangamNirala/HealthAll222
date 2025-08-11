@@ -4283,6 +4283,10 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Profile Management Endpoints...")
         self.test_profile_management_endpoints()
 
+        # Test Profile Wizard Enhancements (NEW - MAIN FOCUS)
+        print("\n📋 Testing Profile Wizard Enhancements...")
+        self.test_profile_wizard_enhancements()
+
         # Test patient analytics endpoints
         print("\n📋 Testing Patient Analytics Endpoints...")
         self.test_patient_analytics_endpoints()
