@@ -1644,6 +1644,197 @@ class HealthPlatformAPITester:
         
         return all_tests_passed
 
+    def test_phase4_food_logging_endpoints(self):
+        """Test Phase 4 Food Logging Backend Endpoints"""
+        print("\n📋 Testing Phase 4 Food Logging Backend Endpoints...")
+        
+        test_user_id = "demo-patient-123"
+        
+        # Test 1: GET /api/patient/food-log/{user_id}/daily-summary
+        success1, daily_summary_data = self.run_test(
+            "Patient Food Log Daily Summary",
+            "GET",
+            f"patient/food-log/{test_user_id}/daily-summary",
+            200
+        )
+        
+        # Validate daily summary response structure
+        if success1 and daily_summary_data:
+            expected_keys = ['user_id', 'date', 'summary']
+            missing_keys = [key for key in expected_keys if key not in daily_summary_data]
+            if not missing_keys:
+                print(f"   ✅ Daily summary response contains all required keys: {expected_keys}")
+                
+                # Validate summary structure
+                summary = daily_summary_data.get('summary', {})
+                summary_keys = ['calories', 'protein', 'carbs', 'fat', 'fiber', 'meals', 'water_intake', 'goals_met', 'daily_goals', 'progress_percentage']
+                missing_summary_keys = [key for key in summary_keys if key not in summary]
+                
+                if not missing_summary_keys:
+                    print(f"   ✅ Summary structure contains all required keys")
+                    
+                    # Validate goals_met structure
+                    goals_met = summary.get('goals_met', {})
+                    goals_keys = ['calories', 'protein', 'carbs', 'fat', 'fiber']
+                    missing_goals_keys = [key for key in goals_keys if key not in goals_met]
+                    
+                    if not missing_goals_keys:
+                        print(f"   ✅ Goals met structure valid")
+                    else:
+                        print(f"   ❌ Goals met missing keys: {missing_goals_keys}")
+                        success1 = False
+                    
+                    # Validate progress_percentage structure
+                    progress_percentage = summary.get('progress_percentage', {})
+                    progress_keys = ['calories', 'protein', 'carbs', 'fat', 'fiber']
+                    missing_progress_keys = [key for key in progress_keys if key not in progress_percentage]
+                    
+                    if not missing_progress_keys:
+                        print(f"   ✅ Progress percentage structure valid")
+                    else:
+                        print(f"   ❌ Progress percentage missing keys: {missing_progress_keys}")
+                        success1 = False
+                        
+                else:
+                    print(f"   ❌ Summary missing keys: {missing_summary_keys}")
+                    success1 = False
+            else:
+                print(f"   ❌ Daily summary response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: GET /api/patient/food-log/{user_id}/recent
+        success2, recent_logs_data = self.run_test(
+            "Patient Food Log Recent Entries",
+            "GET",
+            f"patient/food-log/{test_user_id}/recent",
+            200
+        )
+        
+        # Validate recent logs response structure
+        if success2 and recent_logs_data:
+            expected_keys = ['user_id', 'logs']
+            missing_keys = [key for key in expected_keys if key not in recent_logs_data]
+            if not missing_keys:
+                print(f"   ✅ Recent logs response contains all required keys: {expected_keys}")
+                
+                # Validate logs array structure
+                logs = recent_logs_data.get('logs', [])
+                if logs and len(logs) > 0:
+                    log = logs[0]
+                    log_keys = ['id', 'food_name', 'brand', 'calories', 'protein', 'carbs', 'fat', 'fiber', 'sodium', 'meal_type', 'serving_size', 'timestamp', 'source', 'confidence']
+                    missing_log_keys = [key for key in log_keys if key not in log]
+                    
+                    if not missing_log_keys:
+                        print(f"   ✅ Food log entry structure valid with detailed nutrition info")
+                        print(f"   ✅ Found {len(logs)} recent food log entries")
+                        
+                        # Validate timestamp format
+                        timestamp = log.get('timestamp', '')
+                        if timestamp:
+                            print(f"   ✅ Timestamp format valid: {timestamp}")
+                        else:
+                            print(f"   ❌ Missing timestamp in food log entry")
+                            success2 = False
+                            
+                    else:
+                        print(f"   ❌ Food log entry missing keys: {missing_log_keys}")
+                        success2 = False
+                else:
+                    print(f"   ❌ No food log entries found in response")
+                    success2 = False
+            else:
+                print(f"   ❌ Recent logs response missing keys: {missing_keys}")
+                success2 = False
+        
+        # Test 3: GET /api/patient/smart-suggestions/{user_id}
+        success3, smart_suggestions_data = self.run_test(
+            "Patient Smart Food Suggestions",
+            "GET",
+            f"patient/smart-suggestions/{test_user_id}",
+            200
+        )
+        
+        # Validate smart suggestions response structure
+        if success3 and smart_suggestions_data:
+            expected_keys = ['user_id', 'meal_context', 'generated_at', 'quick_add_suggestions', 'meal_pattern_insights', 'nutrition_gaps', 'personalized_recommendations']
+            missing_keys = [key for key in expected_keys if key not in smart_suggestions_data]
+            if not missing_keys:
+                print(f"   ✅ Smart suggestions response contains all required keys: {expected_keys}")
+                
+                # Validate quick_add_suggestions structure
+                suggestions = smart_suggestions_data.get('quick_add_suggestions', [])
+                if suggestions and len(suggestions) > 0:
+                    suggestion = suggestions[0]
+                    suggestion_keys = ['name', 'calories', 'protein', 'carbs', 'fat', 'reason']
+                    missing_suggestion_keys = [key for key in suggestion_keys if key not in suggestion]
+                    
+                    if not missing_suggestion_keys:
+                        print(f"   ✅ Quick add suggestions structure valid")
+                        print(f"   ✅ Found {len(suggestions)} contextual food suggestions")
+                        
+                        # Check meal context awareness
+                        meal_context = smart_suggestions_data.get('meal_context', '')
+                        if meal_context in ['breakfast', 'lunch', 'dinner', 'snack']:
+                            print(f"   ✅ Context-aware suggestions for {meal_context} time")
+                        else:
+                            print(f"   ❌ Invalid meal context: {meal_context}")
+                            success3 = False
+                            
+                    else:
+                        print(f"   ❌ Quick add suggestion missing keys: {missing_suggestion_keys}")
+                        success3 = False
+                else:
+                    print(f"   ❌ No quick add suggestions found")
+                    success3 = False
+                
+                # Validate meal_pattern_insights structure
+                pattern_insights = smart_suggestions_data.get('meal_pattern_insights', {})
+                pattern_keys = ['breakfast_time', 'lunch_time', 'dinner_time', 'snack_preferences', 'hydration_pattern', 'meal_spacing']
+                missing_pattern_keys = [key for key in pattern_keys if key not in pattern_insights]
+                
+                if not missing_pattern_keys:
+                    print(f"   ✅ Meal pattern insights structure valid")
+                else:
+                    print(f"   ❌ Meal pattern insights missing keys: {missing_pattern_keys}")
+                    success3 = False
+                
+                # Validate nutrition_gaps structure
+                nutrition_gaps = smart_suggestions_data.get('nutrition_gaps', [])
+                if nutrition_gaps and len(nutrition_gaps) > 0:
+                    gap = nutrition_gaps[0]
+                    gap_keys = ['nutrient', 'current', 'target', 'suggestion', 'foods', 'estimated_calories']
+                    missing_gap_keys = [key for key in gap_keys if key not in gap]
+                    
+                    if not missing_gap_keys:
+                        print(f"   ✅ Nutrition gaps structure valid with {len(nutrition_gaps)} gaps identified")
+                    else:
+                        print(f"   ❌ Nutrition gap missing keys: {missing_gap_keys}")
+                        success3 = False
+                
+                # Validate personalized_recommendations structure
+                recommendations = smart_suggestions_data.get('personalized_recommendations', [])
+                if recommendations and len(recommendations) > 0:
+                    rec = recommendations[0]
+                    rec_keys = ['title', 'description', 'foods', 'priority']
+                    missing_rec_keys = [key for key in rec_keys if key not in rec]
+                    
+                    if not missing_rec_keys:
+                        print(f"   ✅ Personalized recommendations structure valid with {len(recommendations)} recommendations")
+                    else:
+                        print(f"   ❌ Personalized recommendation missing keys: {missing_rec_keys}")
+                        success3 = False
+                        
+            else:
+                print(f"   ❌ Smart suggestions response missing keys: {missing_keys}")
+                success3 = False
+        
+        print(f"\n📊 Phase 4 Food Logging Endpoints Test Summary:")
+        print(f"   ✅ Daily Summary Endpoint: {'PASS' if success1 else 'FAIL'}")
+        print(f"   ✅ Recent Logs Endpoint: {'PASS' if success2 else 'FAIL'}")
+        print(f"   ✅ Smart Suggestions Endpoint: {'PASS' if success3 else 'FAIL'}")
+        
+        return success1 and success2 and success3
+
     def test_phase5_family_features(self):
         """Test Phase 5 Comprehensive Family Features endpoints"""
         print("\n📋 Testing Phase 5 Comprehensive Family Features...")
