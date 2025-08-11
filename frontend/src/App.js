@@ -23,6 +23,9 @@ import PatientHealthTimeline from "./components/PatientHealthTimeline";
 // Analytics components
 import PersonalInsights from "./components/analytics/PersonalInsights";
 
+// Goals components  
+import AdvancedGoalTracking from "./components/goals/AdvancedGoalTracking";
+
 // Provider navigation pages
 import ProviderPatients from "./components/ProviderPatients";
 import ProviderTools from "./components/ProviderTools";
