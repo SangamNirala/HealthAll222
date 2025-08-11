@@ -40,3 +40,9 @@ transformers>=4.36.0
 httpx>=0.27.0
 distro>=1.8.0
 PyYAML>=6.0
+
+# Additional dependencies for Phase 4 Food Logging Features
+proto-plus>=1.22.0
+httplib2>=0.22.0
+google-api-python-client>=2.100.0
+tqdm>=4.65.0
