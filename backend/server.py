@@ -1403,10 +1403,24 @@ class FoodLogEntry(BaseModel):
 class SymptomEntry(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
-    symptom_type: str  # energy, mood, digestion, sleep
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    symptom: str  # headache, nausea, fatigue, etc.
     severity: int  # 1-10 scale
+    duration: Optional[int] = None  # duration in minutes
+    triggers: List[str] = Field(default_factory=list)  # stress, lack_of_sleep, etc.
+    medications_taken: List[str] = Field(default_factory=list)
     notes: Optional[str] = None
-    recorded_at: datetime = Field(default_factory=datetime.utcnow)
+    photo_url: Optional[str] = None
+    voice_note_url: Optional[str] = None
+    correlations: Optional[dict] = Field(default_factory=dict)
+
+class SymptomCorrelationData(BaseModel):
+    user_id: str
+    symptoms: List[SymptomEntry]
+    diet_data: List[dict] = Field(default_factory=list)
+    exercise_data: List[dict] = Field(default_factory=list)
+    sleep_data: List[dict] = Field(default_factory=list)
+    medications: List[dict] = Field(default_factory=list)
 
 # ===== PROVIDER CLINICAL TOOLS =====
 
