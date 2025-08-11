@@ -7,7 +7,7 @@ from datetime import datetime
 import uuid
 
 class AIEndpointTester:
-    def __init__(self, base_url="https://ea3cb61b-f8e1-4947-b0b7-1e7610353f02.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://1706bd60-a0c6-4bcd-963f-7b1fe5864923.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
