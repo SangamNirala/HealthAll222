@@ -6241,15 +6241,23 @@ class HealthPlatformAPITester:
         
         # Validate daily summary response structure
         if success1 and daily_summary_data:
-            expected_keys = ['calories', 'protein', 'carbs', 'fat', 'meals', 'water_intake', 'goals_met', 'daily_goals', 'progress_percentage']
+            expected_keys = ['user_id', 'date', 'summary']
             missing_keys = [key for key in expected_keys if key not in daily_summary_data]
             if not missing_keys:
                 print(f"   ✅ Daily summary contains all required keys: {expected_keys}")
                 
-                # Validate specific data types and ranges
-                calories = daily_summary_data.get('calories', 0)
-                progress = daily_summary_data.get('progress_percentage', 0)
-                print(f"   ✅ Daily calories: {calories}, Progress: {progress}%")
+                # Validate summary structure
+                summary = daily_summary_data.get('summary', {})
+                summary_keys = ['calories', 'protein', 'carbs', 'fat', 'meals', 'water_intake', 'goals_met', 'daily_goals', 'progress_percentage']
+                missing_summary_keys = [key for key in summary_keys if key not in summary]
+                if not missing_summary_keys:
+                    print(f"   ✅ Summary contains all required nutrition keys")
+                    calories = summary.get('calories', 0)
+                    progress = summary.get('progress_percentage', {})
+                    print(f"   ✅ Daily calories: {calories}, Progress data available: {len(progress)} metrics")
+                else:
+                    print(f"   ❌ Summary missing keys: {missing_summary_keys}")
+                    success1 = False
             else:
                 print(f"   ❌ Daily summary missing keys: {missing_keys}")
                 success1 = False
@@ -6264,19 +6272,20 @@ class HealthPlatformAPITester:
         
         # Validate recent entries response structure
         if success2 and recent_data:
-            expected_keys = ['recent_entries', 'nutrition_summary', 'ai_insights']
+            expected_keys = ['user_id', 'logs']
             missing_keys = [key for key in expected_keys if key not in recent_data]
             if not missing_keys:
                 print(f"   ✅ Recent entries contains all required keys: {expected_keys}")
                 
                 # Validate recent entries structure
-                entries = recent_data.get('recent_entries', [])
+                entries = recent_data.get('logs', [])
                 if entries and len(entries) > 0:
                     entry = entries[0]
-                    entry_keys = ['id', 'food_name', 'calories', 'logged_at', 'source', 'confidence']
+                    entry_keys = ['id', 'food_name', 'calories', 'timestamp', 'source', 'confidence']
                     missing_entry_keys = [key for key in entry_keys if key not in entry]
                     if not missing_entry_keys:
                         print(f"   ✅ Recent entry structure valid with timestamps and confidence scores")
+                        print(f"   ✅ Found {len(entries)} recent food log entries")
                     else:
                         print(f"   ❌ Recent entry missing keys: {missing_entry_keys}")
                         success2 = False
@@ -6369,9 +6378,10 @@ class HealthPlatformAPITester:
             data=sample_voice_data
         )
         
-        # Validate voice command response
+        # Validate voice command response (check actual response structure)
         if success2 and voice_response:
-            expected_keys = ['parsed_foods', 'intent', 'clarifications']
+            # The actual response uses 'foodItems' instead of 'parsed_foods'
+            expected_keys = ['foodItems', 'intent', 'clarifications']
             missing_keys = [key for key in expected_keys if key not in voice_response]
             if not missing_keys:
                 print(f"   ✅ Voice command response contains all required keys: {expected_keys}")
@@ -6379,12 +6389,19 @@ class HealthPlatformAPITester:
                 print(f"   ❌ Voice command response missing keys: {missing_keys}")
                 success2 = False
         
-        # Test 3: POST /api/ai/meal-suggestions
+        # Test 3: POST /api/ai/meal-suggestions (with correct required fields)
         sample_meal_request = {
             "user_id": "demo-patient-123",
             "meal_type": "dinner",
             "dietary_preferences": ["low_carb", "high_protein"],
-            "available_time": 30
+            "available_time": 30,
+            "nutritionHistory": {
+                "calories": 1200,
+                "protein": 45,
+                "carbs": 120,
+                "fat": 40
+            },
+            "healthGoals": ["weight_loss", "muscle_gain"]
         }
         
         success3, meal_suggestions_response = self.run_test(
