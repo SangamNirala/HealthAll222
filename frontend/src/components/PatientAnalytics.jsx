@@ -155,6 +155,118 @@ const PatientAnalytics = () => {
               <StatTile title="Weight Change" value={`${weekly?.weight_change || 0} kg`} subtitle="last 7 days" color="indigo" />
             </div>
 
+            {/* Enhanced Analytics Dashboard */}
+            <Tabs defaultValue="trends" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="trends" className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  Nutrition Trends
+                </TabsTrigger>
+                <TabsTrigger value="correlation" className="flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  Health Correlations
+                </TabsTrigger>
+                <TabsTrigger value="logging" className="flex items-center gap-2">
+                  <Camera className="h-4 w-4" />
+                  Smart Logging
+                </TabsTrigger>
+                <TabsTrigger value="insights" className="flex items-center gap-2">
+                  <Brain className="h-4 w-4" />
+                  AI Insights
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="trends" className="mt-6">
+                <NutritionTrends userId={userId} />
+              </TabsContent>
+
+              <TabsContent value="correlation" className="mt-6">
+                <HealthMetricsCorrelation userId={userId} />
+              </TabsContent>
+
+              <TabsContent value="logging" className="mt-6">
+                <SmartFoodLogging 
+                  userId={userId} 
+                  onFoodLogged={(food) => {
+                    setActionMessage(`✓ Added ${food.name} to your food log`);
+                    setTimeout(() => setActionMessage(''), 3000);
+                  }} 
+                />
+              </TabsContent>
+
+              <TabsContent value="insights" className="mt-6">
+                {/* Original AI Insights Content */}
+                <div className="space-y-6">
+                  {/* AI Insights */}
+                  <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-purple-900">
+                        <Brain className="h-5 w-5" />
+                        AI-Powered Insights
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {ai?.insights?.length > 0 ? (
+                        <div className="space-y-4">
+                          {ai.insights.map((insight, idx) => (
+                            <div key={idx} className="bg-white border border-purple-200 rounded-lg p-4">
+                              <div className="flex items-start gap-3">
+                                <Brain className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                                <div>
+                                  <p className="text-purple-900 font-medium">{insight.title || insight}</p>
+                                  {insight.description && (
+                                    <p className="text-purple-700 text-sm mt-1">{insight.description}</p>
+                                  )}
+                                  {insight.confidence && (
+                                    <Badge className="mt-2 bg-purple-100 text-purple-800">
+                                      {Math.round(insight.confidence * 100)}% confidence
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-purple-700">AI insights will appear here as you log more data.</p>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Personal Insights */}
+                  {ai?.personal_insights && ai.personal_insights.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sparkles className="h-5 w-5" />
+                          Personal Health Insights
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {ai.personal_insights.map((insight, idx) => (
+                            <div key={idx} className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                              <div className="flex items-start gap-3">
+                                <Sparkles className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0" />
+                                <div>
+                                  <p className="text-blue-900">{insight.insight || insight}</p>
+                                  {insight.recommendation && (
+                                    <p className="text-blue-700 text-sm mt-2">
+                                      <strong>Recommendation:</strong> {insight.recommendation}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+
             {/* Nutrition trends chart */}
             <Card className="col-span-full">
               <CardHeader>
