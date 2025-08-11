@@ -5516,6 +5516,346 @@ class HealthPlatformAPITester:
         
         return success1 and success2 and cleanup_success
 
+    def test_ai_api_endpoints(self):
+        """Test the 4 new AI API endpoints"""
+        print("\n🤖 Testing AI API Endpoints...")
+        
+        # Test 1: POST /api/ai/food-recognition
+        food_recognition_success = self.test_food_recognition_endpoint()
+        
+        # Test 2: POST /api/ai/health-insights
+        health_insights_success = self.test_health_insights_endpoint()
+        
+        # Test 3: POST /api/ai/meal-suggestions
+        meal_suggestions_success = self.test_meal_suggestions_endpoint()
+        
+        # Test 4: POST /api/ai/voice-command
+        voice_command_success = self.test_voice_command_endpoint()
+        
+        return food_recognition_success and health_insights_success and meal_suggestions_success and voice_command_success
+
+    def test_food_recognition_endpoint(self):
+        """Test POST /api/ai/food-recognition endpoint"""
+        print("\n🍎 Testing Food Recognition Endpoint...")
+        
+        # Create a small base64 encoded test image (1x1 pixel JPEG)
+        # This is a minimal valid JPEG image in base64
+        test_image_base64 = "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwA/8A"
+        
+        test_data = {
+            "image": test_image_base64,
+            "provider": "gemini"
+        }
+        
+        success, response = self.run_test(
+            "AI Food Recognition",
+            "POST",
+            "ai/food-recognition",
+            200,
+            data=test_data
+        )
+        
+        # Validate response structure
+        if success and response:
+            expected_keys = ['foods', 'confidence', 'insights']
+            missing_keys = [key for key in expected_keys if key not in response]
+            if not missing_keys:
+                print(f"   ✅ Food recognition response contains all required keys: {expected_keys}")
+                
+                # Validate foods array structure
+                foods = response.get('foods', [])
+                if isinstance(foods, list):
+                    print(f"   ✅ Foods array structure valid (contains {len(foods)} items)")
+                    
+                    # If foods found, validate structure
+                    if foods and len(foods) > 0:
+                        food = foods[0]
+                        food_keys = ['name', 'calories', 'protein', 'carbs', 'fat', 'confidence']
+                        missing_food_keys = [key for key in food_keys if key not in food]
+                        if not missing_food_keys:
+                            print(f"   ✅ Food item structure valid")
+                        else:
+                            print(f"   ⚠️ Food item missing some keys: {missing_food_keys}")
+                    
+                    # Validate confidence score
+                    confidence = response.get('confidence', 0)
+                    if isinstance(confidence, (int, float)) and 0 <= confidence <= 1:
+                        print(f"   ✅ Confidence score valid: {confidence}")
+                    else:
+                        print(f"   ⚠️ Confidence score format issue: {confidence}")
+                        
+                else:
+                    print(f"   ❌ Foods should be an array")
+                    success = False
+            else:
+                print(f"   ❌ Food recognition response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
+    def test_health_insights_endpoint(self):
+        """Test POST /api/ai/health-insights endpoint"""
+        print("\n💡 Testing Health Insights Endpoint...")
+        
+        # Sample health data for testing
+        test_health_data = {
+            "user_id": "test-user-123",
+            "age": 32,
+            "gender": "female",
+            "activity_level": "moderately_active",
+            "current_weight": 68.5,
+            "goal_weight": 65.0,
+            "daily_calories": 2000,
+            "avg_protein": 85,
+            "avg_carbs": 180,
+            "avg_fat": 70,
+            "sleep_hours": 7.5,
+            "exercise_frequency": 4,
+            "stress_level": 6,
+            "health_goals": ["weight_loss", "energy_improvement"],
+            "medical_conditions": [],
+            "recent_symptoms": ["fatigue", "occasional_headaches"]
+        }
+        
+        test_data = {
+            "healthData": test_health_data,
+            "provider": "gemini",
+            "analysis_type": "comprehensive"
+        }
+        
+        success, response = self.run_test(
+            "AI Health Insights",
+            "POST",
+            "ai/health-insights",
+            200,
+            data=test_data
+        )
+        
+        # Validate response structure
+        if success and response:
+            expected_keys = ['insights', 'recommendations', 'patterns', 'confidence']
+            missing_keys = [key for key in expected_keys if key not in response]
+            if not missing_keys:
+                print(f"   ✅ Health insights response contains all required keys: {expected_keys}")
+                
+                # Validate insights array
+                insights = response.get('insights', [])
+                if isinstance(insights, list):
+                    print(f"   ✅ Insights array valid (contains {len(insights)} insights)")
+                else:
+                    print(f"   ❌ Insights should be an array")
+                    success = False
+                
+                # Validate recommendations array
+                recommendations = response.get('recommendations', [])
+                if isinstance(recommendations, list):
+                    print(f"   ✅ Recommendations array valid (contains {len(recommendations)} recommendations)")
+                else:
+                    print(f"   ❌ Recommendations should be an array")
+                    success = False
+                
+                # Validate patterns object
+                patterns = response.get('patterns', {})
+                if isinstance(patterns, dict):
+                    print(f"   ✅ Patterns object valid")
+                else:
+                    print(f"   ❌ Patterns should be an object")
+                    success = False
+                
+                # Validate confidence score
+                confidence = response.get('confidence', 0)
+                if isinstance(confidence, (int, float)) and 0 <= confidence <= 1:
+                    print(f"   ✅ Confidence score valid: {confidence}")
+                else:
+                    print(f"   ⚠️ Confidence score format issue: {confidence}")
+                    
+            else:
+                print(f"   ❌ Health insights response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
+    def test_meal_suggestions_endpoint(self):
+        """Test POST /api/ai/meal-suggestions endpoint"""
+        print("\n🍽️ Testing Meal Suggestions Endpoint...")
+        
+        # Sample nutrition history and preferences
+        test_nutrition_history = {
+            "recent_meals": [
+                {"name": "Oatmeal with berries", "calories": 350, "protein": 12, "carbs": 65, "fat": 8},
+                {"name": "Grilled chicken salad", "calories": 420, "protein": 35, "carbs": 15, "fat": 22},
+                {"name": "Greek yogurt", "calories": 150, "protein": 15, "carbs": 12, "fat": 8}
+            ],
+            "daily_totals": {
+                "calories": 920,
+                "protein": 62,
+                "carbs": 92,
+                "fat": 38
+            },
+            "nutritional_gaps": {
+                "calories_remaining": 1080,
+                "protein_needed": 38,
+                "fiber_low": True,
+                "omega3_low": True
+            }
+        }
+        
+        test_preferences = {
+            "diet_type": "mediterranean",
+            "allergies": ["tree_nuts"],
+            "dislikes": ["liver", "brussels_sprouts"],
+            "cooking_time": 30,
+            "meal_type": "dinner",
+            "cuisine_preferences": ["italian", "greek", "middle_eastern"],
+            "health_goals": ["weight_loss", "heart_health"]
+        }
+        
+        test_data = {
+            "nutritionHistory": test_nutrition_history,
+            "preferences": test_preferences,
+            "provider": "gemini"
+        }
+        
+        success, response = self.run_test(
+            "AI Meal Suggestions",
+            "POST",
+            "ai/meal-suggestions",
+            200,
+            data=test_data
+        )
+        
+        # Validate response structure
+        if success and response:
+            expected_keys = ['suggestions', 'reasoning', 'nutritionalBenefits']
+            missing_keys = [key for key in expected_keys if key not in response]
+            if not missing_keys:
+                print(f"   ✅ Meal suggestions response contains all required keys: {expected_keys}")
+                
+                # Validate suggestions array
+                suggestions = response.get('suggestions', [])
+                if isinstance(suggestions, list):
+                    print(f"   ✅ Suggestions array valid (contains {len(suggestions)} suggestions)")
+                    
+                    # If suggestions found, validate structure
+                    if suggestions and len(suggestions) > 0:
+                        suggestion = suggestions[0]
+                        suggestion_keys = ['name', 'description', 'calories', 'protein', 'carbs', 'fat', 'benefits', 'reasoning']
+                        missing_suggestion_keys = [key for key in suggestion_keys if key not in suggestion]
+                        if not missing_suggestion_keys:
+                            print(f"   ✅ Meal suggestion structure valid")
+                        else:
+                            print(f"   ⚠️ Meal suggestion missing some keys: {missing_suggestion_keys}")
+                else:
+                    print(f"   ❌ Suggestions should be an array")
+                    success = False
+                
+                # Validate reasoning
+                reasoning = response.get('reasoning', '')
+                if isinstance(reasoning, str) and reasoning:
+                    print(f"   ✅ Reasoning provided")
+                else:
+                    print(f"   ⚠️ Reasoning should be a non-empty string")
+                
+                # Validate nutritional benefits
+                benefits = response.get('nutritionalBenefits', [])
+                if isinstance(benefits, list):
+                    print(f"   ✅ Nutritional benefits array valid (contains {len(benefits)} benefits)")
+                else:
+                    print(f"   ❌ Nutritional benefits should be an array")
+                    success = False
+                    
+            else:
+                print(f"   ❌ Meal suggestions response missing keys: {missing_keys}")
+                success = False
+        
+        return success
+
+    def test_voice_command_endpoint(self):
+        """Test POST /api/ai/voice-command endpoint"""
+        print("\n🎤 Testing Voice Command Endpoint...")
+        
+        # Test various voice command transcripts
+        test_transcripts = [
+            "I had a grilled chicken breast with steamed broccoli and brown rice for lunch",
+            "Log two slices of whole wheat toast with avocado and a cup of coffee",
+            "I ate a large apple and a handful of almonds as a snack",
+            "For dinner I had salmon fillet with quinoa and mixed vegetables",
+            "Add one cup of Greek yogurt with blueberries to my breakfast"
+        ]
+        
+        all_tests_passed = True
+        
+        for i, transcript in enumerate(test_transcripts, 1):
+            test_data = {
+                "transcript": transcript,
+                "provider": "gemini",
+                "command_type": "food_logging"
+            }
+            
+            success, response = self.run_test(
+                f"AI Voice Command {i} - '{transcript[:30]}...'",
+                "POST",
+                "ai/voice-command",
+                200,
+                data=test_data
+            )
+            
+            # Validate response structure
+            if success and response:
+                expected_keys = ['foodItems', 'intent', 'confidence', 'clarifications']
+                missing_keys = [key for key in expected_keys if key not in response]
+                if not missing_keys:
+                    print(f"   ✅ Voice command response contains all required keys")
+                    
+                    # Validate foodItems array
+                    food_items = response.get('foodItems', [])
+                    if isinstance(food_items, list):
+                        print(f"   ✅ Food items array valid (contains {len(food_items)} items)")
+                        
+                        # If food items found, validate structure
+                        if food_items and len(food_items) > 0:
+                            food_item = food_items[0]
+                            item_keys = ['name', 'quantity', 'calories', 'protein', 'carbs', 'fat', 'confidence']
+                            missing_item_keys = [key for key in item_keys if key not in food_item]
+                            if not missing_item_keys:
+                                print(f"   ✅ Food item structure valid")
+                            else:
+                                print(f"   ⚠️ Food item missing some keys: {missing_item_keys}")
+                    else:
+                        print(f"   ❌ Food items should be an array")
+                        success = False
+                    
+                    # Validate intent
+                    intent = response.get('intent', '')
+                    if isinstance(intent, str) and intent:
+                        print(f"   ✅ Intent provided: {intent}")
+                    else:
+                        print(f"   ⚠️ Intent should be a non-empty string")
+                    
+                    # Validate confidence score
+                    confidence = response.get('confidence', 0)
+                    if isinstance(confidence, (int, float)) and 0 <= confidence <= 1:
+                        print(f"   ✅ Confidence score valid: {confidence}")
+                    else:
+                        print(f"   ⚠️ Confidence score format issue: {confidence}")
+                    
+                    # Validate clarifications array
+                    clarifications = response.get('clarifications', [])
+                    if isinstance(clarifications, list):
+                        print(f"   ✅ Clarifications array valid (contains {len(clarifications)} items)")
+                    else:
+                        print(f"   ❌ Clarifications should be an array")
+                        success = False
+                        
+                else:
+                    print(f"   ❌ Voice command response missing keys: {missing_keys}")
+                    success = False
+            
+            if not success:
+                all_tests_passed = False
+        
+        return all_tests_passed
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
@@ -5578,6 +5918,10 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Phase 7 Data Export Endpoints...")
         phase7_success = self.test_phase7_data_export_endpoints()
 
+        # Test AI API Endpoints (NEW - PRIORITY TEST)
+        print("\n📋 Testing AI API Endpoints (PRIORITY)...")
+        ai_success = self.test_ai_api_endpoints()
+
         # Test Guest Session Management and Export (PRIORITY TEST)
         print("\n📋 Testing Guest Session Management & Export (PRIORITY)...")
         guest_session_success = self.test_guest_session_management_and_export()
@@ -5589,8 +5933,9 @@ class HealthPlatformAPITester:
         print(f"Tests Passed: {self.tests_passed}")
         print(f"Success Rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
         
-        # Highlight the priority test result
-        print(f"\n🎯 PRIORITY TEST RESULT:")
+        # Highlight the priority test results
+        print(f"\n🎯 PRIORITY TEST RESULTS:")
+        print(f"   AI API Endpoints: {'✅ PASSED' if ai_success else '❌ FAILED'}")
         print(f"   Guest Session Management & Export: {'✅ PASSED' if guest_session_success else '❌ FAILED'}")
         
         if self.tests_passed == self.tests_run:
