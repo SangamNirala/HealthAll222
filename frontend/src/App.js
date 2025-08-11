@@ -20,6 +20,9 @@ import PatientAnalytics from "./components/PatientAnalytics";
 import PatientMedicationReminder from "./components/PatientMedicationReminder";
 import PatientHealthTimeline from "./components/PatientHealthTimeline";
 
+// Analytics components
+import PersonalInsights from "./components/analytics/PersonalInsights";
+
 // Provider navigation pages
 import ProviderPatients from "./components/ProviderPatients";
 import ProviderTools from "./components/ProviderTools";
