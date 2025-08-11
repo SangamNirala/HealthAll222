@@ -14,7 +14,7 @@ class Phase3FamilyGuestAPITester:
     that were implemented in Phase 1 and need validation for the new wizards in Phase 2.
     """
     
-    def __init__(self, base_url="https://1f44a45a-7d0d-48eb-b53d-f315916dad09.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://2a9c9f31-3abf-49bf-aeb2-f03e0e324062.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
