@@ -74,6 +74,7 @@ function App() {
             <Route path="/patient-analytics" element={<PatientAnalytics />} />
             <Route path="/patient-medications" element={<PatientMedicationReminder />} />
             <Route path="/patient-timeline" element={<PatientHealthTimeline />} />
+            <Route path="/personal-insights" element={<PersonalInsights />} />
             
             {/* Provider Navigation Routes */}
             <Route path="/provider-patients" element={<ProviderPatients />} />
