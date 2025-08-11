@@ -4,7 +4,13 @@ import { useRole } from '../context/RoleContext';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { BarChart3, Sparkles, Brain, Activity, Target, Calendar, Clock, Plus } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { BarChart3, Sparkles, Brain, Activity, Target, Calendar, Clock, Plus, TrendingUp, Camera, Mic } from 'lucide-react';
+
+// Import our new enhanced analytics components
+import NutritionTrends from './analytics/NutritionTrends';
+import HealthMetricsCorrelation from './analytics/HealthMetricsCorrelation';
+import SmartFoodLogging from './food-logging/SmartFoodLogging';
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || '';
 
