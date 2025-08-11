@@ -10,6 +10,9 @@ from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, timedelta
 from enum import Enum
+import json
+import requests
+import base64
 
 # Import AI services - temporarily commented out to fix dependency issues
 # from ai_services import get_nutrition_insights, get_smart_food_suggestions, get_health_correlations, get_clinical_insights
