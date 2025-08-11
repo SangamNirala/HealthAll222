@@ -407,3 +407,6 @@ class GoalAIService {
 
 // Export singleton instance
 export default new GoalAIService();
+
+// Export enhanced goal management service
+export { goalManager };
