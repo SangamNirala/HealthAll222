@@ -23,7 +23,40 @@ const MilestoneAchievements = ({ achievements = [], goals = [], onAchievementSha
   };
 
   useEffect(() => {
-    // Calculate streak data for achievements
+    // Load achievement data from backend API
+    loadAchievementData();
+  }, [achievements]);
+
+  const loadAchievementData = async () => {
+    try {
+      const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const userId = localStorage.getItem('user_id') || 'demo-user-123';
+      
+      const response = await fetch(`${API_BASE_URL}/api/patient/achievements/${userId}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        if (data.success) {
+          // Use real streak data from backend
+          setStreakData(data.streak_data || {});
+          
+          // If we have real achievements from backend, we could update the parent component
+          // For now, we'll use the streak data from the API
+        } else {
+          // Fallback to mock calculation
+          calculateMockStreakData();
+        }
+      } else {
+        calculateMockStreakData();
+      }
+    } catch (error) {
+      console.error('Error loading achievement data:', error);
+      calculateMockStreakData();
+    }
+  };
+
+  const calculateMockStreakData = () => {
     const streaks = {};
     achievements.forEach(achievement => {
       const goalId = achievement.goal_id;
@@ -35,7 +68,7 @@ const MilestoneAchievements = ({ achievements = [], goals = [], onAchievementSha
       streaks[goalId].best = Math.floor(Math.random() * 14) + streaks[goalId].current;
     });
     setStreakData(streaks);
-  }, [achievements]);
+  };
 
   const getBadgeIcon = (badgeType) => {
     switch (badgeType) {
