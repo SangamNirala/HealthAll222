@@ -1415,11 +1415,11 @@ async def get_patient_analytics(user_id: str):
             "recommendations": ai_insights.get("recommendations", ["Continue current healthy practices"]),
             "action_items": ai_insights.get("action_items", ["Monitor progress regularly"])
         },
-        "personal_insights": ai_insights.get("insights", [
+        "personal_insights": [
             {"type": "achievement", "message": "You've maintained your target calorie range for 5 consecutive days!", "date": "2024-01-15"},
             {"type": "recommendation", "message": "Consider adding more fiber-rich vegetables to your lunch meals", "date": "2024-01-15"},
             {"type": "pattern", "message": "Your energy levels are highest on days when you exercise in the morning", "date": "2024-01-14"}
-        ]),
+        ],
         "energy_patterns": {
             "morning": {"average": 7.2, "trend": "stable"},
             "afternoon": {"average": 6.8, "trend": "declining"},
