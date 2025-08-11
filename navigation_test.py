@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import uuid
 
 class NavigationAPITester:
-    def __init__(self, base_url="https://76e1b845-03da-4008-a699-895013bc755e.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://d43d820e-dbeb-4964-b8b0-1a8ee40c1082.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
