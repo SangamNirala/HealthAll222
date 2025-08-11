@@ -298,7 +298,7 @@ const HealthMetricsCorrelation = ({ userId }) => {
                 <div className="text-xs text-gray-600 space-y-1">
                   <p><strong>Strong:</strong> ≥ 0.7</p>
                   <p><strong>Moderate:</strong> 0.4 - 0.7</p>
-                  <p><strong>Weak:</strong> < 0.4</p>
+                  <p><strong>Weak:</strong> &lt; 0.4</p>
                 </div>
               </div>
             </CardContent>
