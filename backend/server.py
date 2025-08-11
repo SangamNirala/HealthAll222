@@ -349,7 +349,15 @@ def calculate_profile_completion(profile: dict, profile_type: str) -> float:
     else:
         return 100.0  # Guest profiles are always complete
     
-    completed_sections = sum(1 for section in sections if profile.get(section) is not None)
+    completed_sections = 0
+    for section in sections:
+        section_data = profile.get(section)
+        if section_data is not None:
+            # Special handling for family_members - empty list should not count as completed
+            if section == "family_members" and isinstance(section_data, list) and len(section_data) == 0:
+                continue
+            completed_sections += 1
+    
     return (completed_sections / len(sections)) * 100.0
 
 # Add your routes to the router instead of directly to app
