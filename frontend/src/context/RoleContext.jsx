@@ -27,6 +27,7 @@ const ROLE_CONFIG = {
       { label: 'Food Log', path: '/patient-food-log', icon: 'Apple' },
       { label: 'Health Metrics', path: '/patient-metrics', icon: 'Activity' },
       { label: 'Goals', path: '/patient-goals', icon: 'Target' },
+      { label: 'Advanced Goals', path: '/advanced-goals', icon: 'Zap' },
       { label: 'Analytics', path: '/patient-analytics', icon: 'BarChart3' },
       { label: 'AI Insights', path: '/personal-insights', icon: 'Sparkles' },
       { label: 'Medications', path: '/patient-medications', icon: 'Pill' },
