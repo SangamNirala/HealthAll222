@@ -328,76 +328,12 @@ const PatientAnalytics = () => {
               </Card>
             </div>
 
-            {/* Smart Food Suggestions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center">
-                    <Activity className="w-5 h-5 mr-2 text-green-600" />
-                    Smart Food Suggestions
-                  </span>
-                  {actionMessage ? <Badge variant="secondary">{actionMessage}</Badge> : null}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {(suggestions?.quick_add_suggestions || []).map((sug, idx) => (
-                    <div key={idx} className="border rounded-lg p-4 bg-white hover:bg-gray-50">
-                      <div className="font-semibold text-gray-900">{sug.name}</div>
-                      <div className="text-sm text-gray-600">{sug.reason}</div>
-                      <div className="text-xs text-gray-500 mt-1">{sug.calories} kcal</div>
-                      <Button onClick={() => handleQuickAdd(sug)} className="mt-3 bg-blue-600 hover:bg-blue-700" size="sm">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Quick Add
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Symptom Correlations */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Target className="w-5 h-5 mr-2 text-red-600" />
-                  Symptom Correlation Tracker
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {(correlations?.correlations || []).map((co, idx) => (
-                  <div key={idx} className="border rounded-lg p-4 bg-gray-50">
-                    <div className="font-semibold text-gray-900 mb-1">{co.symptom}</div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-                      <div>
-                        <div className="text-gray-600 mb-1">Strong Positive</div>
-                        <div className="flex flex-wrap gap-2">
-                          {(co.strong_positive || []).map((t, i) => (
-                            <Badge key={i} variant="secondary">{t}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-gray-600 mb-1">Strong Negative</div>
-                        <div className="flex flex-wrap gap-2">
-                          {(co.strong_negative || []).map((t, i) => (
-                            <Badge key={i} className="bg-red-100 text-red-800">{t}</Badge>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-gray-600 mb-1">Insights</div>
-                        <ul className="list-disc pl-5 text-gray-800">
-                          {(co.insights || []).map((t, i) => (
-                            <li key={i}>{t}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+            {/* Action Message */}
+            {actionMessage && (
+              <div className="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+                {actionMessage}
+              </div>
+            )}
           </div>
         )}
       </div>
