@@ -14,8 +14,8 @@ import json
 import requests
 import base64
 
-# Import AI services - temporarily commented out to fix dependency issues
-# from ai_services import get_nutrition_insights, get_smart_food_suggestions, get_health_correlations, get_clinical_insights
+# Import AI services
+from ai_services import get_nutrition_insights, get_smart_food_suggestions, get_health_correlations, get_clinical_insights
 
 
 ROOT_DIR = Path(__file__).parent
