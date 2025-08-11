@@ -6278,6 +6278,10 @@ class HealthPlatformAPITester:
         # Test Phase 4 Food Logging Endpoints (NEW - REQUESTED TEST)
         print("\n📋 Testing Phase 4 Food Logging Endpoints (REQUESTED)...")
         phase4_food_logging_success = self.test_phase4_food_logging_endpoints()
+        
+        # Test AI Integration Endpoints Verification (NEW - REQUESTED TEST)
+        print("\n📋 Testing AI Integration Endpoints Verification (REQUESTED)...")
+        ai_verification_success = self.test_ai_integration_endpoints_verification()
 
         # Test Phase 5 Comprehensive Family Features
         print("\n📋 Testing Phase 5 Comprehensive Family Features...")
