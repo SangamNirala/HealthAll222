@@ -884,3 +884,11 @@ async def get_health_correlations(health_data: Dict[str, Any]) -> Dict[str, Any]
 async def get_clinical_insights(provider_data: Dict[str, Any]) -> Dict[str, Any]:
     """Get AI-powered clinical insights"""
     return await ai_service_manager.generate_clinical_insights(provider_data)
+
+async def get_goal_insights(goal_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Get AI-powered goal insights and recommendations"""
+    return await ai_service_manager.generate_goal_insights(goal_data)
+
+async def get_achievement_insights(achievement_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Get AI-powered achievement and milestone insights"""
+    return await ai_service_manager.generate_achievement_insights(achievement_data)
