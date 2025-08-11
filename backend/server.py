@@ -398,6 +398,549 @@ async def analyze_food_with_ai(food_name: str, food_entry: dict):
         logger.error(f"Food analysis error: {e}")
         return {"calories": 200, "protein": 8, "carbs": 25, "fat": 8}
 
+# ===== PHASE 2.4: SYMPTOM CORRELATION TRACKER =====
+
+# File upload constants
+ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+ALLOWED_AUDIO_TYPES = {"audio/mpeg", "audio/wav", "audio/mp4", "audio/ogg", "audio/webm"}
+MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB for free tier
+MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB for images
+MAX_AUDIO_SIZE = 20 * 1024 * 1024  # 20MB for audio
+
+async def validate_file(file: UploadFile, file_type: str) -> dict:
+    """Validate uploaded file based on type and size constraints"""
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No filename provided")
+    
+    # Read file content to check size
+    file_content = await file.read()
+    file_size = len(file_content)
+    
+    # Reset file position for later use
+    await file.seek(0)
+    
+    # Validate file size based on type
+    if file_type == "photo":
+        if file.content_type not in ALLOWED_IMAGE_TYPES:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Invalid image type. Allowed: {', '.join(ALLOWED_IMAGE_TYPES)}"
+            )
+        if file_size > MAX_IMAGE_SIZE:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Image file too large. Maximum size: {MAX_IMAGE_SIZE // (1024*1024)}MB"
+            )
+    elif file_type == "voice":
+        if file.content_type not in ALLOWED_AUDIO_TYPES:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Invalid audio type. Allowed: {', '.join(ALLOWED_AUDIO_TYPES)}"
+            )
+        if file_size > MAX_AUDIO_SIZE:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Audio file too large. Maximum size: {MAX_AUDIO_SIZE // (1024*1024)}MB"
+            )
+    
+    return {
+        "size": file_size,
+        "content_type": file.content_type,
+        "filename": file.filename
+    }
+
+@api_router.post("/symptom/upload/photo")
+async def upload_symptom_photo(
+    file: UploadFile = File(...),
+    user_id: str = Form(...)
+):
+    """Upload photo for symptom documentation"""
+    try:
+        # Validate the uploaded file
+        validation_result = await validate_file(file, "photo")
+        
+        # Generate unique filename to prevent conflicts
+        file_extension = Path(file.filename).suffix.lower()
+        unique_filename = f"photos/{user_id}/{uuid.uuid4()}{file_extension}"
+        
+        # Read file content
+        file_content = await file.read()
+        
+        # Upload to Supabase Storage
+        supabase = get_supabase_client()
+        upload_response = supabase.storage.from_(STORAGE_BUCKET).upload(
+            path=unique_filename,
+            file=file_content,
+            file_options={"content-type": file.content_type}
+        )
+        
+        if hasattr(upload_response, 'error') and upload_response.error:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to upload file to storage: {upload_response.error}"
+            )
+        
+        # Get public URL for the uploaded file
+        public_url = supabase.storage.from_(STORAGE_BUCKET).get_public_url(unique_filename)
+        
+        return {
+            "message": "Photo uploaded successfully",
+            "file_path": unique_filename,
+            "public_url": public_url,
+            "file_size": validation_result["size"],
+            "content_type": validation_result["content_type"]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Upload failed: {str(e)}"
+        )
+
+@api_router.post("/symptom/upload/voice")
+async def upload_voice_note(
+    file: UploadFile = File(...),
+    user_id: str = Form(...)
+):
+    """Upload voice note for symptom tracking"""
+    try:
+        # Validate the uploaded file
+        validation_result = await validate_file(file, "voice")
+        
+        # Generate unique filename
+        file_extension = Path(file.filename).suffix.lower()
+        unique_filename = f"voice/{user_id}/{uuid.uuid4()}{file_extension}"
+        
+        # Read file content
+        file_content = await file.read()
+        
+        # Upload to Supabase Storage
+        supabase = get_supabase_client()
+        upload_response = supabase.storage.from_(STORAGE_BUCKET).upload(
+            path=unique_filename,
+            file=file_content,
+            file_options={"content-type": file.content_type}
+        )
+        
+        if hasattr(upload_response, 'error') and upload_response.error:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to upload voice note to storage: {upload_response.error}"
+            )
+        
+        # Get public URL for the uploaded file
+        public_url = supabase.storage.from_(STORAGE_BUCKET).get_public_url(unique_filename)
+        
+        return {
+            "message": "Voice note uploaded successfully",
+            "file_path": unique_filename,
+            "public_url": public_url,
+            "file_size": validation_result["size"],
+            "content_type": validation_result["content_type"]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Voice upload failed: {str(e)}"
+        )
+
+@api_router.post("/symptom/log/{user_id}")
+async def log_symptom(user_id: str, symptom_data: dict = Body(...)):
+    """Log a new symptom entry"""
+    try:
+        # Create symptom entry with ID
+        symptom_entry = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "timestamp": datetime.utcnow(),
+            "symptom": symptom_data.get("symptom", ""),
+            "severity": symptom_data.get("severity", 1),
+            "duration": symptom_data.get("duration"),
+            "triggers": symptom_data.get("triggers", []),
+            "medications_taken": symptom_data.get("medications_taken", []),
+            "notes": symptom_data.get("notes"),
+            "photo_url": symptom_data.get("photo_url"),
+            "voice_note_url": symptom_data.get("voice_note_url"),
+            "correlations": {}
+        }
+        
+        # Store in MongoDB
+        result = await db.symptoms.insert_one(symptom_entry)
+        symptom_entry["_id"] = str(result.inserted_id)
+        
+        # Run correlation analysis in background
+        await analyze_symptom_correlations(user_id, symptom_entry["id"])
+        
+        return {
+            "message": "Symptom logged successfully",
+            "symptom_id": symptom_entry["id"],
+            "logged_at": symptom_entry["timestamp"]
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to log symptom: {str(e)}")
+
+@api_router.get("/symptom/entries/{user_id}")
+async def get_symptom_entries(user_id: str, days: int = 30):
+    """Get symptom entries for a user within specified days"""
+    try:
+        # Calculate date range
+        end_date = datetime.utcnow()
+        start_date = end_date - timedelta(days=days)
+        
+        # Fetch symptom entries from MongoDB
+        cursor = db.symptoms.find({
+            "user_id": user_id,
+            "timestamp": {"$gte": start_date, "$lte": end_date}
+        }).sort("timestamp", -1)
+        
+        symptom_entries = []
+        async for doc in cursor:
+            doc["_id"] = str(doc["_id"])
+            symptom_entries.append(doc)
+        
+        return {
+            "user_id": user_id,
+            "entries": symptom_entries,
+            "total_count": len(symptom_entries),
+            "date_range": {
+                "start": start_date.isoformat(),
+                "end": end_date.isoformat()
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch symptom entries: {str(e)}")
+
+async def analyze_symptom_correlations(user_id: str, symptom_id: str):
+    """Advanced correlation analysis for symptom patterns"""
+    try:
+        # Get user's recent data (last 30 days)
+        end_date = datetime.utcnow()
+        start_date = end_date - timedelta(days=30)
+        
+        # Fetch symptom data
+        symptoms_cursor = db.symptoms.find({
+            "user_id": user_id,
+            "timestamp": {"$gte": start_date}
+        })
+        symptoms_data = []
+        async for doc in symptoms_cursor:
+            symptoms_data.append(doc)
+        
+        # Fetch diet data (from food logs)
+        diet_cursor = db.food_logs.find({
+            "user_id": user_id,
+            "logged_at": {"$gte": start_date}
+        })
+        diet_data = []
+        async for doc in diet_cursor:
+            diet_data.append(doc)
+        
+        # Perform correlation analysis
+        correlations = calculate_correlations(symptoms_data, diet_data)
+        
+        # Generate AI insights using existing AI service
+        ai_manager = AIServiceManager()
+        
+        correlation_request = {
+            "user_symptoms": symptoms_data[-10:],  # Last 10 symptoms
+            "user_diet": diet_data[-20:],  # Last 20 diet entries
+            "analysis_type": "symptom_correlation",
+            "timeframe": "30_days"
+        }
+        
+        ai_insights = await ai_manager.get_health_insights(correlation_request)
+        
+        # Update symptom entry with correlation data
+        await db.symptoms.update_one(
+            {"id": symptom_id},
+            {"$set": {"correlations": correlations, "ai_insights": ai_insights}}
+        )
+        
+        return correlations
+        
+    except Exception as e:
+        logging.error(f"Correlation analysis failed: {str(e)}")
+        return {}
+
+def calculate_correlations(symptoms_data: List[dict], diet_data: List[dict]) -> dict:
+    """Calculate multi-variate correlation analysis"""
+    try:
+        # Group symptoms by type
+        symptom_groups = {}
+        for symptom in symptoms_data:
+            symptom_type = symptom.get("symptom", "unknown")
+            if symptom_type not in symptom_groups:
+                symptom_groups[symptom_type] = []
+            symptom_groups[symptom_type].append(symptom)
+        
+        # Analyze correlations
+        correlations = {}
+        
+        for symptom_type, entries in symptom_groups.items():
+            if len(entries) >= 3:  # Need at least 3 entries for correlation
+                # Calculate average severity
+                avg_severity = sum(e.get("severity", 0) for e in entries) / len(entries)
+                
+                # Analyze patterns
+                patterns = {
+                    "frequency": len(entries),
+                    "average_severity": round(avg_severity, 1),
+                    "common_triggers": get_common_triggers(entries),
+                    "time_patterns": analyze_time_patterns(entries),
+                    "medication_effectiveness": analyze_medication_patterns(entries)
+                }
+                
+                correlations[symptom_type] = patterns
+        
+        return correlations
+        
+    except Exception as e:
+        logging.error(f"Correlation calculation failed: {str(e)}")
+        return {}
+
+def get_common_triggers(entries: List[dict]) -> List[str]:
+    """Identify most common triggers"""
+    trigger_counts = {}
+    for entry in entries:
+        for trigger in entry.get("triggers", []):
+            trigger_counts[trigger] = trigger_counts.get(trigger, 0) + 1
+    
+    # Return triggers that appear in at least 30% of entries
+    threshold = max(1, len(entries) * 0.3)
+    return [trigger for trigger, count in trigger_counts.items() if count >= threshold]
+
+def analyze_time_patterns(entries: List[dict]) -> dict:
+    """Analyze temporal patterns in symptoms"""
+    hour_counts = {}
+    day_counts = {}
+    
+    for entry in entries:
+        timestamp = entry.get("timestamp")
+        if timestamp:
+            if isinstance(timestamp, str):
+                timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+            
+            hour = timestamp.hour
+            day = timestamp.strftime("%A")
+            
+            hour_counts[hour] = hour_counts.get(hour, 0) + 1
+            day_counts[day] = day_counts.get(day, 0) + 1
+    
+    # Find peak times
+    peak_hour = max(hour_counts.items(), key=lambda x: x[1])[0] if hour_counts else None
+    peak_day = max(day_counts.items(), key=lambda x: x[1])[0] if day_counts else None
+    
+    return {
+        "peak_hour": peak_hour,
+        "peak_day": peak_day,
+        "hourly_distribution": hour_counts,
+        "daily_distribution": day_counts
+    }
+
+def analyze_medication_patterns(entries: List[dict]) -> dict:
+    """Analyze medication effectiveness patterns"""
+    medication_effects = {}
+    
+    for entry in entries:
+        medications = entry.get("medications_taken", [])
+        severity = entry.get("severity", 0)
+        
+        for med in medications:
+            if med not in medication_effects:
+                medication_effects[med] = {"severities": [], "count": 0}
+            medication_effects[med]["severities"].append(severity)
+            medication_effects[med]["count"] += 1
+    
+    # Calculate effectiveness
+    for med, data in medication_effects.items():
+        if data["count"] > 0:
+            data["average_severity"] = sum(data["severities"]) / len(data["severities"])
+            data["effectiveness_rating"] = max(0, min(10, (10 - data["average_severity"])))
+    
+    return medication_effects
+
+@api_router.get("/symptom/correlations/{user_id}")
+async def get_advanced_correlations(user_id: str):
+    """Get advanced correlation analysis and predictions"""
+    try:
+        # Get recent symptom data
+        symptoms_cursor = db.symptoms.find({
+            "user_id": user_id,
+            "timestamp": {"$gte": datetime.utcnow() - timedelta(days=60)}
+        }).sort("timestamp", -1)
+        
+        symptoms_data = []
+        async for doc in symptoms_cursor:
+            doc["_id"] = str(doc["_id"])
+            symptoms_data.append(doc)
+        
+        if not symptoms_data:
+            return {
+                "user_id": user_id,
+                "correlations": [],
+                "predictions": [],
+                "insights": ["Start logging symptoms to see patterns and correlations"],
+                "confidence": 0.0
+            }
+        
+        # Perform advanced correlation analysis
+        correlations = calculate_correlations(symptoms_data, [])
+        
+        # Generate predictions using AI
+        predictions = await generate_symptom_predictions(user_id, symptoms_data)
+        
+        # Generate insights
+        insights = generate_correlation_insights(correlations)
+        
+        return {
+            "user_id": user_id,
+            "correlations": correlations,
+            "predictions": predictions,
+            "insights": insights,
+            "confidence": calculate_confidence_score(symptoms_data),
+            "data_points": len(symptoms_data)
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get correlations: {str(e)}")
+
+async def generate_symptom_predictions(user_id: str, symptoms_data: List[dict]) -> List[dict]:
+    """Generate symptom predictions using AI"""
+    try:
+        ai_manager = AIServiceManager()
+        
+        prediction_request = {
+            "user_id": user_id,
+            "symptom_history": symptoms_data[-20:],  # Last 20 entries
+            "prediction_horizon": "7_days",
+            "analysis_type": "symptom_prediction"
+        }
+        
+        ai_response = await ai_manager.get_health_insights(prediction_request)
+        
+        # Extract predictions from AI response
+        predictions = []
+        if isinstance(ai_response, dict) and "predictions" in ai_response:
+            predictions = ai_response["predictions"]
+        else:
+            # Generate basic predictions based on patterns
+            predictions = generate_basic_predictions(symptoms_data)
+        
+        return predictions[:5]  # Return top 5 predictions
+        
+    except Exception as e:
+        logging.error(f"Prediction generation failed: {str(e)}")
+        return generate_basic_predictions(symptoms_data)
+
+def generate_basic_predictions(symptoms_data: List[dict]) -> List[dict]:
+    """Generate basic predictions based on historical patterns"""
+    predictions = []
+    
+    # Group by symptom type
+    symptom_groups = {}
+    for symptom in symptoms_data:
+        symptom_type = symptom.get("symptom", "unknown")
+        if symptom_type not in symptom_groups:
+            symptom_groups[symptom_type] = []
+        symptom_groups[symptom_type].append(symptom)
+    
+    # Generate predictions for each symptom type
+    for symptom_type, entries in symptom_groups.items():
+        if len(entries) >= 3:
+            # Calculate frequency
+            days_span = 30  # Assume 30 days of data
+            frequency = len(entries) / days_span
+            
+            # Predict next occurrence
+            avg_interval = days_span / len(entries)
+            last_occurrence = entries[0].get("timestamp", datetime.utcnow())
+            if isinstance(last_occurrence, str):
+                last_occurrence = datetime.fromisoformat(last_occurrence.replace('Z', '+00:00'))
+            
+            next_predicted = last_occurrence + timedelta(days=avg_interval)
+            
+            predictions.append({
+                "symptom": symptom_type,
+                "predicted_date": next_predicted.isoformat(),
+                "probability": min(0.9, frequency * 7),  # Weekly probability
+                "confidence": 0.7 if len(entries) > 5 else 0.5,
+                "reasoning": f"Based on {len(entries)} occurrences, appears every {avg_interval:.1f} days"
+            })
+    
+    return sorted(predictions, key=lambda x: x["probability"], reverse=True)
+
+def generate_correlation_insights(correlations: dict) -> List[str]:
+    """Generate actionable insights from correlation data"""
+    insights = []
+    
+    for symptom_type, data in correlations.items():
+        frequency = data.get("frequency", 0)
+        avg_severity = data.get("average_severity", 0)
+        common_triggers = data.get("common_triggers", [])
+        peak_hour = data.get("time_patterns", {}).get("peak_hour")
+        
+        if frequency >= 5:
+            insights.append(f"{symptom_type.title()} occurs frequently ({frequency} times recently)")
+        
+        if avg_severity > 7:
+            insights.append(f"{symptom_type.title()} tends to be severe (avg {avg_severity}/10)")
+        
+        if common_triggers:
+            insights.append(f"{symptom_type.title()} commonly triggered by: {', '.join(common_triggers)}")
+        
+        if peak_hour is not None:
+            time_desc = "morning" if peak_hour < 12 else "afternoon" if peak_hour < 18 else "evening"
+            insights.append(f"{symptom_type.title()} most common in the {time_desc}")
+    
+    if not insights:
+        insights = [
+            "Continue logging symptoms to identify patterns",
+            "Include triggers and severity ratings for better insights",
+            "Note medication timing and effectiveness"
+        ]
+    
+    return insights[:5]  # Limit to 5 insights
+
+def calculate_confidence_score(symptoms_data: List[dict]) -> float:
+    """Calculate confidence score based on data quality and quantity"""
+    if not symptoms_data:
+        return 0.0
+    
+    score = 0.0
+    
+    # Data quantity (up to 0.4 points)
+    quantity_score = min(0.4, len(symptoms_data) / 50)
+    score += quantity_score
+    
+    # Data completeness (up to 0.3 points)
+    complete_entries = sum(1 for entry in symptoms_data 
+                          if entry.get("severity") and entry.get("symptom") and len(entry.get("triggers", [])) > 0)
+    completeness_score = (complete_entries / len(symptoms_data)) * 0.3
+    score += completeness_score
+    
+    # Time span (up to 0.3 points)
+    if len(symptoms_data) > 1:
+        first_entry = symptoms_data[-1].get("timestamp", datetime.utcnow())
+        last_entry = symptoms_data[0].get("timestamp", datetime.utcnow())
+        
+        if isinstance(first_entry, str):
+            first_entry = datetime.fromisoformat(first_entry.replace('Z', '+00:00'))
+        if isinstance(last_entry, str):
+            last_entry = datetime.fromisoformat(last_entry.replace('Z', '+00:00'))
+        
+        time_span_days = (last_entry - first_entry).days
+        time_score = min(0.3, time_span_days / 30)
+        score += time_score
+    
+    return round(score, 2)
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
