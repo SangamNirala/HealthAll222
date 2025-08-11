@@ -542,6 +542,193 @@ class AIServiceManager:
             logger.error(f"Error generating clinical insights: {str(e)}")
             return self._default_clinical_insights(provider_data)
 
+    def _build_goal_context(self, goal_data: Dict[str, Any]) -> str:
+        """Build context string for goal analysis"""
+        return f"""
+        Goal Analysis Request:
+        
+        Current Goals:
+        {json.dumps(goal_data.get('current_goals', []), indent=2)}
+        
+        User Profile:
+        - Age: {goal_data.get('age', 'N/A')}
+        - Activity Level: {goal_data.get('activity_level', 'N/A')}
+        - Health Conditions: {goal_data.get('health_conditions', [])}
+        
+        Progress Data:
+        - Goal completion rate: {goal_data.get('completion_rate', 'N/A')}%
+        - Average time to complete goals: {goal_data.get('avg_completion_time', 'N/A')} days
+        - Most successful goal types: {goal_data.get('successful_types', [])}
+        - Challenging areas: {goal_data.get('challenging_areas', [])}
+        
+        Recent Performance:
+        - Last 7 days goal adherence: {goal_data.get('week_adherence', 'N/A')}%
+        - Longest streak: {goal_data.get('longest_streak', 'N/A')} days
+        - Current streak: {goal_data.get('current_streak', 'N/A')} days
+        
+        Please provide intelligent goal insights and optimization recommendations.
+        """
+    
+    def _build_achievement_context(self, achievement_data: Dict[str, Any]) -> str:
+        """Build context string for achievement analysis"""
+        return f"""
+        Achievement Analysis Request:
+        
+        Recent Achievements:
+        {json.dumps(achievement_data.get('recent_achievements', []), indent=2)}
+        
+        User Progress:
+        - Total achievements unlocked: {achievement_data.get('total_achievements', 0)}
+        - Current level/tier: {achievement_data.get('current_level', 'N/A')}
+        - Points/score: {achievement_data.get('total_points', 0)}
+        
+        Goal Categories:
+        - Nutrition goals: {achievement_data.get('nutrition_goals', 0)} completed
+        - Fitness goals: {achievement_data.get('fitness_goals', 0)} completed  
+        - Wellness goals: {achievement_data.get('wellness_goals', 0)} completed
+        - Learning goals: {achievement_data.get('learning_goals', 0)} completed
+        
+        Progress Patterns:
+        - Most active day of week: {achievement_data.get('most_active_day', 'N/A')}
+        - Average daily goal progress: {achievement_data.get('daily_progress', 'N/A')}%
+        - Motivation level trend: {achievement_data.get('motivation_trend', 'N/A')}
+        
+        Please suggest meaningful achievements, milestones, and motivation strategies.
+        """
+    
+    def _parse_goal_text_response(self, text: str) -> Dict[str, Any]:
+        """Parse goal insights from text response"""
+        return {
+            "source": "gemini",
+            "model": "gemini-pro", 
+            "api_key_index": self.gemini_rotator.current_key_index,
+            "insights": ["Goal analysis completed successfully"],
+            "recommendations": [{"title": "Continue Progress", "description": text[:200] + "...", "priority": "medium", "timeline": "1-2 weeks", "success_probability": 0.75}],
+            "goal_adjustments": [],
+            "milestone_suggestions": [],
+            "confidence": 0.70
+        }
+    
+    def _parse_achievement_response(self, text: str) -> Dict[str, Any]:
+        """Parse achievement insights from text response"""
+        lines = text.split('\n')
+        insights = []
+        recommendations = []
+        
+        for line in lines:
+            if any(keyword in line.lower() for keyword in ['achievement', 'milestone', 'badge']):
+                insights.append(line.strip())
+            elif any(keyword in line.lower() for keyword in ['suggest', 'recommend', 'try']):
+                recommendations.append(line.strip())
+        
+        return {
+            "achievements": insights[:3] if insights else ["You're making great progress!"],
+            "milestone_suggestions": recommendations[:3] if recommendations else ["Keep up the great work!"],
+            "motivation_tips": ["Stay consistent", "Celebrate small wins", "Track your progress"],
+            "social_sharing_ideas": ["Share your latest achievement", "Inspire others with your progress"]
+        }
+    
+    def _default_goal_insights(self, goal_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Provide default goal insights when AI services are unavailable"""
+        return {
+            "source": "default",
+            "insights": [
+                "Your goal progress shows consistent effort",
+                "Consider breaking large goals into smaller milestones",
+                "Regular review and adjustment improve success rates"
+            ],
+            "recommendations": [
+                {
+                    "title": "Weekly Goal Review",
+                    "description": "Set aside time each week to review progress and adjust goals as needed",
+                    "priority": "high",
+                    "timeline": "Weekly",
+                    "success_probability": 0.80
+                },
+                {
+                    "title": "Milestone Tracking",
+                    "description": "Break larger goals into smaller, achievable milestones",
+                    "priority": "medium", 
+                    "timeline": "2-4 weeks",
+                    "success_probability": 0.75
+                }
+            ],
+            "goal_adjustments": [],
+            "milestone_suggestions": [
+                {
+                    "milestone": "Complete 7 days of consistent progress",
+                    "target_date": "Next week",
+                    "success_criteria": "Daily goal completion"
+                }
+            ],
+            "confidence": 0.60
+        }
+    
+    def _default_achievement_insights(self, achievement_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Provide default achievement insights when AI services are unavailable"""
+        return {
+            "source": "default",
+            "achievement_insights": {
+                "achievements": [
+                    "You're building healthy habits consistently",
+                    "Your progress shows dedication to your goals",
+                    "Every small step counts toward your larger objectives"
+                ],
+                "milestone_suggestions": [
+                    "Celebrate completing your current goal streak", 
+                    "Share your progress with friends and family",
+                    "Set a new personal best for goal completion"
+                ],
+                "motivation_tips": [
+                    "Focus on progress, not perfection",
+                    "Reward yourself for milestones achieved",
+                    "Connect with others who share similar goals"
+                ],
+                "social_sharing_ideas": [
+                    "Share your weekly goal completion rate",
+                    "Post about a healthy habit you've maintained",
+                    "Inspire others by sharing your goal journey"
+                ]
+            },
+            "confidence": 0.60
+        }
+
+    async def _groq_goal_analysis(self, context: str) -> Dict[str, Any]:
+        """Use Groq for goal analysis"""
+        try:
+            completion = self.groq_client.chat.completions.create(
+                model="llama3-8b-8192",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an AI goal optimization expert. Analyze user goal data and provide intelligent insights, recommendations, and milestone suggestions. Respond in JSON format with 'insights', 'recommendations', 'goal_adjustments', and 'milestone_suggestions' keys."
+                    },
+                    {"role": "user", "content": context}
+                ],
+                max_tokens=1200,
+                temperature=0.7
+            )
+            
+            response_text = completion.choices[0].message.content
+            
+            try:
+                parsed_response = json.loads(response_text)
+                return {
+                    "source": "groq",
+                    "model": "llama3-8b-8192",
+                    "insights": parsed_response.get("insights", []),
+                    "recommendations": parsed_response.get("recommendations", []),
+                    "goal_adjustments": parsed_response.get("goal_adjustments", []),
+                    "milestone_suggestions": parsed_response.get("milestone_suggestions", []),
+                    "confidence": 0.85
+                }
+            except json.JSONDecodeError:
+                return self._parse_goal_text_response(response_text)
+                
+        except Exception as e:
+            logger.error(f"Groq goal analysis error: {str(e)}")
+            raise
+
     def _build_nutrition_context(self, user_data: Dict[str, Any]) -> str:
         """Build context string for nutrition analysis"""
         return f"""
