@@ -29,24 +29,67 @@ import ProfessionalContinuingEducation from './clinical/ProfessionalContinuingEd
 const ClinicalDashboard = () => {
   const { switchRole } = useRole();
   const [activeView, setActiveView] = useState('overview');
-  const [lastUpdated, setLastUpdated] = useState(new Date());
-  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [realTimeEnabled, setRealTimeEnabled] = useState(true);
+  
+  // Provider ID (in real implementation, this would come from auth/context)
+  const providerId = 'demo-provider-123';
+  
+  // Use comprehensive dashboard hook with real-time monitoring
+  const {
+    loading: dashboardLoading,
+    error: dashboardError,
+    data: dashboardData,
+    lastUpdated,
+    refresh: refreshDashboard
+  } = useDashboardOverview(providerId, {
+    autoStart: true,
+    realTime: realTimeEnabled
+  });
+
+  // Service health monitoring
+  const {
+    healthy: serviceHealthy,
+    checking: healthChecking,
+    lastCheck: lastHealthCheck,
+    checkHealth
+  } = useServiceHealth();
 
   // Set role to provider when component mounts
   useEffect(() => {
     switchRole('provider');
   }, [switchRole]);
 
-  // Auto-refresh every 30 seconds for real-time updates
+  // Cleanup on unmount
   useEffect(() => {
-    if (!autoRefresh) return;
+    return () => {
+      cleanupClinicalDashboard();
+    };
+  }, []);
 
-    const interval = setInterval(() => {
-      setLastUpdated(new Date());
-    }, 30000);
+  // Dashboard metrics derived from API data
+  const dashboardMetrics = useMemo(() => {
+    if (!dashboardData) return null;
+    
+    const { patientQueue, treatmentOutcomes, populationHealth } = dashboardData;
+    
+    return {
+      queueCount: patientQueue?.queue_stats?.total_in_queue || 0,
+      urgentCases: patientQueue?.queue_stats?.urgent_cases || 0,
+      scheduledToday: patientQueue?.queue_stats?.scheduled_today || 0,
+      successRate: Math.round((treatmentOutcomes?.outcome_summary?.success_rate || 0) * 100),
+      activePatients: populationHealth?.population_overview?.active_patients || 0,
+      satisfactionScore: treatmentOutcomes?.patient_satisfaction?.average_rating || 0
+    };
+  }, [dashboardData]);
 
-    return () => clearInterval(interval);
-  }, [autoRefresh]);
+  const handleRefresh = async () => {
+    await refreshDashboard();
+    await checkHealth();
+  };
+
+  const toggleRealTime = () => {
+    setRealTimeEnabled(!realTimeEnabled);
+  };
 
   const dashboardViews = [
     { id: 'overview', label: 'Dashboard Overview', icon: Stethoscope },
