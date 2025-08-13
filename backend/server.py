@@ -2754,6 +2754,346 @@ async def add_medication(user_id: str, medication: dict):
         "message": "Medication added successfully"
     }
 
+# ============================================================================
+# PROVIDER HEALTHCARE INTEGRATION - Phase 2.5 Step 3
+# ============================================================================
+
+# Provider Medication Management and Monitoring Endpoints
+@api_router.get("/provider/medications/adherence-report/{provider_id}")
+async def get_provider_adherence_report(provider_id: str, patient_id: Optional[str] = None):
+    """Get comprehensive medication adherence report for provider dashboard"""
+    return await provider_medication_service.generate_adherence_report(provider_id, patient_id)
+
+@api_router.get("/provider/medications/effectiveness/{provider_id}/{patient_id}/{medication_id}")
+async def track_medication_effectiveness(provider_id: str, patient_id: str, medication_id: str):
+    """Track and report medication effectiveness for provider review"""
+    return await provider_medication_service.track_medication_effectiveness(provider_id, patient_id, medication_id)
+
+@api_router.get("/provider/medications/side-effects/{provider_id}")
+async def monitor_side_effects(provider_id: str, patient_id: Optional[str] = None):
+    """Monitor and report medication side effects to provider"""
+    return await provider_medication_service.monitor_side_effects(provider_id, patient_id)
+
+@api_router.post("/provider/medications/side-effect-report")
+async def report_side_effect(request: dict):
+    """Patient reports side effect - notifies provider immediately"""
+    try:
+        patient_id = request.get("patient_id")
+        medication_id = request.get("medication_id")
+        medication_name = request.get("medication_name")
+        side_effect = request.get("side_effect")
+        severity = request.get("severity", "mild")  # mild, moderate, severe
+        provider_email = request.get("provider_email")
+        
+        # Store side effect report (mock - in production, save to database)
+        report_id = f"se_{uuid.uuid4()}"
+        
+        # Send immediate notification to provider if severe
+        if severity == "severe" and provider_email:
+            notification_data = {
+                "patient_name": request.get("patient_name", "Unknown"),
+                "medication_name": medication_name,
+                "side_effect": side_effect,
+                "severity": severity,
+                "reported_date": datetime.utcnow().isoformat()
+            }
+            
+            await provider_medication_service.send_provider_notification(
+                provider_email, "side_effect_alert", notification_data
+            )
+        
+        return {
+            "success": True,
+            "report_id": report_id,
+            "severity": severity,
+            "provider_notified": severity == "severe",
+            "message": f"Side effect reported successfully. {'Provider has been notified immediately.' if severity == 'severe' else 'Report will be reviewed at next appointment.'}"
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Failed to report side effect: {str(e)}"
+        }
+
+@api_router.get("/provider/medications/emergency-contacts/{patient_id}")
+async def get_emergency_contacts(patient_id: str):
+    """Get emergency contacts for patient medication emergencies"""
+    return await provider_medication_service.get_emergency_contacts(patient_id)
+
+@api_router.post("/provider/medications/emergency-alert")
+async def send_emergency_alert(request: dict):
+    """Send emergency alert for critical medication situations"""
+    try:
+        patient_id = request.get("patient_id")
+        alert_type = request.get("alert_type")  # severe_reaction, missed_critical_dose, overdose
+        medication_name = request.get("medication_name")
+        severity = request.get("severity", "high")
+        notes = request.get("notes", "")
+        
+        # Get emergency contacts
+        emergency_contacts = await provider_medication_service.get_emergency_contacts(patient_id)
+        
+        # Send alerts to all emergency contacts
+        alert_results = []
+        for contact in emergency_contacts.get("emergency_contacts", []):
+            if contact["priority"] <= 2:  # Only send to priority 1 and 2 contacts
+                notification_data = {
+                    "patient_id": patient_id,
+                    "alert_type": alert_type,
+                    "medication_name": medication_name,
+                    "severity": severity,
+                    "notes": notes,
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+                
+                success = await provider_medication_service.send_provider_notification(
+                    contact["email"], "emergency_alert", notification_data
+                )
+                
+                alert_results.append({
+                    "contact": contact["name"],
+                    "contact_type": contact["role"],
+                    "notified": success
+                })
+        
+        return {
+            "success": True,
+            "alert_id": f"alert_{uuid.uuid4()}",
+            "contacts_notified": len([r for r in alert_results if r["notified"]]),
+            "notification_results": alert_results
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Failed to send emergency alert: {str(e)}"
+        }
+
+# OpenFDA Drug Interaction and Safety Endpoints
+@api_router.get("/provider/medications/drug-safety/{drug_name}")
+async def get_drug_safety_info(drug_name: str):
+    """Get comprehensive drug safety information from OpenFDA"""
+    return await openfda_service.get_drug_safety_info(drug_name)
+
+@api_router.get("/provider/medications/drug-interactions/{drug_name}")
+async def get_drug_interactions(drug_name: str):
+    """Get detailed drug interaction information from OpenFDA"""
+    return await openfda_service.get_drug_interactions(drug_name)
+
+@api_router.get("/provider/medications/adverse-events/{drug_name}")
+async def get_adverse_events(drug_name: str, limit: int = 10):
+    """Get adverse event reports for specific drug from OpenFDA"""
+    return await openfda_service.get_adverse_events(drug_name, limit)
+
+@api_router.get("/provider/medications/food-interactions/{drug_name}")
+async def get_food_interactions(drug_name: str):
+    """Get drug-food interaction warnings from OpenFDA"""
+    return await openfda_service.check_drug_food_interactions(drug_name)
+
+@api_router.post("/provider/medications/batch-safety-check")
+async def batch_drug_safety_check(request: dict):
+    """Check safety information for multiple drugs simultaneously"""
+    try:
+        drug_names = request.get("drug_names", [])
+        
+        if not drug_names:
+            return {
+                "success": False,
+                "error": "No drug names provided"
+            }
+        
+        # Process up to 5 drugs at once to avoid API rate limits
+        drug_names = drug_names[:5]
+        
+        safety_results = {}
+        for drug_name in drug_names:
+            try:
+                safety_info = await openfda_service.get_drug_safety_info(drug_name)
+                safety_results[drug_name] = safety_info
+            except Exception as e:
+                safety_results[drug_name] = {
+                    "error": f"Failed to get safety info: {str(e)}",
+                    "safety_score": 50.0  # Neutral score for failed lookups
+                }
+        
+        # Calculate overall safety assessment
+        avg_safety_score = sum(
+            result.get("safety_score", 50.0) 
+            for result in safety_results.values() 
+            if not result.get("error")
+        ) / len([r for r in safety_results.values() if not r.get("error")])
+        
+        return {
+            "success": True,
+            "total_drugs_checked": len(drug_names),
+            "safety_results": safety_results,
+            "overall_safety_score": avg_safety_score,
+            "recommendations": [
+                "Review all drug interactions before prescribing",
+                "Monitor patients for reported adverse events",
+                "Consider food interaction warnings in patient counseling",
+                "Document any patient-specific risk factors"
+            ]
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Batch safety check failed: {str(e)}"
+        }
+
+# Provider Communication Portal Endpoints
+@api_router.post("/provider/communications/send-message")
+async def send_provider_message(request: dict):
+    """Send message from provider to patient via email notification"""
+    try:
+        provider_id = request.get("provider_id")
+        patient_id = request.get("patient_id")
+        patient_email = request.get("patient_email")
+        subject = request.get("subject")
+        message = request.get("message")
+        message_type = request.get("message_type", "general")  # general, medication, appointment, urgent
+        
+        # Create message record (mock - in production, save to database)
+        message_id = f"msg_{uuid.uuid4()}"
+        
+        # Send email notification to patient
+        notification_data = {
+            "provider_id": provider_id,
+            "patient_id": patient_id,
+            "subject": subject,
+            "message": message,
+            "message_type": message_type,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+        success = await provider_medication_service.send_provider_notification(
+            patient_email, "provider_message", notification_data
+        )
+        
+        return {
+            "success": success,
+            "message_id": message_id,
+            "sent_to": patient_email,
+            "delivery_method": "email",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Failed to send message: {str(e)}"
+        }
+
+@api_router.get("/provider/communications/inbox/{provider_id}")
+async def get_provider_inbox(provider_id: str, limit: int = 20):
+    """Get provider's communication inbox with patients"""
+    # Mock inbox data - in production, fetch from database
+    inbox_messages = [
+        {
+            "message_id": "msg_001",
+            "from_patient_id": "patient_001",
+            "patient_name": "John Smith",
+            "subject": "Question about Metformin side effects",
+            "preview": "I've been experiencing some nausea after taking my morning dose...",
+            "received_date": "2024-01-16T14:30:00Z",
+            "status": "unread",
+            "priority": "normal",
+            "category": "medication"
+        },
+        {
+            "message_id": "msg_002",
+            "from_patient_id": "patient_002",
+            "patient_name": "Mary Johnson",
+            "subject": "Missed doses - what should I do?",
+            "preview": "I forgot to take my evening medication for 2 days...",
+            "received_date": "2024-01-16T09:15:00Z", 
+            "status": "read",
+            "priority": "high",
+            "category": "adherence"
+        },
+        {
+            "message_id": "msg_003",
+            "from_patient_id": "patient_003",
+            "patient_name": "Robert Wilson",
+            "subject": "Request for medication refill",
+            "preview": "My prescription for Lisinopril is running low...",
+            "received_date": "2024-01-15T16:45:00Z",
+            "status": "replied",
+            "priority": "normal",
+            "category": "prescription"
+        }
+    ]
+    
+    return {
+        "provider_id": provider_id,
+        "total_messages": len(inbox_messages),
+        "unread_count": len([m for m in inbox_messages if m["status"] == "unread"]),
+        "high_priority_count": len([m for m in inbox_messages if m["priority"] == "high"]),
+        "messages": inbox_messages[:limit],
+        "categories": {
+            "medication": len([m for m in inbox_messages if m["category"] == "medication"]),
+            "adherence": len([m for m in inbox_messages if m["category"] == "adherence"]),
+            "prescription": len([m for m in inbox_messages if m["category"] == "prescription"]),
+            "general": len([m for m in inbox_messages if m["category"] == "general"])
+        }
+    }
+
+@api_router.get("/provider/dashboard/overview/{provider_id}")
+async def get_provider_dashboard_overview(provider_id: str):
+    """Get comprehensive provider dashboard overview with medication insights"""
+    try:
+        # Get adherence report
+        adherence_report = await provider_medication_service.generate_adherence_report(provider_id)
+        
+        # Get side effects monitoring
+        side_effects_report = await provider_medication_service.monitor_side_effects(provider_id)
+        
+        # Create dashboard overview
+        dashboard_data = {
+            "provider_id": provider_id,
+            "last_updated": datetime.utcnow().isoformat(),
+            "summary_stats": {
+                "total_patients": adherence_report.get("summary", {}).get("total_patients", 0),
+                "average_adherence": adherence_report.get("summary", {}).get("average_adherence", 0),
+                "patients_low_adherence": adherence_report.get("summary", {}).get("patients_below_50_percent", 0),
+                "pending_side_effect_reviews": side_effects_report.get("summary", {}).get("pending_review", 0),
+                "severe_reactions_week": len([s for s in side_effects_report.get("recent_reports", []) if s.get("severity") == "severe"])
+            },
+            "alerts": {
+                "critical_adherence": adherence_report.get("alerts", []),
+                "side_effect_alerts": [s for s in side_effects_report.get("action_required", [])],
+                "drug_interaction_warnings": []  # Placeholder for interaction warnings
+            },
+            "recent_activities": [
+                {
+                    "type": "side_effect_report",
+                    "patient": "John Smith",
+                    "medication": "Metformin",
+                    "severity": "mild",
+                    "timestamp": "2024-01-16T14:30:00Z",
+                    "status": "needs_review"
+                },
+                {
+                    "type": "adherence_improvement",
+                    "patient": "Mary Johnson",
+                    "improvement": "78% to 85%",
+                    "timestamp": "2024-01-16T10:00:00Z",
+                    "status": "positive"
+                }
+            ],
+            "recommendations": adherence_report.get("recommendations", [])
+        }
+        
+        return dashboard_data
+        
+    except Exception as e:
+        return {
+            "error": f"Failed to load provider dashboard: {str(e)}",
+            "provider_id": provider_id
+        }
+
 # Drug Interaction Checking System Endpoints
 @api_router.post("/drug-interaction/check")
 async def check_drug_interactions(request: dict):
