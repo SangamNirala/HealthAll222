@@ -1,38 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { 
   Users, AlertTriangle, Calendar, Clock, Activity,
   Eye, MessageCircle, Phone, UserPlus, Filter,
-  RefreshCw, Settings
+  RefreshCw, Settings, Loader2
 } from 'lucide-react';
+import { usePatientQueue } from '../../hooks/useClinicalDashboard';
 
-const PatientQueue = ({ lastUpdated }) => {
-  const [queueData, setQueueData] = useState(null);
-  const [loading, setLoading] = useState(true);
+const PatientQueue = ({ providerId }) => {
   const [selectedQueue, setSelectedQueue] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
 
-  const providerId = 'provider-123'; // This would come from auth context
-
-  useEffect(() => {
-    fetchQueueData();
-  }, [lastUpdated]);
-
-  const fetchQueueData = async () => {
-    try {
-      setLoading(true);
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
-      const response = await fetch(`${backendUrl}/api/provider/patient-queue/${providerId}`);
-      const data = await response.json();
-      setQueueData(data);
-    } catch (error) {
-      console.error('Error fetching queue data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use the custom hook for patient queue data with real-time updates
+  const {
+    loading,
+    error,
+    data: queueData,
+    lastUpdated,
+    refresh,
+    isStale
+  } = usePatientQueue(providerId, {
+    realTime: true,
+    refreshInterval: 30000,
+    autoStart: true
+  });
 
   const getPriorityColor = (priority) => {
     switch (priority) {
