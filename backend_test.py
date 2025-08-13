@@ -7281,6 +7281,458 @@ class HealthPlatformAPITester:
         
         return success1 and success2 and success3 and success4 and success5 and success6 and success7
 
+    def test_enhanced_clinical_dashboard_endpoints(self):
+        """Test Enhanced Clinical Dashboard API endpoints for Phase 4.1"""
+        print("\n🏥 Testing Enhanced Clinical Dashboard API Endpoints...")
+        print("Focus: 6 core clinical dashboard components for provider workflow")
+        
+        provider_id = "demo-provider-123"
+        
+        # Test 1: GET /api/provider/patient-queue/{provider_id}
+        print("\n📝 Test 1: Patient Queue Management System")
+        success1, queue_data = self.run_test(
+            "Patient Queue Management",
+            "GET",
+            f"provider/patient-queue/{provider_id}",
+            200
+        )
+        
+        # Validate patient queue response structure
+        if success1 and queue_data:
+            expected_keys = ['provider_id', 'queue_stats', 'priority_queue', 'scheduled_queue', 'completed_today', 'no_shows']
+            missing_keys = [key for key in expected_keys if key not in queue_data]
+            if not missing_keys:
+                print(f"   ✅ Patient queue response contains all required keys: {expected_keys}")
+                
+                # Validate queue_stats structure
+                queue_stats = queue_data.get('queue_stats', {})
+                stats_keys = ['total_in_queue', 'urgent', 'scheduled', 'walk_in', 'avg_wait_time']
+                missing_stats_keys = [key for key in stats_keys if key not in queue_stats]
+                if not missing_stats_keys:
+                    print(f"   ✅ Queue stats structure valid")
+                    print(f"      - Total in queue: {queue_stats.get('total_in_queue', 0)}")
+                    print(f"      - Urgent cases: {queue_stats.get('urgent', 0)}")
+                    print(f"      - Scheduled today: {queue_stats.get('scheduled', 0)}")
+                    print(f"      - Average wait time: {queue_stats.get('avg_wait_time', 'N/A')}")
+                else:
+                    print(f"   ❌ Queue stats missing keys: {missing_stats_keys}")
+                    success1 = False
+                
+                # Validate priority queue structure
+                priority_queue = queue_data.get('priority_queue', [])
+                if priority_queue and len(priority_queue) > 0:
+                    patient = priority_queue[0]
+                    patient_keys = ['id', 'patient_name', 'condition', 'priority', 'wait_time', 'room', 'vitals', 'status']
+                    missing_patient_keys = [key for key in patient_keys if key not in patient]
+                    if not missing_patient_keys:
+                        print(f"   ✅ Priority queue patient structure valid - {len(priority_queue)} urgent patients")
+                        print(f"      - Sample patient: {patient.get('patient_name')} - {patient.get('condition')} ({patient.get('priority')})")
+                    else:
+                        print(f"   ❌ Priority queue patient missing keys: {missing_patient_keys}")
+                        success1 = False
+                
+                # Validate scheduled queue structure
+                scheduled_queue = queue_data.get('scheduled_queue', [])
+                if scheduled_queue and len(scheduled_queue) > 0:
+                    appointment = scheduled_queue[0]
+                    appt_keys = ['id', 'patient_name', 'appointment_time', 'condition', 'priority', 'wait_time', 'room', 'status']
+                    missing_appt_keys = [key for key in appt_keys if key not in appointment]
+                    if not missing_appt_keys:
+                        print(f"   ✅ Scheduled queue structure valid - {len(scheduled_queue)} scheduled patients")
+                        print(f"      - Sample appointment: {appointment.get('patient_name')} at {appointment.get('appointment_time')}")
+                    else:
+                        print(f"   ❌ Scheduled queue appointment missing keys: {missing_appt_keys}")
+                        success1 = False
+            else:
+                print(f"   ❌ Patient queue response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: GET /api/provider/clinical-insights/{provider_id}
+        print("\n📝 Test 2: AI-Powered Clinical Decision Support")
+        success2, insights_data = self.run_test(
+            "Clinical Decision Support Insights",
+            "GET",
+            f"provider/clinical-insights/{provider_id}",
+            200
+        )
+        
+        # Validate clinical insights response structure
+        if success2 and insights_data:
+            expected_keys = ['provider_id', 'ai_recommendations', 'clinical_alerts', 'decision_support', 'risk_assessments']
+            missing_keys = [key for key in expected_keys if key not in insights_data]
+            if not missing_keys:
+                print(f"   ✅ Clinical insights response contains all required keys: {expected_keys}")
+                
+                # Validate AI recommendations structure
+                ai_recommendations = insights_data.get('ai_recommendations', [])
+                if ai_recommendations and len(ai_recommendations) > 0:
+                    recommendation = ai_recommendations[0]
+                    rec_keys = ['category', 'confidence', 'recommendation', 'evidence', 'next_steps']
+                    missing_rec_keys = [key for key in rec_keys if key not in recommendation]
+                    if not missing_rec_keys:
+                        print(f"   ✅ AI recommendations structure valid - {len(ai_recommendations)} recommendations")
+                        print(f"      - Sample: {recommendation.get('category')} (confidence: {recommendation.get('confidence')})")
+                    else:
+                        print(f"   ❌ AI recommendation missing keys: {missing_rec_keys}")
+                        success2 = False
+                
+                # Validate clinical alerts
+                clinical_alerts = insights_data.get('clinical_alerts', [])
+                if clinical_alerts and len(clinical_alerts) > 0:
+                    alert = clinical_alerts[0]
+                    alert_keys = ['id', 'patient_id', 'alert_type', 'severity', 'message', 'timestamp']
+                    missing_alert_keys = [key for key in alert_keys if key not in alert]
+                    if not missing_alert_keys:
+                        print(f"   ✅ Clinical alerts structure valid - {len(clinical_alerts)} alerts")
+                        print(f"      - Sample alert: {alert.get('alert_type')} - {alert.get('severity')}")
+                    else:
+                        print(f"   ❌ Clinical alert missing keys: {missing_alert_keys}")
+                        success2 = False
+            else:
+                print(f"   ❌ Clinical insights response missing keys: {missing_keys}")
+                success2 = False
+        
+        # Test 3: GET /api/provider/treatment-outcomes/{provider_id}
+        print("\n📝 Test 3: Treatment Outcome Tracking")
+        success3, outcomes_data = self.run_test(
+            "Treatment Outcomes Analytics",
+            "GET",
+            f"provider/treatment-outcomes/{provider_id}",
+            200
+        )
+        
+        # Test with timeframe parameter
+        success3b, outcomes_data_30d = self.run_test(
+            "Treatment Outcomes Analytics (30d)",
+            "GET",
+            f"provider/treatment-outcomes/{provider_id}",
+            200,
+            params={"timeframe": "30d"}
+        )
+        
+        # Validate treatment outcomes response structure
+        if success3 and outcomes_data:
+            expected_keys = ['provider_id', 'timeframe', 'outcome_summary', 'condition_outcomes', 'trending_metrics']
+            missing_keys = [key for key in expected_keys if key not in outcomes_data]
+            if not missing_keys:
+                print(f"   ✅ Treatment outcomes response contains all required keys: {expected_keys}")
+                
+                # Validate outcome summary
+                outcome_summary = outcomes_data.get('outcome_summary', {})
+                summary_keys = ['total_patients_treated', 'successful_outcomes', 'success_rate', 'readmission_rate', 'patient_satisfaction']
+                missing_summary_keys = [key for key in summary_keys if key not in outcome_summary]
+                if not missing_summary_keys:
+                    print(f"   ✅ Outcome summary structure valid")
+                    print(f"      - Success rate: {outcome_summary.get('success_rate', 0)}%")
+                    print(f"      - Patient satisfaction: {outcome_summary.get('patient_satisfaction', 0)}/5")
+                    print(f"      - Total patients treated: {outcome_summary.get('total_patients_treated', 0)}")
+                else:
+                    print(f"   ❌ Outcome summary missing keys: {missing_summary_keys}")
+                    success3 = False
+                
+                # Validate condition outcomes
+                condition_outcomes = outcomes_data.get('condition_outcomes', [])
+                if condition_outcomes and len(condition_outcomes) > 0:
+                    condition = condition_outcomes[0]
+                    condition_keys = ['condition', 'patients', 'improved', 'stable', 'declined', 'target_achievement_rate']
+                    missing_condition_keys = [key for key in condition_keys if key not in condition]
+                    if not missing_condition_keys:
+                        print(f"   ✅ Condition outcomes structure valid - {len(condition_outcomes)} conditions tracked")
+                        print(f"      - Sample: {condition.get('condition')} - {condition.get('target_achievement_rate')}% target achievement")
+                    else:
+                        print(f"   ❌ Condition outcome missing keys: {missing_condition_keys}")
+                        success3 = False
+            else:
+                print(f"   ❌ Treatment outcomes response missing keys: {missing_keys}")
+                success3 = False
+        
+        # Test 4: GET /api/provider/population-health/{provider_id}
+        print("\n📝 Test 4: Population Health Analytics")
+        success4, population_data = self.run_test(
+            "Population Health Analytics",
+            "GET",
+            f"provider/population-health/{provider_id}",
+            200
+        )
+        
+        # Validate population health response structure
+        if success4 and population_data:
+            expected_keys = ['provider_id', 'population_overview', 'demographic_breakdown', 'condition_prevalence', 'risk_stratification', 'quality_measures', 'intervention_opportunities']
+            missing_keys = [key for key in expected_keys if key not in population_data]
+            if not missing_keys:
+                print(f"   ✅ Population health response contains all required keys: {expected_keys}")
+                
+                # Validate population overview
+                population_overview = population_data.get('population_overview', {})
+                overview_keys = ['total_population', 'active_patients', 'high_risk_patients', 'chronic_conditions_prevalence']
+                missing_overview_keys = [key for key in overview_keys if key not in population_overview]
+                if not missing_overview_keys:
+                    print(f"   ✅ Population overview structure valid")
+                    print(f"      - Total population: {population_overview.get('total_population', 0)}")
+                    print(f"      - Active patients: {population_overview.get('active_patients', 0)}")
+                    print(f"      - High risk patients: {population_overview.get('high_risk_patients', 0)}")
+                else:
+                    print(f"   ❌ Population overview missing keys: {missing_overview_keys}")
+                    success4 = False
+                
+                # Validate demographic breakdown
+                demographic_breakdown = population_data.get('demographic_breakdown', [])
+                if demographic_breakdown and len(demographic_breakdown) > 0:
+                    demo = demographic_breakdown[0]
+                    demo_keys = ['age_group', 'count', 'percentage', 'top_conditions']
+                    missing_demo_keys = [key for key in demo_keys if key not in demo]
+                    if not missing_demo_keys:
+                        print(f"   ✅ Demographic breakdown structure valid - {len(demographic_breakdown)} age groups")
+                        print(f"      - Sample: {demo.get('age_group')} - {demo.get('percentage')}% of population")
+                    else:
+                        print(f"   ❌ Demographic breakdown missing keys: {missing_demo_keys}")
+                        success4 = False
+                
+                # Validate condition prevalence
+                condition_prevalence = population_data.get('condition_prevalence', [])
+                if condition_prevalence and len(condition_prevalence) > 0:
+                    condition = condition_prevalence[0]
+                    prev_keys = ['condition', 'count', 'prevalence', 'trend']
+                    missing_prev_keys = [key for key in prev_keys if key not in condition]
+                    if not missing_prev_keys:
+                        print(f"   ✅ Condition prevalence structure valid - {len(condition_prevalence)} conditions tracked")
+                        print(f"      - Top condition: {condition.get('condition')} - {condition.get('prevalence')}% prevalence")
+                    else:
+                        print(f"   ❌ Condition prevalence missing keys: {missing_prev_keys}")
+                        success4 = False
+            else:
+                print(f"   ❌ Population health response missing keys: {missing_keys}")
+                success4 = False
+        
+        # Test 5: POST /api/provider/evidence-recommendations
+        print("\n📝 Test 5: AI-Powered Evidence-Based Recommendations")
+        evidence_request_data = {
+            "condition": "Type 2 Diabetes",
+            "patient_profile": {
+                "age": 45,
+                "gender": "male",
+                "bmi": 28.5,
+                "hba1c": 8.2,
+                "comorbidities": ["hypertension", "obesity"],
+                "current_medications": ["metformin", "lisinopril"],
+                "lifestyle_factors": {
+                    "exercise_frequency": "2_times_week",
+                    "diet_adherence": "moderate",
+                    "smoking_status": "former"
+                }
+            },
+            "clinical_context": {
+                "presentation": "routine_followup",
+                "recent_labs": {
+                    "hba1c": 8.2,
+                    "fasting_glucose": 165,
+                    "ldl": 145,
+                    "blood_pressure": "145/92"
+                },
+                "treatment_goals": ["glycemic_control", "weight_reduction", "cardiovascular_risk_reduction"]
+            }
+        }
+        
+        success5, evidence_data = self.run_test(
+            "Evidence-Based Recommendations",
+            "POST",
+            "provider/evidence-recommendations",
+            200,
+            data=evidence_request_data
+        )
+        
+        # Validate evidence recommendations response structure
+        if success5 and evidence_data:
+            expected_keys = ['request_id', 'condition', 'evidence_level', 'recommendations', 'clinical_guidelines', 'contraindications', 'monitoring_parameters']
+            missing_keys = [key for key in expected_keys if key not in evidence_data]
+            if not missing_keys:
+                print(f"   ✅ Evidence recommendations response contains all required keys: {expected_keys}")
+                
+                # Validate recommendations structure
+                recommendations = evidence_data.get('recommendations', [])
+                if recommendations and len(recommendations) > 0:
+                    rec = recommendations[0]
+                    rec_keys = ['category', 'recommendation', 'evidence_grade', 'strength', 'rationale', 'implementation']
+                    missing_rec_keys = [key for key in rec_keys if key not in rec]
+                    if not missing_rec_keys:
+                        print(f"   ✅ Evidence recommendations structure valid - {len(recommendations)} recommendations")
+                        print(f"      - Sample: {rec.get('category')} - Grade {rec.get('evidence_grade')} ({rec.get('strength')})")
+                    else:
+                        print(f"   ❌ Evidence recommendation missing keys: {missing_rec_keys}")
+                        success5 = False
+                
+                # Validate clinical guidelines
+                clinical_guidelines = evidence_data.get('clinical_guidelines', [])
+                if clinical_guidelines and len(clinical_guidelines) > 0:
+                    guideline = clinical_guidelines[0]
+                    guide_keys = ['organization', 'guideline_name', 'recommendation', 'year', 'evidence_level']
+                    missing_guide_keys = [key for key in guide_keys if key not in guideline]
+                    if not missing_guide_keys:
+                        print(f"   ✅ Clinical guidelines structure valid - {len(clinical_guidelines)} guidelines")
+                        print(f"      - Sample: {guideline.get('organization')} - {guideline.get('guideline_name')}")
+                    else:
+                        print(f"   ❌ Clinical guideline missing keys: {missing_guide_keys}")
+                        success5 = False
+            else:
+                print(f"   ❌ Evidence recommendations response missing keys: {missing_keys}")
+                success5 = False
+        
+        # Test 6: GET /api/provider/continuing-education/{provider_id}
+        print("\n📝 Test 6: Professional Continuing Education Portal")
+        success6, education_data = self.run_test(
+            "Continuing Education Portal",
+            "GET",
+            f"provider/continuing-education/{provider_id}",
+            200
+        )
+        
+        # Validate continuing education response structure
+        if success6 and education_data:
+            expected_keys = ['provider_id', 'education_summary', 'available_courses', 'completed_courses', 'cme_tracking', 'professional_development']
+            missing_keys = [key for key in expected_keys if key not in education_data]
+            if not missing_keys:
+                print(f"   ✅ Continuing education response contains all required keys: {expected_keys}")
+                
+                # Validate education summary
+                education_summary = education_data.get('education_summary', {})
+                summary_keys = ['total_cme_credits', 'credits_required', 'credits_earned_this_year', 'compliance_status', 'next_deadline']
+                missing_summary_keys = [key for key in summary_keys if key not in education_summary]
+                if not missing_summary_keys:
+                    print(f"   ✅ Education summary structure valid")
+                    print(f"      - CME credits earned: {education_summary.get('credits_earned_this_year', 0)}/{education_summary.get('credits_required', 0)}")
+                    print(f"      - Compliance status: {education_summary.get('compliance_status', 'Unknown')}")
+                    print(f"      - Next deadline: {education_summary.get('next_deadline', 'N/A')}")
+                else:
+                    print(f"   ❌ Education summary missing keys: {missing_summary_keys}")
+                    success6 = False
+                
+                # Validate available courses
+                available_courses = education_data.get('available_courses', [])
+                if available_courses and len(available_courses) > 0:
+                    course = available_courses[0]
+                    course_keys = ['id', 'title', 'provider', 'credits', 'duration', 'category', 'difficulty', 'rating']
+                    missing_course_keys = [key for key in course_keys if key not in course]
+                    if not missing_course_keys:
+                        print(f"   ✅ Available courses structure valid - {len(available_courses)} courses")
+                        print(f"      - Sample: {course.get('title')} - {course.get('credits')} credits ({course.get('duration')})")
+                    else:
+                        print(f"   ❌ Available course missing keys: {missing_course_keys}")
+                        success6 = False
+                
+                # Validate CME tracking
+                cme_tracking = education_data.get('cme_tracking', {})
+                if cme_tracking:
+                    tracking_keys = ['current_cycle', 'cycle_start', 'cycle_end', 'credits_by_category', 'upcoming_deadlines']
+                    missing_tracking_keys = [key for key in tracking_keys if key not in cme_tracking]
+                    if not missing_tracking_keys:
+                        print(f"   ✅ CME tracking structure valid")
+                        print(f"      - Current cycle: {cme_tracking.get('current_cycle', 'Unknown')}")
+                        print(f"      - Cycle period: {cme_tracking.get('cycle_start', 'N/A')} to {cme_tracking.get('cycle_end', 'N/A')}")
+                    else:
+                        print(f"   ❌ CME tracking missing keys: {missing_tracking_keys}")
+                        success6 = False
+            else:
+                print(f"   ❌ Continuing education response missing keys: {missing_keys}")
+                success6 = False
+        
+        # Test 7: Error Handling - Invalid Provider ID
+        print("\n📝 Test 7: Error Handling - Invalid Provider ID")
+        success7, _ = self.run_test(
+            "Patient Queue - Invalid Provider ID (Should Fail)",
+            "GET",
+            "provider/patient-queue/invalid-provider-999",
+            404  # Expecting 404 or appropriate error status
+        )
+        
+        # Test 8: Performance Testing - Multiple Concurrent Requests
+        print("\n📝 Test 8: Performance Testing - Response Times")
+        import time
+        
+        start_time = time.time()
+        concurrent_success = True
+        
+        # Test multiple endpoints quickly to check performance
+        endpoints_to_test = [
+            f"provider/patient-queue/{provider_id}",
+            f"provider/clinical-insights/{provider_id}",
+            f"provider/treatment-outcomes/{provider_id}",
+            f"provider/population-health/{provider_id}",
+            f"provider/continuing-education/{provider_id}"
+        ]
+        
+        for endpoint in endpoints_to_test:
+            success, _ = self.run_test(
+                f"Performance Test - {endpoint.split('/')[-2]}",
+                "GET",
+                endpoint,
+                200
+            )
+            if not success:
+                concurrent_success = False
+        
+        end_time = time.time()
+        total_time = end_time - start_time
+        
+        print(f"   ✅ Performance test completed in {total_time:.2f} seconds")
+        if total_time < 10.0:  # All 5 endpoints should complete within 10 seconds
+            print(f"   ✅ Response times acceptable for clinical workflow")
+        else:
+            print(f"   ⚠️ Response times may be slow for clinical workflow: {total_time:.2f}s")
+        
+        # Test 9: Data Structure Integration Test
+        print("\n📝 Test 9: Frontend Integration Compatibility")
+        
+        # Test that all endpoints return data structures compatible with ClinicalDashboard.jsx
+        integration_success = True
+        
+        # Check if patient queue data can populate dashboard metrics
+        if success1 and queue_data:
+            queue_stats = queue_data.get('queue_stats', {})
+            if 'total_in_queue' in queue_stats and 'urgent' in queue_stats:
+                print(f"   ✅ Patient queue data compatible with dashboard metrics")
+            else:
+                print(f"   ❌ Patient queue data missing required metrics for dashboard")
+                integration_success = False
+        
+        # Check if treatment outcomes can populate success rate metrics
+        if success3 and outcomes_data:
+            outcome_summary = outcomes_data.get('outcome_summary', {})
+            if 'success_rate' in outcome_summary and 'patient_satisfaction' in outcome_summary:
+                print(f"   ✅ Treatment outcomes data compatible with dashboard metrics")
+            else:
+                print(f"   ❌ Treatment outcomes data missing required metrics for dashboard")
+                integration_success = False
+        
+        # Check if population health can populate active patients metric
+        if success4 and population_data:
+            population_overview = population_data.get('population_overview', {})
+            if 'active_patients' in population_overview:
+                print(f"   ✅ Population health data compatible with dashboard metrics")
+            else:
+                print(f"   ❌ Population health data missing required metrics for dashboard")
+                integration_success = False
+        
+        # Calculate overall success
+        core_endpoints_success = success1 and success2 and success3 and success4 and success5 and success6
+        error_handling_success = success7  # Should fail appropriately
+        performance_success = concurrent_success
+        
+        overall_success = core_endpoints_success and error_handling_success and performance_success and integration_success
+        
+        print(f"\n📊 Enhanced Clinical Dashboard API Test Summary:")
+        print(f"   ✅ Patient Queue Management: {'PASS' if success1 else 'FAIL'}")
+        print(f"   ✅ Clinical Decision Support: {'PASS' if success2 else 'FAIL'}")
+        print(f"   ✅ Treatment Outcomes Tracking: {'PASS' if success3 and success3b else 'FAIL'}")
+        print(f"   ✅ Population Health Analytics: {'PASS' if success4 else 'FAIL'}")
+        print(f"   ✅ Evidence-Based Recommendations: {'PASS' if success5 else 'FAIL'}")
+        print(f"   ✅ Continuing Education Portal: {'PASS' if success6 else 'FAIL'}")
+        print(f"   ✅ Error Handling: {'PASS' if success7 else 'FAIL'}")
+        print(f"   ✅ Performance Testing: {'PASS' if performance_success else 'FAIL'}")
+        print(f"   ✅ Frontend Integration Compatibility: {'PASS' if integration_success else 'FAIL'}")
+        print(f"   ✅ Overall Enhanced Clinical Dashboard: {'PASS' if overall_success else 'FAIL'}")
+        
+        return overall_success
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
