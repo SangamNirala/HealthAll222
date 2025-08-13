@@ -52,4 +52,3 @@ supabase>=2.0.0
 
 # OpenFDA and Provider Medication Services
 aiohttp>=3.8.0
-smtplib2>=0.2.2
