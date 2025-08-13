@@ -1268,6 +1268,7 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Phase 1A: Advanced Patient Management System Backend APIs"
     - "Phase 4.1: Enhanced Clinical Dashboard Backend Testing"
     - "Phase 4.2: Enhanced Clinical Dashboard Frontend Component Testing"
   stuck_tasks:
