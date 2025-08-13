@@ -428,6 +428,7 @@ const ClinicalDashboard = () => {
 
           {activeView === 'education' && (
             <ProfessionalContinuingEducation providerId={providerId} />
+          )}
         </div>
       </div>
     </div>
