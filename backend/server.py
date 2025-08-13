@@ -1722,7 +1722,7 @@ async def get_continuing_education(provider_id: str):
     """Professional Continuing Education Portal"""
     return {
         "provider_id": provider_id,
-        "education_summary": {
+        "cme_tracking": {
             "total_credits_earned": 32.5,
             "credits_required": 50.0,
             "progress_percentage": 65.0,
