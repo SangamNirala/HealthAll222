@@ -7733,6 +7733,223 @@ class HealthPlatformAPITester:
         
         return overall_success
 
+    def test_phase41_clinical_dashboard_retesting(self):
+        """Test Phase 4.1 Enhanced Clinical Dashboard endpoints - Re-testing after fixes"""
+        print("\n🏥 Testing Phase 4.1 Enhanced Clinical Dashboard Endpoints (Re-testing after fixes)...")
+        print("Focus: Verify fixes applied for clinical insights, continuing education, and provider validation")
+        
+        valid_provider_id = "provider-123"
+        invalid_provider_id = "invalid-xyz"
+        
+        # Test 1: GET /api/provider/patient-queue/{provider_id} - Valid ID
+        success1, queue_data = self.run_test(
+            "Provider Patient Queue (Valid ID)",
+            "GET",
+            f"provider/patient-queue/{valid_provider_id}",
+            200
+        )
+        
+        # Validate patient queue response structure
+        if success1 and queue_data:
+            expected_keys = ['provider_id', 'queue_stats', 'priority_queue', 'scheduled_queue']
+            missing_keys = [key for key in expected_keys if key not in queue_data]
+            if not missing_keys:
+                print(f"   ✅ Patient queue response contains all required keys: {expected_keys}")
+            else:
+                print(f"   ❌ Patient queue response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: GET /api/provider/patient-queue/{provider_id} - Invalid ID (should return 404)
+        success2, _ = self.run_test(
+            "Provider Patient Queue (Invalid ID - Should Return 404)",
+            "GET",
+            f"provider/patient-queue/{invalid_provider_id}",
+            404
+        )
+        
+        # Test 3: GET /api/provider/clinical-insights/{provider_id} - Valid ID
+        success3, insights_data = self.run_test(
+            "Provider Clinical Insights (Valid ID)",
+            "GET",
+            f"provider/clinical-insights/{valid_provider_id}",
+            200
+        )
+        
+        # Validate clinical insights response structure - should have 'ai_recommendations' key
+        if success3 and insights_data:
+            if 'ai_recommendations' in insights_data:
+                ai_recommendations = insights_data['ai_recommendations']
+                expected_ai_keys = ['enabled', 'insights', 'evidence_based_recommendations', 'confidence']
+                missing_ai_keys = [key for key in expected_ai_keys if key not in ai_recommendations]
+                if not missing_ai_keys:
+                    print(f"   ✅ Clinical insights has correct 'ai_recommendations' structure with keys: {expected_ai_keys}")
+                else:
+                    print(f"   ❌ Clinical insights 'ai_recommendations' missing keys: {missing_ai_keys}")
+                    success3 = False
+            else:
+                print(f"   ❌ Clinical insights response missing 'ai_recommendations' key")
+                success3 = False
+        
+        # Test 4: GET /api/provider/clinical-insights/{provider_id} - Invalid ID (should return 404)
+        success4, _ = self.run_test(
+            "Provider Clinical Insights (Invalid ID - Should Return 404)",
+            "GET",
+            f"provider/clinical-insights/{invalid_provider_id}",
+            404
+        )
+        
+        # Test 5: POST /api/provider/clinical-decision-support
+        decision_support_data = {
+            "patient_data": {"id": "patient-123", "age": 45, "gender": "male"},
+            "symptoms": ["fatigue", "weight_gain"],
+            "history": ["diabetes_family_history"]
+        }
+        
+        success5, decision_data = self.run_test(
+            "Provider Clinical Decision Support",
+            "POST",
+            "provider/clinical-decision-support",
+            200,
+            data=decision_support_data
+        )
+        
+        # Validate decision support response has 'ai_recommendations' array
+        if success5 and decision_data:
+            if 'ai_recommendations' in decision_data and isinstance(decision_data['ai_recommendations'], list):
+                print(f"   ✅ Clinical decision support has correct 'ai_recommendations' array structure")
+            else:
+                print(f"   ❌ Clinical decision support missing 'ai_recommendations' array")
+                success5 = False
+        
+        # Test 6: GET /api/provider/treatment-outcomes/{provider_id} - Valid ID with timeframe
+        success6, outcomes_data = self.run_test(
+            "Provider Treatment Outcomes (Valid ID with timeframe=30d)",
+            "GET",
+            f"provider/treatment-outcomes/{valid_provider_id}",
+            200,
+            params={"timeframe": "30d"}
+        )
+        
+        # Validate treatment outcomes response structure
+        if success6 and outcomes_data:
+            expected_keys = ['provider_id', 'timeframe', 'outcome_summary', 'condition_outcomes']
+            missing_keys = [key for key in expected_keys if key not in outcomes_data]
+            if not missing_keys:
+                print(f"   ✅ Treatment outcomes response contains all required keys: {expected_keys}")
+            else:
+                print(f"   ❌ Treatment outcomes response missing keys: {missing_keys}")
+                success6 = False
+        
+        # Test 7: GET /api/provider/treatment-outcomes/{provider_id} - Invalid ID (should return 404)
+        success7, _ = self.run_test(
+            "Provider Treatment Outcomes (Invalid ID - Should Return 404)",
+            "GET",
+            f"provider/treatment-outcomes/{invalid_provider_id}",
+            404
+        )
+        
+        # Test 8: GET /api/provider/population-health/{provider_id} - Valid ID
+        success8, population_data = self.run_test(
+            "Provider Population Health (Valid ID)",
+            "GET",
+            f"provider/population-health/{valid_provider_id}",
+            200
+        )
+        
+        # Validate population health response structure
+        if success8 and population_data:
+            expected_keys = ['provider_id', 'population_overview', 'demographic_breakdown', 'condition_prevalence']
+            missing_keys = [key for key in expected_keys if key not in population_data]
+            if not missing_keys:
+                print(f"   ✅ Population health response contains all required keys: {expected_keys}")
+            else:
+                print(f"   ❌ Population health response missing keys: {missing_keys}")
+                success8 = False
+        
+        # Test 9: GET /api/provider/population-health/{provider_id} - Invalid ID (should return 404)
+        success9, _ = self.run_test(
+            "Provider Population Health (Invalid ID - Should Return 404)",
+            "GET",
+            f"provider/population-health/{invalid_provider_id}",
+            404
+        )
+        
+        # Test 10: POST /api/provider/evidence-recommendations
+        evidence_data = {
+            "patient_profile": {"age": 55, "conditions": ["hypertension"], "medications": ["lisinopril"]},
+            "clinical_context": {"presenting_symptoms": ["headache"], "duration": "2_weeks"}
+        }
+        
+        success10, evidence_response = self.run_test(
+            "Provider Evidence Recommendations",
+            "POST",
+            "provider/evidence-recommendations",
+            200,
+            data=evidence_data
+        )
+        
+        # Validate evidence recommendations response structure
+        if success10 and evidence_response:
+            expected_keys = ['recommendations', 'evidence_level', 'clinical_guidelines']
+            missing_keys = [key for key in expected_keys if key not in evidence_response]
+            if not missing_keys:
+                print(f"   ✅ Evidence recommendations response contains all required keys: {expected_keys}")
+            else:
+                print(f"   ❌ Evidence recommendations response missing keys: {missing_keys}")
+                success10 = False
+        
+        # Test 11: GET /api/provider/continuing-education/{provider_id} - Valid ID
+        success11, education_data = self.run_test(
+            "Provider Continuing Education (Valid ID)",
+            "GET",
+            f"provider/continuing-education/{valid_provider_id}",
+            200
+        )
+        
+        # Validate continuing education response structure - should have 'available_courses' and 'cme_tracking'
+        if success11 and education_data:
+            if 'available_courses' in education_data and 'cme_tracking' in education_data:
+                print(f"   ✅ Continuing education has correct structure with 'available_courses' and 'cme_tracking'")
+                # Check that old keys are NOT present
+                if 'featured_courses' in education_data or 'education_summary' in education_data:
+                    print(f"   ❌ Continuing education still contains old keys 'featured_courses' or 'education_summary'")
+                    success11 = False
+                else:
+                    print(f"   ✅ Continuing education correctly removed old keys 'featured_courses' and 'education_summary'")
+            else:
+                missing_keys = []
+                if 'available_courses' not in education_data:
+                    missing_keys.append('available_courses')
+                if 'cme_tracking' not in education_data:
+                    missing_keys.append('cme_tracking')
+                print(f"   ❌ Continuing education response missing keys: {missing_keys}")
+                success11 = False
+        
+        # Test 12: GET /api/provider/continuing-education/{provider_id} - Invalid ID (should return 404)
+        success12, _ = self.run_test(
+            "Provider Continuing Education (Invalid ID - Should Return 404)",
+            "GET",
+            f"provider/continuing-education/{invalid_provider_id}",
+            404
+        )
+        
+        print(f"\n📊 Phase 4.1 Clinical Dashboard Re-testing Summary:")
+        print(f"   ✅ Patient Queue (Valid): {'PASS' if success1 else 'FAIL'}")
+        print(f"   ✅ Patient Queue (Invalid 404): {'PASS' if success2 else 'FAIL'}")
+        print(f"   ✅ Clinical Insights (Valid): {'PASS' if success3 else 'FAIL'}")
+        print(f"   ✅ Clinical Insights (Invalid 404): {'PASS' if success4 else 'FAIL'}")
+        print(f"   ✅ Clinical Decision Support: {'PASS' if success5 else 'FAIL'}")
+        print(f"   ✅ Treatment Outcomes (Valid): {'PASS' if success6 else 'FAIL'}")
+        print(f"   ✅ Treatment Outcomes (Invalid 404): {'PASS' if success7 else 'FAIL'}")
+        print(f"   ✅ Population Health (Valid): {'PASS' if success8 else 'FAIL'}")
+        print(f"   ✅ Population Health (Invalid 404): {'PASS' if success9 else 'FAIL'}")
+        print(f"   ✅ Evidence Recommendations: {'PASS' if success10 else 'FAIL'}")
+        print(f"   ✅ Continuing Education (Valid): {'PASS' if success11 else 'FAIL'}")
+        print(f"   ✅ Continuing Education (Invalid 404): {'PASS' if success12 else 'FAIL'}")
+        
+        return (success1 and success2 and success3 and success4 and success5 and success6 and 
+                success7 and success8 and success9 and success10 and success11 and success12)
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
