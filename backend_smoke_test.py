@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 
 class BackendSmokeTest:
-    def __init__(self, base_url="https://30d5c3f4-a38a-430a-950f-9ba5ab009235.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://rxinteract-alert.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
