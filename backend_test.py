@@ -7369,6 +7369,7 @@ class HealthPlatformAPITester:
         print(f"   Phase 3 AI Integration - PersonalInsights: {'✅ PASSED' if phase3_ai_success else '❌ FAILED'}")
         print(f"   Phase 4 Food Logging Endpoints: {'✅ PASSED' if phase4_food_logging_success else '❌ FAILED'}")
         print(f"   Guest Session Management & Export: {'✅ PASSED' if guest_session_success else '❌ FAILED'}")
+        print(f"   Provider Healthcare Integration: {'✅ PASSED' if provider_integration_success else '❌ FAILED'}")
         
         if self.tests_passed == self.tests_run:
             print("🎉 All tests passed!")
