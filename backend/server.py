@@ -1730,7 +1730,7 @@ async def get_continuing_education(provider_id: str):
             "courses_in_progress": 3,
             "deadline": "2024-12-31"
         },
-        "featured_courses": [
+        "available_courses": [
             {
                 "id": "course-001",
                 "title": "Advanced Diabetes Management 2024",
