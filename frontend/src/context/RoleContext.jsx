@@ -53,6 +53,7 @@ const ROLE_CONFIG = {
       { label: 'Profile', path: '/provider-profile', icon: 'User' },
       { label: 'Patients', path: '/provider-patients', icon: 'Users' },
       { label: 'Clinical Tools', path: '/provider-tools', icon: 'Stethoscope' },
+      { label: 'Medication Hub', path: '/provider-medication-dashboard', icon: 'Pill' },
       { label: 'Analytics', path: '/provider-analytics', icon: 'BarChart3' },
       { label: 'Education', path: '/provider-education', icon: 'BookOpen' }
     ],
