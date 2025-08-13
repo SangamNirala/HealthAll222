@@ -7316,7 +7316,7 @@ async def get_patient_progress(patient_id: str, metric_type: Optional[str] = Non
         return {
             "patient_id": patient_id,
             "timeframe": f"{days}_days",
-            "progress_data": [PatientProgress(**entry) for entry in progress_data],
+            "progress_entries": [PatientProgress(**entry) for entry in progress_data],
             "metrics_summary": metrics_summary,
             "total_entries": len(progress_data),
             "last_updated": progress_data[-1]["recorded_at"] if progress_data else None
