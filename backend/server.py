@@ -3544,6 +3544,7 @@ async def add_timeline_event(user_id: str, event: dict):
 # Provider Clinical Endpoints
 @api_router.get("/provider/clinical-insights/{provider_id}")
 async def get_clinical_insights(provider_id: str):
+    validate_provider_id(provider_id)
     """Get clinical decision support and insights with AI"""
     
     # Sample provider data
