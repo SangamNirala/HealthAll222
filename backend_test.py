@@ -7055,10 +7055,21 @@ class HealthPlatformAPITester:
         
         # Validate overview response structure
         if success1 and overview_data:
-            expected_keys = ['provider_id', 'dashboard_summary', 'adherence_overview', 'side_effects_summary', 'recent_alerts', 'patient_statistics']
+            expected_keys = ['provider_id', 'last_updated', 'summary_stats', 'alerts', 'recent_activities', 'recommendations']
             missing_keys = [key for key in expected_keys if key not in overview_data]
             if not missing_keys:
                 print(f"   ✅ Dashboard overview contains all required keys: {expected_keys}")
+                
+                # Validate summary_stats structure
+                summary_stats = overview_data.get('summary_stats', {})
+                stats_keys = ['total_patients', 'average_adherence', 'patients_low_adherence', 'pending_side_effect_reviews', 'severe_reactions_week']
+                missing_stats_keys = [key for key in stats_keys if key not in summary_stats]
+                if not missing_stats_keys:
+                    print(f"   ✅ Summary stats structure valid")
+                    print(f"   📊 Total patients: {summary_stats['total_patients']}, Avg adherence: {summary_stats['average_adherence']:.1f}%")
+                else:
+                    print(f"   ❌ Summary stats missing keys: {missing_stats_keys}")
+                    success1 = False
             else:
                 print(f"   ❌ Dashboard overview missing keys: {missing_keys}")
                 success1 = False
