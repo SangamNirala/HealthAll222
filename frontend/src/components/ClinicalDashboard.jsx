@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRole } from '../context/RoleContext';
 import SmartNavigation from './shared/SmartNavigation';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -7,8 +7,16 @@ import { Badge } from './ui/badge';
 import { 
   Stethoscope, Users, Brain, BarChart3, 
   BookOpen, GraduationCap, RefreshCw, Settings,
-  Activity, TrendingUp, AlertTriangle
+  Activity, TrendingUp, AlertTriangle, Loader2,
+  Wifi, WifiOff
 } from 'lucide-react';
+
+// Import service layer and hooks
+import {
+  useDashboardOverview,
+  useServiceHealth,
+  cleanupClinicalDashboard
+} from '../hooks/useClinicalDashboard';
 
 // Import sub-components
 import PatientQueue from './clinical/PatientQueue';
