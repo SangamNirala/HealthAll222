@@ -91,6 +91,16 @@ const ClinicalDashboard = () => {
     setRealTimeEnabled(!realTimeEnabled);
   };
 
+  const dashboardViews = [
+    { id: 'overview', label: 'Dashboard Overview', icon: Stethoscope },
+    { id: 'queue', label: 'Patient Queue', icon: Users },
+    { id: 'decision-support', label: 'Clinical Decision Support', icon: Brain },
+    { id: 'outcomes', label: 'Treatment Outcomes', icon: BarChart3 },
+    { id: 'population', label: 'Population Health', icon: TrendingUp },
+    { id: 'evidence', label: 'Evidence & Research', icon: BookOpen },
+    { id: 'education', label: 'Continuing Education', icon: GraduationCap }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100">
       <SmartNavigation />
