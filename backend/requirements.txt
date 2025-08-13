@@ -53,3 +53,9 @@ supabase>=2.0.0
 
 # OpenFDA and Provider Medication Services
 aiohttp>=3.8.0
+
+# Patient Management System Dependencies
+scikit-learn>=1.3.0
+reportlab>=4.0.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
