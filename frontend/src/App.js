@@ -35,6 +35,7 @@ import ProviderAnalytics from "./components/ProviderAnalytics";
 import ProviderEducation from "./components/ProviderEducation";
 import ProviderMedicationDashboard from "./components/ProviderMedicationDashboard";
 import PatientMedicationProvider from "./components/PatientMedicationProvider";
+import ClinicalDashboard from "./components/ClinicalDashboard";
 
 // Guest navigation pages
 import GuestFoodLog from "./components/GuestFoodLog";
