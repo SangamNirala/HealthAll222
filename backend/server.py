@@ -18,6 +18,10 @@ import random
 # Import AI services
 from ai_services import get_nutrition_insights, get_smart_food_suggestions, get_health_correlations, get_clinical_insights, get_goal_insights, get_achievement_insights, AIServiceManager
 
+# Import OpenFDA and Provider Services
+from openfda_service import openfda_service
+from provider_medication_service import provider_medication_service
+
 # Import Supabase
 from supabase import create_client, Client
 
