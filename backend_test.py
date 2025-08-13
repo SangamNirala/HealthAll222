@@ -7352,6 +7352,10 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Guest Session Management & Export (PRIORITY)...")
         guest_session_success = self.test_guest_session_management_and_export()
 
+        # Test Provider Healthcare Integration (Phase 2.5 Step 3) - NEW PRIORITY TEST
+        print("\n📋 Testing Provider Healthcare Integration (Phase 2.5 Step 3)...")
+        provider_integration_success = self.test_provider_healthcare_integration_endpoints()
+
         # Print final results
         print("\n" + "=" * 60)
         print(f"📊 FINAL RESULTS")
