@@ -8,6 +8,8 @@
  * @version 1.0.0
  */
 
+import React from 'react';
+
 // Get backend URL from environment
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
