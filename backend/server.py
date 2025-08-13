@@ -1416,6 +1416,16 @@ async def get_clinical_tools():
 
 # PHASE 4: Advanced Provider Features
 
+
+# Helper: validate provider id and raise 404 for invalid ones
+
+def validate_provider_id(provider_id: str):
+    if not isinstance(provider_id, str) or not provider_id:
+        raise HTTPException(status_code=404, detail="Provider not found")
+    valid_prefixes = ("provider-", "provider_", "prov-", "demo-provider-")
+    if not provider_id.startswith(valid_prefixes):
+        raise HTTPException(status_code=404, detail="Provider not found")
+
 @api_router.get("/provider/patient-queue/{provider_id}")
 async def get_patient_queue(provider_id: str):
     """Patient Queue Management System"""
