@@ -6754,6 +6754,289 @@ class HealthPlatformAPITester:
         
         return all_tests_passed and success4
 
+    def test_drug_interaction_endpoints(self):
+        """Test Drug Interaction API endpoints"""
+        print("\n💊 Testing Drug Interaction API Endpoints...")
+        
+        # Test 1: POST /api/drug-interaction/check - Valid drug combinations
+        warfarin_aspirin_data = {
+            "medications": ["Warfarin", "Aspirin"],
+            "user_id": "test-user-123"
+        }
+        
+        success1, interaction_response = self.run_test(
+            "Check Drug Interactions (Warfarin + Aspirin)",
+            "POST",
+            "drug-interaction/check",
+            200,
+            data=warfarin_aspirin_data
+        )
+        
+        # Validate interaction response structure
+        if success1 and interaction_response:
+            expected_keys = ['success', 'medications_checked', 'total_interactions_found', 'interactions', 'summary', 'recommendations']
+            missing_keys = [key for key in expected_keys if key not in interaction_response]
+            if not missing_keys:
+                print(f"   ✅ Interaction response contains all required keys: {expected_keys}")
+                
+                # Validate interactions structure
+                interactions = interaction_response.get('interactions', [])
+                if interactions and len(interactions) > 0:
+                    interaction = interactions[0]
+                    interaction_keys = ['drug_pair', 'interaction_type', 'severity', 'confidence', 'description', 'mechanism', 'management']
+                    missing_interaction_keys = [key for key in interaction_keys if key not in interaction]
+                    if not missing_interaction_keys:
+                        print(f"   ✅ Found {len(interactions)} interactions with proper structure")
+                        print(f"   ⚠️ Major interaction detected: {interaction['drug_pair']} - {interaction['severity']}")
+                    else:
+                        print(f"   ❌ Interaction object missing keys: {missing_interaction_keys}")
+                        success1 = False
+                else:
+                    print(f"   ⚠️ No interactions found for Warfarin + Aspirin (unexpected)")
+            else:
+                print(f"   ❌ Interaction response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: POST /api/drug-interaction/check - Metformin + Lisinopril
+        metformin_lisinopril_data = {
+            "medications": ["Metformin", "Lisinopril"],
+            "user_id": "test-user-123"
+        }
+        
+        success2, metformin_response = self.run_test(
+            "Check Drug Interactions (Metformin + Lisinopril)",
+            "POST",
+            "drug-interaction/check",
+            200,
+            data=metformin_lisinopril_data
+        )
+        
+        if success2 and metformin_response:
+            interactions = metformin_response.get('interactions', [])
+            print(f"   ✅ Metformin + Lisinopril check: {len(interactions)} interactions found")
+            if interactions:
+                print(f"   📋 Interaction severity: {interactions[0]['severity']}")
+        
+        # Test 3: POST /api/drug-interaction/check - No interactions (safe combination)
+        safe_combination_data = {
+            "medications": ["Acetaminophen", "Vitamin D"],
+            "user_id": "test-user-123"
+        }
+        
+        success3, safe_response = self.run_test(
+            "Check Drug Interactions (Safe Combination)",
+            "POST",
+            "drug-interaction/check",
+            200,
+            data=safe_combination_data
+        )
+        
+        if success3 and safe_response:
+            interactions = safe_response.get('interactions', [])
+            print(f"   ✅ Safe combination check: {len(interactions)} interactions found")
+        
+        # Test 4: POST /api/drug-interaction/check - Single medication (should return error)
+        single_med_data = {
+            "medications": ["Warfarin"],
+            "user_id": "test-user-123"
+        }
+        
+        success4, single_response = self.run_test(
+            "Check Drug Interactions (Single Medication - Should Return Error)",
+            "POST",
+            "drug-interaction/check",
+            200,  # API returns 200 but with success: false
+            data=single_med_data
+        )
+        
+        if success4 and single_response:
+            success_flag = single_response.get('success', True)
+            error_message = single_response.get('error', '')
+            if not success_flag and 'at least 2 medications' in error_message.lower():
+                print(f"   ✅ Single medication properly rejected: {error_message}")
+            else:
+                print(f"   ❌ Single medication validation failed")
+                success4 = False
+        
+        # Test 5: POST /api/drug-interaction/check - Empty request
+        empty_data = {
+            "medications": [],
+            "user_id": "test-user-123"
+        }
+        
+        success5, empty_response = self.run_test(
+            "Check Drug Interactions (Empty Request)",
+            "POST",
+            "drug-interaction/check",
+            200,  # API returns 200 but with success: false
+            data=empty_data
+        )
+        
+        if success5 and empty_response:
+            success_flag = empty_response.get('success', True)
+            if not success_flag:
+                print(f"   ✅ Empty request properly rejected")
+            else:
+                print(f"   ❌ Empty request validation failed")
+                success5 = False
+        
+        # Test 6: GET /api/drug-interaction/alternatives/{drug_name} - Warfarin
+        success6, warfarin_alternatives = self.run_test(
+            "Get Drug Alternatives (Warfarin)",
+            "GET",
+            "drug-interaction/alternatives/warfarin",
+            200
+        )
+        
+        if success6 and warfarin_alternatives:
+            expected_keys = ['drug_name', 'alternatives_found', 'alternatives', 'disclaimer', 'recommendation']
+            missing_keys = [key for key in expected_keys if key not in warfarin_alternatives]
+            if not missing_keys:
+                print(f"   ✅ Alternatives response contains all required keys")
+                alternatives = warfarin_alternatives.get('alternatives', [])
+                print(f"   💊 Found {len(alternatives)} alternatives for Warfarin")
+                if alternatives:
+                    alt = alternatives[0]
+                    print(f"   📋 Sample alternative: {alt.get('name')} ({alt.get('class')})")
+            else:
+                print(f"   ❌ Alternatives response missing keys: {missing_keys}")
+                success6 = False
+        
+        # Test 7: GET /api/drug-interaction/alternatives/{drug_name} - Metformin
+        success7, metformin_alternatives = self.run_test(
+            "Get Drug Alternatives (Metformin)",
+            "GET",
+            "drug-interaction/alternatives/metformin",
+            200
+        )
+        
+        if success7 and metformin_alternatives:
+            alternatives = metformin_alternatives.get('alternatives', [])
+            print(f"   💊 Found {len(alternatives)} alternatives for Metformin")
+        
+        # Test 8: GET /api/drug-interaction/alternatives/{drug_name} - Unknown drug
+        success8, unknown_alternatives = self.run_test(
+            "Get Drug Alternatives (Unknown Drug)",
+            "GET",
+            "drug-interaction/alternatives/unknowndrug123",
+            200
+        )
+        
+        if success8 and unknown_alternatives:
+            alternatives = unknown_alternatives.get('alternatives', [])
+            print(f"   ❓ Found {len(alternatives)} alternatives for unknown drug (expected: 0)")
+        
+        # Test 9: POST /api/drug-interaction/normalize - Brand names
+        brand_names_data = {
+            "drug_names": ["Tylenol", "Advil", "Coumadin"]
+        }
+        
+        success9, normalize_response = self.run_test(
+            "Normalize Drug Names (Brand Names)",
+            "POST",
+            "drug-interaction/normalize",
+            200,
+            data=brand_names_data
+        )
+        
+        if success9 and normalize_response:
+            expected_keys = ['success', 'normalized_drugs', 'total_processed', 'successful_matches']
+            missing_keys = [key for key in expected_keys if key not in normalize_response]
+            if not missing_keys:
+                print(f"   ✅ Normalize response contains all required keys")
+                normalized_drugs = normalize_response.get('normalized_drugs', [])
+                successful_matches = normalize_response.get('successful_matches', 0)
+                print(f"   🔄 Processed {len(normalized_drugs)} drugs, {successful_matches} successful matches")
+                
+                # Validate normalized drug structure
+                if normalized_drugs:
+                    drug = normalized_drugs[0]
+                    drug_keys = ['original_name', 'standard_name', 'rxcui', 'confidence', 'match_type']
+                    missing_drug_keys = [key for key in drug_keys if key not in drug]
+                    if not missing_drug_keys:
+                        print(f"   ✅ Normalized drug structure valid")
+                        print(f"   📋 Sample: {drug['original_name']} → {drug['standard_name']} (confidence: {drug['confidence']})")
+                    else:
+                        print(f"   ❌ Normalized drug missing keys: {missing_drug_keys}")
+                        success9 = False
+            else:
+                print(f"   ❌ Normalize response missing keys: {missing_keys}")
+                success9 = False
+        
+        # Test 10: POST /api/drug-interaction/normalize - Generic names
+        generic_names_data = {
+            "drug_names": ["acetaminophen", "ibuprofen", "warfarin"]
+        }
+        
+        success10, generic_normalize = self.run_test(
+            "Normalize Drug Names (Generic Names)",
+            "POST",
+            "drug-interaction/normalize",
+            200,
+            data=generic_names_data
+        )
+        
+        if success10 and generic_normalize:
+            normalized_drugs = generic_normalize.get('normalized_drugs', [])
+            successful_matches = generic_normalize.get('successful_matches', 0)
+            print(f"   🔄 Generic names: {successful_matches}/{len(normalized_drugs)} matches")
+        
+        # Test 11: POST /api/drug-interaction/normalize - Unknown drug names
+        unknown_names_data = {
+            "drug_names": ["unknowndrug123", "fakemedicine456"]
+        }
+        
+        success11, unknown_normalize = self.run_test(
+            "Normalize Drug Names (Unknown Drugs)",
+            "POST",
+            "drug-interaction/normalize",
+            200,
+            data=unknown_names_data
+        )
+        
+        if success11 and unknown_normalize:
+            normalized_drugs = unknown_normalize.get('normalized_drugs', [])
+            no_matches = [d for d in normalized_drugs if d.get('confidence', 0) == 0.0]
+            print(f"   ❓ Unknown drugs: {len(no_matches)}/{len(normalized_drugs)} with no matches")
+        
+        # Test 12: POST /api/drug-interaction/normalize - Empty request
+        empty_normalize_data = {
+            "drug_names": []
+        }
+        
+        success12, empty_normalize = self.run_test(
+            "Normalize Drug Names (Empty Request)",
+            "POST",
+            "drug-interaction/normalize",
+            200,  # API returns 200 but with success: false
+            data=empty_normalize_data
+        )
+        
+        if success12 and empty_normalize:
+            success_flag = empty_normalize.get('success', True)
+            if not success_flag:
+                print(f"   ✅ Empty normalize request properly rejected")
+            else:
+                print(f"   ❌ Empty normalize request validation failed")
+                success12 = False
+        
+        print(f"\n📊 Drug Interaction API Test Summary:")
+        print(f"   ✅ Check interactions (Warfarin + Aspirin): {'PASS' if success1 else 'FAIL'}")
+        print(f"   ✅ Check interactions (Metformin + Lisinopril): {'PASS' if success2 else 'FAIL'}")
+        print(f"   ✅ Check interactions (Safe combination): {'PASS' if success3 else 'FAIL'}")
+        print(f"   ✅ Single medication validation: {'PASS' if success4 else 'FAIL'}")
+        print(f"   ✅ Empty request validation: {'PASS' if success5 else 'FAIL'}")
+        print(f"   ✅ Get alternatives (Warfarin): {'PASS' if success6 else 'FAIL'}")
+        print(f"   ✅ Get alternatives (Metformin): {'PASS' if success7 else 'FAIL'}")
+        print(f"   ✅ Get alternatives (Unknown drug): {'PASS' if success8 else 'FAIL'}")
+        print(f"   ✅ Normalize brand names: {'PASS' if success9 else 'FAIL'}")
+        print(f"   ✅ Normalize generic names: {'PASS' if success10 else 'FAIL'}")
+        print(f"   ✅ Normalize unknown drugs: {'PASS' if success11 else 'FAIL'}")
+        print(f"   ✅ Normalize empty request: {'PASS' if success12 else 'FAIL'}")
+        
+        return (success1 and success2 and success3 and success4 and success5 and success6 and 
+                success7 and success8 and success9 and success10 and success11 and success12)
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
