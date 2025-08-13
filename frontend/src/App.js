@@ -33,6 +33,8 @@ import ProviderPatients from "./components/ProviderPatients";
 import ProviderTools from "./components/ProviderTools";
 import ProviderAnalytics from "./components/ProviderAnalytics";
 import ProviderEducation from "./components/ProviderEducation";
+import ProviderMedicationDashboard from "./components/ProviderMedicationDashboard";
+import PatientMedicationProvider from "./components/PatientMedicationProvider";
 
 // Guest navigation pages
 import GuestFoodLog from "./components/GuestFoodLog";
