@@ -52,6 +52,7 @@ const ROLE_CONFIG = {
     navigationItems: [
       { label: 'Dashboard', path: '/provider-dashboard', icon: 'LayoutDashboard' },
       { label: 'Profile', path: '/provider-profile', icon: 'User' },
+      { label: 'Clinical Dashboard', path: '/provider-clinical-dashboard', icon: 'Monitor' },
       { label: 'Patients', path: '/provider-patients', icon: 'Users' },
       { label: 'Clinical Tools', path: '/provider-tools', icon: 'Stethoscope' },
       { label: 'Medication Hub', path: '/provider-medication-dashboard', icon: 'Pill' },
