@@ -1532,6 +1532,7 @@ async def clinical_decision_support(request: dict):
 
 @api_router.get("/provider/treatment-outcomes/{provider_id}")
 async def get_treatment_outcomes(provider_id: str, timeframe: str = "30d"):
+    validate_provider_id(provider_id)
     """Treatment Outcome Tracking"""
     return {
         "provider_id": provider_id,
