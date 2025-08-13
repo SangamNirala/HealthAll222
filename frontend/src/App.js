@@ -20,6 +20,7 @@ import PatientAnalytics from "./components/PatientAnalytics";
 import PatientMedicationReminder from "./components/PatientMedicationReminder";
 import PatientHealthTimeline from "./components/PatientHealthTimeline";
 import EnhancedMedicationManager from "./components/EnhancedMedicationManager";
+import DrugInteractionWarnings from "./components/DrugInteractionWarnings";
 
 // Analytics components
 import PersonalInsights from "./components/analytics/PersonalInsights";
