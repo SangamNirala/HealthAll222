@@ -7247,7 +7247,7 @@ class HealthPlatformAPITester:
                 messages = inbox_data.get('messages', [])
                 if messages and len(messages) > 0:
                     message = messages[0]
-                    message_keys = ['message_id', 'from_patient_id', 'patient_name', 'subject', 'preview', 'timestamp', 'read', 'priority', 'category']
+                    message_keys = ['message_id', 'from_patient_id', 'patient_name', 'subject', 'preview', 'received_date', 'status', 'priority', 'category']
                     missing_message_keys = [key for key in message_keys if key not in message]
                     if not missing_message_keys:
                         print(f"   ✅ Message structure valid - Found {len(messages)} messages")
