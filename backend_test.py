@@ -7832,6 +7832,7 @@ class HealthPlatformAPITester:
         
         # Highlight the priority test results
         print(f"\n🎯 PRIORITY TEST RESULTS:")
+        print(f"   Enhanced Clinical Dashboard (Phase 4.1): {'✅ PASSED' if enhanced_clinical_dashboard_success else '❌ FAILED'}")
         print(f"   AI API Endpoints: {'✅ PASSED' if ai_success else '❌ FAILED'}")
         print(f"   Phase 3 AI Integration - PersonalInsights: {'✅ PASSED' if phase3_ai_success else '❌ FAILED'}")
         print(f"   Phase 4 Food Logging Endpoints: {'✅ PASSED' if phase4_food_logging_success else '❌ FAILED'}")
