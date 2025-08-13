@@ -3567,7 +3567,7 @@ async def get_clinical_insights(provider_id: str):
     
     return {
         "provider_id": provider_id,
-        "ai_powered_analysis": {
+        "ai_recommendations": {
             "enabled": True,
             "insights": ai_clinical_insights.get("insights", []),
             "evidence_based_recommendations": ai_clinical_insights.get("recommendations", []),
