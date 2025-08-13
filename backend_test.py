@@ -7037,6 +7037,239 @@ class HealthPlatformAPITester:
         return (success1 and success2 and success3 and success4 and success5 and success6 and 
                 success7 and success8 and success9 and success10 and success11 and success12)
 
+    def test_provider_healthcare_integration_endpoints(self):
+        """Test Provider Healthcare Integration endpoints (Phase 2.5 Step 3)"""
+        print("\n📋 Testing Provider Healthcare Integration Endpoints...")
+        
+        provider_id = "provider_001"
+        patient_id = "demo-patient-123"
+        drug_name = "Metformin"
+        
+        # Test 1: GET /api/provider/dashboard/overview/{provider_id}
+        success1, overview_data = self.run_test(
+            "Provider Dashboard Overview",
+            "GET",
+            f"provider/dashboard/overview/{provider_id}",
+            200
+        )
+        
+        # Validate overview response structure
+        if success1 and overview_data:
+            expected_keys = ['provider_id', 'dashboard_summary', 'adherence_overview', 'side_effects_summary', 'recent_alerts', 'patient_statistics']
+            missing_keys = [key for key in expected_keys if key not in overview_data]
+            if not missing_keys:
+                print(f"   ✅ Dashboard overview contains all required keys: {expected_keys}")
+            else:
+                print(f"   ❌ Dashboard overview missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: GET /api/provider/medications/adherence-report/{provider_id}
+        success2, adherence_data = self.run_test(
+            "Provider Adherence Report",
+            "GET",
+            f"provider/medications/adherence-report/{provider_id}",
+            200
+        )
+        
+        # Validate adherence report structure
+        if success2 and adherence_data:
+            expected_keys = ['provider_id', 'report_date', 'summary', 'patient_details', 'alerts', 'recommendations']
+            missing_keys = [key for key in expected_keys if key not in adherence_data]
+            if not missing_keys:
+                print(f"   ✅ Adherence report contains all required keys: {expected_keys}")
+                
+                # Validate summary structure
+                summary = adherence_data.get('summary', {})
+                summary_keys = ['total_patients', 'average_adherence', 'patients_above_80_percent', 'patients_below_50_percent']
+                missing_summary_keys = [key for key in summary_keys if key not in summary]
+                if not missing_summary_keys:
+                    print(f"   ✅ Adherence summary structure valid")
+                    print(f"   📊 Total patients: {summary['total_patients']}, Avg adherence: {summary['average_adherence']:.1f}%")
+                else:
+                    print(f"   ❌ Adherence summary missing keys: {missing_summary_keys}")
+                    success2 = False
+            else:
+                print(f"   ❌ Adherence report missing keys: {missing_keys}")
+                success2 = False
+        
+        # Test 3: GET /api/provider/medications/side-effects/{provider_id}
+        success3, side_effects_data = self.run_test(
+            "Provider Side Effects Monitoring",
+            "GET",
+            f"provider/medications/side-effects/{provider_id}",
+            200
+        )
+        
+        # Validate side effects monitoring structure
+        if success3 and side_effects_data:
+            expected_keys = ['provider_id', 'monitoring_date', 'summary', 'recent_reports', 'severity_breakdown', 'action_required']
+            missing_keys = [key for key in expected_keys if key not in side_effects_data]
+            if not missing_keys:
+                print(f"   ✅ Side effects monitoring contains all required keys: {expected_keys}")
+                
+                # Validate severity breakdown
+                severity_breakdown = side_effects_data.get('severity_breakdown', {})
+                severity_keys = ['severe', 'moderate', 'mild']
+                missing_severity_keys = [key for key in severity_keys if key not in severity_breakdown]
+                if not missing_severity_keys:
+                    print(f"   ✅ Severity breakdown structure valid")
+                    print(f"   ⚠️ Severe: {severity_breakdown['severe']}, Moderate: {severity_breakdown['moderate']}, Mild: {severity_breakdown['mild']}")
+                else:
+                    print(f"   ❌ Severity breakdown missing keys: {missing_severity_keys}")
+                    success3 = False
+            else:
+                print(f"   ❌ Side effects monitoring missing keys: {missing_keys}")
+                success3 = False
+        
+        # Test 4: GET /api/provider/medications/drug-safety/{drug_name}
+        success4, drug_safety_data = self.run_test(
+            "OpenFDA Drug Safety Information",
+            "GET",
+            f"provider/medications/drug-safety/{drug_name}",
+            200
+        )
+        
+        # Validate drug safety information structure
+        if success4 and drug_safety_data:
+            expected_keys = ['drug_name', 'interactions', 'adverse_events', 'food_interactions', 'safety_score', 'last_updated']
+            missing_keys = [key for key in expected_keys if key not in drug_safety_data]
+            if not missing_keys:
+                print(f"   ✅ Drug safety info contains all required keys: {expected_keys}")
+                print(f"   💊 Drug: {drug_safety_data['drug_name']}, Safety score: {drug_safety_data['safety_score']}")
+                
+                # Validate interactions structure
+                interactions = drug_safety_data.get('interactions', {})
+                if 'interactions' in interactions and 'warnings' in interactions:
+                    print(f"   ✅ Drug interactions structure valid")
+                    print(f"   ⚠️ Total interactions: {interactions.get('total_interactions', 0)}")
+                else:
+                    print(f"   ❌ Drug interactions structure invalid")
+                    success4 = False
+            else:
+                print(f"   ❌ Drug safety info missing keys: {missing_keys}")
+                success4 = False
+        
+        # Test 5: GET /api/provider/medications/emergency-contacts/{patient_id}
+        success5, emergency_contacts_data = self.run_test(
+            "Patient Emergency Contacts",
+            "GET",
+            f"provider/medications/emergency-contacts/{patient_id}",
+            200
+        )
+        
+        # Validate emergency contacts structure
+        if success5 and emergency_contacts_data:
+            expected_keys = ['patient_id', 'emergency_contacts', 'emergency_protocols']
+            missing_keys = [key for key in expected_keys if key not in emergency_contacts_data]
+            if not missing_keys:
+                print(f"   ✅ Emergency contacts contains all required keys: {expected_keys}")
+                
+                # Validate emergency contacts list
+                contacts = emergency_contacts_data.get('emergency_contacts', [])
+                if contacts and len(contacts) > 0:
+                    contact = contacts[0]
+                    contact_keys = ['id', 'name', 'role', 'phone', 'email', 'priority']
+                    missing_contact_keys = [key for key in contact_keys if key not in contact]
+                    if not missing_contact_keys:
+                        print(f"   ✅ Emergency contact structure valid - Found {len(contacts)} contacts")
+                        print(f"   📞 Primary contact: {contact['name']} ({contact['role']}) - {contact['phone']}")
+                    else:
+                        print(f"   ❌ Emergency contact missing keys: {missing_contact_keys}")
+                        success5 = False
+                else:
+                    print(f"   ❌ No emergency contacts found")
+                    success5 = False
+            else:
+                print(f"   ❌ Emergency contacts missing keys: {missing_keys}")
+                success5 = False
+        
+        # Test 6: POST /api/provider/medications/side-effect-report
+        side_effect_report_data = {
+            "patient_id": patient_id,
+            "medication_id": "med_001",
+            "medication_name": "Metformin",
+            "side_effect": "Severe nausea and vomiting",
+            "severity": "severe",
+            "provider_email": "dr.smith@clinic.com",
+            "patient_notes": "Started experiencing symptoms 2 hours after taking morning dose"
+        }
+        
+        success6, report_response = self.run_test(
+            "Side Effect Reporting",
+            "POST",
+            "provider/medications/side-effect-report",
+            200,
+            data=side_effect_report_data
+        )
+        
+        # Validate side effect report response
+        if success6 and report_response:
+            expected_keys = ['success', 'report_id', 'provider_notified', 'message']
+            missing_keys = [key for key in expected_keys if key not in report_response]
+            if not missing_keys:
+                print(f"   ✅ Side effect report response contains required keys: {expected_keys}")
+                print(f"   📝 Report ID: {report_response['report_id']}")
+                print(f"   🚨 Provider notified: {report_response['provider_notified']}")
+                print(f"   💬 Message: {report_response['message']}")
+            else:
+                print(f"   ❌ Side effect report response missing keys: {missing_keys}")
+                success6 = False
+        
+        # Test 7: GET /api/provider/communications/inbox/{provider_id}
+        success7, inbox_data = self.run_test(
+            "Provider Communication Inbox",
+            "GET",
+            f"provider/communications/inbox/{provider_id}",
+            200
+        )
+        
+        # Validate inbox structure
+        if success7 and inbox_data:
+            expected_keys = ['provider_id', 'total_messages', 'unread_count', 'high_priority_count', 'messages', 'categories']
+            missing_keys = [key for key in expected_keys if key not in inbox_data]
+            if not missing_keys:
+                print(f"   ✅ Provider inbox contains all required keys: {expected_keys}")
+                print(f"   📧 Total messages: {inbox_data['total_messages']}, Unread: {inbox_data['unread_count']}")
+                print(f"   🚨 High priority: {inbox_data['high_priority_count']}")
+                
+                # Validate message structure
+                messages = inbox_data.get('messages', [])
+                if messages and len(messages) > 0:
+                    message = messages[0]
+                    message_keys = ['message_id', 'from_patient_id', 'patient_name', 'subject', 'preview', 'timestamp', 'read', 'priority', 'category']
+                    missing_message_keys = [key for key in message_keys if key not in message]
+                    if not missing_message_keys:
+                        print(f"   ✅ Message structure valid - Found {len(messages)} messages")
+                        print(f"   📨 Sample message: {message['subject']} from {message['patient_name']}")
+                    else:
+                        print(f"   ❌ Message structure missing keys: {missing_message_keys}")
+                        success7 = False
+                
+                # Validate categories structure
+                categories = inbox_data.get('categories', {})
+                category_keys = ['medication', 'adherence', 'prescription', 'general']
+                missing_category_keys = [key for key in category_keys if key not in categories]
+                if not missing_category_keys:
+                    print(f"   ✅ Categories structure valid")
+                    print(f"   📊 Categories: Medication: {categories['medication']}, Adherence: {categories['adherence']}")
+                else:
+                    print(f"   ❌ Categories missing keys: {missing_category_keys}")
+                    success7 = False
+            else:
+                print(f"   ❌ Provider inbox missing keys: {missing_keys}")
+                success7 = False
+        
+        print(f"\n📊 Provider Healthcare Integration Test Summary:")
+        print(f"   ✅ Provider dashboard overview: {'PASS' if success1 else 'FAIL'}")
+        print(f"   ✅ Medication adherence report: {'PASS' if success2 else 'FAIL'}")
+        print(f"   ✅ Side effects monitoring: {'PASS' if success3 else 'FAIL'}")
+        print(f"   ✅ OpenFDA drug safety info: {'PASS' if success4 else 'FAIL'}")
+        print(f"   ✅ Emergency contacts system: {'PASS' if success5 else 'FAIL'}")
+        print(f"   ✅ Side effect reporting: {'PASS' if success6 else 'FAIL'}")
+        print(f"   ✅ Provider communication inbox: {'PASS' if success7 else 'FAIL'}")
+        
+        return success1 and success2 and success3 and success4 and success5 and success6 and success7
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
