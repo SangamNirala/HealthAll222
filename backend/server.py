@@ -1593,6 +1593,7 @@ async def get_treatment_outcomes(provider_id: str, timeframe: str = "30d"):
 
 @api_router.get("/provider/population-health/{provider_id}")
 async def get_population_health(provider_id: str):
+    validate_provider_id(provider_id)
     """Population Health Analytics"""
     return {
         "provider_id": provider_id,
