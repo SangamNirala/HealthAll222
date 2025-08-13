@@ -91,6 +91,8 @@ function App() {
             <Route path="/provider-tools" element={<ProviderTools />} />
             <Route path="/provider-analytics" element={<ProviderAnalytics />} />
             <Route path="/provider-education" element={<ProviderEducation />} />
+            <Route path="/provider-medication-dashboard" element={<ProviderMedicationDashboard />} />
+            <Route path="/patient-provider-connection" element={<PatientMedicationProvider />} />
             
             {/* Family Navigation Routes */}
             <Route path="/family-members" element={<FamilyMembers />} />
