@@ -45,7 +45,7 @@ const PatientQueue = ({ providerId }) => {
     }
   };
 
-  if (loading) {
+  if (loading && !queueData) {
     return (
       <div className="space-y-6">
         <Card>
@@ -63,8 +63,48 @@ const PatientQueue = ({ providerId }) => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <AlertTriangle className="w-5 h-5 text-red-500 mr-2" />
+                <span className="text-red-700">Error loading patient queue: {error}</span>
+              </div>
+              <Button variant="outline" size="sm" onClick={refresh}>
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* Real-time Status Indicator */}
+      {lastUpdated && (
+        <Card className={`border ${isStale ? 'border-yellow-200 bg-yellow-50' : 'border-green-200 bg-green-50'}`}>
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">
+                Last updated: {new Date(lastUpdated).toLocaleTimeString()}
+                {isStale && ' (Data may be stale)'}
+              </span>
+              <div className="flex items-center space-x-2">
+                <div className={`w-2 h-2 rounded-full ${isStale ? 'bg-yellow-500' : 'bg-green-500'}`}></div>
+                <span className="text-xs text-gray-500">
+                  {isStale ? 'Updating...' : 'Real-time'}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Queue Statistics */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card className="border-2 border-emerald-200 bg-emerald-50">
