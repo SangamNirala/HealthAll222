@@ -173,8 +173,12 @@ const PatientQueue = ({ providerId }) => {
             <UserPlus className="w-4 h-4 mr-2" />
             Add Patient
           </Button>
-          <Button variant="outline" size="sm" onClick={fetchQueueData}>
-            <RefreshCw className="w-4 h-4 mr-2" />
+          <Button variant="outline" size="sm" onClick={refresh} disabled={loading}>
+            {loading ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4 mr-2" />
+            )}
             Refresh
           </Button>
         </div>
