@@ -273,44 +273,6 @@ const ClinicalDashboard = () => {
         <div className="clinical-interface">
           {activeView === 'overview' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {/* Quick Stats Overview */}
-              <Card className="xl:col-span-3">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Activity className="w-5 h-5 mr-2 text-emerald-600" />
-                    Clinical Overview
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    <div className="text-center p-4 bg-emerald-50 rounded-lg">
-                      <div className="text-2xl font-bold text-emerald-600">12</div>
-                      <div className="text-sm text-gray-600">Queue</div>
-                    </div>
-                    <div className="text-center p-4 bg-red-50 rounded-lg">
-                      <div className="text-2xl font-bold text-red-600">3</div>
-                      <div className="text-sm text-gray-600">Urgent</div>
-                    </div>
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">8</div>
-                      <div className="text-sm text-gray-600">Scheduled</div>
-                    </div>
-                    <div className="text-center p-4 bg-purple-50 rounded-lg">
-                      <div className="text-2xl font-bold text-purple-600">85%</div>
-                      <div className="text-sm text-gray-600">Success Rate</div>
-                    </div>
-                    <div className="text-center p-4 bg-orange-50 rounded-lg">
-                      <div className="text-2xl font-bold text-orange-600">247</div>
-                      <div className="text-sm text-gray-600">Active Patients</div>
-                    </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">4.7</div>
-                      <div className="text-sm text-gray-600">Satisfaction</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Mini Component Previews */}
               <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveView('queue')}>
                 <CardHeader>
@@ -320,8 +282,21 @@ const ClinicalDashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-lg font-semibold">3 Urgent Cases</div>
-                  <div className="text-sm text-gray-600">18 min avg wait time</div>
+                  {dashboardLoading ? (
+                    <div className="flex items-center">
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Loading...
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-lg font-semibold">
+                        {dashboardMetrics?.urgentCases || 0} Urgent Cases
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {dashboardData?.patientQueue?.queue_stats?.average_wait_time || 'N/A'} avg wait time
+                      </div>
+                    </>
+                  )}
                 </CardContent>
               </Card>
 
@@ -334,7 +309,7 @@ const ClinicalDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-lg font-semibold">Ready for Analysis</div>
-                  <div className="text-sm text-gray-600">Enter patient data</div>
+                  <div className="text-sm text-gray-600">AI-powered clinical insights</div>
                 </CardContent>
               </Card>
 
@@ -346,8 +321,114 @@ const ClinicalDashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-lg font-semibold">85% Success Rate</div>
-                  <div className="text-sm text-gray-600">156 patients this month</div>
+                  {dashboardLoading ? (
+                    <div className="flex items-center">
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Loading...
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-lg font-semibold">
+                        {dashboardMetrics?.successRate || 0}% Success Rate
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {dashboardData?.treatmentOutcomes?.outcome_summary?.patients_treated || 0} patients this month
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveView('population')}>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-sm">
+                    <TrendingUp className="w-4 h-4 mr-2 text-orange-600" />
+                    Population Health
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {dashboardLoading ? (
+                    <div className="flex items-center">
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Loading...
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-lg font-semibold">
+                        {dashboardData?.populationHealth?.population_overview?.total_population || 0} Patients
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {dashboardData?.populationHealth?.population_overview?.high_risk_patients || 0} high-risk
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveView('evidence')}>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-sm">
+                    <BookOpen className="w-4 h-4 mr-2 text-indigo-600" />
+                    Latest Evidence
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-lg font-semibold">New Guidelines</div>
+                  <div className="text-sm text-gray-600">2024 updates available</div>
+                </CardContent>
+              </Card>
+
+              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveView('education')}>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-sm">
+                    <GraduationCap className="w-4 h-4 mr-2 text-pink-600" />
+                    CME Progress
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {dashboardLoading ? (
+                    <div className="flex items-center">
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Loading...
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-lg font-semibold">
+                        {dashboardData?.continuingEducation?.education_summary?.credits_earned || 0} / {dashboardData?.continuingEducation?.education_summary?.credits_required || 50} Credits
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {Math.round(((dashboardData?.continuingEducation?.education_summary?.credits_earned || 0) / (dashboardData?.continuingEducation?.education_summary?.credits_required || 50)) * 100)}% complete
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeView === 'queue' && (
+            <PatientQueue providerId={providerId} />
+          )}
+
+          {activeView === 'decision-support' && (
+            <ClinicalDecisionSupport providerId={providerId} />
+          )}
+
+          {activeView === 'outcomes' && (
+            <TreatmentOutcomeTracking providerId={providerId} />
+          )}
+
+          {activeView === 'population' && (
+            <PopulationHealthAnalytics providerId={providerId} />
+          )}
+
+          {activeView === 'evidence' && (
+            <EvidenceBasedRecommendations providerId={providerId} />
+          )}
+
+          {activeView === 'education' && (
+            <ProfessionalContinuingEducation providerId={providerId} />
+          )}
                 </CardContent>
               </Card>
 
