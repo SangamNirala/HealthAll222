@@ -1718,6 +1718,7 @@ async def get_evidence_recommendations(request: dict):
 
 @api_router.get("/provider/continuing-education/{provider_id}")
 async def get_continuing_education(provider_id: str):
+    validate_provider_id(provider_id)
     """Professional Continuing Education Portal"""
     return {
         "provider_id": provider_id,
