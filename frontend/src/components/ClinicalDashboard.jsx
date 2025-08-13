@@ -428,57 +428,6 @@ const ClinicalDashboard = () => {
 
           {activeView === 'education' && (
             <ProfessionalContinuingEducation providerId={providerId} />
-          )}
-                </CardContent>
-              </Card>
-
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveView('population')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center text-sm">
-                    <TrendingUp className="w-4 h-4 mr-2 text-green-600" />
-                    Population Health
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-lg font-semibold">2,847 Patients</div>
-                  <div className="text-sm text-gray-600">284 high-risk</div>
-                </CardContent>
-              </Card>
-
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveView('evidence')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center text-sm">
-                    <BookOpen className="w-4 h-4 mr-2 text-orange-600" />
-                    Latest Evidence
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-lg font-semibold">New Guidelines</div>
-                  <div className="text-sm text-gray-600">2024 Updates available</div>
-                </CardContent>
-              </Card>
-
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveView('education')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center text-sm">
-                    <GraduationCap className="w-4 h-4 mr-2 text-indigo-600" />
-                    CME Progress
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-lg font-semibold">32.5 / 50 Credits</div>
-                  <div className="text-sm text-gray-600">65% complete</div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {activeView === 'queue' && <PatientQueue lastUpdated={lastUpdated} />}
-          {activeView === 'decision-support' && <ClinicalDecisionSupport />}
-          {activeView === 'outcomes' && <TreatmentOutcomeTracking />}
-          {activeView === 'population' && <PopulationHealthAnalytics />}
-          {activeView === 'evidence' && <EvidenceBasedRecommendations />}
-          {activeView === 'education' && <ProfessionalContinuingEducation />}
         </div>
       </div>
     </div>
