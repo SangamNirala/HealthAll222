@@ -31,6 +31,7 @@ const ROLE_CONFIG = {
       { label: 'Analytics', path: '/patient-analytics', icon: 'BarChart3' },
       { label: 'AI Insights', path: '/personal-insights', icon: 'Sparkles' },
       { label: 'Medications', path: '/patient-medications', icon: 'Pill' },
+      { label: 'Provider Connection', path: '/patient-provider-connection', icon: 'MessageSquare' },
       { label: 'Drug Interactions', path: '/drug-interactions', icon: 'Shield' },
       { label: 'Health Timeline', path: '/patient-timeline', icon: 'Calendar' }
     ],
