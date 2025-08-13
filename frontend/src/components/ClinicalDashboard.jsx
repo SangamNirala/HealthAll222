@@ -91,20 +91,6 @@ const ClinicalDashboard = () => {
     setRealTimeEnabled(!realTimeEnabled);
   };
 
-  const dashboardViews = [
-    { id: 'overview', label: 'Dashboard Overview', icon: Stethoscope },
-    { id: 'queue', label: 'Patient Queue', icon: Users },
-    { id: 'decision-support', label: 'Clinical Decision Support', icon: Brain },
-    { id: 'outcomes', label: 'Treatment Outcomes', icon: BarChart3 },
-    { id: 'population', label: 'Population Health', icon: TrendingUp },
-    { id: 'evidence', label: 'Evidence & Research', icon: BookOpen },
-    { id: 'education', label: 'Continuing Education', icon: GraduationCap }
-  ];
-
-  const handleRefresh = () => {
-    setLastUpdated(new Date());
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100">
       <SmartNavigation />
@@ -122,28 +108,131 @@ const ClinicalDashboard = () => {
               </p>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="text-sm text-gray-500">
-                Last updated: {lastUpdated.toLocaleTimeString()}
+              {/* Service Health Indicator */}
+              <div className="flex items-center space-x-2">
+                {serviceHealthy === null ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                ) : serviceHealthy ? (
+                  <Wifi className="w-4 h-4 text-green-500" />
+                ) : (
+                  <WifiOff className="w-4 h-4 text-red-500" />
+                )}
+                <span className="text-xs text-gray-500">
+                  {serviceHealthy === null ? 'Checking...' : 
+                   serviceHealthy ? 'Connected' : 'Disconnected'}
+                </span>
               </div>
+
+              {/* Last Updated */}
+              <div className="text-sm text-gray-500">
+                {lastUpdated ? (
+                  `Last updated: ${new Date(lastUpdated).toLocaleTimeString()}`
+                ) : 'Loading...'}
+              </div>
+
+              {/* Real-time Toggle */}
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setAutoRefresh(!autoRefresh)}
-                className={autoRefresh ? 'bg-green-50 border-green-200' : ''}
+                onClick={toggleRealTime}
+                className={realTimeEnabled ? 'bg-green-50 border-green-200' : ''}
               >
-                {autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
+                {realTimeEnabled ? 'Real-time ON' : 'Real-time OFF'}
               </Button>
-              <Button variant="outline" size="sm" onClick={handleRefresh}>
-                <RefreshCw className="w-4 h-4 mr-2" />
+
+              {/* Refresh Button */}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefresh}
+                disabled={dashboardLoading || healthChecking}
+              >
+                {(dashboardLoading || healthChecking) ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                )}
                 Refresh
               </Button>
+
               <Button variant="outline" size="sm">
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>
             </div>
           </div>
+
+          {/* Error Alert */}
+          {dashboardError && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center">
+                <AlertTriangle className="w-5 h-5 text-red-500 mr-2" />
+                <span className="text-red-700">
+                  Dashboard Error: {dashboardError}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Clinical Overview Metrics */}
+        {dashboardMetrics && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-2xl font-bold text-blue-600">
+                  {dashboardMetrics.queueCount}
+                </div>
+                <p className="text-sm text-gray-600">Queue</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-2xl font-bold text-red-600">
+                  {dashboardMetrics.urgentCases}
+                </div>
+                <p className="text-sm text-gray-600">Urgent</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-2xl font-bold text-blue-600">
+                  {dashboardMetrics.scheduledToday}
+                </div>
+                <p className="text-sm text-gray-600">Scheduled</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-2xl font-bold text-purple-600">
+                  {dashboardMetrics.successRate}%
+                </div>
+                <p className="text-sm text-gray-600">Success Rate</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-2xl font-bold text-orange-600">
+                  {dashboardMetrics.activePatients}
+                </div>
+                <p className="text-sm text-gray-600">Active Patients</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-2xl font-bold text-green-600">
+                  {dashboardMetrics.satisfactionScore.toFixed(1)}
+                </div>
+                <p className="text-sm text-gray-600">Satisfaction</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Navigation Tabs */}
         <div className="mb-6">
