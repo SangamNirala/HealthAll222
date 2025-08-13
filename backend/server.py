@@ -1062,6 +1062,415 @@ class GoalCorrelation(BaseModel):
     recommendations: List[Dict[str, Any]] = []
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
+# ===== ADVANCED PATIENT MANAGEMENT SYSTEM MODELS =====
+
+# Patient Assignment System Models
+class PatientPriorityEnum(str, Enum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    URGENT = "URGENT"
+    CRITICAL = "CRITICAL"
+
+class PatientStatusEnum(str, Enum):
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    DISCHARGED = "DISCHARGED"
+    TRANSFERRED = "TRANSFERRED"
+    COMPLETED = "COMPLETED"
+
+class AssignmentStatusEnum(str, Enum):
+    PENDING = "PENDING"
+    ACTIVE = "ACTIVE"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+
+class PatientAssignment(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    patient_id: str
+    provider_id: str
+    assignment_type: str  # routine, emergency, specialist, followup
+    priority: PatientPriorityEnum = PatientPriorityEnum.MEDIUM
+    status: AssignmentStatusEnum = AssignmentStatusEnum.PENDING
+    ai_match_score: float = 0.0
+    assignment_reason: str
+    estimated_duration: Optional[int] = None  # in minutes
+    scheduled_time: Optional[datetime] = None
+    actual_start_time: Optional[datetime] = None
+    actual_end_time: Optional[datetime] = None
+    patient_condition: str
+    required_expertise: List[str] = []
+    medical_history_summary: str = ""
+    current_medications: List[str] = []
+    special_instructions: str = ""
+    assignment_notes: str = ""
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PatientAssignmentCreate(BaseModel):
+    patient_id: str
+    provider_id: str
+    assignment_type: str
+    priority: PatientPriorityEnum = PatientPriorityEnum.MEDIUM
+    assignment_reason: str
+    estimated_duration: Optional[int] = None
+    scheduled_time: Optional[datetime] = None
+    patient_condition: str
+    required_expertise: List[str] = []
+    special_instructions: str = ""
+
+class AIMatchingCriteria(BaseModel):
+    provider_id: str
+    patient_conditions: List[str] = []
+    required_expertise: List[str] = []
+    workload_preference: str = "balanced"  # light, balanced, heavy
+    availability_window: dict = {}
+    priority_threshold: PatientPriorityEnum = PatientPriorityEnum.MEDIUM
+
+# Progress Tracking Models
+class ProgressMetricType(str, Enum):
+    VITAL_SIGNS = "VITAL_SIGNS"
+    MEDICATION_ADHERENCE = "MEDICATION_ADHERENCE"
+    NUTRITION = "NUTRITION"
+    ACTIVITY = "ACTIVITY"
+    SYMPTOMS = "SYMPTOMS"
+    QUALITY_OF_LIFE = "QUALITY_OF_LIFE"
+    TREATMENT_RESPONSE = "TREATMENT_RESPONSE"
+
+class PatientProgress(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    patient_id: str
+    provider_id: str
+    assignment_id: Optional[str] = None
+    metric_type: ProgressMetricType
+    metric_name: str
+    value: float
+    unit: str
+    target_range: Dict[str, float] = {}  # min, max values
+    measurement_method: str = "manual"  # manual, device, calculated
+    data_source: str = "provider_input"
+    confidence_score: float = 1.0
+    trend_direction: str = "stable"  # improving, declining, stable, fluctuating
+    clinical_significance: str = "normal"  # normal, concerning, critical
+    contextual_notes: str = ""
+    related_factors: List[str] = []
+    recorded_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PatientProgressCreate(BaseModel):
+    patient_id: str
+    provider_id: str
+    assignment_id: Optional[str] = None
+    metric_type: ProgressMetricType
+    metric_name: str
+    value: float
+    unit: str
+    target_range: Dict[str, float] = {}
+    measurement_method: str = "manual"
+    contextual_notes: str = ""
+
+class ProgressAnalytics(BaseModel):
+    patient_id: str
+    timeframe: str = "30_days"
+    metrics_summary: Dict[str, Any] = {}
+    trend_analysis: Dict[str, Any] = {}
+    milestone_achievements: List[Dict[str, Any]] = []
+    predictive_insights: List[Dict[str, Any]] = []
+    risk_assessment: Dict[str, Any] = {}
+    recommendations: List[str] = []
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+# Adherence Monitoring Models
+class AdherenceType(str, Enum):
+    MEDICATION = "MEDICATION"
+    DIET = "DIET"
+    EXERCISE = "EXERCISE"
+    APPOINTMENT = "APPOINTMENT"
+    LIFESTYLE = "LIFESTYLE"
+    THERAPY = "THERAPY"
+
+class AdherenceStatus(str, Enum):
+    EXCELLENT = "EXCELLENT"  # 95-100%
+    GOOD = "GOOD"           # 80-94%
+    MODERATE = "MODERATE"   # 60-79%
+    POOR = "POOR"          # 40-59%
+    CRITICAL = "CRITICAL"   # <40%
+
+class AdherenceMonitoring(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    patient_id: str
+    provider_id: str
+    adherence_type: AdherenceType
+    target_item: str  # medication name, diet plan, exercise routine, etc.
+    adherence_percentage: float = 0.0
+    adherence_status: AdherenceStatus = AdherenceStatus.MODERATE
+    tracking_period: str = "weekly"  # daily, weekly, monthly
+    expected_frequency: int  # times per day/week/month
+    actual_frequency: int = 0
+    missed_instances: int = 0
+    perfect_days: int = 0
+    improvement_trend: float = 0.0  # percentage change from previous period
+    barriers_identified: List[str] = []
+    intervention_strategies: List[str] = []
+    ai_insights: List[str] = []
+    predictive_risk_score: float = 0.0
+    next_review_date: datetime
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class AdherenceMonitoringCreate(BaseModel):
+    patient_id: str
+    provider_id: str
+    adherence_type: AdherenceType
+    target_item: str
+    tracking_period: str = "weekly"
+    expected_frequency: int
+    next_review_date: datetime
+
+class AdherenceAlert(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    adherence_monitoring_id: str
+    patient_id: str
+    provider_id: str
+    alert_type: str = "adherence_decline"
+    severity: str = "medium"  # low, medium, high, critical
+    message: str
+    recommended_actions: List[str] = []
+    triggered_at: datetime = Field(default_factory=datetime.utcnow)
+    acknowledged_at: Optional[datetime] = None
+    resolved_at: Optional[datetime] = None
+    auto_generated: bool = True
+
+# Smart Alert System Models
+class AlertCategory(str, Enum):
+    CLINICAL = "CLINICAL"
+    ADHERENCE = "ADHERENCE"
+    PROGRESS = "PROGRESS"
+    APPOINTMENT = "APPOINTMENT"
+    MEDICATION = "MEDICATION"
+    LIFESTYLE = "LIFESTYLE"
+    SYSTEM = "SYSTEM"
+
+class AlertSeverity(str, Enum):
+    INFO = "INFO"
+    WARNING = "WARNING"
+    CRITICAL = "CRITICAL"
+    EMERGENCY = "EMERGENCY"
+
+class SmartAlert(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    patient_id: str
+    provider_id: str
+    category: AlertCategory
+    severity: AlertSeverity
+    title: str
+    message: str
+    detailed_description: str = ""
+    data_source: str  # vital_signs, lab_results, patient_input, ai_analysis
+    triggering_values: Dict[str, Any] = {}
+    threshold_breached: Dict[str, Any] = {}
+    recommended_actions: List[str] = []
+    clinical_context: str = ""
+    urgency_score: float = 0.0  # 0.0 to 1.0
+    ai_confidence: float = 0.0
+    similar_cases: List[str] = []
+    escalation_path: List[str] = []
+    auto_resolve: bool = False
+    resolution_criteria: Dict[str, Any] = {}
+    triggered_at: datetime = Field(default_factory=datetime.utcnow)
+    acknowledged_at: Optional[datetime] = None
+    resolved_at: Optional[datetime] = None
+    escalated_at: Optional[datetime] = None
+    status: str = "active"  # active, acknowledged, resolved, escalated
+    resolution_notes: str = ""
+
+class SmartAlertCreate(BaseModel):
+    patient_id: str
+    provider_id: str
+    category: AlertCategory
+    severity: AlertSeverity
+    title: str
+    message: str
+    detailed_description: str = ""
+    data_source: str
+    triggering_values: Dict[str, Any] = {}
+    recommended_actions: List[str] = []
+
+class AlertRule(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    provider_id: str
+    rule_name: str
+    description: str
+    category: AlertCategory
+    severity: AlertSeverity
+    condition_logic: Dict[str, Any]  # Complex condition definitions
+    is_active: bool = True
+    auto_resolve: bool = False
+    escalation_minutes: int = 60
+    notification_methods: List[str] = ["in_app"]  # in_app, email, sms
+    patient_filters: Dict[str, Any] = {}  # Apply rule to specific patient groups
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+# Automated Report Models
+class ReportType(str, Enum):
+    PATIENT_SUMMARY = "PATIENT_SUMMARY"
+    PROGRESS_REPORT = "PROGRESS_REPORT"
+    ADHERENCE_REPORT = "ADHERENCE_REPORT"
+    POPULATION_HEALTH = "POPULATION_HEALTH"
+    CLINICAL_OUTCOMES = "CLINICAL_OUTCOMES"
+    QUALITY_METRICS = "QUALITY_METRICS"
+    MEDICATION_REVIEW = "MEDICATION_REVIEW"
+
+class ReportFormat(str, Enum):
+    PDF = "PDF"
+    JSON = "JSON"
+    EXCEL = "EXCEL"
+    HTML = "HTML"
+
+class AutomatedReport(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    report_type: ReportType
+    report_format: ReportFormat = ReportFormat.PDF
+    title: str
+    patient_id: Optional[str] = None
+    provider_id: str
+    report_period: str = "monthly"  # daily, weekly, monthly, quarterly, yearly
+    data_range: Dict[str, datetime] = {}
+    generated_data: Dict[str, Any] = {}
+    charts_included: List[str] = []
+    ai_insights_included: bool = True
+    file_path: Optional[str] = None
+    file_size: Optional[int] = None
+    generation_status: str = "pending"  # pending, generating, completed, failed
+    generation_progress: int = 0
+    error_message: Optional[str] = None
+    scheduled_generation: bool = False
+    next_generation: Optional[datetime] = None
+    generated_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class AutomatedReportCreate(BaseModel):
+    report_type: ReportType
+    report_format: ReportFormat = ReportFormat.PDF
+    title: str
+    patient_id: Optional[str] = None
+    provider_id: str
+    report_period: str = "monthly"
+    data_range: Dict[str, datetime] = {}
+    charts_included: List[str] = []
+    scheduled_generation: bool = False
+
+# Patient Risk Analysis Models
+class RiskCategory(str, Enum):
+    CARDIOVASCULAR = "CARDIOVASCULAR"
+    DIABETES = "DIABETES"
+    RESPIRATORY = "RESPIRATORY"
+    MENTAL_HEALTH = "MENTAL_HEALTH"
+    MEDICATION_ADVERSE = "MEDICATION_ADVERSE"
+    FALLS = "FALLS"
+    INFECTION = "INFECTION"
+    READMISSION = "READMISSION"
+    MORTALITY = "MORTALITY"
+
+class RiskLevel(str, Enum):
+    VERY_LOW = "VERY_LOW"
+    LOW = "LOW"
+    MODERATE = "MODERATE"
+    HIGH = "HIGH"
+    VERY_HIGH = "VERY_HIGH"
+
+class PatientRiskAnalysis(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    patient_id: str
+    provider_id: str
+    risk_category: RiskCategory
+    risk_level: RiskLevel
+    risk_score: float  # 0.0 to 1.0
+    confidence_interval: Dict[str, float] = {}  # lower, upper bounds
+    contributing_factors: List[Dict[str, Any]] = []
+    protective_factors: List[Dict[str, Any]] = []
+    risk_trajectory: str = "stable"  # increasing, decreasing, stable, fluctuating
+    time_horizon: str = "30_days"  # 7_days, 30_days, 90_days, 1_year
+    model_version: str = "v1.0"
+    model_accuracy: float = 0.0
+    clinical_validation: bool = False
+    intervention_recommendations: List[Dict[str, Any]] = []
+    monitoring_frequency: str = "weekly"
+    alert_thresholds: Dict[str, float] = {}
+    historical_scores: List[Dict[str, Any]] = []
+    population_percentile: Optional[float] = None
+    similar_patient_outcomes: List[Dict[str, Any]] = []
+    last_updated: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PatientRiskAnalysisCreate(BaseModel):
+    patient_id: str
+    provider_id: str
+    risk_category: RiskCategory
+    time_horizon: str = "30_days"
+
+# Meal Planning Models
+class MealType(str, Enum):
+    BREAKFAST = "BREAKFAST"
+    LUNCH = "LUNCH"
+    DINNER = "DINNER"
+    SNACK = "SNACK"
+    BEVERAGE = "BEVERAGE"
+
+class DietaryRestriction(str, Enum):
+    DIABETIC = "DIABETIC"
+    LOW_SODIUM = "LOW_SODIUM"
+    LOW_FAT = "LOW_FAT"
+    GLUTEN_FREE = "GLUTEN_FREE"
+    VEGETARIAN = "VEGETARIAN"
+    VEGAN = "VEGAN"
+    KETO = "KETO"
+    MEDITERRANEAN = "MEDITERRANEAN"
+    HEART_HEALTHY = "HEART_HEALTHY"
+
+class IntelligentMealPlan(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    patient_id: str
+    provider_id: str
+    plan_name: str
+    description: str = ""
+    dietary_restrictions: List[DietaryRestriction] = []
+    calorie_target: int
+    macro_targets: Dict[str, float] = {}  # protein, carbs, fat in grams
+    micro_targets: Dict[str, float] = {}  # vitamins, minerals
+    meal_preferences: List[str] = []
+    food_allergies: List[str] = []
+    cultural_preferences: List[str] = []
+    budget_range: str = "moderate"  # low, moderate, high
+    cooking_skill_level: str = "intermediate"  # beginner, intermediate, advanced
+    preparation_time: str = "moderate"  # quick, moderate, long
+    plan_duration: int = 7  # days
+    meals_per_day: int = 3
+    snacks_per_day: int = 2
+    hydration_target: float = 2.0  # liters
+    ai_optimization_score: float = 0.0
+    nutritional_completeness: float = 0.0
+    variety_score: float = 0.0
+    adherence_prediction: float = 0.0
+    cost_estimate: Dict[str, float] = {}
+    shopping_list: List[Dict[str, Any]] = []
+    meal_schedule: List[Dict[str, Any]] = []
+    alternative_options: List[Dict[str, Any]] = []
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class IntelligentMealPlanCreate(BaseModel):
+    patient_id: str
+    provider_id: str
+    plan_name: str
+    dietary_restrictions: List[DietaryRestriction] = []
+    calorie_target: int
+    macro_targets: Dict[str, float] = {}
+    meal_preferences: List[str] = []
+    food_allergies: List[str] = []
+    plan_duration: int = 7
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
