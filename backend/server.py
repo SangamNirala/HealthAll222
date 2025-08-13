@@ -1428,6 +1428,7 @@ def validate_provider_id(provider_id: str):
 
 @api_router.get("/provider/patient-queue/{provider_id}")
 async def get_patient_queue(provider_id: str):
+    validate_provider_id(provider_id)
     """Patient Queue Management System"""
     return {
         "provider_id": provider_id,
