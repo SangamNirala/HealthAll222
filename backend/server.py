@@ -1385,9 +1385,9 @@ class PatientRiskAnalysis(BaseModel):
     patient_id: str
     provider_id: str
     risk_category: RiskCategory
-    risk_level: RiskLevel
-    risk_score: float  # 0.0 to 1.0
-    confidence_interval: Dict[str, float] = {}  # lower, upper bounds
+    risk_level: RiskLevel = RiskLevel.MODERATE
+    risk_score: float = 0.0  # 0.0 to 1.0
+    confidence_interval: Dict[str, float] = Field(default_factory=lambda: {"lower": 0.0, "upper": 1.0})
     contributing_factors: List[Dict[str, Any]] = []
     protective_factors: List[Dict[str, Any]] = []
     risk_trajectory: str = "stable"  # increasing, decreasing, stable, fluctuating
@@ -1397,7 +1397,7 @@ class PatientRiskAnalysis(BaseModel):
     clinical_validation: bool = False
     intervention_recommendations: List[Dict[str, Any]] = []
     monitoring_frequency: str = "weekly"
-    alert_thresholds: Dict[str, float] = {}
+    alert_thresholds: Dict[str, float] = Field(default_factory=dict)
     historical_scores: List[Dict[str, Any]] = []
     population_percentile: Optional[float] = None
     similar_patient_outcomes: List[Dict[str, Any]] = []
