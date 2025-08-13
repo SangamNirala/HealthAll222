@@ -8002,7 +8002,7 @@ class HealthPlatformAPITester:
 
         # Test Enhanced Clinical Dashboard Endpoints (NEW - PHASE 4.1 PRIORITY TEST)
         print("\n📋 Testing Enhanced Clinical Dashboard Endpoints (PHASE 4.1 PRIORITY)...")
-        enhanced_clinical_dashboard_success = self.test_enhanced_clinical_dashboard_endpoints()
+        enhanced_clinical_dashboard_success = self.test_phase41_clinical_dashboard_retesting_specific()
 
         # Test Phase 4 Food Logging Endpoints (NEW - REQUESTED TEST)
         print("\n📋 Testing Phase 4 Food Logging Endpoints (REQUESTED)...")
