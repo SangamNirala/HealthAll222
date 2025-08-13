@@ -7201,6 +7201,7 @@ async def ai_patient_matching(criteria: AIMatchingCriteria):
                     "Provider availability",
                     "Historical success rate"
                 ],
+                "reasoning": f"High compatibility based on provider expertise in {random.choice(['diabetes', 'cardiovascular', 'endocrinology'])} and optimal workload distribution",
                 "estimated_duration": random.randint(30, 120),
                 "complexity_score": random.uniform(0.3, 0.9)
             })
