@@ -33,6 +33,7 @@ from pathlib import Path
 
 # Import AI services
 from ai_services import get_nutrition_insights, get_smart_food_suggestions, get_health_correlations, get_clinical_insights, get_goal_insights, get_achievement_insights, AIServiceManager
+from food_recognition_service import FoodRecognitionService
 
 # Import OpenFDA and Provider Services
 from openfda_service import openfda_service
