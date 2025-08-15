@@ -62,6 +62,7 @@ import IntelligentMealPlanGenerator from "./components/patient-management/Intell
 import AdvancedAdherenceMonitor from "./components/patient-management/AdvancedAdherenceMonitor";
 import AutomatedReportGenerator from "./components/patient-management/AutomatedReportGenerator";
 import IntelligentAlertSystem from "./components/patient-management/IntelligentAlertSystem";
+import VirtualConsultationCenter from "./components/patient-management/VirtualConsultationCenter";
 
 function App() {
   return (
