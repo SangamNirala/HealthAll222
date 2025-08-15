@@ -341,6 +341,7 @@ class PredictiveAnalyticsAPITester:
         
         # Test 2: Poor sleep habits (late caffeine, late dinner)
         poor_habits_data = {
+            "user_id": "demo-patient-456",
             "daily_choices": {
                 "last_caffeine_time": "18:00",  # After 4 PM
                 "last_meal_time": "21:30",      # After 9 PM
