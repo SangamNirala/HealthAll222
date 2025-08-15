@@ -112,6 +112,7 @@ function App() {
             <Route path="/adherence-monitor" element={<AdvancedAdherenceMonitor />} />
             <Route path="/report-generator" element={<AutomatedReportGenerator />} />
             <Route path="/alert-system" element={<IntelligentAlertSystem />} />
+            <Route path="/virtual-consultation" element={<VirtualConsultationCenter />} />
             
             {/* Family Navigation Routes */}
             <Route path="/family-members" element={<FamilyMembers />} />
