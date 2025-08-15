@@ -7156,8 +7156,8 @@ async def create_patient_assignment(assignment: PatientAssignmentCreate):
         
         # Create assignment
         assignment_dict = assignment.dict()
+        assignment_dict['ai_match_score'] = ai_match_score
         assignment_obj = PatientAssignment(**assignment_dict)
-        assignment_obj.ai_match_score = ai_match_score
         
         await db.patient_assignments.insert_one(assignment_obj.dict())
         return assignment_obj
