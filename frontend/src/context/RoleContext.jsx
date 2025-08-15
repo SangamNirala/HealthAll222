@@ -91,6 +91,7 @@ const ROLE_CONFIG = {
       { label: 'Calendar', path: '/family-calendar', icon: 'Calendar' },
       { label: 'Coordination', path: '/family-coordination', icon: 'Shield' },
       { label: 'Child Education', path: '/child-nutrition-education', icon: 'BookOpen' },
+      { label: 'Patient Engagement', path: '/patient-engagement', icon: 'MessageSquare' },
       { label: 'Caregiver Tools', path: '/caregiver-tools', icon: 'Heart' },
       { label: 'Family Goals', path: '/family-goals', icon: 'Target' },
       { label: 'Multi-Profiles', path: '/multi-profile-management', icon: 'Settings' }
