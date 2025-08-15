@@ -26,12 +26,91 @@ const ProviderEducation = () => {
     // Fetch continuing education data
     const fetchEducationData = async () => {
       try {
+        setLoading(true);
         const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
         const response = await fetch(`${backendUrl}/api/provider/continuing-education/provider-123`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch education data');
+        }
+        
         const data = await response.json();
         setEducationData(data);
+        setError(null);
       } catch (error) {
         console.error('Error fetching education data:', error);
+        setError(error.message);
+        // Set fallback data so users can still see the interface
+        setEducationData({
+          cme_tracking: {
+            total_credits_earned: 32.5,
+            credits_required: 50.0,
+            progress_percentage: 65.0,
+            courses_completed: 8,
+            courses_in_progress: 3,
+            deadline: "2024-12-31"
+          },
+          available_courses: [
+            {
+              id: "course-001",
+              title: "Advanced Diabetes Management 2024",
+              provider: "American Diabetes Association", 
+              credits: 4.0,
+              duration: "4 hours",
+              format: "Online",
+              difficulty: "Intermediate",
+              rating: 4.8,
+              enrolled: false,
+              cost: "Free",
+              description: "Latest evidence-based approaches to diabetes care"
+            },
+            {
+              id: "course-002",
+              title: "Population Health Strategies",
+              provider: "CDC",
+              credits: 3.5,
+              duration: "3.5 hours",
+              format: "Webinar",
+              difficulty: "Advanced",
+              rating: 4.6,
+              enrolled: true,
+              progress: 60,
+              cost: "Free",
+              description: "Community-based interventions for chronic disease"
+            }
+          ],
+          my_courses: [
+            {
+              id: "course-003",
+              title: "Nutrition Counseling Essentials",
+              status: "in_progress",
+              progress: 75,
+              credits: 2.5,
+              due_date: "2024-02-15"
+            },
+            {
+              id: "course-004", 
+              title: "Clinical Documentation",
+              status: "completed",
+              progress: 100,
+              credits: 3.0,
+              completed_date: "2023-12-20"
+            }
+          ],
+          categories: [
+            {"id": "diabetes", "name": "Diabetes Care", "course_count": 15},
+            {"id": "cardiology", "name": "Cardiovascular Health", "course_count": 12},
+            {"id": "nutrition", "name": "Nutrition & Dietetics", "course_count": 18},
+            {"id": "mental_health", "name": "Mental Health", "course_count": 9},
+            {"id": "technology", "name": "Health Technology", "course_count": 7}
+          ],
+          upcoming_deadlines: [
+            {"course": "Nutrition Counseling Essentials", "due_date": "2024-02-15", "days_left": 6},
+            {"course": "Annual CME Requirement", "due_date": "2024-12-31", "days_left": 330}
+          ]
+        });
+      } finally {
+        setLoading(false);
       }
     };
     
