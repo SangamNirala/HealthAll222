@@ -529,7 +529,7 @@ const AdvancedAdherenceMonitor = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {displayData.barriers.map((barrier, index) => (
+                  {safeDisplayData.barriers.map((barrier, index) => (
                     <Card key={index} className="border-yellow-200">
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start mb-3">
