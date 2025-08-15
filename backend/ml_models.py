@@ -1497,21 +1497,83 @@ class WeeklyPatternAnalyzer:
         }
 
 
-# Global ML model instances
+# Global ML model instances with Phase 4 enhancements
 energy_prediction_model = EnergyPredictionModel()
 mood_correlation_engine = MoodCorrelationEngine()
 sleep_impact_calculator = SleepImpactCalculator()
 whatif_scenario_processor = WhatIfScenarioProcessor()
 weekly_pattern_analyzer = WeeklyPatternAnalyzer()
 
+# Global Phase 4 instances
+global_performance_tracker = ModelPerformanceTracker()
+global_feedback_integrator = UserFeedbackIntegrator()
+global_ab_testing = ABTestingFramework()
+
 # Initialize models on module load
 def initialize_ml_models():
-    """Initialize all ML models with sample data"""
+    """Initialize all ML models with enhanced Phase 4 capabilities"""
     try:
         energy_prediction_model.train()
-        logger.info("ML models initialized successfully")
+        
+        # Initialize A/B tests for different models
+        global_ab_testing.create_test(
+            'energy_prediction_variants',
+            {'model': 'linear_regression', 'features': 'base'},
+            {'model': 'random_forest', 'features': 'enhanced'},
+            traffic_split=0.2
+        )
+        
+        global_ab_testing.create_test(
+            'mood_correlation_algorithms',
+            {'algorithm': 'pearson_correlation', 'threshold': 0.3},
+            {'algorithm': 'spearman_correlation', 'threshold': 0.25},
+            traffic_split=0.15
+        )
+        
+        logger.info("ML models and Phase 4 enhancements initialized successfully")
     except Exception as e:
         logger.error(f"Error initializing ML models: {e}")
+
+def get_model_performance_summary() -> Dict[str, Any]:
+    """Get comprehensive performance summary for all models"""
+    return {
+        'energy_prediction': energy_prediction_model.get_model_performance_metrics(),
+        'mood_correlation': {
+            'feedback_satisfaction': global_feedback_integrator.get_model_satisfaction('mood_correlation'),
+            'performance': global_performance_tracker.calculate_accuracy('mood_correlation')
+        },
+        'sleep_impact': {
+            'feedback_satisfaction': global_feedback_integrator.get_model_satisfaction('sleep_impact'),
+            'performance': global_performance_tracker.calculate_accuracy('sleep_impact')
+        },
+        'active_ab_tests': list(global_ab_testing.test_configs.keys()),
+        'system_health': {
+            'total_predictions': sum(len(hist) for hist in global_performance_tracker.performance_history.values()),
+            'models_trained': 5,
+            'continuous_learning_active': True
+        }
+    }
+
+def add_user_feedback_to_models(model_name: str, prediction_id: str, user_rating: float, 
+                               actual_outcome: Optional[float] = None, feedback_text: str = ""):
+    """Centralized function to add user feedback to any model"""
+    global_feedback_integrator.add_feedback(model_name, prediction_id, user_rating, actual_outcome, feedback_text)
+    
+    # Also add to specific model if it has feedback capability
+    if model_name == 'energy_prediction' and hasattr(energy_prediction_model, 'add_user_feedback'):
+        energy_prediction_model.add_user_feedback(prediction_id, user_rating, actual_outcome, feedback_text)
+
+def trigger_continuous_learning(model_name: str, input_data: Dict[str, Any], actual_outcome: float):
+    """Trigger continuous learning for a specific model"""
+    try:
+        if model_name == 'energy_prediction':
+            energy_prediction_model.continuous_learning_update(input_data, actual_outcome)
+        
+        # Log performance for tracking
+        global_performance_tracker.log_prediction(model_name, input_data.get('predicted_value', 0), actual_outcome)
+        
+    except Exception as e:
+        logger.error(f"Error in continuous learning for {model_name}: {e}")
 
 # Initialize on import
 initialize_ml_models()
