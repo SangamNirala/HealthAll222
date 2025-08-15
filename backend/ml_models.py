@@ -16,10 +16,239 @@ import logging
 from typing import Dict, List, Any, Optional, Tuple
 import joblib
 import os
+import pickle
+from collections import defaultdict
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Phase 4: Enhanced ML Pipeline Classes
+class ModelPerformanceTracker:
+    """Tracks model performance and accuracy over time"""
+    
+    def __init__(self):
+        self.performance_history = defaultdict(list)
+        self.accuracy_threshold = 0.75
+        self.retrain_threshold = 0.70
+        
+    def log_prediction(self, model_name: str, prediction: float, actual: Optional[float] = None):
+        """Log a prediction and actual value for accuracy tracking"""
+        timestamp = datetime.now().isoformat()
+        
+        entry = {
+            'timestamp': timestamp,
+            'prediction': prediction,
+            'actual': actual
+        }
+        
+        self.performance_history[model_name].append(entry)
+        
+        # Keep only last 1000 entries per model
+        if len(self.performance_history[model_name]) > 1000:
+            self.performance_history[model_name] = self.performance_history[model_name][-1000:]
+    
+    def calculate_accuracy(self, model_name: str, days_back: int = 7) -> Dict[str, Any]:
+        """Calculate model accuracy for recent predictions"""
+        cutoff_date = datetime.now() - timedelta(days=days_back)
+        recent_entries = [
+            entry for entry in self.performance_history[model_name]
+            if entry['actual'] is not None and 
+            datetime.fromisoformat(entry['timestamp']) >= cutoff_date
+        ]
+        
+        if len(recent_entries) < 5:
+            return {'accuracy': None, 'sample_size': len(recent_entries), 'needs_data': True}
+        
+        predictions = [entry['prediction'] for entry in recent_entries]
+        actuals = [entry['actual'] for entry in recent_entries]
+        
+        # Calculate R² score
+        accuracy = r2_score(actuals, predictions)
+        mae = np.mean(np.abs(np.array(predictions) - np.array(actuals)))
+        
+        return {
+            'accuracy': accuracy,
+            'mae': mae,
+            'sample_size': len(recent_entries),
+            'needs_retrain': accuracy < self.retrain_threshold,
+            'performance_trend': self._calculate_trend(recent_entries)
+        }
+    
+    def _calculate_trend(self, entries: List[Dict]) -> str:
+        """Calculate if model performance is improving or declining"""
+        if len(entries) < 10:
+            return 'insufficient_data'
+        
+        # Split into two halves and compare accuracy
+        mid = len(entries) // 2
+        first_half = entries[:mid]
+        second_half = entries[mid:]
+        
+        first_errors = [abs(e['prediction'] - e['actual']) for e in first_half]
+        second_errors = [abs(e['prediction'] - e['actual']) for e in second_half]
+        
+        first_avg_error = np.mean(first_errors)
+        second_avg_error = np.mean(second_errors)
+        
+        if second_avg_error < first_avg_error * 0.9:
+            return 'improving'
+        elif second_avg_error > first_avg_error * 1.1:
+            return 'declining'
+        else:
+            return 'stable'
+
+class UserFeedbackIntegrator:
+    """Integrates user feedback to improve model predictions"""
+    
+    def __init__(self):
+        self.feedback_data = defaultdict(list)
+        self.learning_rate = 0.1
+    
+    def add_feedback(self, model_name: str, prediction_id: str, user_rating: float, 
+                    actual_outcome: Optional[float] = None, feedback_text: str = ""):
+        """Add user feedback for a specific prediction"""
+        feedback = {
+            'prediction_id': prediction_id,
+            'user_rating': user_rating,  # 1-5 scale
+            'actual_outcome': actual_outcome,
+            'feedback_text': feedback_text,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        self.feedback_data[model_name].append(feedback)
+    
+    def get_model_satisfaction(self, model_name: str) -> Dict[str, Any]:
+        """Calculate user satisfaction metrics for a model"""
+        feedbacks = self.feedback_data[model_name]
+        
+        if not feedbacks:
+            return {'satisfaction': None, 'sample_size': 0}
+        
+        recent_feedback = [
+            f for f in feedbacks 
+            if datetime.fromisoformat(f['timestamp']) >= datetime.now() - timedelta(days=30)
+        ]
+        
+        if not recent_feedback:
+            return {'satisfaction': None, 'sample_size': 0}
+        
+        avg_rating = np.mean([f['user_rating'] for f in recent_feedback])
+        
+        return {
+            'satisfaction': avg_rating,
+            'sample_size': len(recent_feedback),
+            'satisfaction_trend': self._calculate_satisfaction_trend(recent_feedback)
+        }
+    
+    def _calculate_satisfaction_trend(self, feedbacks: List[Dict]) -> str:
+        """Calculate satisfaction trend over time"""
+        if len(feedbacks) < 6:
+            return 'insufficient_data'
+        
+        ratings = [f['user_rating'] for f in feedbacks]
+        first_half = ratings[:len(ratings)//2]
+        second_half = ratings[len(ratings)//2:]
+        
+        if np.mean(second_half) > np.mean(first_half) + 0.2:
+            return 'improving'
+        elif np.mean(second_half) < np.mean(first_half) - 0.2:
+            return 'declining'
+        else:
+            return 'stable'
+
+class ABTestingFramework:
+    """A/B testing framework for model improvements"""
+    
+    def __init__(self):
+        self.test_configs = {}
+        self.test_results = defaultdict(list)
+    
+    def create_test(self, test_name: str, model_a_config: Dict, model_b_config: Dict, 
+                   traffic_split: float = 0.5):
+        """Create a new A/B test"""
+        self.test_configs[test_name] = {
+            'model_a': model_a_config,
+            'model_b': model_b_config,
+            'traffic_split': traffic_split,
+            'start_date': datetime.now().isoformat(),
+            'status': 'active'
+        }
+    
+    def should_use_model_b(self, test_name: str, user_id: str) -> bool:
+        """Determine if user should see model B (based on consistent hashing)"""
+        if test_name not in self.test_configs:
+            return False
+        
+        # Use hash of user_id for consistent assignment
+        import hashlib
+        hash_val = int(hashlib.md5(user_id.encode()).hexdigest(), 16)
+        return (hash_val % 100) < (self.test_configs[test_name]['traffic_split'] * 100)
+    
+    def record_result(self, test_name: str, user_id: str, model_used: str, 
+                     prediction: float, actual: Optional[float] = None, 
+                     user_satisfaction: Optional[float] = None):
+        """Record result for A/B test analysis"""
+        result = {
+            'user_id': user_id,
+            'model_used': model_used,
+            'prediction': prediction,
+            'actual': actual,
+            'user_satisfaction': user_satisfaction,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        self.test_results[test_name].append(result)
+    
+    def analyze_test(self, test_name: str) -> Dict[str, Any]:
+        """Analyze A/B test results"""
+        results = self.test_results[test_name]
+        
+        if len(results) < 20:
+            return {'status': 'insufficient_data', 'sample_size': len(results)}
+        
+        model_a_results = [r for r in results if r['model_used'] == 'A']
+        model_b_results = [r for r in results if r['model_used'] == 'B']
+        
+        # Calculate metrics for both models
+        def calculate_metrics(model_results):
+            if not model_results:
+                return {}
+            
+            predictions = [r['prediction'] for r in model_results if r['actual'] is not None]
+            actuals = [r['actual'] for r in model_results if r['actual'] is not None]
+            satisfactions = [r['user_satisfaction'] for r in model_results if r['user_satisfaction'] is not None]
+            
+            metrics = {
+                'sample_size': len(model_results),
+                'accuracy': r2_score(actuals, predictions) if len(actuals) >= 5 else None,
+                'avg_satisfaction': np.mean(satisfactions) if satisfactions else None
+            }
+            
+            return metrics
+        
+        return {
+            'status': 'analysis_ready',
+            'model_a_metrics': calculate_metrics(model_a_results),
+            'model_b_metrics': calculate_metrics(model_b_results),
+            'winner': self._determine_winner(model_a_results, model_b_results)
+        }
+    
+    def _determine_winner(self, model_a_results: List, model_b_results: List) -> str:
+        """Determine winning model based on accuracy and satisfaction"""
+        if not model_a_results or not model_b_results:
+            return 'insufficient_data'
+        
+        # Simple winner determination (can be enhanced with statistical significance)
+        a_sat = np.mean([r['user_satisfaction'] for r in model_a_results if r['user_satisfaction']])
+        b_sat = np.mean([r['user_satisfaction'] for r in model_b_results if r['user_satisfaction']])
+        
+        if b_sat > a_sat + 0.1:
+            return 'model_b'
+        elif a_sat > b_sat + 0.1:
+            return 'model_a'
+        else:
+            return 'tie'
 
 class EnergyPredictionModel:
     """Predicts daily energy levels based on food intake, sleep, and activity"""
