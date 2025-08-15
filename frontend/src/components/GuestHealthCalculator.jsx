@@ -27,7 +27,6 @@ const GuestHealthCalculator = () => {
   // Results state
   const [results, setResults] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
-  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [feedbackData, setFeedbackData] = useState(null);
   const [calculationCount, setCalculationCount] = useState(0);
 
