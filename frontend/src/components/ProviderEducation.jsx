@@ -505,7 +505,7 @@ const ProviderEducation = () => {
                 </Button>
               </div>
               <p className="text-gray-600 mt-2">
-                Total Credits Earned: {educationData.education_summary.total_credits_earned}
+                Total Credits Earned: {educationData.cme_tracking.total_credits_earned}
               </p>
             </div>
 
