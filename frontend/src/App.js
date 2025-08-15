@@ -101,6 +101,11 @@ function App() {
             <Route path="/provider-clinical-dashboard" element={<ClinicalDashboard />} />
             <Route path="/patient-provider-connection" element={<PatientMedicationProvider />} />
             
+            {/* Patient Management Routes */}
+            <Route path="/smart-patient-assignments" element={<SmartPatientAssignmentPanel />} />
+            <Route path="/progress-dashboard" element={<RealTimeProgressDashboard />} />
+            <Route path="/intelligent-meal-planning" element={<IntelligentMealPlanGenerator />} />
+            
             {/* Family Navigation Routes */}
             <Route path="/family-members" element={<FamilyMembers />} />
             <Route path="/family-meals" element={<FamilyMeals />} />
