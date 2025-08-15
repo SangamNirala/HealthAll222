@@ -98,7 +98,7 @@ const ProviderEducation = () => {
     );
   }
 
-  const filteredCourses = educationData.featured_courses.filter(course => {
+  const filteredCourses = educationData.available_courses?.filter(course => {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          course.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || 
@@ -107,7 +107,7 @@ const ProviderEducation = () => {
                              course.title.toLowerCase().includes(cat.name.toLowerCase().split(' ')[0])
                            );
     return matchesSearch && matchesCategory;
-  });
+  }) || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100">
