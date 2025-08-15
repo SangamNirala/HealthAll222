@@ -2164,6 +2164,111 @@ async def create_patient_progress(progress: PatientProgressCreate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create patient progress: {str(e)}")
 
+# ===== SAMPLE DATA CREATION =====
+
+async def create_sample_educational_content():
+    """Create sample educational content for the platform"""
+    try:
+        # Check if content already exists
+        existing_content = await db.educational_content.find_one({})
+        if existing_content:
+            return  # Content already exists
+        
+        sample_content = [
+            {
+                "id": str(uuid.uuid4()),
+                "title": "Understanding Healthy Nutrition",
+                "description": "Learn the basics of balanced nutrition and healthy eating habits.",
+                "content_type": "ARTICLE",
+                "category": "nutrition",
+                "difficulty_level": "beginner",
+                "estimated_read_time": 10,
+                "content_text": "Proper nutrition is the foundation of good health. This article covers the essential nutrients your body needs and how to incorporate them into your daily meals.",
+                "tags": ["nutrition", "healthy eating", "basics"],
+                "view_count": 0,
+                "rating": 4.5,
+                "is_featured": True,
+                "created_by": "system",
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "title": "Exercise for Beginners",
+                "description": "Simple exercises to start your fitness journey safely.",
+                "content_type": "VIDEO",
+                "category": "exercise",
+                "difficulty_level": "beginner",
+                "estimated_read_time": 15,
+                "content_text": "Starting an exercise routine can be intimidating. This guide provides simple, safe exercises for beginners.",
+                "tags": ["exercise", "fitness", "beginners"],
+                "view_count": 0,
+                "rating": 4.3,
+                "is_featured": True,
+                "created_by": "system",
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "title": "Managing Stress and Mental Health",
+                "description": "Practical techniques for managing daily stress and improving mental wellness.",
+                "content_type": "ARTICLE",
+                "category": "mental_health",
+                "difficulty_level": "intermediate",
+                "estimated_read_time": 12,
+                "content_text": "Stress management is crucial for overall health. Learn evidence-based techniques to reduce stress and improve your mental well-being.",
+                "tags": ["mental health", "stress management", "wellness"],
+                "view_count": 0,
+                "rating": 4.7,
+                "is_featured": False,
+                "created_by": "system",
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "title": "Heart Health Checklist",
+                "description": "A comprehensive checklist for maintaining cardiovascular health.",
+                "content_type": "CHECKLIST",
+                "category": "heart_health",
+                "difficulty_level": "beginner",
+                "estimated_read_time": 8,
+                "content_text": "Use this checklist to track important habits that support heart health, including diet, exercise, and lifestyle factors.",
+                "tags": ["heart health", "cardiovascular", "checklist"],
+                "view_count": 0,
+                "rating": 4.2,
+                "is_featured": False,
+                "created_by": "system",
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "title": "Sleep Hygiene Quiz",
+                "description": "Test your knowledge about healthy sleep habits.",
+                "content_type": "QUIZ",
+                "category": "sleep",
+                "difficulty_level": "beginner",
+                "estimated_read_time": 5,
+                "content_text": "Take this interactive quiz to learn about sleep hygiene and discover ways to improve your sleep quality.",
+                "tags": ["sleep", "hygiene", "quiz"],
+                "view_count": 0,
+                "rating": 4.0,
+                "is_featured": False,
+                "created_by": "system",
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            }
+        ]
+        
+        # Insert sample content
+        await db.educational_content.insert_many(sample_content)
+        logger.info("Sample educational content created successfully")
+        
+    except Exception as e:
+        logger.error(f"Failed to create sample educational content: {str(e)}")
+
 # ===== PROFILE MANAGEMENT API ENDPOINTS =====
 
 # Patient Profile Endpoints
