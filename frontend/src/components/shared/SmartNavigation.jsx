@@ -20,7 +20,7 @@ const ICON_MAP = {
   LayoutDashboard, User, Users, Apple, Activity, Target, Stethoscope, 
   BarChart3, BookOpen, FileText, UserPlus, ChefHat, Calendar, Shield, 
   Settings, Plus, Camera, Home, Pill, Download, MoreHorizontal, Sparkles, Zap, Calculator, Monitor,
-  UserCheck, TrendingUp
+  UserCheck, TrendingUp, AlertTriangle
 };
 
 const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
