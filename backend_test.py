@@ -11028,6 +11028,10 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Health Assessment APIs (REVIEW REQUEST - COMPREHENSIVE TESTING)...")
         health_assessment_success = self.test_health_assessment_api()
 
+        # NEW: Phase 3 & 4 ML Pipeline APIs (REVIEW REQUEST - PRIORITY TESTING)
+        print("\n📋 Testing Phase 3 & 4 ML Pipeline APIs (REVIEW REQUEST - PRIORITY TESTING)...")
+        phase3_phase4_ml_success = self.test_phase3_phase4_ml_endpoints()
+
         # Print final results
         print("\n" + "=" * 60)
         print(f"📊 FINAL RESULTS")
