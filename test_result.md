@@ -108,7 +108,7 @@ agent_communication:
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "ADVANCED HEALTHCARE PROJECT: Implement Phase 2 Frontend Components for Patient Management System - Building upon the successful implementation of the first 3 Advanced Patient Management components, complete Phase 2 with 3 additional critical components: AdvancedAdherenceMonitor.jsx, AutomatedReportGenerator.jsx, and IntelligentAlertSystem.jsx. The backend APIs are 100% functional with comprehensive patient management endpoints already tested and working perfectly."
+user_problem_statement: "TASK: Implement Advanced 'Instant Health Snapshot' Feature for Healthcare Platform Guest Mode - Create a comprehensive '5-Minute Health Assessment' feature that provides instant personalized health insights for guest users, significantly increasing user engagement and conversion potential. The feature should include: 1) 5-step assessment wizard (age, activity, goals, diet, stress), 2) Sophisticated health scoring algorithm, 3) Results dashboard with health score, health age, recommendations, meal suggestions, 4) Integration with existing guest dashboard, 5) Mobile-responsive design, 6) Conversion optimization with upgrade prompts."
 
 frontend:
   - task: "Phase 3: API Integration - Clinical Dashboard Service Layer"
