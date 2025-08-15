@@ -9205,6 +9205,10 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Patient Management APIs (REVIEW REQUEST)...")
         patient_management_apis_success = self.test_patient_management_apis()
 
+        # NEW: Phase 2 Patient Management System APIs (REVIEW REQUEST - SPECIFIC FOCUS)
+        print("\n📋 Testing Phase 2 Patient Management System APIs (REVIEW REQUEST - SPECIFIC FOCUS)...")
+        phase2_patient_management_success = self.test_phase2_patient_management_system()
+
         # Print final results
         print("\n" + "=" * 60)
         print(f"📊 FINAL RESULTS")
