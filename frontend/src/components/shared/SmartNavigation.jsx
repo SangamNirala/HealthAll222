@@ -22,7 +22,7 @@ const ICON_MAP = {
   BarChart3, BookOpen, FileText, UserPlus, ChefHat, Calendar, Shield, 
   Settings, Plus, Camera, Home, Pill, Download, MoreHorizontal, Sparkles, Zap, Calculator, Monitor,
   UserCheck, TrendingUp, AlertTriangle, MessageSquare, Heart,
-  Video
+  Video, Brain
 };
 
 const SmartNavigation = ({ breadcrumbs = null, showRoleSwitcher = true }) => {
