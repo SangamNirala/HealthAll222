@@ -9462,6 +9462,8 @@ class HealthPlatformAPITester:
         print(f"   Guest Session Management & Export: {'✅ PASSED' if guest_session_success else '❌ FAILED'}")
         print(f"   Provider Healthcare Integration: {'✅ PASSED' if provider_integration_success else '❌ FAILED'}")
         print(f"   Phase 2 Patient Management System: {'✅ PASSED' if phase2_patient_management_success else '❌ FAILED'}")
+        print(f"   Patient Engagement APIs (REVIEW REQUEST): {'✅ PASSED' if patient_engagement_success else '❌ FAILED'}")
+        print(f"   Virtual Consultation APIs (REVIEW REQUEST): {'✅ PASSED' if virtual_consultation_success else '❌ FAILED'}")
         
         if self.tests_passed == self.tests_run:
             print("🎉 All tests passed!")
