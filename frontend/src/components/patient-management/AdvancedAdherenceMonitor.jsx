@@ -414,7 +414,7 @@ const AdvancedAdherenceMonitor = () => {
                     <ResponsiveContainer width="100%" height={200}>
                       <PieChart>
                         <Pie
-                          data={Object.entries(displayData.adherence_types).map(([type, data]) => ({
+                          data={Object.entries(safeDisplayData.adherence_types).map(([type, data]) => ({
                             name: type,
                             value: data.percentage,
                             color: type === 'medication' ? '#3B82F6' : 
@@ -427,7 +427,7 @@ const AdvancedAdherenceMonitor = () => {
                           dataKey="value"
                           label={({name, value}) => `${name}: ${(value * 100).toFixed(0)}%`}
                         >
-                          {Object.entries(displayData.adherence_types).map((entry, index) => (
+                          {Object.entries(safeDisplayData.adherence_types).map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={
                               entry[0] === 'medication' ? '#3B82F6' : 
                               entry[0] === 'diet' ? '#10B981' : 
