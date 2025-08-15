@@ -646,7 +646,7 @@ def generate_health_recommendations(responses: Dict[str, Any], health_score: int
     
     return recommendations[:5]  # Return top 5 recommendations
 
-def generate_meal_suggestions(responses: Dict[str, Any]) -> List[Dict[str, Any]]:
+def generate_health_meal_suggestions(responses: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Generate personalized meal suggestions based on dietary preferences and goals"""
     
     dietary_preferences = responses.get('dietary_preferences', [])
