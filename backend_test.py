@@ -8752,7 +8752,7 @@ class HealthPlatformAPITester:
         )
         
         if success2 and assignments_list:
-            assignments = assignments_list.get('assignments', [])
+            assignments = assignments_list if isinstance(assignments_list, list) else []
             print(f"   ✅ Retrieved {len(assignments)} assignments for provider {provider_id}")
             
             # Validate assignments list structure
