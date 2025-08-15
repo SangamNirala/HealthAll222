@@ -306,7 +306,7 @@ const ProviderEducation = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {educationData.featured_courses.slice(0, 2).map((course) => (
+                      {educationData.available_courses?.slice(0, 2).map((course) => (
                         <div key={course.id} className="p-3 border rounded-lg hover:bg-gray-50">
                           <h5 className="font-medium text-gray-900 mb-1">{course.title}</h5>
                           <div className="flex items-center justify-between">
@@ -317,7 +317,7 @@ const ProviderEducation = () => {
                             <Badge className="bg-emerald-100 text-emerald-800">{course.credits} credits</Badge>
                           </div>
                         </div>
-                      ))}
+                      )) || []}
                     </div>
                   </CardContent>
                 </Card>
