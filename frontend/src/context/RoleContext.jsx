@@ -61,6 +61,8 @@ const ROLE_CONFIG = {
       { label: 'Report Generator', path: '/report-generator', icon: 'FileText' },
       { label: 'Alert System', path: '/alert-system', icon: 'AlertTriangle' },
       { label: 'Virtual Consultation', path: '/virtual-consultation', icon: 'Video' },
+      { label: 'Patient Engagement', path: '/patient-engagement', icon: 'MessageSquare' },
+      { label: 'Management System', path: '/enhanced-patient-management', icon: 'LayoutDashboard' },
       { label: 'Clinical Tools', path: '/provider-tools', icon: 'Stethoscope' },
       { label: 'Medication Hub', path: '/provider-medication-dashboard', icon: 'Pill' },
       { label: 'Analytics', path: '/provider-analytics', icon: 'BarChart3' },
