@@ -364,16 +364,6 @@ const GuestHealthCalculator = () => {
                   </Card>
                 </div>
 
-                {/* Enhanced Upgrade Prompt */}
-                <div className="mb-6">
-                  <UpgradePrompt
-                    type="calculator_results"
-                    context={results ? `Based on your BMI of ${results.bmi}, there's room for optimization with our premium health tracking features.` : ''}
-                    triggerAction={handleUpgradeAction}
-                    compact={true}
-                  />
-                </div>
-
                 {/* Detailed Information */}
                 <Card>
                   <CardHeader>
