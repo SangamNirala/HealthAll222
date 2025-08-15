@@ -381,43 +381,77 @@ const HealthSnapshotCard = () => {
   );
 };
 
-// Component: Health Calculator Quick Access
-const HealthCalculatorCard = () => {
+// Component: AI Food Scanner Card
+const AIFoodScannerCard = () => {
   const navigate = useNavigate();
 
   return (
-    <Card>
+    <Card className="col-span-full lg:col-span-2 border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
       <CardHeader>
         <CardTitle className="flex items-center">
-          <Calculator className="w-5 h-5 mr-2 text-orange-500" />
-          Health Calculator
+          <Brain className="w-6 h-6 mr-3 text-blue-600" />
+          <div>
+            <div className="text-xl text-blue-900">AI Food Recognition</div>
+            <div className="text-sm text-blue-700 font-normal">Snap, analyze & get instant nutrition insights</div>
+          </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="p-3 bg-orange-50 rounded-lg">
-          <div className="font-medium text-orange-900 mb-2">Calculate Your Health Metrics</div>
-          <div className="space-y-1 text-sm text-orange-700">
-            <div>• BMI (Body Mass Index)</div>
-            <div>• BMR (Basal Metabolic Rate)</div>
-            <div>• Daily Calorie Needs</div>
-            <div>• Nutrition Recommendations</div>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="p-4 bg-white rounded-lg shadow-sm border">
+              <div className="font-medium text-blue-900 mb-3">What You'll Get:</div>
+              <div className="space-y-2 text-sm text-gray-700">
+                <div className="flex items-center">
+                  <Scan className="w-4 h-4 text-blue-600 mr-2" />
+                  Instant food identification
+                </div>
+                <div className="flex items-center">
+                  <BarChart3 className="w-4 h-4 text-blue-600 mr-2" />
+                  Comprehensive nutrition analysis
+                </div>
+                <div className="flex items-center">
+                  <Award className="w-4 h-4 text-blue-600 mr-2" />
+                  Food quality scoring (A-F grades)
+                </div>
+                <div className="flex items-center">
+                  <TrendingUp className="w-4 h-4 text-blue-600 mr-2" />
+                  Healthier alternatives
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="p-4 bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg border border-green-200">
+              <div className="flex items-center space-x-2 mb-2">
+                <Zap className="w-5 h-5 text-green-600" />
+                <div className="font-medium text-green-900">Powered by AI</div>
+              </div>
+              <div className="text-sm text-green-800">
+                • Multi-stage AI processing<br/>
+                • Gemini Vision + Groq analysis<br/>
+                • USDA database validation<br/>
+                • Smart recommendation engine
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <Button 
+                onClick={() => navigate('/ai-food-scan')}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3"
+                size="lg"
+              >
+                <Camera className="w-5 h-5 mr-2" />
+                Start AI Food Scan
+              </Button>
+              
+              <div className="text-center text-xs text-blue-600">
+                ✨ Uses camera or photo upload • Get results in seconds
+              </div>
+            </div>
           </div>
         </div>
-        
-        <div className="p-3 bg-gradient-to-r from-purple-100 to-violet-100 rounded-lg">
-          <div className="font-medium text-purple-900 mb-1">Instant Results</div>
-          <div className="text-sm text-purple-700">
-            Get personalized health insights based on your age, gender, height, weight, and activity level.
-          </div>
-        </div>
-        
-        <Button 
-          onClick={() => navigate('/guest-calculator')}
-          className="w-full bg-orange-500 hover:bg-orange-600"
-        >
-          <Calculator className="w-4 h-4 mr-2" />
-          Calculate Now
-        </Button>
       </CardContent>
     </Card>
   );
