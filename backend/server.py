@@ -7661,6 +7661,293 @@ Return as JSON:
         }
 
 # ========================================
+# ADVANCED AI FOOD RECOGNITION & NUTRITION ANALYSIS
+# ========================================
+
+class FoodImageRequest(BaseModel):
+    image_base64: str
+    user_preferences: Dict[str, Any] = {}
+    dietary_restrictions: List[str] = []
+    health_goals: List[str] = []
+
+class BatchFoodAnalysisRequest(BaseModel):
+    images: List[str]  # List of base64 images
+    user_session: str
+    meal_context: str = "unknown"  # breakfast, lunch, dinner, snack
+
+@api_router.post("/ai/food-recognition-advanced")
+async def advanced_food_recognition(request: FoodImageRequest):
+    """
+    Comprehensive AI-powered food recognition using multi-stage processing
+    Stage 1: Gemini Vision - Food identification and visual analysis
+    Stage 2: Groq - Nutrition analysis and scoring
+    Stage 3: USDA/OpenFood - Database validation and enhancement
+    Stage 4: Healthier alternatives generation
+    """
+    try:
+        # Initialize food recognition service
+        food_service = FoodRecognitionService()
+        
+        # Run comprehensive analysis
+        result = await food_service.analyze_food_image_comprehensive(
+            image_base64=request.image_base64,
+            user_preferences=request.user_preferences
+        )
+        
+        # Add user-specific context
+        result['user_context'] = {
+            'dietary_restrictions': request.dietary_restrictions,
+            'health_goals': request.health_goals,
+            'preferences_considered': True
+        }
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Advanced food recognition error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Food recognition failed: {str(e)}")
+
+@api_router.post("/ai/batch-food-analysis") 
+async def batch_food_analysis(request: BatchFoodAnalysisRequest):
+    """Process multiple food images in sequence for meal planning"""
+    try:
+        food_service = FoodRecognitionService()
+        batch_results = []
+        
+        for i, image_base64 in enumerate(request.images[:5]):  # Limit to 5 images
+            try:
+                result = await food_service.analyze_food_image_comprehensive(image_base64)
+                result['image_index'] = i
+                result['meal_context'] = request.meal_context
+                batch_results.append(result)
+            except Exception as e:
+                logger.error(f"Batch processing error for image {i}: {str(e)}")
+                batch_results.append({
+                    "image_index": i,
+                    "error": "Processing failed",
+                    "foods_detected": []
+                })
+        
+        # Generate batch insights
+        total_calories = sum(
+            sum(food.get('nutrition', {}).get('calories', 0) for food in result.get('foods_detected', []))
+            for result in batch_results if 'foods_detected' in result
+        )
+        
+        batch_summary = {
+            "batch_results": batch_results,
+            "meal_summary": {
+                "total_images_processed": len(batch_results),
+                "total_foods_detected": sum(len(r.get('foods_detected', [])) for r in batch_results),
+                "estimated_total_calories": total_calories,
+                "meal_context": request.meal_context,
+                "batch_insights": [
+                    f"Analyzed {len(batch_results)} images for {request.meal_context}",
+                    f"Detected approximately {total_calories} calories total",
+                    "Consider meal balance and portion sizes"
+                ]
+            },
+            "processing_metadata": {
+                "session_id": request.user_session,
+                "processed_at": datetime.now().isoformat(),
+                "processing_time": "batch"
+            }
+        }
+        
+        return batch_summary
+        
+    except Exception as e:
+        logger.error(f"Batch food analysis error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Batch analysis failed: {str(e)}")
+
+@api_router.post("/ai/food-score-calculator")
+async def calculate_food_scores(request: Dict[str, Any]):
+    """Calculate detailed food scores and provide improvement recommendations"""
+    try:
+        food_service = FoodRecognitionService()
+        
+        foods = request.get('foods', [])
+        scored_foods = []
+        
+        for food in foods:
+            # Calculate comprehensive score
+            food_score = food_service._calculate_food_score(
+                food_data=food,
+                nutrition_data=food.get('nutrition', {})
+            )
+            
+            scored_food = {
+                **food,
+                'detailed_score': food_score,
+                'improvement_tips': food_service._generate_improvement_tips(food, food_score),
+                'health_impact_analysis': food_service._analyze_health_impact(food)
+            }
+            scored_foods.append(scored_food)
+        
+        # Calculate meal-level insights
+        meal_score = food_service._calculate_meal_score(scored_foods)
+        
+        return {
+            "scored_foods": scored_foods,
+            "meal_analysis": {
+                "overall_meal_score": meal_score,
+                "meal_grade": food_service._get_meal_grade(meal_score),
+                "meal_insights": food_service._generate_meal_insights(scored_foods),
+                "improvement_priority": food_service._get_improvement_priorities(scored_foods)
+            },
+            "scoring_methodology": {
+                "factors": [
+                    "Nutritional Density (25%)",
+                    "Processing Level (25%)", 
+                    "Hidden Ingredients (15%)",
+                    "Portion Size (15%)",
+                    "Health Impact (20%)"
+                ],
+                "grade_ranges": {
+                    "A": "90-100 (Excellent)",
+                    "B": "80-89 (Good)", 
+                    "C": "70-79 (Fair)",
+                    "D": "60-69 (Poor)",
+                    "F": "Below 60 (Avoid)"
+                }
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Food scoring error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Food scoring failed: {str(e)}")
+
+@api_router.post("/ai/healthier-alternatives")
+async def generate_comprehensive_alternatives(request: Dict[str, Any]):
+    """Generate detailed healthier alternatives with cooking tips and substitutions"""
+    try:
+        food_service = FoodRecognitionService()
+        
+        foods = request.get('foods', [])
+        user_preferences = request.get('user_preferences', {})
+        dietary_restrictions = request.get('dietary_restrictions', [])
+        
+        comprehensive_alternatives = []
+        
+        for food in foods:
+            alternatives = await food_service._generate_healthier_alternatives(
+                [food], 
+                {}, 
+                user_preferences
+            )
+            
+            # Enhance alternatives with cooking tips and preparation methods
+            enhanced_alternatives = []
+            for alt_group in alternatives:
+                for alt in alt_group.get('alternatives', []):
+                    enhanced_alt = {
+                        **alt,
+                        'cooking_tips': food_service._get_cooking_tips(alt.get('food', '')),
+                        'prep_difficulty': food_service._assess_prep_difficulty(alt.get('food', '')),
+                        'cost_comparison': food_service._compare_costs(food.get('name', ''), alt.get('food', '')),
+                        'availability': 'common',  # Could be enhanced with location data
+                        'dietary_compliance': food_service._check_dietary_compliance(alt.get('food', ''), dietary_restrictions)
+                    }
+                    enhanced_alternatives.append(enhanced_alt)
+            
+            comprehensive_alternatives.append({
+                'original_food': food,
+                'alternatives': enhanced_alternatives,
+                'swap_difficulty': food_service._assess_swap_difficulty(food, enhanced_alternatives),
+                'motivation_message': food_service._get_motivation_message(food, enhanced_alternatives)
+            })
+        
+        return {
+            "alternatives_analysis": comprehensive_alternatives,
+            "quick_swaps": food_service._get_quick_swaps(foods),
+            "meal_optimization": food_service._optimize_meal_composition(foods, comprehensive_alternatives),
+            "shopping_tips": food_service._generate_shopping_tips(comprehensive_alternatives)
+        }
+        
+    except Exception as e:
+        logger.error(f"Alternatives generation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Alternatives generation failed: {str(e)}")
+
+@api_router.get("/ai/nutrition-database-lookup/{food_name}")
+async def nutrition_database_lookup(food_name: str, source: str = "all"):
+    """Direct lookup in nutrition databases (USDA, OpenFood Facts)"""
+    try:
+        food_service = FoodRecognitionService()
+        
+        results = {}
+        
+        if source in ["all", "usda"]:
+            usda_result = await food_service._usda_lookup(food_name)
+            results['usda'] = usda_result
+        
+        if source in ["all", "openfood"]:
+            openfood_result = await food_service._openfood_lookup(food_name)  
+            results['openfood'] = openfood_result
+        
+        # Combine and analyze results
+        combined_analysis = {
+            "query": food_name,
+            "sources_checked": list(results.keys()),
+            "database_results": results,
+            "confidence": food_service._calculate_database_confidence(
+                results.get('usda', {}), 
+                results.get('openfood', {})
+            ),
+            "recommended_nutrition": food_service._combine_database_results(results),
+            "data_quality_assessment": food_service._assess_data_quality(results)
+        }
+        
+        return combined_analysis
+        
+    except Exception as e:
+        logger.error(f"Database lookup error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Database lookup failed: {str(e)}")
+
+@api_router.post("/ai/meal-pattern-analysis")
+async def analyze_meal_patterns(request: Dict[str, Any]):
+    """Analyze eating patterns and provide personalized recommendations"""
+    try:
+        food_service = FoodRecognitionService()
+        
+        meal_history = request.get('meal_history', [])
+        user_profile = request.get('user_profile', {})
+        analysis_period = request.get('analysis_period', '7_days')
+        
+        # Analyze patterns
+        pattern_analysis = {
+            "meal_timing_patterns": food_service._analyze_meal_timing(meal_history),
+            "food_preference_patterns": food_service._analyze_food_preferences(meal_history),
+            "nutrition_consistency": food_service._analyze_nutrition_consistency(meal_history),
+            "portion_size_trends": food_service._analyze_portion_trends(meal_history),
+            "processing_level_trends": food_service._analyze_processing_trends(meal_history)
+        }
+        
+        # Generate personalized recommendations
+        recommendations = food_service._generate_pattern_based_recommendations(
+            pattern_analysis, 
+            user_profile
+        )
+        
+        return {
+            "analysis_period": analysis_period,
+            "meals_analyzed": len(meal_history),
+            "pattern_analysis": pattern_analysis,
+            "personalized_recommendations": recommendations,
+            "progress_tracking": {
+                "suggested_metrics": [
+                    "meal_timing_consistency",
+                    "food_quality_score_trend",
+                    "nutrition_balance_improvement"
+                ],
+                "next_analysis_date": (datetime.now() + timedelta(days=7)).isoformat()
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Meal pattern analysis error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Pattern analysis failed: {str(e)}")
+
+# ========================================
 # PHASE 2.3: ADVANCED GOAL TRACKING ENDPOINTS
 # ========================================
 
