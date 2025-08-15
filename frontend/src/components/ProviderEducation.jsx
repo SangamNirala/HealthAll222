@@ -221,7 +221,7 @@ const ProviderEducation = () => {
                     <Calendar className="w-8 h-8 text-orange-600 mr-3" />
                     <div>
                       <div className="text-2xl font-bold text-orange-600">
-                        {educationData.education_summary.courses_in_progress}
+                        {educationData.cme_tracking.courses_in_progress}
                       </div>
                       <p className="text-sm text-gray-600">In Progress</p>
                     </div>
