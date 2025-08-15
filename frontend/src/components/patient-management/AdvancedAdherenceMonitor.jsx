@@ -578,13 +578,13 @@ const AdvancedAdherenceMonitor = () => {
                     <h4 className="font-semibold mb-4">Patient Percentile</h4>
                     <div className="text-center">
                       <div className="text-4xl font-bold text-emerald-600 mb-2">
-                        {displayData.population_comparison.patient_percentile}th
+                        {safeDisplayData.population_comparison.patient_percentile}th
                       </div>
                       <p className="text-gray-600">percentile</p>
                       <div className="mt-4 bg-gray-200 rounded-full h-3">
                         <div 
                           className="bg-emerald-600 h-3 rounded-full"
-                          style={{ width: `${displayData.population_comparison.patient_percentile}%` }}
+                          style={{ width: `${safeDisplayData.population_comparison.patient_percentile}%` }}
                         />
                       </div>
                     </div>
