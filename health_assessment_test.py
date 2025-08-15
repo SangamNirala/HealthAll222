@@ -266,10 +266,10 @@ class HealthAssessmentTester:
         }
         
         success4, _ = self.run_test(
-            "Health Assessment - Missing Required Fields (Should Handle Gracefully)",
+            "Health Assessment - Missing Required Fields (Should Fail with Validation)",
             "POST",
             "guest/health-assessment",
-            200,  # Should still work with defaults
+            400,  # Should fail with validation error for missing required fields
             data=incomplete_data
         )
         
