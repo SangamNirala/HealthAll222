@@ -18,7 +18,10 @@ import {
   Lightbulb,
   ArrowRight,
   Sparkles,
-  RefreshCw
+  RefreshCw,
+  Calculator,
+  Moon,
+  Apple
 } from 'lucide-react';
 import {
   LineChart,
@@ -37,6 +40,9 @@ import {
   Cell
 } from 'recharts';
 import SmartNavigation from '../shared/SmartNavigation';
+import predictiveAnalyticsService from '../../services/predictiveAnalyticsService';
+import WhatIfScenarios from './WhatIfScenarios';
+import WeeklyHealthDashboard from './WeeklyHealthDashboard';
 
 const PersonalInsights = ({ 
   userId = 'demo-patient-123', 
