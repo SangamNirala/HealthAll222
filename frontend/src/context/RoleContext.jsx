@@ -121,6 +121,7 @@ const ROLE_CONFIG = {
     },
     navigationItems: [
       { label: 'Dashboard', path: '/guest-dashboard', icon: 'LayoutDashboard' },
+      { label: 'Health Snapshot', path: '/instant-health-check', icon: 'Heart' },
       { label: 'Quick Setup', path: '/guest-setup', icon: 'Settings' },
       { label: 'Food Log', path: '/guest-food-log', icon: 'Apple' },
       { label: 'Goals', path: '/guest-goals', icon: 'Target' },
