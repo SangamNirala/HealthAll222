@@ -64,3 +64,6 @@ reportlab>=4.0.0
 matplotlib>=3.7.0
 seaborn>=0.12.0
 filelock>=3.19.0
+multidict>=6.6.0
+attrs>=25.3.0
+propcache>=0.3.0
