@@ -33,6 +33,7 @@ const GuestFoodLog = () => {
   const [realtimeFeedback, setRealtimeFeedback] = useState(null);
   const [streakDays, setStreakDays] = useState(0);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [showAIModal, setShowAIModal] = useState(false);
 
   // Initialize guest session
   useEffect(() => {
