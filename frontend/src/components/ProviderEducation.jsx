@@ -165,7 +165,7 @@ const ProviderEducation = () => {
     return icons[categoryId] || BookOpen;
   };
 
-  if (!educationData) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100">
         <SmartNavigation />
