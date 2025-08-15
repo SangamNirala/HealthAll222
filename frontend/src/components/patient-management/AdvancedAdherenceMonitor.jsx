@@ -333,14 +333,14 @@ const AdvancedAdherenceMonitor = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-center">
-                    <div className={`inline-flex px-3 py-1 rounded-full text-sm font-semibold ${getRiskColor(displayData.risk_score)}`}>
-                      {(displayData.risk_score * 100).toFixed(0)}% Risk
+                    <div className={`inline-flex px-3 py-1 rounded-full text-sm font-semibold ${getRiskColor(safeDisplayData.risk_score)}`}>
+                      {(safeDisplayData.risk_score * 100).toFixed(0)}% Risk
                     </div>
                     <p className="text-xs text-gray-600 mt-2">
-                      Confidence: {(displayData.confidence_level * 100).toFixed(0)}%
+                      Confidence: {(safeDisplayData.confidence_level * 100).toFixed(0)}%
                     </p>
                     <div className="mt-3">
-                      <Progress value={displayData.risk_score * 100} className="h-2" />
+                      <Progress value={safeDisplayData.risk_score * 100} className="h-2" />
                     </div>
                   </div>
                 </CardContent>
