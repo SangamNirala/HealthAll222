@@ -576,11 +576,10 @@ const GuestFoodLog = () => {
                         </div>
                         <Button
                           size="sm"
-                          className="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-xs"
-                          onClick={() => setShowUpgradePrompt(true)}
+                          className="w-full mt-2 bg-gray-200 hover:bg-gray-300 text-gray-600 text-xs"
                         >
-                          <Zap className="w-3 h-3 mr-1" />
-                          Unlock Premium Features
+                          <Info className="w-3 h-3 mr-1" />
+                          Learn About Premium
                         </Button>
                       </div>
                     )}
