@@ -161,7 +161,6 @@ const GuestHealthCalculator = () => {
     });
     setResults(null);
     setFeedbackData(null);
-    setShowUpgradePrompt(false);
   };
 
   const handleUpgradeAction = () => {
