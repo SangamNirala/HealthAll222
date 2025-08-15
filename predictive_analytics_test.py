@@ -140,6 +140,7 @@ class PredictiveAnalyticsAPITester:
         
         # Test 2: High activity/low stress profile
         high_activity_data = {
+            "user_id": "demo-patient-456",
             "intake_data": {
                 "calories": 2200,
                 "protein_g": 120,
