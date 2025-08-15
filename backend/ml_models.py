@@ -502,7 +502,7 @@ class EnergyPredictionModel:
         return pd.DataFrame(data)
     
     def train(self, user_data: Optional[Dict] = None):
-        """Train the energy prediction model"""
+        """Enhanced training with feature engineering and model selection"""
         try:
             if user_data and len(user_data.get('daily_logs', [])) > 20:
                 # Use real user data if sufficient
@@ -511,31 +511,78 @@ class EnergyPredictionModel:
                 # Use synthetic data for initial training
                 df = self.generate_sample_data()
             
-            # Prepare features and target
-            feature_cols = ['calories', 'protein_g', 'carbs_g', 'fat_g', 'sleep_hours', 
-                           'exercise_minutes', 'stress_level', 'water_intake_ml', 
-                           'caffeine_mg', 'meal_timing_consistency']
+            # Apply enhanced feature engineering
+            df_enhanced = self.enhanced_feature_engineering(df)
             
-            X = df[feature_cols].fillna(0)
-            y = df['energy_level']
+            # Prepare features and target
+            base_feature_cols = ['calories', 'protein_g', 'carbs_g', 'fat_g', 'sleep_hours', 
+                               'exercise_minutes', 'stress_level', 'water_intake_ml', 
+                               'caffeine_mg', 'meal_timing_consistency']
+            
+            # Include engineered features if they exist
+            all_feature_cols = [col for col in df_enhanced.columns 
+                              if col not in ['energy_level', 'timestamp'] and not col.startswith('user_')]
+            
+            # Use enhanced features if available, fallback to base
+            feature_cols = all_feature_cols if len(all_feature_cols) > len(base_feature_cols) else base_feature_cols
+            feature_cols = [col for col in feature_cols if col in df_enhanced.columns]
+            
+            self._feature_columns = feature_cols  # Store for later use
+            
+            X = df_enhanced[feature_cols].fillna(0)
+            y = df_enhanced['energy_level']
             
             # Split and scale data
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
             X_train_scaled = self.scaler.fit_transform(X_train)
             X_test_scaled = self.scaler.transform(X_test)
             
-            # Train model
-            self.model.fit(X_train_scaled, y_train)
+            # Store original training data for incremental learning
+            self._original_training_data = (X_train_scaled, y_train)
             
-            # Calculate accuracy
-            y_pred = self.model.predict(X_test_scaled)
-            self.model_accuracy = r2_score(y_test, y_pred)
+            # Try different models and select the best
+            best_score = -np.inf
+            best_model = None
+            best_variant = 'linear'
             
-            # Calculate feature importance (coefficients for linear model)
-            self.feature_importance = dict(zip(feature_cols, abs(self.model.coef_)))
+            for variant_name, model in self.model_variants.items():
+                try:
+                    model.fit(X_train_scaled, y_train)
+                    score = model.score(X_test_scaled, y_test)
+                    
+                    logger.info(f"{variant_name} model accuracy: {score:.3f}")
+                    
+                    if score > best_score:
+                        best_score = score
+                        best_model = model
+                        best_variant = variant_name
+                        
+                except Exception as e:
+                    logger.warning(f"Failed to train {variant_name}: {e}")
+                    continue
+            
+            if best_model is None:
+                # Fallback to basic linear regression
+                best_model = LinearRegression()
+                best_model.fit(X_train_scaled, y_train)
+                best_score = best_model.score(X_test_scaled, y_test)
+                best_variant = 'linear_fallback'
+            
+            self.model = best_model
+            self.current_variant = best_variant
+            self.model_accuracy = best_score
+            
+            # Calculate feature importance
+            if hasattr(self.model, 'coef_'):
+                self.feature_importance = dict(zip(feature_cols, abs(self.model.coef_)))
+            elif hasattr(self.model, 'feature_importances_'):
+                self.feature_importance = dict(zip(feature_cols, self.model.feature_importances_))
             
             self.is_trained = True
-            logger.info(f"Energy prediction model trained with accuracy: {self.model_accuracy:.3f}")
+            logger.info(f"Energy prediction model trained with {best_variant} variant. Accuracy: {best_score:.3f}")
+            
+            # Initialize A/B testing
+            self.start_ab_test()
             
         except Exception as e:
             logger.error(f"Error training energy prediction model: {e}")
