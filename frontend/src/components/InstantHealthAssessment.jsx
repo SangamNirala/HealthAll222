@@ -231,7 +231,7 @@ const InstantHealthAssessment = () => {
       const sessionId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       // Call backend API
-      const backendUrl = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
+      const backendUrl = process.env.REACT_APP_BACKEND_URL;
       const response = await fetch(`${backendUrl}/api/guest/health-assessment`, {
         method: 'POST',
         headers: {
