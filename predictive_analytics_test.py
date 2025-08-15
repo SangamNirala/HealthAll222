@@ -487,6 +487,7 @@ class PredictiveAnalyticsAPITester:
         
         # Test 3: Multiple changes scenario
         multiple_changes_data = {
+            "user_id": "demo-patient-789",
             "base_data": {
                 "calories": 2200,
                 "protein_g": 90,
