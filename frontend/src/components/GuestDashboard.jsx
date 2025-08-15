@@ -325,6 +325,82 @@ const NutritionTips = ({ handleUpgradeAction }) => (
   </Card>
 );
 
+// Component: Health Snapshot Quick Access
+const HealthSnapshotCard = () => {
+  const navigate = useNavigate();
+
+  return (
+    <Card className="col-span-full lg:col-span-2 border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-violet-50">
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <Heart className="w-6 h-6 mr-3 text-purple-600" />
+          <div>
+            <div className="text-xl text-purple-900">Instant Health Snapshot</div>
+            <div className="text-sm text-purple-700 font-normal">Get your personalized health score in 2 minutes</div>
+          </div>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="p-4 bg-white rounded-lg shadow-sm border">
+              <div className="font-medium text-purple-900 mb-3">What You'll Discover:</div>
+              <div className="space-y-2 text-sm text-gray-700">
+                <div className="flex items-center">
+                  <Target className="w-4 h-4 text-purple-600 mr-2" />
+                  Your health score (0-100)
+                </div>
+                <div className="flex items-center">
+                  <Activity className="w-4 h-4 text-purple-600 mr-2" />
+                  Health age vs actual age
+                </div>
+                <div className="flex items-center">
+                  <Sparkles className="w-4 h-4 text-purple-600 mr-2" />
+                  5 personalized recommendations
+                </div>
+                <div className="flex items-center">
+                  <Utensils className="w-4 h-4 text-purple-600 mr-2" />
+                  Custom meal suggestions
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="p-4 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-lg border border-yellow-200">
+              <div className="flex items-center space-x-2 mb-2">
+                <Star className="w-5 h-5 text-yellow-600" />
+                <div className="font-medium text-yellow-900">Featured Assessment</div>
+              </div>
+              <div className="text-sm text-yellow-800">
+                • 5-question assessment<br/>
+                • Instant personalized results<br/>
+                • Science-based scoring<br/>
+                • Actionable recommendations
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <Button 
+                onClick={() => navigate('/instant-health-check')}
+                className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white py-3"
+                size="lg"
+              >
+                <Heart className="w-5 h-5 mr-2" />
+                Start Health Assessment
+              </Button>
+              
+              <div className="text-center text-xs text-purple-600">
+                ✨ Takes just 2 minutes • Get instant results
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 // Component: Health Calculator Quick Access
 const HealthCalculatorCard = () => {
   const navigate = useNavigate();
