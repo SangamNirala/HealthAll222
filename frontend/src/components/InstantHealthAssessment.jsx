@@ -289,7 +289,6 @@ const InstantHealthAssessment = () => {
       stress_level: ''
     });
     setFeedbackData(null);
-    setShowUpgradePrompt(false);
   };
 
   const getCurrentStepField = () => {
