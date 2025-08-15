@@ -193,7 +193,7 @@ const ProviderEducation = () => {
                     <Target className="w-8 h-8 text-blue-600 mr-3" />
                     <div>
                       <div className="text-2xl font-bold text-blue-600">
-                        {Math.round(educationData.education_summary.progress_percentage)}%
+                        {Math.round(educationData.cme_tracking.progress_percentage)}%
                       </div>
                       <p className="text-sm text-gray-600">Progress</p>
                     </div>
