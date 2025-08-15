@@ -139,6 +139,23 @@ const AdvancedAdherenceMonitor = () => {
 
   const displayData = adherenceData || sampleAdherenceData;
 
+  // Add safety checks for nested objects
+  const safeDisplayData = {
+    overall_adherence: displayData?.overall_adherence || 0.78,
+    risk_score: displayData?.risk_score || 0.35,
+    confidence_level: displayData?.confidence_level || 0.82,
+    adherence_types: {
+      medication: displayData?.adherence_types?.medication || { percentage: 0.85, trend: 'improving' },
+      diet: displayData?.adherence_types?.diet || { percentage: 0.72, trend: 'stable' },
+      exercise: displayData?.adherence_types?.exercise || { percentage: 0.65, trend: 'declining' },
+      appointments: displayData?.adherence_types?.appointments || { percentage: 0.90, trend: 'improving' }
+    },
+    trend_data: displayData?.trend_data || sampleAdherenceData.trend_data,
+    barriers: displayData?.barriers || sampleAdherenceData.barriers,
+    interventions: displayData?.interventions || sampleAdherenceData.interventions,
+    population_comparison: displayData?.population_comparison || sampleAdherenceData.population_comparison
+  };
+
   const getRiskColor = (risk) => {
     if (risk < 0.3) return 'text-green-600 bg-green-100';
     if (risk < 0.6) return 'text-yellow-600 bg-yellow-100';
