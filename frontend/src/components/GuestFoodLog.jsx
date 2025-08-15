@@ -193,13 +193,6 @@ const GuestFoodLog = () => {
         setNewFood('');
         setShowAddForm(false);
         
-        // Check for upgrade triggers
-        if (updatedFoods.length >= 5 || getTotalCalories() > 1500) {
-          setTimeout(() => {
-            setShowUpgradePrompt(true);
-          }, 5000);
-        }
-        
         // Show success feedback briefly
         setTimeout(() => setLastFeedback(null), 10000); // Clear after 10 seconds
         
