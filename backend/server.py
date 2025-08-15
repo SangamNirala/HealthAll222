@@ -1928,16 +1928,34 @@ async def get_patient_engagement_dashboard(patient_id: str):
             engagement = engagement_obj.dict()
         
         # Get recent activity
-        recent_messages = await db.chat_messages.find(
+        recent_messages_cursor = db.chat_messages.find(
             {"sender_id": patient_id}
-        ).sort("timestamp", -1).limit(5).to_list(length=5)
+        ).sort("timestamp", -1).limit(5)
+        recent_messages = await recent_messages_cursor.to_list(length=5)
         
-        recent_appointments = await db.consultation_sessions.find(
+        # Convert ObjectId to string for recent messages
+        for msg in recent_messages:
+            if "_id" in msg:
+                msg["_id"] = str(msg["_id"])
+        
+        recent_appointments_cursor = db.consultation_sessions.find(
             {"patient_id": patient_id}
-        ).sort("scheduled_time", -1).limit(3).to_list(length=3)
+        ).sort("scheduled_time", -1).limit(3)
+        recent_appointments = await recent_appointments_cursor.to_list(length=3)
+        
+        # Convert ObjectId to string for recent appointments
+        for apt in recent_appointments:
+            if "_id" in apt:
+                apt["_id"] = str(apt["_id"])
         
         # Get educational content views
-        content_views = await db.educational_content.find().limit(10).to_list(length=10)
+        content_views_cursor = db.educational_content.find().limit(10)
+        content_views = await content_views_cursor.to_list(length=10)
+        
+        # Convert ObjectId to string for content views
+        for content in content_views:
+            if "_id" in content:
+                content["_id"] = str(content["_id"])
         
         dashboard_data = {
             "engagement_score": engagement.get("engagement_score", 0.0),
