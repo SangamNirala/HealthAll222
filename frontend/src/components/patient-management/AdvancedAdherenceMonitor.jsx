@@ -594,10 +594,10 @@ const AdvancedAdherenceMonitor = () => {
                     <h4 className="font-semibold mb-4">Comparative Metrics</h4>
                     <ResponsiveContainer width="100%" height={200}>
                       <BarChart data={[
-                        { category: 'Patient', value: displayData.overall_adherence },
-                        { category: 'Similar Conditions', value: displayData.population_comparison.similar_conditions },
-                        { category: 'Age Group', value: displayData.population_comparison.age_group },
-                        { category: 'Overall Average', value: displayData.population_comparison.overall_average }
+                        { category: 'Patient', value: safeDisplayData.overall_adherence },
+                        { category: 'Similar Conditions', value: safeDisplayData.population_comparison.similar_conditions },
+                        { category: 'Age Group', value: safeDisplayData.population_comparison.age_group },
+                        { category: 'Overall Average', value: safeDisplayData.population_comparison.overall_average }
                       ]}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="category" />
