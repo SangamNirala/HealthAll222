@@ -202,6 +202,7 @@ const InstantHealthAssessment = () => {
   };
 
   const processAssessment = async () => {
+    console.log('processAssessment called with responses:', responses);
     setIsProcessing(true);
     
     // Show processing animation with health messages
