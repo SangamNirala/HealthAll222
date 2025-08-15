@@ -1695,6 +1695,475 @@ manager = ConnectionManager()
 async def root():
     return {"message": "Health & Nutrition Platform API"}
 
+# ===== PHASE 1: VIRTUAL CONSULTATION API ENDPOINTS =====
+
+# WebSocket endpoint for real-time communication
+@app.websocket("/ws/consultation/{session_id}/{user_id}")
+async def websocket_consultation(websocket: WebSocket, session_id: str, user_id: str):
+    try:
+        await manager.connect(websocket, session_id, user_id)
+        
+        while True:
+            # Receive message from client
+            data = await websocket.receive_text()
+            message_data = json.loads(data)
+            
+            # Store message in database
+            chat_message = {
+                "id": str(uuid.uuid4()),
+                "session_id": session_id,
+                "sender_id": user_id,
+                "sender_type": message_data.get("sender_type", "patient"),
+                "message": message_data.get("message", ""),
+                "message_type": message_data.get("message_type", "text"),
+                "file_url": message_data.get("file_url"),
+                "timestamp": datetime.utcnow()
+            }
+            
+            await db.chat_messages.insert_one(chat_message)
+            
+            # Broadcast message to all participants in the session
+            broadcast_message = json.dumps({
+                "type": "chat_message",
+                "data": chat_message,
+                "timestamp": chat_message["timestamp"].isoformat()
+            })
+            
+            await manager.broadcast_to_session(broadcast_message, session_id)
+            
+    except WebSocketDisconnect:
+        manager.disconnect(session_id, user_id)
+    except Exception as e:
+        logger.error(f"WebSocket error: {str(e)}")
+        manager.disconnect(session_id, user_id)
+
+# Virtual Consultation Session Management
+@api_router.post("/virtual-consultation/sessions", response_model=ConsultationSession)
+async def create_consultation_session(session: ConsultationSessionCreate):
+    """Create a new virtual consultation session"""
+    try:
+        session_dict = session.dict()
+        session_obj = ConsultationSession(**session_dict)
+        
+        # Insert session into MongoDB
+        result = await db.consultation_sessions.insert_one(session_obj.dict())
+        session_obj.id = str(result.inserted_id)
+        
+        return session_obj
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create consultation session: {str(e)}")
+
+@api_router.get("/virtual-consultation/sessions/{session_id}")
+async def get_consultation_session(session_id: str):
+    """Get consultation session details"""
+    try:
+        session = await db.consultation_sessions.find_one({"session_id": session_id})
+        if not session:
+            raise HTTPException(status_code=404, detail="Consultation session not found")
+        
+        session["_id"] = str(session["_id"])
+        return session
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve session: {str(e)}")
+
+@api_router.post("/virtual-consultation/join/{session_id}")
+async def join_consultation_session(session_id: str, user_data: dict = Body(...)):
+    """Join a consultation session"""
+    try:
+        user_id = user_data.get("user_id")
+        user_type = user_data.get("user_type", "patient")  # patient or provider
+        
+        # Verify session exists
+        session = await db.consultation_sessions.find_one({"session_id": session_id})
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Update session status to ACTIVE if it's the first join
+        if session["status"] == "SCHEDULED":
+            await db.consultation_sessions.update_one(
+                {"session_id": session_id},
+                {
+                    "$set": {
+                        "status": "ACTIVE",
+                        "start_time": datetime.utcnow(),
+                        "updated_at": datetime.utcnow()
+                    }
+                }
+            )
+        
+        # Return session details and WebSocket connection info
+        return {
+            "session_id": session_id,
+            "status": "joined",
+            "websocket_url": f"/ws/consultation/{session_id}/{user_id}",
+            "user_type": user_type,
+            "session_details": {
+                "provider_id": session["provider_id"],
+                "patient_id": session["patient_id"],
+                "session_type": session["session_type"]
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to join session: {str(e)}")
+
+@api_router.post("/virtual-consultation/end/{session_id}")
+async def end_consultation_session(session_id: str, end_data: dict = Body(...)):
+    """End a consultation session"""
+    try:
+        # Update session status
+        update_data = {
+            "status": "COMPLETED",
+            "end_time": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
+        }
+        
+        # Add optional data
+        if "notes" in end_data:
+            update_data["notes"] = end_data["notes"]
+        if "recording_path" in end_data:
+            update_data["recording_path"] = end_data["recording_path"]
+        if "connection_quality" in end_data:
+            update_data["connection_quality"] = end_data["connection_quality"]
+        
+        result = await db.consultation_sessions.update_one(
+            {"session_id": session_id},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Disconnect all WebSocket connections for this session
+        if session_id in manager.consultation_rooms:
+            for connection in manager.consultation_rooms[session_id]:
+                try:
+                    await connection.close()
+                except:
+                    pass
+            del manager.consultation_rooms[session_id]
+        
+        return {"message": "Session ended successfully", "session_id": session_id}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to end session: {str(e)}")
+
+@api_router.get("/virtual-consultation/recordings/{session_id}")
+async def get_session_recording(session_id: str):
+    """Get session recording information"""
+    try:
+        session = await db.consultation_sessions.find_one({"session_id": session_id})
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        if not session.get("recording_path"):
+            return {"message": "No recording available for this session", "has_recording": False}
+        
+        # In a real implementation, you would check if the file exists and return download URL
+        return {
+            "has_recording": True,
+            "recording_path": session["recording_path"],
+            "session_duration": "N/A",  # Calculate from start_time and end_time
+            "file_size": "N/A"  # Get from file system
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get recording: {str(e)}")
+
+# Chat Message Management
+@api_router.get("/virtual-consultation/messages/{session_id}")
+async def get_session_messages(session_id: str):
+    """Get all chat messages for a consultation session"""
+    try:
+        cursor = db.chat_messages.find({"session_id": session_id}).sort("timestamp", 1)
+        messages = await cursor.to_list(length=None)
+        
+        # Convert ObjectId to string
+        for message in messages:
+            message["_id"] = str(message["_id"])
+        
+        return {"session_id": session_id, "messages": messages}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve messages: {str(e)}")
+
+@api_router.post("/virtual-consultation/messages")
+async def send_message(message: ChatMessageCreate):
+    """Send a chat message during consultation"""
+    try:
+        message_dict = message.dict()
+        message_obj = ChatMessage(**message_dict)
+        
+        # Insert message into MongoDB
+        result = await db.chat_messages.insert_one(message_obj.dict())
+        message_obj.id = str(result.inserted_id)
+        
+        return message_obj
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send message: {str(e)}")
+
+# ===== PHASE 1: PATIENT ENGAGEMENT API ENDPOINTS =====
+
+@api_router.get("/patient-engagement/dashboard/{patient_id}")
+async def get_patient_engagement_dashboard(patient_id: str):
+    """Get patient engagement dashboard data"""
+    try:
+        # Get engagement record
+        engagement = await db.patient_engagements.find_one({"patient_id": patient_id})
+        if not engagement:
+            # Create default engagement record
+            engagement_obj = PatientEngagement(patient_id=patient_id, provider_id="system")
+            await db.patient_engagements.insert_one(engagement_obj.dict())
+            engagement = engagement_obj.dict()
+        
+        # Get recent activity
+        recent_messages = await db.chat_messages.find(
+            {"sender_id": patient_id}
+        ).sort("timestamp", -1).limit(5).to_list(length=5)
+        
+        recent_appointments = await db.consultation_sessions.find(
+            {"patient_id": patient_id}
+        ).sort("scheduled_time", -1).limit(3).to_list(length=3)
+        
+        # Get educational content views
+        content_views = await db.educational_content.find().limit(10).to_list(length=10)
+        
+        dashboard_data = {
+            "engagement_score": engagement.get("engagement_score", 0.0),
+            "total_interactions": engagement.get("total_interactions", 0),
+            "goals_completed": engagement.get("goals_completed", 0),
+            "appointments_attended": engagement.get("appointments_attended", 0),
+            "messages_sent": len(recent_messages),
+            "recent_activity": {
+                "messages": recent_messages[:3],
+                "appointments": recent_appointments,
+                "last_interaction": engagement.get("last_interaction")
+            },
+            "recommended_content": content_views[:5],
+            "engagement_status": engagement.get("engagement_status", "ACTIVE")
+        }
+        
+        return dashboard_data
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get dashboard data: {str(e)}")
+
+@api_router.post("/patient-engagement/messages")
+async def send_engagement_message(message_data: dict = Body(...)):
+    """Send a message through patient engagement portal"""
+    try:
+        sender_id = message_data.get("sender_id")
+        recipient_id = message_data.get("recipient_id")
+        message_content = message_data.get("message")
+        message_type = message_data.get("message_type", "text")
+        
+        # Create message record
+        message = {
+            "id": str(uuid.uuid4()),
+            "sender_id": sender_id,
+            "recipient_id": recipient_id,
+            "message": message_content,
+            "message_type": message_type,
+            "read_status": False,
+            "timestamp": datetime.utcnow()
+        }
+        
+        # Store message
+        result = await db.engagement_messages.insert_one(message)
+        message["_id"] = str(result.inserted_id)
+        
+        # Update engagement metrics
+        await db.patient_engagements.update_one(
+            {"patient_id": sender_id},
+            {
+                "$inc": {"messages_sent": 1, "total_interactions": 1},
+                "$set": {"last_interaction": datetime.utcnow()}
+            }
+        )
+        
+        return {"message": "Message sent successfully", "message_id": message["id"]}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send message: {str(e)}")
+
+@api_router.get("/patient-engagement/messages/{patient_id}")
+async def get_patient_messages(patient_id: str):
+    """Get messages for a patient"""
+    try:
+        # Get messages sent by or to the patient
+        cursor = db.engagement_messages.find({
+            "$or": [
+                {"sender_id": patient_id},
+                {"recipient_id": patient_id}
+            ]
+        }).sort("timestamp", -1)
+        
+        messages = await cursor.to_list(length=100)  # Limit to recent 100 messages
+        
+        # Convert ObjectId to string
+        for message in messages:
+            message["_id"] = str(message["_id"])
+        
+        return {"patient_id": patient_id, "messages": messages}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve messages: {str(e)}")
+
+@api_router.get("/patient-engagement/educational-content")
+async def get_educational_content(
+    category: Optional[str] = None,
+    content_type: Optional[str] = None,
+    difficulty_level: Optional[str] = None,
+    featured_only: bool = False
+):
+    """Get educational content for patients"""
+    try:
+        # Build query filter
+        filter_query = {}
+        if category:
+            filter_query["category"] = category
+        if content_type:
+            filter_query["content_type"] = content_type
+        if difficulty_level:
+            filter_query["difficulty_level"] = difficulty_level
+        if featured_only:
+            filter_query["is_featured"] = True
+        
+        # Get content
+        cursor = db.educational_content.find(filter_query).sort("created_at", -1)
+        content = await cursor.to_list(length=50)
+        
+        # Convert ObjectId to string
+        for item in content:
+            item["_id"] = str(item["_id"])
+        
+        return {"content": content, "total_count": len(content)}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve educational content: {str(e)}")
+
+@api_router.post("/patient-engagement/educational-content")
+async def create_educational_content(content: EducationalContentCreate):
+    """Create new educational content"""
+    try:
+        content_dict = content.dict()
+        content_obj = EducationalContent(**content_dict)
+        
+        # Insert content into MongoDB
+        result = await db.educational_content.insert_one(content_obj.dict())
+        content_obj.id = str(result.inserted_id)
+        
+        return content_obj
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create educational content: {str(e)}")
+
+@api_router.post("/patient-engagement/engagement-tracking")
+async def track_patient_engagement(tracking_data: dict = Body(...)):
+    """Track patient engagement activities"""
+    try:
+        patient_id = tracking_data.get("patient_id")
+        activity_type = tracking_data.get("activity_type")  # content_view, goal_completion, appointment_attendance
+        activity_data = tracking_data.get("activity_data", {})
+        
+        # Update engagement metrics based on activity type
+        update_fields = {
+            "last_interaction": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
+        }
+        
+        increment_fields = {"total_interactions": 1}
+        
+        if activity_type == "content_view":
+            increment_fields["educational_content_viewed"] = 1
+        elif activity_type == "goal_completion":
+            increment_fields["goals_completed"] = 1
+        elif activity_type == "appointment_attendance":
+            increment_fields["appointments_attended"] = 1
+        
+        # Calculate engagement score (simple formula - can be enhanced)
+        engagement_record = await db.patient_engagements.find_one({"patient_id": patient_id})
+        if engagement_record:
+            current_score = engagement_record.get("engagement_score", 0.0)
+            # Simple engagement score calculation
+            score_increment = 0.5 if activity_type == "content_view" else 1.0
+            new_score = min(100.0, current_score + score_increment)
+            update_fields["engagement_score"] = new_score
+        
+        # Update or create engagement record
+        await db.patient_engagements.update_one(
+            {"patient_id": patient_id},
+            {"$set": update_fields, "$inc": increment_fields},
+            upsert=True
+        )
+        
+        return {"message": "Engagement tracked successfully", "activity_type": activity_type}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to track engagement: {str(e)}")
+
+@api_router.get("/patient-engagement/progress/{patient_id}")
+async def get_patient_progress(patient_id: str):
+    """Get patient progress data"""
+    try:
+        # Get progress records for the patient
+        cursor = db.patient_progress.find({"patient_id": patient_id}).sort("last_updated", -1)
+        progress_records = await cursor.to_list(length=None)
+        
+        # Convert ObjectId to string
+        for record in progress_records:
+            record["_id"] = str(record["_id"])
+        
+        # Calculate overall progress summary
+        total_goals = len(progress_records)
+        completed_goals = len([r for r in progress_records if r.get("progress_percentage", 0) >= 100])
+        average_progress = np.mean([r.get("progress_percentage", 0) for r in progress_records]) if progress_records else 0
+        
+        progress_summary = {
+            "patient_id": patient_id,
+            "total_goals": total_goals,
+            "completed_goals": completed_goals,
+            "average_progress": round(average_progress, 2),
+            "progress_records": progress_records,
+            "last_updated": datetime.utcnow()
+        }
+        
+        return progress_summary
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get patient progress: {str(e)}")
+
+@api_router.post("/patient-engagement/progress")
+async def create_patient_progress(progress: PatientProgressCreate):
+    """Create a new patient progress record"""
+    try:
+        progress_dict = progress.dict()
+        progress_obj = PatientProgress(**progress_dict)
+        
+        # Calculate initial progress percentage if target is set
+        if progress_obj.target_value and progress_obj.target_value > 0:
+            progress_obj.progress_percentage = min(100, (progress_obj.current_value / progress_obj.target_value) * 100)
+        
+        # Insert progress record into MongoDB
+        result = await db.patient_progress.insert_one(progress_obj.dict())
+        progress_obj.id = str(result.inserted_id)
+        
+        return progress_obj
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create patient progress: {str(e)}")
+
 # ===== PROFILE MANAGEMENT API ENDPOINTS =====
 
 # Patient Profile Endpoints
