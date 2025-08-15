@@ -66,7 +66,51 @@ const PersonalInsights = ({
 
   useEffect(() => {
     fetchPersonalInsights();
+    fetchMLPredictions();
   }, [userId, activeTimeframe]);
+
+  const fetchMLPredictions = async () => {
+    try {
+      // Sample intake data for predictions
+      const sampleIntakeData = {
+        calories: 2000,
+        protein_g: 100,
+        carbs_g: 250,
+        fat_g: 70,
+        sleep_hours: 7.5,
+        exercise_minutes: 30,
+        stress_level: 5,
+        water_intake_ml: 2500,
+        caffeine_mg: 100,
+        meal_timing_consistency: 0.8
+      };
+
+      const sampleDailyChoices = {
+        caffeine_timing: 'morning',
+        meal_timing: 'regular',
+        exercise_timing: 'afternoon',
+        screen_time: 2,
+        stress_level: 5,
+        alcohol_intake: 0
+      };
+
+      // Fetch all ML predictions
+      const [energyResult, moodResult, sleepResult, weeklyResult] = await Promise.all([
+        predictiveAnalyticsService.predictEnergy(sampleIntakeData),
+        predictiveAnalyticsService.analyzeMoodFoodCorrelation(userId, 30),
+        predictiveAnalyticsService.analyzeSleepImpact(sampleDailyChoices),
+        predictiveAnalyticsService.getWeeklyHealthPatterns(userId, 4)
+      ]);
+
+      if (energyResult.success) setEnergyPrediction(energyResult.data);
+      if (moodResult.success) setMoodCorrelation(moodResult.data);
+      if (sleepResult.success) setSleepImpact(sleepResult.data);
+      if (weeklyResult.success) setWeeklyPatterns(weeklyResult.data);
+
+    } catch (error) {
+      console.error('Error fetching ML predictions:', error);
+    }
+  };
 
   const fetchPersonalInsights = async () => {
     try {
