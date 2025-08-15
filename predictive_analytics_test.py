@@ -399,6 +399,7 @@ class PredictiveAnalyticsAPITester:
         
         # Test 1: Increase protein scenario
         protein_scenario_data = {
+            "user_id": "demo-patient-123",
             "base_data": {
                 "calories": 2000,
                 "protein_g": 80,
