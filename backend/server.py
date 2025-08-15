@@ -35,13 +35,20 @@ from pathlib import Path
 from ai_services import get_nutrition_insights, get_smart_food_suggestions, get_health_correlations, get_clinical_insights, get_goal_insights, get_achievement_insights, AIServiceManager
 from food_recognition_service import FoodRecognitionService
 
-# Import ML Models for Predictive Analytics
+# Import ML Models for Predictive Analytics (Phase 4 Enhanced)
 from ml_models import (
     energy_prediction_model,
     mood_correlation_engine, 
     sleep_impact_calculator,
     whatif_scenario_processor,
-    weekly_pattern_analyzer
+    weekly_pattern_analyzer,
+    # Phase 4 enhancements
+    global_performance_tracker,
+    global_feedback_integrator,
+    global_ab_testing,
+    get_model_performance_summary,
+    add_user_feedback_to_models,
+    trigger_continuous_learning
 )
 
 # Import OpenFDA and Provider Services
