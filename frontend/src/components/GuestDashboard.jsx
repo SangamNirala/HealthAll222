@@ -7,10 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { 
-  Zap, Clock, Eye, UserX, Plus, Apple, 
-  Target, Info, BookOpen, TrendingUp, Award,
-  Camera, Search, Edit, Heart, Calculator, Crown,
-  Utensils, Star, Activity, Sparkles
+  Search, Plus, Clock, Trash2, Target, Apple, 
+  Lightbulb, Heart, CheckCircle, Sparkles, 
+  TrendingUp, Info, AlertCircle, Zap, Crown,
+  Calculator, BookOpen, Award, Star, Activity,
+  User, Utensils, Settings, Brain, Camera,
+  Scan, BarChart3
 } from 'lucide-react';
 
 // Component: Quick Start Guide
