@@ -7788,6 +7788,155 @@ async def advanced_food_recognition(request: FoodImageRequest):
         logger.error(f"Advanced food recognition error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Food recognition failed: {str(e)}")
 
+# PHASE 2: PREDICTIVE ANALYTICS API ENDPOINTS
+
+@api_router.post("/ai/energy-prediction", response_model=EnergyPredictionResponse)
+async def predict_energy_levels(request: EnergyPredictionRequest):
+    """Predict daily energy levels based on food intake and lifestyle factors"""
+    try:
+        logger.info(f"Processing energy prediction for user: {request.user_id}")
+        
+        # Get energy prediction from ML model
+        prediction_result = energy_prediction_model.predict_energy(request.intake_data)
+        
+        prediction_date = request.prediction_date or datetime.utcnow().strftime("%Y-%m-%d")
+        
+        return EnergyPredictionResponse(
+            user_id=request.user_id,
+            predicted_energy=prediction_result['predicted_energy'],
+            confidence=prediction_result['confidence'],
+            factors=prediction_result['factors'],
+            recommendations=prediction_result['recommendations'],
+            prediction_date=prediction_date,
+            model_accuracy=energy_prediction_model.model_accuracy
+        )
+        
+    except Exception as e:
+        logger.error(f"Error predicting energy levels: {e}")
+        raise HTTPException(status_code=500, detail=f"Energy prediction failed: {str(e)}")
+
+@api_router.post("/ai/mood-food-correlation", response_model=MoodFoodCorrelationResponse)  
+async def analyze_mood_food_correlation(request: MoodFoodCorrelationRequest):
+    """Analyze correlations between food intake and mood patterns"""
+    try:
+        logger.info(f"Analyzing mood-food correlation for user: {request.user_id}")
+        
+        # Get user data for correlation analysis
+        user_data = {
+            'user_id': request.user_id,
+            'timeframe_days': request.timeframe_days,
+            'daily_logs': []  # Would be populated from database in real implementation
+        }
+        
+        # Analyze mood-food correlations
+        correlation_result = mood_correlation_engine.analyze_mood_food_correlation(user_data)
+        
+        return MoodFoodCorrelationResponse(
+            user_id=request.user_id,
+            correlations=correlation_result['correlations'],
+            trigger_foods=correlation_result['trigger_foods'],
+            mood_predictors=correlation_result['mood_predictors'],
+            recommendations=correlation_result['recommendations'],
+            analysis_period=f"{request.timeframe_days} days",
+            confidence=correlation_result['confidence']
+        )
+        
+    except Exception as e:
+        logger.error(f"Error analyzing mood-food correlation: {e}")
+        raise HTTPException(status_code=500, detail=f"Mood correlation analysis failed: {str(e)}")
+
+@api_router.post("/ai/sleep-impact-analysis", response_model=SleepImpactResponse)
+async def analyze_sleep_impact(request: SleepImpactRequest):
+    """Analyze sleep quality impact based on daily choices"""
+    try:
+        logger.info(f"Analyzing sleep impact for user: {request.user_id}")
+        
+        # Calculate sleep impact using ML model
+        sleep_result = sleep_impact_calculator.calculate_sleep_impact(request.daily_choices)
+        
+        analysis_date = request.analysis_date or datetime.utcnow().strftime("%Y-%m-%d")
+        
+        return SleepImpactResponse(
+            user_id=request.user_id,
+            predicted_sleep_quality=sleep_result['predicted_sleep_quality'],
+            improvement_potential=sleep_result['improvement_potential'],
+            factor_analysis=sleep_result['factor_analysis'],
+            recommendations=sleep_result['recommendations'],
+            confidence=sleep_result['confidence'],
+            analysis_date=analysis_date
+        )
+        
+    except Exception as e:
+        logger.error(f"Error analyzing sleep impact: {e}")
+        raise HTTPException(status_code=500, detail=f"Sleep impact analysis failed: {str(e)}")
+
+@api_router.post("/ai/what-if-scenarios", response_model=WhatIfScenarioResponse)
+async def process_what_if_scenario(request: WhatIfScenarioRequest):
+    """Process interactive what-if scenarios for health predictions"""
+    try:
+        logger.info(f"Processing what-if scenario for user: {request.user_id}")
+        
+        # Process scenario with ML models
+        scenario_result = whatif_scenario_processor.process_scenario(
+            request.base_data, 
+            request.proposed_changes
+        )
+        
+        return WhatIfScenarioResponse(
+            user_id=request.user_id,
+            scenario_id=scenario_result['scenario_id'],
+            scenario_name=request.scenario_name,
+            changes_applied=scenario_result['changes_applied'],
+            current_state=scenario_result['current_state'],
+            predicted_state=scenario_result['predicted_state'],
+            impact_analysis=scenario_result['impact_analysis'],
+            recommendations=scenario_result['recommendations'],
+            confidence=scenario_result['confidence']
+        )
+        
+    except Exception as e:
+        logger.error(f"Error processing what-if scenario: {e}")
+        raise HTTPException(status_code=500, detail=f"What-if scenario processing failed: {str(e)}")
+
+@api_router.get("/ai/weekly-health-patterns/{user_id}", response_model=WeeklyHealthPattern)
+async def get_weekly_health_patterns(user_id: str, weeks_back: Optional[int] = 4):
+    """Get weekly health pattern analysis for a user"""
+    try:
+        logger.info(f"Analyzing weekly health patterns for user: {user_id}")
+        
+        # Generate sample weekly data (in real implementation, fetch from database)
+        weeks_data = []
+        for i in range(weeks_back * 7):
+            day_data = {
+                'date': (datetime.utcnow() - timedelta(days=i)).strftime("%Y-%m-%d"),
+                'calories': 1800 + np.random.randint(-200, 300),
+                'protein': 100 + np.random.randint(-20, 30),
+                'energy_level': 6 + np.random.randint(-2, 3),
+                'sleep_hours': 7.5 + np.random.uniform(-1.5, 1.5),
+                'exercise_minutes': np.random.randint(0, 90),
+                'mood': 7 + np.random.randint(-2, 3),
+                'stress_level': np.random.randint(3, 8)
+            }
+            weeks_data.append(day_data)
+        
+        # Analyze weekly patterns
+        pattern_result = weekly_pattern_analyzer.analyze_weekly_patterns(user_id, weeks_data)
+        
+        return WeeklyHealthPattern(
+            user_id=pattern_result['user_id'],
+            analysis_period=pattern_result['analysis_period'],
+            patterns=pattern_result['patterns'],
+            insights=pattern_result['insights'],
+            anomalies=pattern_result['anomalies'],
+            recommendations=pattern_result['recommendations'],
+            trend_direction=pattern_result['trend_direction'],
+            confidence=pattern_result['confidence']
+        )
+        
+    except Exception as e:
+        logger.error(f"Error analyzing weekly health patterns: {e}")
+        raise HTTPException(status_code=500, detail=f"Weekly pattern analysis failed: {str(e)}")
+
 @api_router.post("/ai/batch-food-analysis") 
 async def batch_food_analysis(request: BatchFoodAnalysisRequest):
     """Process multiple food images in sequence for meal planning"""
