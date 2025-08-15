@@ -1926,6 +1926,10 @@ async def get_patient_engagement_dashboard(patient_id: str):
             engagement_obj = PatientEngagement(patient_id=patient_id, provider_id="system")
             await db.patient_engagements.insert_one(engagement_obj.dict())
             engagement = engagement_obj.dict()
+        else:
+            # Convert ObjectId to string
+            if "_id" in engagement:
+                engagement["_id"] = str(engagement["_id"])
         
         # Get recent activity
         recent_messages_cursor = db.chat_messages.find(
