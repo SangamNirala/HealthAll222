@@ -251,7 +251,7 @@ class ABTestingFramework:
             return 'tie'
 
 class EnergyPredictionModel:
-    """Predicts daily energy levels based on food intake, sleep, and activity"""
+    """Enhanced Energy Prediction Model with continuous learning and performance tracking"""
     
     def __init__(self):
         self.model = LinearRegression()
@@ -259,6 +259,207 @@ class EnergyPredictionModel:
         self.is_trained = False
         self.feature_importance = {}
         self.model_accuracy = 0.0
+        self.version = "1.0"
+        
+        # Phase 4 enhancements
+        self.performance_tracker = ModelPerformanceTracker()
+        self.feedback_integrator = UserFeedbackIntegrator()
+        self.ab_testing = ABTestingFramework()
+        self.training_history = []
+        self.feature_engineering_pipeline = None
+        
+        # Alternative models for A/B testing
+        self.model_variants = {
+            'linear': LinearRegression(),
+            'ridge': Ridge(alpha=1.0),
+            'random_forest': RandomForestRegressor(n_estimators=50, random_state=42)
+        }
+        self.current_variant = 'linear'
+        
+    def enhanced_feature_engineering(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Advanced feature engineering pipeline"""
+        enhanced_df = df.copy()
+        
+        # Interaction features
+        enhanced_df['protein_carbs_ratio'] = enhanced_df['protein_g'] / (enhanced_df['carbs_g'] + 1)
+        enhanced_df['calorie_density'] = enhanced_df['calories'] / (enhanced_df['protein_g'] + enhanced_df['carbs_g'] + enhanced_df['fat_g'] + 1)
+        enhanced_df['sleep_exercise_interaction'] = enhanced_df['sleep_hours'] * enhanced_df['exercise_minutes']
+        enhanced_df['stress_caffeine_interaction'] = enhanced_df['stress_level'] * enhanced_df['caffeine_mg']
+        
+        # Polynomial features for key variables
+        enhanced_df['sleep_squared'] = enhanced_df['sleep_hours'] ** 2
+        enhanced_df['exercise_log'] = np.log1p(enhanced_df['exercise_minutes'])
+        
+        # Time-based features (if timestamp available)
+        if 'timestamp' in enhanced_df.columns:
+            enhanced_df['hour_of_day'] = pd.to_datetime(enhanced_df['timestamp']).dt.hour
+            enhanced_df['day_of_week'] = pd.to_datetime(enhanced_df['timestamp']).dt.dayofweek
+            enhanced_df['is_weekend'] = (enhanced_df['day_of_week'] >= 5).astype(int)
+        
+        # Nutritional balance indicators
+        enhanced_df['macro_balance'] = np.abs(enhanced_df['protein_g'] * 4 + enhanced_df['carbs_g'] * 4 + enhanced_df['fat_g'] * 9 - enhanced_df['calories']) / enhanced_df['calories']
+        enhanced_df['hydration_per_calorie'] = enhanced_df['water_intake_ml'] / enhanced_df['calories']
+        
+        return enhanced_df
+    
+    def continuous_learning_update(self, new_data: Dict[str, Any], actual_energy: float):
+        """Update model with new user data point"""
+        try:
+            # Log the feedback for performance tracking
+            prediction_id = f"{new_data.get('user_id', 'unknown')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            
+            # Get current prediction to compare with actual
+            current_prediction = self.predict_energy(new_data)['predicted_energy']
+            
+            # Log performance
+            self.performance_tracker.log_prediction(
+                'energy_prediction', 
+                current_prediction, 
+                actual_energy
+            )
+            
+            # Prepare data for incremental learning
+            if self.is_trained and len(self.training_history) < 100:
+                # Store new data point
+                data_point = {**new_data, 'energy_level': actual_energy, 'timestamp': datetime.now().isoformat()}
+                self.training_history.append(data_point)
+                
+                # Retrain if we have enough new data or performance is declining
+                performance_metrics = self.performance_tracker.calculate_accuracy('energy_prediction')
+                
+                if (len(self.training_history) >= 20 or 
+                    (performance_metrics.get('needs_retrain', False) and len(self.training_history) >= 10)):
+                    
+                    logger.info("Triggering model retraining due to new data or performance decline")
+                    self._retrain_with_new_data()
+            
+        except Exception as e:
+            logger.error(f"Error in continuous learning update: {e}")
+    
+    def _retrain_with_new_data(self):
+        """Retrain model with accumulated new data"""
+        try:
+            # Convert training history to DataFrame
+            new_df = pd.DataFrame(self.training_history)
+            
+            # Enhanced feature engineering
+            new_df_enhanced = self.enhanced_feature_engineering(new_df)
+            
+            # Get enhanced feature columns
+            base_features = ['calories', 'protein_g', 'carbs_g', 'fat_g', 'sleep_hours', 
+                           'exercise_minutes', 'stress_level', 'water_intake_ml', 
+                           'caffeine_mg', 'meal_timing_consistency']
+            
+            enhanced_features = [col for col in new_df_enhanced.columns 
+                               if col not in ['energy_level', 'timestamp'] and 
+                               not col.startswith('user_')]
+            
+            # Use enhanced features if available, fallback to base features
+            feature_cols = enhanced_features if len(enhanced_features) > len(base_features) else base_features
+            feature_cols = [col for col in feature_cols if col in new_df_enhanced.columns]
+            
+            X_new = new_df_enhanced[feature_cols].fillna(0)
+            y_new = new_df_enhanced['energy_level']
+            
+            # Combine with existing synthetic data for stability
+            if hasattr(self, '_original_training_data'):
+                X_combined = np.vstack([self._original_training_data[0], X_new])
+                y_combined = np.concatenate([self._original_training_data[1], y_new])
+            else:
+                X_combined, y_combined = X_new, y_new
+            
+            # Retrain model
+            X_scaled = self.scaler.fit_transform(X_combined)
+            
+            # Try different model variants and select best performing
+            best_score = -np.inf
+            best_model = None
+            best_variant = self.current_variant
+            
+            for variant_name, model in self.model_variants.items():
+                try:
+                    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y_combined, test_size=0.2, random_state=42)
+                    model.fit(X_train, y_train)
+                    score = model.score(X_test, y_test)
+                    
+                    if score > best_score:
+                        best_score = score
+                        best_model = model
+                        best_variant = variant_name
+                        
+                except Exception as e:
+                    logger.warning(f"Failed to train variant {variant_name}: {e}")
+                    continue
+            
+            if best_model is not None:
+                self.model = best_model
+                self.current_variant = best_variant
+                self.model_accuracy = best_score
+                
+                # Update feature importance
+                if hasattr(self.model, 'coef_'):
+                    self.feature_importance = dict(zip(feature_cols, abs(self.model.coef_)))
+                elif hasattr(self.model, 'feature_importances_'):
+                    self.feature_importance = dict(zip(feature_cols, self.model.feature_importances_))
+                
+                # Clear training history after successful retrain
+                self.training_history = []
+                
+                logger.info(f"Model retrained successfully with {best_variant} variant. New accuracy: {best_score:.3f}")
+                
+        except Exception as e:
+            logger.error(f"Error retraining model: {e}")
+    
+    def get_model_performance_metrics(self) -> Dict[str, Any]:
+        """Get comprehensive performance metrics"""
+        performance = self.performance_tracker.calculate_accuracy('energy_prediction')
+        satisfaction = self.feedback_integrator.get_model_satisfaction('energy_prediction')
+        
+        return {
+            'model_version': self.version,
+            'current_variant': self.current_variant,
+            'base_accuracy': self.model_accuracy,
+            'recent_performance': performance,
+            'user_satisfaction': satisfaction,
+            'training_data_points': len(self.training_history),
+            'total_predictions': len(self.performance_tracker.performance_history['energy_prediction'])
+        }
+    
+    def add_user_feedback(self, prediction_id: str, user_rating: float, 
+                         actual_energy: Optional[float] = None, feedback_text: str = ""):
+        """Add user feedback for model improvement"""
+        self.feedback_integrator.add_feedback(
+            'energy_prediction', prediction_id, user_rating, actual_energy, feedback_text
+        )
+    
+    def start_ab_test(self, test_name: str = "energy_model_variants"):
+        """Start A/B test between model variants"""
+        model_a_config = {'variant': 'linear', 'version': self.version}
+        model_b_config = {'variant': 'random_forest', 'version': f"{self.version}_rf"}
+        
+        self.ab_testing.create_test(test_name, model_a_config, model_b_config, 0.3)
+        logger.info(f"Started A/B test: {test_name}")
+    
+    def get_prediction_for_ab_test(self, intake_data: Dict[str, Any], 
+                                  user_id: str, test_name: str = "energy_model_variants") -> Dict[str, Any]:
+        """Get prediction considering A/B test assignment"""
+        use_variant_b = self.ab_testing.should_use_model_b(test_name, user_id)
+        
+        if use_variant_b and 'random_forest' in self.model_variants:
+            # Use random forest variant
+            model_to_use = self.model_variants['random_forest']
+            variant_used = 'B'
+        else:
+            # Use current model (variant A)
+            model_to_use = self.model
+            variant_used = 'A'
+        
+        # Get prediction using selected model
+        result = self.predict_energy(intake_data, specific_model=model_to_use)
+        result['ab_test_variant'] = variant_used
+        result['test_name'] = test_name
+        
+        return result
         
     def generate_sample_data(self, n_samples=1000):
         """Generate synthetic training data for energy prediction"""
