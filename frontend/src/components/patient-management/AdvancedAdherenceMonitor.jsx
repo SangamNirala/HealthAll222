@@ -395,7 +395,7 @@ const AdvancedAdherenceMonitor = () => {
                   <div>
                     <h4 className="font-semibold mb-3">By Category</h4>
                     <div className="space-y-3">
-                      {Object.entries(displayData.adherence_types).map(([type, data]) => (
+                      {Object.entries(safeDisplayData.adherence_types).map(([type, data]) => (
                         <div key={type} className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <span className="capitalize font-medium">{type}</span>
