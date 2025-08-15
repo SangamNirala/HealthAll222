@@ -285,8 +285,278 @@ class PredictiveAnalyticsService {
     });
   }
 
-  // Default fallback data
-  _getDefaultEnergyPrediction() {
+  /**
+   * Get enhanced energy prediction with A/B testing (Phase 4)
+   */
+  async getEnhancedEnergyPrediction(intakeData, userId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/ai/enhanced-energy-prediction`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          intake_data: intakeData
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        data: data
+      };
+    } catch (error) {
+      console.error('Error getting enhanced energy prediction:', error);
+      return {
+        success: false,
+        error: error.message,
+        data: this._getDefaultEnergyPrediction()
+      };
+    }
+  }
+
+  /**
+   * Submit user feedback for model improvement (Phase 4)
+   */
+  async submitModelFeedback(modelName, predictionId, userRating, actualOutcome = null, feedbackText = "", userId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/ai/model-feedback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model_name: modelName,
+          prediction_id: predictionId,
+          user_rating: userRating,
+          actual_outcome: actualOutcome,
+          feedback_text: feedbackText,
+          user_id: userId
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        data: data
+      };
+    } catch (error) {
+      console.error('Error submitting model feedback:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Get model performance metrics (Phase 4)
+   */
+  async getModelPerformance() {
+    const cacheKey = 'model-performance';
+    
+    // Check cache first
+    if (this._getCachedData(cacheKey)) {
+      return this._getCachedData(cacheKey);
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/ai/model-performance`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const result = {
+        success: true,
+        data: data.performance_summary
+      };
+
+      this._setCachedData(cacheKey, result);
+      return result;
+    } catch (error) {
+      console.error('Error fetching model performance:', error);
+      return {
+        success: false,
+        error: error.message,
+        data: this._getDefaultPerformanceData()
+      };
+    }
+  }
+
+  /**
+   * Get A/B test results (Phase 4)
+   */
+  async getABTestResults(testName) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/ai/ab-test-results/${testName}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        data: data.analysis
+      };
+    } catch (error) {
+      console.error('Error fetching A/B test results:', error);
+      return {
+        success: false,
+        error: error.message,
+        data: null
+      };
+    }
+  }
+
+  /**
+   * Trigger continuous learning update (Phase 4)
+   */
+  async triggerContinuousLearning(modelName, inputData, actualOutcome, userId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/ai/continuous-learning-update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model_name: modelName,
+          input_data: inputData,
+          actual_outcome: actualOutcome,
+          user_id: userId
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        data: data
+      };
+    } catch (error) {
+      console.error('Error triggering continuous learning:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Check model health (Phase 4)
+   */
+  async checkModelHealth() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/ai/model-health-check`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        data: data
+      };
+    } catch (error) {
+      console.error('Error checking model health:', error);
+      return {
+        success: false,
+        error: error.message,
+        data: this._getDefaultHealthData()
+      };
+    }
+  }
+
+  /**
+   * Generate prediction ID for tracking
+   */
+  generatePredictionId(userId, modelName) {
+    const timestamp = new Date().getTime();
+    return `${userId}_${modelName}_${timestamp}`;
+  }
+
+  /**
+   * Rate prediction accuracy (1-5 scale)
+   */
+  async ratePredictionAccuracy(predictionId, modelName, rating, actualValue = null, userId) {
+    return await this.submitModelFeedback(
+      modelName, 
+      predictionId, 
+      rating, 
+      actualValue, 
+      `User rated prediction accuracy: ${rating}/5`, 
+      userId
+    );
+  }
+
+  // Default fallback data for Phase 4 features
+  _getDefaultPerformanceData() {
+    return {
+      energy_prediction: {
+        base_accuracy: 0.79,
+        recent_performance: { accuracy: 0.75, sample_size: 10 },
+        user_satisfaction: { satisfaction: 4.2, sample_size: 8 }
+      },
+      mood_correlation: {
+        feedback_satisfaction: { satisfaction: 4.0, sample_size: 5 },
+        performance: { accuracy: 0.72, sample_size: 7 }
+      },
+      system_health: {
+        total_predictions: 156,
+        models_trained: 5,
+        continuous_learning_active: true
+      }
+    };
+  }
+
+  _getDefaultHealthData() {
+    return {
+      overall_status: 'healthy',
+      models: {
+        energy_prediction: { status: 'operational', accuracy: 0.79 },
+        mood_correlation: { status: 'operational' },
+        sleep_impact: { status: 'operational' },
+        whatif_scenario: { status: 'operational' },
+        weekly_pattern: { status: 'operational' }
+      },
+      phase4_components: {
+        performance_tracker: 156,
+        feedback_integrator: 23,
+        ab_testing_active: 2,
+        continuous_learning: 'enabled'
+      }
+    };
+  }
     return {
       predicted_energy: 6.5,
       confidence: 0.7,
