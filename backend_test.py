@@ -8683,6 +8683,430 @@ class HealthPlatformAPITester:
         
         return success
 
+    def test_patient_management_apis(self):
+        """Test Patient Management API endpoints as requested in review"""
+        print("\n📋 Testing Patient Management API Endpoints...")
+        
+        # Use the specified test IDs from the review request
+        provider_id = "provider-123"
+        patient_id = "patient-456"
+        
+        # Test Smart Patient Assignment APIs
+        assignment_success = self.test_smart_patient_assignment_apis(provider_id, patient_id)
+        
+        # Test Real-Time Progress APIs
+        progress_success = self.test_real_time_progress_apis(provider_id, patient_id)
+        
+        # Test Intelligent Meal Planning APIs
+        meal_planning_success = self.test_intelligent_meal_planning_apis(provider_id, patient_id)
+        
+        return assignment_success and progress_success and meal_planning_success
+
+    def test_smart_patient_assignment_apis(self, provider_id, patient_id):
+        """Test Smart Patient Assignment APIs"""
+        print("\n🎯 Testing Smart Patient Assignment APIs...")
+        
+        # Test 1: POST /api/provider/patient-management/assignments (create assignment)
+        assignment_data = {
+            "patient_id": patient_id,
+            "provider_id": provider_id,
+            "assignment_type": "routine",
+            "priority": "MEDIUM",
+            "assignment_reason": "Regular nutrition consultation and meal planning review",
+            "estimated_duration": 60,
+            "patient_condition": "Type 2 Diabetes with weight management goals",
+            "required_expertise": ["nutrition_counseling", "diabetes_management"],
+            "special_instructions": "Patient prefers morning appointments and has dietary restrictions"
+        }
+        
+        success1, assignment_response = self.run_test(
+            "Create Patient Assignment",
+            "POST",
+            "provider/patient-management/assignments",
+            200,
+            data=assignment_data
+        )
+        
+        assignment_id = None
+        if success1 and assignment_response:
+            assignment_id = assignment_response.get('id')
+            print(f"   ✅ Assignment created with ID: {assignment_id}")
+            
+            # Validate assignment response structure
+            expected_keys = ['id', 'patient_id', 'provider_id', 'assignment_type', 'priority', 'status', 'ai_match_score']
+            missing_keys = [key for key in expected_keys if key not in assignment_response]
+            if not missing_keys:
+                print(f"   ✅ Assignment response contains all required keys")
+                print(f"   📊 AI Match Score: {assignment_response.get('ai_match_score', 0.0)}")
+                print(f"   📋 Status: {assignment_response.get('status', 'UNKNOWN')}")
+            else:
+                print(f"   ❌ Assignment response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: GET /api/provider/patient-management/assignments/{provider_id} (get assignments)
+        success2, assignments_list = self.run_test(
+            "Get Provider Assignments",
+            "GET",
+            f"provider/patient-management/assignments/{provider_id}",
+            200
+        )
+        
+        if success2 and assignments_list:
+            assignments = assignments_list.get('assignments', [])
+            print(f"   ✅ Retrieved {len(assignments)} assignments for provider {provider_id}")
+            
+            # Validate assignments list structure
+            if assignments and len(assignments) > 0:
+                assignment = assignments[0]
+                expected_keys = ['id', 'patient_id', 'provider_id', 'assignment_type', 'priority', 'status']
+                missing_keys = [key for key in expected_keys if key not in assignment]
+                if not missing_keys:
+                    print(f"   ✅ Assignment list structure valid")
+                    print(f"   📋 Sample assignment: {assignment['assignment_type']} - {assignment['priority']} priority")
+                else:
+                    print(f"   ❌ Assignment object missing keys: {missing_keys}")
+                    success2 = False
+        
+        # Test 3: POST /api/provider/patient-management/ai-matching (AI matching)
+        ai_matching_data = {
+            "provider_id": provider_id,
+            "patient_conditions": ["diabetes", "obesity", "hypertension"],
+            "required_expertise": ["nutrition_counseling", "diabetes_management", "weight_management"],
+            "workload_preference": "balanced",
+            "priority_threshold": "MEDIUM"
+        }
+        
+        success3, ai_matching_response = self.run_test(
+            "AI Patient-Provider Matching",
+            "POST",
+            "provider/patient-management/ai-matching",
+            200,
+            data=ai_matching_data
+        )
+        
+        if success3 and ai_matching_response:
+            # Validate AI matching response structure
+            expected_keys = ['matches', 'match_scores', 'recommendations']
+            missing_keys = [key for key in expected_keys if key not in ai_matching_response]
+            if not missing_keys:
+                print(f"   ✅ AI matching response contains all required keys")
+                
+                matches = ai_matching_response.get('matches', [])
+                match_scores = ai_matching_response.get('match_scores', {})
+                print(f"   🤖 Found {len(matches)} potential matches")
+                
+                # Validate match scores are within expected range (0.0 to 1.0)
+                for patient, score in match_scores.items():
+                    if 0.0 <= score <= 1.0:
+                        print(f"   📊 Patient {patient}: Match score {score:.2f}")
+                    else:
+                        print(f"   ❌ Invalid match score for {patient}: {score}")
+                        success3 = False
+                        break
+            else:
+                print(f"   ❌ AI matching response missing keys: {missing_keys}")
+                success3 = False
+        
+        # Test 4: PUT /api/provider/patient-management/assignments/{assignment_id} (update assignment)
+        if assignment_id:
+            update_data = {
+                "status": "ACTIVE",
+                "scheduled_time": (datetime.utcnow() + timedelta(days=1)).isoformat(),
+                "assignment_notes": "Patient confirmed availability for tomorrow morning session"
+            }
+            
+            success4, update_response = self.run_test(
+                "Update Patient Assignment",
+                "PUT",
+                f"provider/patient-management/assignments/{assignment_id}",
+                200,
+                data=update_data
+            )
+            
+            if success4 and update_response:
+                print(f"   ✅ Assignment {assignment_id} updated successfully")
+                print(f"   📅 Scheduled time: {update_response.get('scheduled_time', 'Not set')}")
+                print(f"   📋 Status: {update_response.get('status', 'UNKNOWN')}")
+        else:
+            print(f"   ⚠️ Skipping assignment update test - no assignment ID available")
+            success4 = True  # Don't fail the overall test
+        
+        print(f"\n📊 Smart Patient Assignment API Test Summary:")
+        print(f"   ✅ Create assignment: {'PASS' if success1 else 'FAIL'}")
+        print(f"   ✅ Get provider assignments: {'PASS' if success2 else 'FAIL'}")
+        print(f"   ✅ AI matching: {'PASS' if success3 else 'FAIL'}")
+        print(f"   ✅ Update assignment: {'PASS' if success4 else 'FAIL'}")
+        
+        return success1 and success2 and success3 and success4
+
+    def test_real_time_progress_apis(self, provider_id, patient_id):
+        """Test Real-Time Progress APIs"""
+        print("\n📈 Testing Real-Time Progress APIs...")
+        
+        # Test 1: POST /api/provider/patient-management/progress (record progress)
+        progress_data = {
+            "patient_id": patient_id,
+            "provider_id": provider_id,
+            "metric_type": "NUTRITION",
+            "metric_name": "Daily Calorie Intake",
+            "value": 1850.0,
+            "unit": "calories",
+            "target_range": {"min": 1600.0, "max": 2000.0},
+            "measurement_method": "patient_reported",
+            "contextual_notes": "Patient reported following meal plan consistently, slight increase from last week"
+        }
+        
+        success1, progress_response = self.run_test(
+            "Record Patient Progress",
+            "POST",
+            "provider/patient-management/progress",
+            200,
+            data=progress_data
+        )
+        
+        if success1 and progress_response:
+            # Validate progress response structure
+            expected_keys = ['id', 'patient_id', 'provider_id', 'metric_type', 'metric_name', 'value', 'trend_direction']
+            missing_keys = [key for key in expected_keys if key not in progress_response]
+            if not missing_keys:
+                print(f"   ✅ Progress record response contains all required keys")
+                print(f"   📊 Metric: {progress_response.get('metric_name')} = {progress_response.get('value')} {progress_response.get('unit', '')}")
+                print(f"   📈 Trend: {progress_response.get('trend_direction', 'stable')}")
+                print(f"   🎯 Clinical Significance: {progress_response.get('clinical_significance', 'normal')}")
+            else:
+                print(f"   ❌ Progress response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: GET /api/provider/patient-management/progress/{patient_id} (get progress data)
+        success2, progress_data_response = self.run_test(
+            "Get Patient Progress Data",
+            "GET",
+            f"provider/patient-management/progress/{patient_id}",
+            200
+        )
+        
+        if success2 and progress_data_response:
+            # Validate progress data response structure
+            expected_keys = ['patient_id', 'progress_entries', 'summary_stats', 'recent_trends']
+            missing_keys = [key for key in expected_keys if key not in progress_data_response]
+            if not missing_keys:
+                print(f"   ✅ Progress data response contains all required keys")
+                
+                progress_entries = progress_data_response.get('progress_entries', [])
+                summary_stats = progress_data_response.get('summary_stats', {})
+                recent_trends = progress_data_response.get('recent_trends', {})
+                
+                print(f"   📊 Found {len(progress_entries)} progress entries")
+                print(f"   📈 Summary stats available: {list(summary_stats.keys())}")
+                print(f"   📉 Recent trends tracked: {list(recent_trends.keys())}")
+                
+                # Validate progress entry structure if entries exist
+                if progress_entries and len(progress_entries) > 0:
+                    entry = progress_entries[0]
+                    entry_keys = ['id', 'metric_type', 'metric_name', 'value', 'recorded_at', 'trend_direction']
+                    missing_entry_keys = [key for key in entry_keys if key not in entry]
+                    if not missing_entry_keys:
+                        print(f"   ✅ Progress entry structure valid")
+                    else:
+                        print(f"   ❌ Progress entry missing keys: {missing_entry_keys}")
+                        success2 = False
+            else:
+                print(f"   ❌ Progress data response missing keys: {missing_keys}")
+                success2 = False
+        
+        # Test 3: GET /api/provider/patient-management/progress-analytics/{patient_id} (get analytics)
+        success3, analytics_response = self.run_test(
+            "Get Patient Progress Analytics",
+            "GET",
+            f"provider/patient-management/progress-analytics/{patient_id}",
+            200
+        )
+        
+        if success3 and analytics_response:
+            # Validate analytics response structure
+            expected_keys = ['patient_id', 'metrics_summary', 'trend_analysis', 'predictive_insights', 'recommendations']
+            missing_keys = [key for key in expected_keys if key not in analytics_response]
+            if not missing_keys:
+                print(f"   ✅ Progress analytics response contains all required keys")
+                
+                metrics_summary = analytics_response.get('metrics_summary', {})
+                trend_analysis = analytics_response.get('trend_analysis', {})
+                predictive_insights = analytics_response.get('predictive_insights', [])
+                recommendations = analytics_response.get('recommendations', [])
+                
+                print(f"   📊 Metrics summarized: {list(metrics_summary.keys())}")
+                print(f"   📈 Trend analysis categories: {list(trend_analysis.keys())}")
+                print(f"   🔮 Predictive insights: {len(predictive_insights)} insights")
+                print(f"   💡 Recommendations: {len(recommendations)} recommendations")
+                
+                # Validate predictive insights structure
+                if predictive_insights and len(predictive_insights) > 0:
+                    insight = predictive_insights[0]
+                    insight_keys = ['metric', 'prediction', 'confidence', 'timeframe']
+                    missing_insight_keys = [key for key in insight_keys if key not in insight]
+                    if not missing_insight_keys:
+                        print(f"   ✅ Predictive insight structure valid")
+                        print(f"   🎯 Sample prediction: {insight.get('metric')} - {insight.get('prediction')} (confidence: {insight.get('confidence', 0):.2f})")
+                    else:
+                        print(f"   ❌ Predictive insight missing keys: {missing_insight_keys}")
+                        success3 = False
+            else:
+                print(f"   ❌ Progress analytics response missing keys: {missing_keys}")
+                success3 = False
+        
+        print(f"\n📊 Real-Time Progress API Test Summary:")
+        print(f"   ✅ Record progress: {'PASS' if success1 else 'FAIL'}")
+        print(f"   ✅ Get progress data: {'PASS' if success2 else 'FAIL'}")
+        print(f"   ✅ Get progress analytics: {'PASS' if success3 else 'FAIL'}")
+        
+        return success1 and success2 and success3
+
+    def test_intelligent_meal_planning_apis(self, provider_id, patient_id):
+        """Test Intelligent Meal Planning APIs"""
+        print("\n🍽️ Testing Intelligent Meal Planning APIs...")
+        
+        # Test 1: POST /api/provider/patient-management/meal-plans (create meal plan)
+        meal_plan_data = {
+            "patient_id": patient_id,
+            "provider_id": provider_id,
+            "plan_name": "Diabetes-Friendly Weight Management Plan",
+            "description": "7-day meal plan designed for Type 2 diabetes management with weight loss goals",
+            "dietary_restrictions": ["DIABETIC", "LOW_SODIUM"],
+            "calorie_target": 1800,
+            "macro_targets": {
+                "protein": 135.0,  # 30% of calories
+                "carbs": 180.0,    # 40% of calories  
+                "fat": 60.0        # 30% of calories
+            },
+            "micro_targets": {
+                "fiber": 35.0,
+                "sodium": 2000.0,
+                "potassium": 3500.0
+            },
+            "meal_preferences": ["mediterranean", "low_glycemic", "heart_healthy"],
+            "food_allergies": ["shellfish", "tree_nuts"],
+            "cultural_preferences": ["american", "mediterranean"],
+            "budget_range": "moderate",
+            "cooking_skill_level": "intermediate",
+            "preparation_time": "moderate",
+            "plan_duration": 7,
+            "meals_per_day": 3,
+            "snacks_per_day": 2
+        }
+        
+        success1, meal_plan_response = self.run_test(
+            "Create Intelligent Meal Plan",
+            "POST",
+            "provider/patient-management/meal-plans",
+            200,
+            data=meal_plan_data
+        )
+        
+        meal_plan_id = None
+        if success1 and meal_plan_response:
+            meal_plan_id = meal_plan_response.get('id')
+            print(f"   ✅ Meal plan created with ID: {meal_plan_id}")
+            
+            # Validate meal plan response structure
+            expected_keys = ['id', 'patient_id', 'provider_id', 'plan_name', 'calorie_target', 'macro_targets', 
+                           'ai_optimization_score', 'nutritional_completeness', 'meal_schedule', 'shopping_list']
+            missing_keys = [key for key in expected_keys if key not in meal_plan_response]
+            if not missing_keys:
+                print(f"   ✅ Meal plan response contains all required keys")
+                print(f"   🎯 Calorie target: {meal_plan_response.get('calorie_target')} calories")
+                print(f"   🤖 AI optimization score: {meal_plan_response.get('ai_optimization_score', 0.0):.2f}")
+                print(f"   📊 Nutritional completeness: {meal_plan_response.get('nutritional_completeness', 0.0):.2f}")
+                print(f"   📋 Plan duration: {meal_plan_response.get('plan_duration', 0)} days")
+                
+                # Validate meal schedule structure
+                meal_schedule = meal_plan_response.get('meal_schedule', [])
+                if meal_schedule and len(meal_schedule) > 0:
+                    print(f"   📅 Meal schedule contains {len(meal_schedule)} entries")
+                    sample_meal = meal_schedule[0]
+                    meal_keys = ['day', 'meal_type', 'recipe_name', 'calories', 'macros']
+                    missing_meal_keys = [key for key in meal_keys if key not in sample_meal]
+                    if not missing_meal_keys:
+                        print(f"   ✅ Meal schedule structure valid")
+                        print(f"   🍽️ Sample meal: {sample_meal.get('recipe_name')} ({sample_meal.get('meal_type')}) - {sample_meal.get('calories')} cal")
+                    else:
+                        print(f"   ❌ Meal schedule entry missing keys: {missing_meal_keys}")
+                        success1 = False
+                
+                # Validate shopping list structure
+                shopping_list = meal_plan_response.get('shopping_list', [])
+                if shopping_list and len(shopping_list) > 0:
+                    print(f"   🛒 Shopping list contains {len(shopping_list)} items")
+                    sample_item = shopping_list[0]
+                    item_keys = ['item', 'quantity', 'unit', 'category']
+                    missing_item_keys = [key for key in item_keys if key not in sample_item]
+                    if not missing_item_keys:
+                        print(f"   ✅ Shopping list structure valid")
+                        print(f"   🛍️ Sample item: {sample_item.get('quantity')} {sample_item.get('unit')} {sample_item.get('item')}")
+                    else:
+                        print(f"   ❌ Shopping list item missing keys: {missing_item_keys}")
+                        success1 = False
+            else:
+                print(f"   ❌ Meal plan response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: GET /api/provider/patient-management/meal-plans/{patient_id} (get meal plans)
+        success2, meal_plans_response = self.run_test(
+            "Get Patient Meal Plans",
+            "GET",
+            f"provider/patient-management/meal-plans/{patient_id}",
+            200
+        )
+        
+        if success2 and meal_plans_response:
+            # Validate meal plans list response structure
+            expected_keys = ['patient_id', 'meal_plans', 'active_plan', 'plan_history']
+            missing_keys = [key for key in expected_keys if key not in meal_plans_response]
+            if not missing_keys:
+                print(f"   ✅ Meal plans response contains all required keys")
+                
+                meal_plans = meal_plans_response.get('meal_plans', [])
+                active_plan = meal_plans_response.get('active_plan')
+                plan_history = meal_plans_response.get('plan_history', [])
+                
+                print(f"   📋 Found {len(meal_plans)} meal plans for patient {patient_id}")
+                print(f"   ✅ Active plan: {'Yes' if active_plan else 'No'}")
+                print(f"   📚 Plan history: {len(plan_history)} previous plans")
+                
+                # Validate meal plan structure in list
+                if meal_plans and len(meal_plans) > 0:
+                    plan = meal_plans[0]
+                    plan_keys = ['id', 'plan_name', 'calorie_target', 'dietary_restrictions', 'created_at', 'status']
+                    missing_plan_keys = [key for key in plan_keys if key not in plan]
+                    if not missing_plan_keys:
+                        print(f"   ✅ Meal plan list structure valid")
+                        print(f"   📝 Sample plan: {plan.get('plan_name')} - {plan.get('calorie_target')} cal")
+                        print(f"   🏷️ Dietary restrictions: {plan.get('dietary_restrictions', [])}")
+                        print(f"   📊 Status: {plan.get('status', 'UNKNOWN')}")
+                    else:
+                        print(f"   ❌ Meal plan in list missing keys: {missing_plan_keys}")
+                        success2 = False
+                
+                # Validate active plan structure if present
+                if active_plan:
+                    active_keys = ['id', 'plan_name', 'days_remaining', 'adherence_rate', 'next_meal']
+                    missing_active_keys = [key for key in active_keys if key not in active_plan]
+                    if not missing_active_keys:
+                        print(f"   ✅ Active plan structure valid")
+                        print(f"   🎯 Active: {active_plan.get('plan_name')} - {active_plan.get('days_remaining')} days remaining")
+                        print(f"   📈 Adherence rate: {active_plan.get('adherence_rate', 0):.1f}%")
+                    else:
+                        print(f"   ❌ Active plan missing keys: {missing_active_keys}")
+                        success2 = False
+            else:
+                print(f"   ❌ Meal plans response missing keys: {missing_keys}")
+                success2 = False
+        
+        print(f"\n📊 Intelligent Meal Planning API Test Summary:")
+        print(f"   ✅ Create meal plan: {'PASS' if success1 else 'FAIL'}")
+        print(f"   ✅ Get patient meal plans: {'PASS' if success2 else 'FAIL'}")
+        
+        return success1 and success2
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
