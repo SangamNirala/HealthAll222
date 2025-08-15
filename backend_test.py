@@ -9793,6 +9793,7 @@ class HealthPlatformAPITester:
         print(f"   Phase 2 Patient Management System: {'✅ PASSED' if phase2_patient_management_success else '❌ FAILED'}")
         print(f"   Patient Engagement APIs (REVIEW REQUEST): {'✅ PASSED' if patient_engagement_success else '❌ FAILED'}")
         print(f"   Virtual Consultation APIs (REVIEW REQUEST): {'✅ PASSED' if virtual_consultation_success else '❌ FAILED'}")
+        print(f"   Health Assessment APIs (REVIEW REQUEST): {'✅ PASSED' if health_assessment_success else '❌ FAILED'}")
         
         if self.tests_passed == self.tests_run:
             print("🎉 All tests passed!")
