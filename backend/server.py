@@ -1802,7 +1802,79 @@ class PatientRiskAnalysisCreate(BaseModel):
     patient_id: str
     provider_id: str
     risk_category: RiskCategory
-    time_horizon: str = "30_days"
+    analysis_date: datetime = Field(default_factory=datetime.utcnow)
+    additional_notes: str = ""
+
+# Predictive Analytics Models
+class EnergyPredictionRequest(BaseModel):
+    user_id: str
+    intake_data: Dict[str, Any]
+    prediction_date: Optional[str] = None
+
+class EnergyPredictionResponse(BaseModel):
+    user_id: str
+    predicted_energy: float
+    confidence: float
+    factors: Dict[str, Any]
+    recommendations: List[str]
+    prediction_date: str
+    model_accuracy: float
+
+class MoodFoodCorrelationRequest(BaseModel):
+    user_id: str
+    timeframe_days: Optional[int] = 30
+    include_mood_data: Optional[bool] = True
+
+class MoodFoodCorrelationResponse(BaseModel):
+    user_id: str
+    correlations: Dict[str, Any]
+    trigger_foods: Dict[str, Any] 
+    mood_predictors: Dict[str, Any]
+    recommendations: List[str]
+    analysis_period: str
+    confidence: float
+
+class SleepImpactRequest(BaseModel):
+    user_id: str
+    daily_choices: Dict[str, Any]
+    analysis_date: Optional[str] = None
+
+class SleepImpactResponse(BaseModel):
+    user_id: str
+    predicted_sleep_quality: float
+    improvement_potential: float
+    factor_analysis: Dict[str, Any]
+    recommendations: List[str]
+    confidence: float
+    analysis_date: str
+
+class WhatIfScenarioRequest(BaseModel):
+    user_id: str
+    base_data: Dict[str, Any]
+    proposed_changes: Dict[str, Any]
+    scenario_name: Optional[str] = "Custom Scenario"
+
+class WhatIfScenarioResponse(BaseModel):
+    user_id: str
+    scenario_id: str
+    scenario_name: str
+    changes_applied: Dict[str, Any]
+    current_state: Dict[str, Any]
+    predicted_state: Dict[str, Any]
+    impact_analysis: Dict[str, Any]
+    recommendations: List[str]
+    confidence: float
+
+class WeeklyHealthPattern(BaseModel):
+    user_id: str
+    analysis_period: str
+    patterns: Dict[str, Any]
+    insights: List[str]
+    anomalies: List[Dict[str, Any]]
+    recommendations: List[str] 
+    trend_direction: str
+    confidence: float
+    generated_at: datetime = Field(default_factory=datetime.utcnow)
 
 # Meal Planning Models
 class MealType(str, Enum):
