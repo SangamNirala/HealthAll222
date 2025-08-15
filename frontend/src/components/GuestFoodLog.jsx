@@ -597,9 +597,6 @@ const GuestFoodLog = () => {
             data={realtimeFeedback}
             onAction={(action) => {
               console.log('Food log feedback action:', action);
-              if (action === 'level_up' || action === 'try_suggestion') {
-                setShowUpgradePrompt(true);
-              }
             }}
             onDismiss={() => setRealtimeFeedback(null)}
             position="bottom-right"
