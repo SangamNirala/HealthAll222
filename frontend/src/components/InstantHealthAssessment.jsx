@@ -499,6 +499,7 @@ const InstantHealthAssessment = () => {
             </Button>
             
             <Button
+              type="button"
               onClick={nextStep}
               disabled={!isStepComplete()}
               className="bg-purple-600 hover:bg-purple-700"
