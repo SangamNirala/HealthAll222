@@ -55,6 +55,11 @@ import CaregiverTools from "./components/CaregiverTools";
 import FamilyGoalsCoordination from "./components/FamilyGoalsCoordination";
 import MultiProfileManagement from "./components/MultiProfileManagement";
 
+// Patient Management Components
+import SmartPatientAssignmentPanel from "./components/patient-management/SmartPatientAssignmentPanel";
+import RealTimeProgressDashboard from "./components/patient-management/RealTimeProgressDashboard";
+import IntelligentMealPlanGenerator from "./components/patient-management/IntelligentMealPlanGenerator";
+
 function App() {
   return (
     <div className="App">
