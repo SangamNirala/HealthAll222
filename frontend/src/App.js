@@ -138,6 +138,7 @@ function App() {
             <Route path="/guest-tips" element={<GuestNutritionTips />} />
             <Route path="/guest-goals" element={<GuestGoals />} />
             <Route path="/instant-health-check" element={<InstantHealthAssessment />} />
+            <Route path="/ai-food-scan" element={<AIFoodRecognition />} />
           </Routes>
         </BrowserRouter>
       </RoleProvider>
