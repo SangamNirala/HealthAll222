@@ -71,6 +71,10 @@ multidict>=6.6.0
 attrs>=25.3.0
 propcache>=0.3.0
 
+# Phase 1: Virtual Consultation & Patient Engagement Dependencies (FREE)
+websockets>=12.0.0
+python-socketio>=5.11.0
+
 
 scipy
 joblib
