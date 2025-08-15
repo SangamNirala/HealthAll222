@@ -276,6 +276,43 @@ const GuestFoodLog = () => {
     setShowAddForm(true);
   };
 
+  const handleAIFoodAnalyzed = (analysisResults) => {
+    // Process AI analysis results and add to food log
+    if (analysisResults && analysisResults.foods_detected) {
+      analysisResults.foods_detected.forEach(async (food) => {
+        const newEntry = {
+          id: Date.now() + Math.random(),
+          name: food.name,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          calories: food.nutrition?.calories || 200,
+          protein: food.nutrition?.protein || '10g',
+          carbs: food.nutrition?.carbs || '20g',
+          fat: food.nutrition?.fat || '8g',
+          fiber: food.nutrition?.fiber || '2g',
+          meal: getMealTime(),
+          api_feedback: food.health_insights || ['AI analysis completed'],
+          suggestions: ['Great choice! Keep logging your meals consistently.'],
+          food_score: food.food_score,
+          ai_analyzed: true
+        };
+
+        const updatedFoods = [...loggedFoods, newEntry];
+        setLoggedFoods(updatedFoods);
+        updateSessionTotals(updatedFoods);
+        localStorage.setItem(`guest_foods_${sessionId}`, JSON.stringify(updatedFoods));
+        
+        // Show success feedback
+        setRealtimeFeedback({
+          type: 'ai_food_logged',
+          foodName: food.name,
+          calories: food.nutrition?.calories,
+          grade: food.food_score?.grade,
+          insights: food.health_insights?.slice(0, 2) || []
+        });
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-violet-100">
       <SmartNavigation />
