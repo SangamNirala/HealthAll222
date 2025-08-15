@@ -372,6 +372,47 @@ class GuestProfileCreate(BaseModel):
     simple_goals: SimpleGoals
     session_expires: datetime
 
+# ===== HEALTH ASSESSMENT MODELS =====
+
+class HealthAssessmentRequest(BaseModel):
+    user_id: str  # guest session id
+    responses: Dict[str, Any]
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+class HealthScoreBreakdown(BaseModel):
+    activity: int
+    nutrition: int
+    stress_management: int
+    lifestyle: int
+
+class HealthRecommendation(BaseModel):
+    title: str
+    description: str
+    priority: str  # high, medium, low
+    impact: str
+    time_estimate: str
+    category: str
+
+class MealSuggestion(BaseModel):
+    name: str
+    meal_type: str  # breakfast, lunch, dinner
+    prep_time: str
+    difficulty: str  # easy, medium, hard
+    health_benefits: List[str]
+    estimated_nutrition: Dict[str, Any]
+    ingredients_preview: List[str]
+
+class HealthAssessmentResponse(BaseModel):
+    health_score: int
+    health_age: int
+    actual_age_range: str
+    score_breakdown: HealthScoreBreakdown
+    recommendations: List[HealthRecommendation]
+    meal_suggestions: List[MealSuggestion]
+    improvement_areas: List[str]
+    next_steps: List[str]
+    assessment_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+
 # ===== PROFILE COMPLETION HELPERS =====
 
 def calculate_profile_completion(profile: dict, profile_type: str) -> float:
