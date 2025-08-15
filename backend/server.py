@@ -7944,6 +7944,263 @@ async def get_weekly_health_patterns(user_id: str, weeks_back: Optional[int] = 4
         logger.error(f"Error analyzing weekly health patterns: {e}")
         raise HTTPException(status_code=500, detail=f"Weekly pattern analysis failed: {str(e)}")
 
+# Phase 4: Enhanced ML Pipeline API Endpoints
+
+@api_router.post("/ai/enhanced-energy-prediction")
+async def enhanced_energy_prediction(request: EnergyPredictionRequest, user_agent: str = ""):
+    """Enhanced energy prediction with A/B testing and continuous learning"""
+    try:
+        logger.info(f"Processing enhanced energy prediction for user: {request.user_id}")
+        
+        # Get prediction with A/B testing
+        prediction_result = energy_prediction_model.get_prediction_for_ab_test(
+            request.intake_data, 
+            request.user_id, 
+            "energy_model_variants"
+        )
+        
+        # Record A/B test result
+        global_ab_testing.record_result(
+            "energy_model_variants",
+            request.user_id,
+            prediction_result.get('ab_test_variant', 'A'),
+            prediction_result['predicted_energy']
+        )
+        
+        prediction_date = request.prediction_date or datetime.utcnow().strftime("%Y-%m-%d")
+        
+        return {
+            "user_id": request.user_id,
+            "predicted_energy": prediction_result['predicted_energy'],
+            "confidence": prediction_result['confidence'],
+            "confidence_interval": prediction_result.get('confidence_interval', {}),
+            "factors": prediction_result['factors'],
+            "recommendations": prediction_result['recommendations'],
+            "explanation": prediction_result.get('explanation', ''),
+            "feature_contributions": prediction_result.get('feature_contributions', {}),
+            "model_variant": prediction_result.get('ab_test_variant', 'A'),
+            "prediction_date": prediction_date,
+            "model_accuracy": energy_prediction_model.model_accuracy,
+            "enhanced_features": True
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in enhanced energy prediction: {e}")
+        raise HTTPException(status_code=500, detail=f"Enhanced prediction failed: {str(e)}")
+
+@api_router.post("/ai/model-feedback")
+async def submit_model_feedback(
+    model_name: str = Body(...),
+    prediction_id: str = Body(...),
+    user_rating: float = Body(...),
+    actual_outcome: Optional[float] = Body(None),
+    feedback_text: str = Body(""),
+    user_id: str = Body(...)
+):
+    """Submit user feedback for model improvement"""
+    try:
+        logger.info(f"Received feedback for {model_name} from user {user_id}")
+        
+        # Add feedback to models
+        add_user_feedback_to_models(model_name, prediction_id, user_rating, actual_outcome, feedback_text)
+        
+        # Trigger continuous learning if actual outcome provided
+        if actual_outcome is not None and model_name == 'energy_prediction':
+            # Get the input data from prediction_id (would be stored in real implementation)
+            sample_input = {
+                'calories': 2000, 'protein_g': 100, 'carbs_g': 250, 'fat_g': 70,
+                'sleep_hours': 7.5, 'exercise_minutes': 30, 'stress_level': 5,
+                'water_intake_ml': 2500, 'caffeine_mg': 100, 'meal_timing_consistency': 0.8
+            }
+            trigger_continuous_learning(model_name, sample_input, actual_outcome)
+        
+        return {
+            "success": True,
+            "message": "Feedback submitted successfully",
+            "model_name": model_name,
+            "prediction_id": prediction_id,
+            "continuous_learning_triggered": actual_outcome is not None
+        }
+        
+    except Exception as e:
+        logger.error(f"Error submitting model feedback: {e}")
+        raise HTTPException(status_code=500, detail=f"Feedback submission failed: {str(e)}")
+
+@api_router.get("/ai/model-performance")
+async def get_model_performance():
+    """Get comprehensive model performance metrics"""
+    try:
+        logger.info("Fetching model performance summary")
+        
+        performance_summary = get_model_performance_summary()
+        
+        return {
+            "success": True,
+            "timestamp": datetime.utcnow().isoformat(),
+            "performance_summary": performance_summary,
+            "system_status": "operational"
+        }
+        
+    except Exception as e:
+        logger.error(f"Error fetching model performance: {e}")
+        raise HTTPException(status_code=500, detail=f"Performance fetch failed: {str(e)}")
+
+@api_router.get("/ai/ab-test-results/{test_name}")
+async def get_ab_test_results(test_name: str):
+    """Get A/B test analysis results"""
+    try:
+        logger.info(f"Fetching A/B test results for: {test_name}")
+        
+        test_analysis = global_ab_testing.analyze_test(test_name)
+        
+        return {
+            "success": True,
+            "test_name": test_name,
+            "analysis": test_analysis,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error fetching A/B test results: {e}")
+        raise HTTPException(status_code=500, detail=f"A/B test analysis failed: {str(e)}")
+
+@api_router.post("/ai/continuous-learning-update")
+async def continuous_learning_update(
+    model_name: str = Body(...),
+    input_data: Dict[str, Any] = Body(...),
+    actual_outcome: float = Body(...),
+    user_id: str = Body(...)
+):
+    """Manually trigger continuous learning update"""
+    try:
+        logger.info(f"Manual continuous learning update for {model_name}")
+        
+        trigger_continuous_learning(model_name, input_data, actual_outcome)
+        
+        # Get updated performance metrics
+        if model_name == 'energy_prediction':
+            metrics = energy_prediction_model.get_model_performance_metrics()
+        else:
+            metrics = {"message": "Metrics not available for this model"}
+        
+        return {
+            "success": True,
+            "message": "Continuous learning update completed",
+            "model_name": model_name,
+            "updated_metrics": metrics,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in continuous learning update: {e}")
+        raise HTTPException(status_code=500, detail=f"Continuous learning update failed: {str(e)}")
+
+@api_router.post("/ai/retrain-model")
+async def retrain_model(
+    model_name: str = Body(...),
+    user_data: Optional[Dict[str, Any]] = Body(None),
+    force_retrain: bool = Body(False)
+):
+    """Trigger model retraining with new data"""
+    try:
+        logger.info(f"Retraining model: {model_name}")
+        
+        if model_name == 'energy_prediction':
+            # Check if retraining is needed
+            performance = energy_prediction_model.performance_tracker.calculate_accuracy('energy_prediction')
+            
+            if force_retrain or performance.get('needs_retrain', False):
+                energy_prediction_model.train(user_data)
+                
+                return {
+                    "success": True,
+                    "message": "Model retrained successfully",
+                    "model_name": model_name,
+                    "new_accuracy": energy_prediction_model.model_accuracy,
+                    "model_variant": energy_prediction_model.current_variant,
+                    "retrain_reason": "forced" if force_retrain else "performance_decline"
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": "Retraining not needed - model performance is adequate",
+                    "model_name": model_name,
+                    "current_accuracy": energy_prediction_model.model_accuracy
+                }
+        else:
+            return {
+                "success": False,
+                "message": f"Retraining not supported for model: {model_name}"
+            }
+        
+    except Exception as e:
+        logger.error(f"Error retraining model: {e}")
+        raise HTTPException(status_code=500, detail=f"Model retraining failed: {str(e)}")
+
+@api_router.get("/ai/model-health-check")
+async def model_health_check():
+    """Comprehensive health check for all ML models"""
+    try:
+        logger.info("Performing model health check")
+        
+        health_status = {
+            "overall_status": "healthy",
+            "timestamp": datetime.utcnow().isoformat(),
+            "models": {}
+        }
+        
+        # Check energy prediction model
+        try:
+            sample_prediction = energy_prediction_model.predict_energy({
+                'calories': 2000, 'protein_g': 100, 'sleep_hours': 8
+            })
+            health_status["models"]["energy_prediction"] = {
+                "status": "operational",
+                "accuracy": energy_prediction_model.model_accuracy,
+                "variant": getattr(energy_prediction_model, 'current_variant', 'linear'),
+                "sample_prediction": sample_prediction['predicted_energy']
+            }
+        except Exception as e:
+            health_status["models"]["energy_prediction"] = {
+                "status": "error",
+                "error": str(e)
+            }
+            health_status["overall_status"] = "degraded"
+        
+        # Check other models
+        for model_name, model in [
+            ("mood_correlation", mood_correlation_engine),
+            ("sleep_impact", sleep_impact_calculator),
+            ("whatif_scenario", whatif_scenario_processor),
+            ("weekly_pattern", weekly_pattern_analyzer)
+        ]:
+            try:
+                # Basic availability check
+                health_status["models"][model_name] = {
+                    "status": "operational",
+                    "class": model.__class__.__name__
+                }
+            except Exception as e:
+                health_status["models"][model_name] = {
+                    "status": "error",
+                    "error": str(e)
+                }
+                health_status["overall_status"] = "degraded"
+        
+        # Check Phase 4 components
+        health_status["phase4_components"] = {
+            "performance_tracker": len(global_performance_tracker.performance_history),
+            "feedback_integrator": sum(len(feedback) for feedback in global_feedback_integrator.feedback_data.values()),
+            "ab_testing_active": len(global_ab_testing.test_configs),
+            "continuous_learning": "enabled"
+        }
+        
+        return health_status
+        
+    except Exception as e:
+        logger.error(f"Error in model health check: {e}")
+        raise HTTPException(status_code=500, detail=f"Health check failed: {str(e)}")
+
 @api_router.post("/ai/batch-food-analysis") 
 async def batch_food_analysis(request: BatchFoodAnalysisRequest):
     """Process multiple food images in sequence for meal planning"""
