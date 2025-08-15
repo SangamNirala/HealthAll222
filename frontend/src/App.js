@@ -42,6 +42,7 @@ import GuestFoodLog from "./components/GuestFoodLog";
 import GuestNutritionTips from "./components/GuestNutritionTips";
 import GuestHealthCalculator from "./components/GuestHealthCalculator";
 import GuestGoals from "./components/GuestGoals";
+import InstantHealthAssessment from "./components/InstantHealthAssessment";
 
 // Family navigation pages
 import FamilyMembers from "./components/FamilyMembers";
