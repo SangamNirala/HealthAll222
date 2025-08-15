@@ -829,7 +829,10 @@ const PersonalInsights = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={fetchPersonalInsights}
+                onClick={() => {
+                  fetchPersonalInsights();
+                  fetchMLPredictions();
+                }}
                 disabled={loading}
               >
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
