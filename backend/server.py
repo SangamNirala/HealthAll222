@@ -434,6 +434,11 @@ def calculate_profile_completion(profile: dict, profile_type: str) -> float:
             if section == "family_members" and isinstance(section_data, list) and len(section_data) == 0:
                 continue
             completed_sections += 1
+    
+    # Calculate completion percentage
+    total_sections = len(sections)
+    completion_percentage = (completed_sections / total_sections) * 100.0
+    return round(completion_percentage, 1)
 
 # ===== HEALTH ASSESSMENT ALGORITHMS =====
 
