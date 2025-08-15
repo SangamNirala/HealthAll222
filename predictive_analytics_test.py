@@ -461,6 +461,7 @@ class PredictiveAnalyticsAPITester:
         
         # Test 2: Reduce caffeine scenario
         caffeine_scenario_data = {
+            "user_id": "demo-patient-456",
             "base_data": {
                 "calories": 2000,
                 "protein_g": 100,
