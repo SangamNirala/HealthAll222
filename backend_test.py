@@ -10392,5 +10392,494 @@ def main():
         print("❌ Issues detected with profile completion persistence")
         return 1
 
+    def test_phase2_patient_management_system(self):
+        """Test Phase 2 Patient Management System Backend APIs - REVIEW REQUEST FOCUS
+        
+        Testing specific endpoints for:
+        1. AdvancedAdherenceMonitor Backend APIs (3 endpoints)
+        2. AutomatedReportGenerator Backend APIs (2 endpoints) 
+        3. IntelligentAlertSystem Backend APIs (4 endpoints)
+        
+        Using test parameters: Provider ID: provider-123, Patient ID: patient-456
+        """
+        print("\n🏥 Testing Phase 2 Patient Management System Backend APIs...")
+        print("🎯 FOCUS: AdvancedAdherenceMonitor, AutomatedReportGenerator, IntelligentAlertSystem")
+        print("📋 Test Parameters: Provider ID: provider-123, Patient ID: patient-456")
+        
+        provider_id = "provider-123"
+        patient_id = "patient-456"
+        
+        # Test AdvancedAdherenceMonitor Backend APIs
+        adherence_success = self.test_advanced_adherence_monitor_apis(provider_id, patient_id)
+        
+        # Test AutomatedReportGenerator Backend APIs
+        report_success = self.test_automated_report_generator_apis(provider_id, patient_id)
+        
+        # Test IntelligentAlertSystem Backend APIs
+        alert_success = self.test_intelligent_alert_system_apis(provider_id, patient_id)
+        
+        # Summary
+        print(f"\n📊 Phase 2 Patient Management System Test Summary:")
+        print(f"   ✅ AdvancedAdherenceMonitor APIs: {'PASS' if adherence_success else 'FAIL'}")
+        print(f"   ✅ AutomatedReportGenerator APIs: {'PASS' if report_success else 'FAIL'}")
+        print(f"   ✅ IntelligentAlertSystem APIs: {'PASS' if alert_success else 'FAIL'}")
+        
+        overall_success = adherence_success and report_success and alert_success
+        print(f"   🎯 Overall Phase 2 Success: {'✅ PASS' if overall_success else '❌ FAIL'}")
+        
+        return overall_success
+
+    def test_advanced_adherence_monitor_apis(self, provider_id, patient_id):
+        """Test AdvancedAdherenceMonitor Backend APIs (3 endpoints)"""
+        print("\n📊 Testing AdvancedAdherenceMonitor Backend APIs...")
+        
+        # Test 1: POST /api/provider/patient-management/adherence - Create adherence monitoring
+        adherence_data = {
+            "patient_id": patient_id,
+            "provider_id": provider_id,
+            "adherence_type": "MEDICATION",
+            "target_item": "Metformin 500mg",
+            "tracking_period": "weekly",
+            "expected_frequency": 14,  # twice daily for 7 days
+            "next_review_date": (datetime.utcnow() + timedelta(days=7)).isoformat()
+        }
+        
+        success1, create_response = self.run_test(
+            "POST Create Adherence Monitoring",
+            "POST",
+            "provider/patient-management/adherence",
+            200,
+            data=adherence_data
+        )
+        
+        adherence_id = None
+        if success1 and create_response:
+            adherence_id = create_response.get('id')
+            print(f"   ✅ Created adherence monitoring with ID: {adherence_id}")
+            
+            # Validate response structure
+            expected_keys = ['id', 'patient_id', 'provider_id', 'adherence_type', 'target_item', 'adherence_percentage', 'adherence_status']
+            missing_keys = [key for key in expected_keys if key not in create_response]
+            if not missing_keys:
+                print(f"   ✅ Response structure valid - contains all required keys")
+                print(f"   📋 Adherence Type: {create_response.get('adherence_type')}")
+                print(f"   📋 Target Item: {create_response.get('target_item')}")
+                print(f"   📋 Status: {create_response.get('adherence_status')}")
+            else:
+                print(f"   ❌ Response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: GET /api/provider/patient-management/adherence/{patient_id} - Get adherence data with AI insights
+        success2, get_response = self.run_test(
+            "GET Adherence Data with AI Insights",
+            "GET",
+            f"provider/patient-management/adherence/{patient_id}",
+            200
+        )
+        
+        if success2 and get_response:
+            # Validate response structure for adherence data
+            expected_keys = ['patient_id', 'adherence_records', 'ai_insights', 'predictive_risk_score']
+            missing_keys = [key for key in expected_keys if key not in get_response]
+            if not missing_keys:
+                print(f"   ✅ Adherence data response structure valid")
+                
+                adherence_records = get_response.get('adherence_records', [])
+                ai_insights = get_response.get('ai_insights', [])
+                risk_score = get_response.get('predictive_risk_score', 0)
+                
+                print(f"   📊 Found {len(adherence_records)} adherence records")
+                print(f"   🤖 AI Insights: {len(ai_insights)} insights provided")
+                print(f"   ⚠️ Predictive Risk Score: {risk_score}")
+                
+                # Validate AI insights structure
+                if ai_insights and len(ai_insights) > 0:
+                    print(f"   💡 Sample AI Insight: {ai_insights[0]}")
+                
+                # Validate risk score is within expected range (0.0 to 1.0)
+                if 0.0 <= risk_score <= 1.0:
+                    print(f"   ✅ Risk score within valid range (0.0-1.0)")
+                else:
+                    print(f"   ❌ Risk score outside valid range: {risk_score}")
+                    success2 = False
+            else:
+                print(f"   ❌ Adherence data response missing keys: {missing_keys}")
+                success2 = False
+        
+        # Test 3: PUT /api/provider/patient-management/adherence/{adherence_id} - Update adherence data
+        success3 = True
+        if adherence_id:
+            update_data = {
+                "adherence_percentage": 85.7,
+                "actual_frequency": 12,  # missed 2 doses out of 14
+                "missed_instances": 2,
+                "perfect_days": 5,
+                "improvement_trend": 5.2,
+                "barriers_identified": ["forgetfulness", "side_effects"],
+                "intervention_strategies": ["medication_reminders", "side_effect_management"]
+            }
+            
+            success3, update_response = self.run_test(
+                "PUT Update Adherence Data",
+                "PUT",
+                f"provider/patient-management/adherence/{adherence_id}",
+                200,
+                data=update_data
+            )
+            
+            if success3 and update_response:
+                # Validate updated response
+                updated_percentage = update_response.get('adherence_percentage', 0)
+                barriers = update_response.get('barriers_identified', [])
+                strategies = update_response.get('intervention_strategies', [])
+                
+                print(f"   ✅ Adherence updated successfully")
+                print(f"   📊 Updated adherence percentage: {updated_percentage}%")
+                print(f"   🚧 Barriers identified: {len(barriers)} barriers")
+                print(f"   💡 Intervention strategies: {len(strategies)} strategies")
+                
+                # Validate adherence percentage is reasonable
+                if 0.0 <= updated_percentage <= 100.0:
+                    print(f"   ✅ Adherence percentage within valid range")
+                else:
+                    print(f"   ❌ Adherence percentage outside valid range: {updated_percentage}")
+                    success3 = False
+        else:
+            print(f"   ⚠️ Skipping adherence update test - no adherence_id from creation")
+            success3 = False
+        
+        return success1 and success2 and success3
+
+    def test_automated_report_generator_apis(self, provider_id, patient_id):
+        """Test AutomatedReportGenerator Backend APIs (2 endpoints)"""
+        print("\n📄 Testing AutomatedReportGenerator Backend APIs...")
+        
+        # Test 1: POST /api/provider/patient-management/reports - Generate automated report with AI
+        report_data = {
+            "report_type": "PATIENT_SUMMARY",
+            "report_format": "PDF",
+            "title": f"Patient Summary Report - {patient_id}",
+            "patient_id": patient_id,
+            "provider_id": provider_id,
+            "report_period": "monthly",
+            "data_range": {
+                "start_date": (datetime.utcnow() - timedelta(days=30)).isoformat(),
+                "end_date": datetime.utcnow().isoformat()
+            },
+            "charts_included": ["adherence_trends", "progress_metrics", "ai_insights"],
+            "ai_insights_included": True,
+            "scheduled_generation": False
+        }
+        
+        success1, create_response = self.run_test(
+            "POST Generate Automated Report with AI",
+            "POST",
+            "provider/patient-management/reports",
+            200,
+            data=report_data
+        )
+        
+        report_id = None
+        if success1 and create_response:
+            report_id = create_response.get('id')
+            print(f"   ✅ Created automated report with ID: {report_id}")
+            
+            # Validate response structure
+            expected_keys = ['id', 'report_type', 'report_format', 'title', 'patient_id', 'provider_id', 'generation_status']
+            missing_keys = [key for key in expected_keys if key not in create_response]
+            if not missing_keys:
+                print(f"   ✅ Report creation response structure valid")
+                print(f"   📋 Report Type: {create_response.get('report_type')}")
+                print(f"   📋 Format: {create_response.get('report_format')}")
+                print(f"   📋 Title: {create_response.get('title')}")
+                print(f"   📋 Generation Status: {create_response.get('generation_status')}")
+                
+                # Validate AI insights inclusion
+                ai_included = create_response.get('ai_insights_included', False)
+                if ai_included:
+                    print(f"   🤖 AI insights included in report")
+                else:
+                    print(f"   ⚠️ AI insights not included in report")
+                
+                # Validate charts inclusion
+                charts = create_response.get('charts_included', [])
+                print(f"   📊 Charts included: {len(charts)} charts - {charts}")
+                
+                # Check generation progress
+                progress = create_response.get('generation_progress', 0)
+                print(f"   ⏳ Generation progress: {progress}%")
+                
+            else:
+                print(f"   ❌ Report creation response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: GET /api/provider/patient-management/reports/{provider_id} - Get provider reports
+        success2, get_response = self.run_test(
+            "GET Provider Reports",
+            "GET",
+            f"provider/patient-management/reports/{provider_id}",
+            200
+        )
+        
+        if success2 and get_response:
+            # Validate response structure for provider reports
+            expected_keys = ['provider_id', 'reports', 'total_reports', 'recent_reports']
+            missing_keys = [key for key in expected_keys if key not in get_response]
+            if not missing_keys:
+                print(f"   ✅ Provider reports response structure valid")
+                
+                reports = get_response.get('reports', [])
+                total_reports = get_response.get('total_reports', 0)
+                recent_reports = get_response.get('recent_reports', [])
+                
+                print(f"   📊 Total reports for provider: {total_reports}")
+                print(f"   📄 Reports in response: {len(reports)}")
+                print(f"   🕒 Recent reports: {len(recent_reports)}")
+                
+                # Validate individual report structure if reports exist
+                if reports and len(reports) > 0:
+                    sample_report = reports[0]
+                    report_keys = ['id', 'report_type', 'title', 'generation_status', 'created_at']
+                    missing_report_keys = [key for key in report_keys if key not in sample_report]
+                    if not missing_report_keys:
+                        print(f"   ✅ Individual report structure valid")
+                        print(f"   📋 Sample report: {sample_report.get('title')} - {sample_report.get('generation_status')}")
+                    else:
+                        print(f"   ❌ Individual report missing keys: {missing_report_keys}")
+                        success2 = False
+                
+                # Check for AI-generated reports
+                ai_reports = [r for r in reports if r.get('ai_insights_included', False)]
+                print(f"   🤖 AI-enhanced reports: {len(ai_reports)} out of {len(reports)}")
+                
+            else:
+                print(f"   ❌ Provider reports response missing keys: {missing_keys}")
+                success2 = False
+        
+        return success1 and success2
+
+    def test_intelligent_alert_system_apis(self, provider_id, patient_id):
+        """Test IntelligentAlertSystem Backend APIs (4 endpoints)"""
+        print("\n🚨 Testing IntelligentAlertSystem Backend APIs...")
+        
+        # Test 1: POST /api/provider/patient-management/alerts - Create smart alert
+        alert_data = {
+            "patient_id": patient_id,
+            "provider_id": provider_id,
+            "category": "ADHERENCE",
+            "severity": "WARNING",
+            "title": "Medication Adherence Decline",
+            "message": "Patient adherence has dropped below 80% threshold",
+            "detailed_description": "Metformin adherence has declined from 95% to 75% over the past week. Patient reported forgetfulness and mild GI side effects.",
+            "data_source": "adherence_monitoring",
+            "triggering_values": {
+                "current_adherence": 75.0,
+                "previous_adherence": 95.0,
+                "threshold": 80.0,
+                "decline_rate": -20.0
+            },
+            "recommended_actions": [
+                "Schedule medication counseling session",
+                "Implement reminder system",
+                "Evaluate side effect management options",
+                "Consider medication timing adjustment"
+            ]
+        }
+        
+        success1, create_response = self.run_test(
+            "POST Create Smart Alert",
+            "POST",
+            "provider/patient-management/alerts",
+            200,
+            data=alert_data
+        )
+        
+        alert_id = None
+        if success1 and create_response:
+            alert_id = create_response.get('id')
+            print(f"   ✅ Created smart alert with ID: {alert_id}")
+            
+            # Validate response structure
+            expected_keys = ['id', 'patient_id', 'provider_id', 'category', 'severity', 'title', 'urgency_score', 'status']
+            missing_keys = [key for key in expected_keys if key not in create_response]
+            if not missing_keys:
+                print(f"   ✅ Alert creation response structure valid")
+                print(f"   📋 Category: {create_response.get('category')}")
+                print(f"   📋 Severity: {create_response.get('severity')}")
+                print(f"   📋 Title: {create_response.get('title')}")
+                print(f"   📋 Status: {create_response.get('status')}")
+                
+                # Validate urgency score
+                urgency_score = create_response.get('urgency_score', 0)
+                if 0.0 <= urgency_score <= 1.0:
+                    print(f"   ⚠️ Urgency score: {urgency_score} (valid range)")
+                else:
+                    print(f"   ❌ Urgency score outside valid range: {urgency_score}")
+                    success1 = False
+                
+                # Validate recommended actions
+                actions = create_response.get('recommended_actions', [])
+                print(f"   💡 Recommended actions: {len(actions)} actions provided")
+                
+            else:
+                print(f"   ❌ Alert creation response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: GET /api/provider/patient-management/alerts/{provider_id} - Get provider alerts
+        success2, get_response = self.run_test(
+            "GET Provider Alerts",
+            "GET",
+            f"provider/patient-management/alerts/{provider_id}",
+            200
+        )
+        
+        if success2 and get_response:
+            # Validate response structure for provider alerts
+            expected_keys = ['provider_id', 'alerts', 'active_alerts', 'critical_alerts', 'alert_summary']
+            missing_keys = [key for key in expected_keys if key not in get_response]
+            if not missing_keys:
+                print(f"   ✅ Provider alerts response structure valid")
+                
+                alerts = get_response.get('alerts', [])
+                active_alerts = get_response.get('active_alerts', 0)
+                critical_alerts = get_response.get('critical_alerts', 0)
+                alert_summary = get_response.get('alert_summary', {})
+                
+                print(f"   📊 Total alerts: {len(alerts)}")
+                print(f"   🔴 Active alerts: {active_alerts}")
+                print(f"   ⚠️ Critical alerts: {critical_alerts}")
+                
+                # Validate alert summary structure
+                if alert_summary:
+                    summary_keys = ['by_category', 'by_severity', 'by_status']
+                    missing_summary_keys = [key for key in summary_keys if key not in alert_summary]
+                    if not missing_summary_keys:
+                        print(f"   ✅ Alert summary structure valid")
+                        print(f"   📊 Categories: {list(alert_summary.get('by_category', {}).keys())}")
+                        print(f"   📊 Severities: {list(alert_summary.get('by_severity', {}).keys())}")
+                    else:
+                        print(f"   ❌ Alert summary missing keys: {missing_summary_keys}")
+                
+                # Validate individual alert structure if alerts exist
+                if alerts and len(alerts) > 0:
+                    sample_alert = alerts[0]
+                    alert_keys = ['id', 'category', 'severity', 'title', 'status', 'urgency_score', 'triggered_at']
+                    missing_alert_keys = [key for key in alert_keys if key not in sample_alert]
+                    if not missing_alert_keys:
+                        print(f"   ✅ Individual alert structure valid")
+                        print(f"   🚨 Sample alert: {sample_alert.get('title')} - {sample_alert.get('severity')}")
+                    else:
+                        print(f"   ❌ Individual alert missing keys: {missing_alert_keys}")
+                        success2 = False
+                
+            else:
+                print(f"   ❌ Provider alerts response missing keys: {missing_keys}")
+                success2 = False
+        
+        # Test 3: POST /api/provider/patient-management/alert-rules - Create alert rules
+        alert_rule_data = {
+            "provider_id": provider_id,
+            "rule_name": "Medication Adherence Threshold",
+            "description": "Alert when patient medication adherence drops below 80%",
+            "category": "ADHERENCE",
+            "severity": "WARNING",
+            "condition_logic": {
+                "metric": "adherence_percentage",
+                "operator": "less_than",
+                "threshold": 80.0,
+                "timeframe": "weekly",
+                "consecutive_periods": 1
+            },
+            "is_active": True,
+            "auto_resolve": False,
+            "escalation_minutes": 60,
+            "notification_methods": ["in_app", "email"],
+            "patient_filters": {
+                "conditions": ["diabetes", "hypertension"],
+                "age_range": {"min": 18, "max": 80}
+            }
+        }
+        
+        success3, rule_response = self.run_test(
+            "POST Create Alert Rules",
+            "POST",
+            "provider/patient-management/alert-rules",
+            200,
+            data=alert_rule_data
+        )
+        
+        if success3 and rule_response:
+            rule_id = rule_response.get('id')
+            print(f"   ✅ Created alert rule with ID: {rule_id}")
+            
+            # Validate response structure
+            expected_keys = ['id', 'provider_id', 'rule_name', 'category', 'severity', 'is_active', 'condition_logic']
+            missing_keys = [key for key in expected_keys if key not in rule_response]
+            if not missing_keys:
+                print(f"   ✅ Alert rule creation response structure valid")
+                print(f"   📋 Rule Name: {rule_response.get('rule_name')}")
+                print(f"   📋 Category: {rule_response.get('category')}")
+                print(f"   📋 Active: {rule_response.get('is_active')}")
+                
+                # Validate condition logic
+                condition_logic = rule_response.get('condition_logic', {})
+                if condition_logic:
+                    print(f"   🔧 Condition: {condition_logic.get('metric')} {condition_logic.get('operator')} {condition_logic.get('threshold')}")
+                
+                # Validate notification methods
+                notification_methods = rule_response.get('notification_methods', [])
+                print(f"   📧 Notification methods: {notification_methods}")
+                
+            else:
+                print(f"   ❌ Alert rule creation response missing keys: {missing_keys}")
+                success3 = False
+        
+        # Test 4: PUT /api/provider/patient-management/alerts/{alert_id}/acknowledge - Acknowledge alerts
+        success4 = True
+        if alert_id:
+            acknowledge_data = {
+                "acknowledged_by": provider_id,
+                "acknowledgment_notes": "Reviewed patient case. Scheduled follow-up appointment for medication counseling and side effect management.",
+                "action_taken": "scheduled_appointment",
+                "follow_up_required": True,
+                "follow_up_date": (datetime.utcnow() + timedelta(days=3)).isoformat()
+            }
+            
+            success4, ack_response = self.run_test(
+                "PUT Acknowledge Alert",
+                "PUT",
+                f"provider/patient-management/alerts/{alert_id}/acknowledge",
+                200,
+                data=acknowledge_data
+            )
+            
+            if success4 and ack_response:
+                print(f"   ✅ Alert acknowledged successfully")
+                
+                # Validate acknowledgment response
+                expected_keys = ['alert_id', 'status', 'acknowledged_at', 'acknowledged_by']
+                missing_keys = [key for key in expected_keys if key not in ack_response]
+                if not missing_keys:
+                    print(f"   ✅ Acknowledgment response structure valid")
+                    print(f"   📋 Alert Status: {ack_response.get('status')}")
+                    print(f"   📋 Acknowledged by: {ack_response.get('acknowledged_by')}")
+                    print(f"   📋 Acknowledged at: {ack_response.get('acknowledged_at')}")
+                    
+                    # Check if follow-up information is included
+                    if 'follow_up_required' in ack_response:
+                        follow_up = ack_response.get('follow_up_required', False)
+                        print(f"   📅 Follow-up required: {follow_up}")
+                        if follow_up and 'follow_up_date' in ack_response:
+                            print(f"   📅 Follow-up date: {ack_response.get('follow_up_date')}")
+                    
+                else:
+                    print(f"   ❌ Acknowledgment response missing keys: {missing_keys}")
+                    success4 = False
+        else:
+            print(f"   ⚠️ Skipping alert acknowledgment test - no alert_id from creation")
+            success4 = False
+        
+        return success1 and success2 and success3 and success4
+
 if __name__ == "__main__":
     sys.exit(main())
