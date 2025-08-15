@@ -11515,24 +11515,37 @@ class HealthPlatformAPITester:
         return success1 and success2 and success3 and success4 and success5
 
 def main():
-    """Main test execution"""
+    """Main test execution - AI Food Recognition API Testing"""
     tester = HealthPlatformAPITester()
     
-    # Run the profile completion persistence test as requested in the review
-    print("🚀 Starting Profile Completion Persistence Fix Test")
+    # Run the AI Food Recognition API tests as requested in the review
+    print("🚀 Starting AI Food Recognition API Testing")
     print(f"🌐 Base URL: {tester.base_url}")
     print("=" * 80)
+    print("🎯 TESTING FOCUS: New AI Food Recognition API Endpoints")
+    print("📋 Endpoints to test:")
+    print("   1. POST /api/ai/food-recognition-advanced")
+    print("   2. POST /api/ai/batch-food-analysis")
+    print("   3. POST /api/ai/food-score-calculator")
+    print("   4. GET /api/ai/nutrition-database-lookup/{food_name}")
+    print("   5. POST /api/ai/meal-pattern-analysis")
+    print("=" * 80)
     
-    success = tester.test_profile_completion_persistence_fix()
+    success = tester.test_ai_food_recognition_endpoints()
     
     print("\n" + "=" * 80)
     if success:
-        print("🎉 Profile Completion Persistence Fix Test: PASSED")
-        print("✅ Profile completion is properly persisted to database after updates")
+        print("🎉 AI Food Recognition API Testing: PASSED")
+        print("✅ All AI Food Recognition endpoints are working correctly")
+        print("✅ Multi-stage processing (Gemini Vision → Groq → Database lookup → Alternatives) functional")
+        print("✅ Food scoring algorithm produces accurate grades (A-F)")
+        print("✅ USDA and OpenFood Facts integration working")
+        print("✅ Batch processing and meal pattern analysis operational")
+        print("✅ Response structures match frontend expectations")
         return 0
     else:
-        print("⚠️ Profile Completion Persistence Fix Test: FAILED")
-        print("❌ Issues detected with profile completion persistence")
+        print("⚠️ AI Food Recognition API Testing: FAILED")
+        print("❌ Issues detected with AI Food Recognition endpoints")
         return 1
 
     def test_phase2_patient_management_system(self):
