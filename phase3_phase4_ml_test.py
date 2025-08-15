@@ -308,38 +308,17 @@ class Phase3Phase4MLTester:
         # Test 1: Trigger continuous learning update
         update_data = {
             "user_id": "demo-patient-123",
-            "model_type": "energy_prediction",
-            "learning_data": [
-                {
-                    "input_features": {
-                        "calories": 2000,
-                        "protein_g": 100,
-                        "carbs_g": 250,
-                        "fat_g": 70,
-                        "sleep_hours": 7.5,
-                        "exercise_minutes": 30,
-                        "stress_level": 5
-                    },
-                    "actual_outcome": 7.8,
-                    "predicted_outcome": 7.5,
-                    "feedback_rating": 4.5
-                },
-                {
-                    "input_features": {
-                        "calories": 1800,
-                        "protein_g": 120,
-                        "carbs_g": 200,
-                        "fat_g": 60,
-                        "sleep_hours": 8.0,
-                        "exercise_minutes": 45,
-                        "stress_level": 3
-                    },
-                    "actual_outcome": 8.2,
-                    "predicted_outcome": 8.0,
-                    "feedback_rating": 4.8
-                }
-            ],
-            "trigger_retraining": True
+            "model_name": "energy_prediction",
+            "input_data": {
+                "calories": 2000,
+                "protein_g": 100,
+                "carbs_g": 250,
+                "fat_g": 70,
+                "sleep_hours": 7.5,
+                "exercise_minutes": 30,
+                "stress_level": 5
+            },
+            "actual_outcome": 7.8
         }
         
         success1, response1 = self.run_test(
