@@ -59,6 +59,9 @@ import MultiProfileManagement from "./components/MultiProfileManagement";
 import SmartPatientAssignmentPanel from "./components/patient-management/SmartPatientAssignmentPanel";
 import RealTimeProgressDashboard from "./components/patient-management/RealTimeProgressDashboard";
 import IntelligentMealPlanGenerator from "./components/patient-management/IntelligentMealPlanGenerator";
+import AdvancedAdherenceMonitor from "./components/patient-management/AdvancedAdherenceMonitor";
+import AutomatedReportGenerator from "./components/patient-management/AutomatedReportGenerator";
+import IntelligentAlertSystem from "./components/patient-management/IntelligentAlertSystem";
 
 function App() {
   return (
