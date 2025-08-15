@@ -264,11 +264,6 @@ const InstantHealthAssessment = () => {
         ]
       });
 
-      // Show upgrade prompt after viewing results for a while
-      setTimeout(() => {
-        setShowUpgradePrompt(true);
-      }, 10000);
-
     } catch (error) {
       clearInterval(messageInterval);
       setIsProcessing(false);
