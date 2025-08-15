@@ -508,9 +508,6 @@ const GuestHealthCalculator = () => {
             data={feedbackData}
             onAction={(action) => {
               console.log('Feedback action:', action);
-              if (action === 'try_suggestion') {
-                setShowUpgradePrompt(true);
-              }
             }}
             onDismiss={() => setFeedbackData(null)}
             position="bottom-right"
