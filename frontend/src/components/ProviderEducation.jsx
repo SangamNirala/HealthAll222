@@ -244,16 +244,16 @@ const ProviderEducation = () => {
                     <div className="mb-4">
                       <div className="flex justify-between text-sm font-medium mb-2">
                         <span>Annual Requirement Progress</span>
-                        <span>{educationData.education_summary.total_credits_earned} / {educationData.education_summary.credits_required} credits</span>
+                        <span>{educationData.cme_tracking.total_credits_earned} / {educationData.cme_tracking.credits_required} credits</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-3">
                         <div 
                           className="bg-emerald-500 h-3 rounded-full transition-all duration-500"
-                          style={{ width: `${educationData.education_summary.progress_percentage}%` }}
+                          style={{ width: `${educationData.cme_tracking.progress_percentage}%` }}
                         />
                       </div>
                       <p className="text-sm text-gray-600 mt-2">
-                        Deadline: {educationData.education_summary.deadline}
+                        Deadline: {educationData.cme_tracking.deadline}
                       </p>
                     </div>
                     
