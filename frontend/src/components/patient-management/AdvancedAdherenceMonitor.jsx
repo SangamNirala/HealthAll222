@@ -309,7 +309,7 @@ const AdvancedAdherenceMonitor = () => {
                           strokeWidth="10"
                           fill="transparent"
                           strokeDasharray={`${2 * Math.PI * 40}`}
-                          strokeDashoffset={`${2 * Math.PI * 40 * (1 - displayData.overall_adherence)}`}
+                          strokeDashoffset={`${2 * Math.PI * 40 * (1 - safeDisplayData.overall_adherence)}`}
                           className="text-emerald-600"
                         />
                       </svg>
