@@ -362,6 +362,7 @@ class PredictiveAnalyticsAPITester:
         
         # Test 3: Mixed habits
         mixed_habits_data = {
+            "user_id": "demo-patient-789",
             "daily_choices": {
                 "last_caffeine_time": "15:00",  # Good timing
                 "last_meal_time": "20:00",      # Moderate timing
