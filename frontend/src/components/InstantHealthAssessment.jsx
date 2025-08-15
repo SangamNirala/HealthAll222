@@ -21,7 +21,6 @@ const InstantHealthAssessment = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showResults, setShowResults] = useState(false);
-  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [feedbackData, setFeedbackData] = useState(null);
   
   // Assessment responses
