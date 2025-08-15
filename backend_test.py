@@ -11051,6 +11051,7 @@ class HealthPlatformAPITester:
         print(f"   Patient Engagement APIs (REVIEW REQUEST): {'✅ PASSED' if patient_engagement_success else '❌ FAILED'}")
         print(f"   Virtual Consultation APIs (REVIEW REQUEST): {'✅ PASSED' if virtual_consultation_success else '❌ FAILED'}")
         print(f"   Health Assessment APIs (REVIEW REQUEST): {'✅ PASSED' if health_assessment_success else '❌ FAILED'}")
+        print(f"   Phase 3 & 4 ML Pipeline APIs (REVIEW REQUEST): {'✅ PASSED' if phase3_phase4_ml_success else '❌ FAILED'}")
         
         if self.tests_passed == self.tests_run:
             print("🎉 All tests passed!")
