@@ -432,7 +432,7 @@ const ProviderEducation = () => {
         {/* My Courses Tab */}
         {activeTab === 'mycourses' && (
           <div className="space-y-6">
-            {educationData.my_courses.map((course) => (
+            {educationData.my_courses?.map((course) => (
               <Card key={course.id}>
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
@@ -489,7 +489,7 @@ const ProviderEducation = () => {
                   )}
                 </CardContent>
               </Card>
-            ))}
+            )) || []}
           </div>
         )}
 
