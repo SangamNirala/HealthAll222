@@ -557,6 +557,9 @@ class PredictiveAnalyticsService {
       }
     };
   }
+
+  // Default fallback data for Phase 4 features  
+  _getDefaultEnergyPrediction() {
     return {
       predicted_energy: 6.5,
       confidence: 0.7,
