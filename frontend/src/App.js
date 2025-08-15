@@ -63,6 +63,8 @@ import AdvancedAdherenceMonitor from "./components/patient-management/AdvancedAd
 import AutomatedReportGenerator from "./components/patient-management/AutomatedReportGenerator";
 import IntelligentAlertSystem from "./components/patient-management/IntelligentAlertSystem";
 import VirtualConsultationCenter from "./components/patient-management/VirtualConsultationCenter";
+import PatientEngagementHub from "./components/patient-management/PatientEngagementHub";
+import EnhancedPatientManagementSystem from "./components/patient-management/EnhancedPatientManagementSystem";
 
 function App() {
   return (
