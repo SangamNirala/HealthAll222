@@ -875,13 +875,169 @@ const PersonalInsights = ({
         )}
 
         {insights && !loading && (
-          <div className="space-y-6">
-            {renderSummaryCard()}
-            {renderPatternAnalysis()}
-            {renderRecommendations()}
-            {renderCorrelations()}
-            {renderTrendChart()}
-          </div>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <div className="border-b">
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="overview" className="flex items-center gap-2">
+                  <Brain className="h-4 w-4" />
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="predictions" className="flex items-center gap-2">
+                  <Zap className="h-4 w-4" />
+                  Predictions
+                </TabsTrigger>
+                <TabsTrigger value="whatif" className="flex items-center gap-2">
+                  <Calculator className="h-4 w-4" />
+                  What-If
+                </TabsTrigger>
+                <TabsTrigger value="weekly" className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Weekly Patterns
+                </TabsTrigger>
+                <TabsTrigger value="correlations" className="flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  Correlations
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="overview" className="space-y-6">
+              {renderSummaryCard()}
+              {renderMLPredictionsCard()}
+              {renderPatternAnalysis()}
+              {renderRecommendations()}
+            </TabsContent>
+
+            <TabsContent value="predictions" className="space-y-6">
+              {renderMLPredictionsCard()}
+              {renderTrendChart()}
+              
+              {/* Energy Prediction Details */}
+              {energyPrediction && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Zap className="h-5 w-5 text-orange-600" />
+                      Detailed Energy Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="font-semibold mb-3">Key Factors</h4>
+                        <div className="space-y-2">
+                          {energyPrediction.factors && Object.entries(energyPrediction.factors).map(([key, factor]) => (
+                            <div key={key} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                              <span className="text-sm capitalize">{key.replace(/_/g, ' ')}</span>
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline">{factor.value}</Badge>
+                                <Badge className={
+                                  factor.impact === 'positive' ? 'bg-green-100 text-green-800' :
+                                  factor.impact === 'negative' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'
+                                }>
+                                  {factor.impact}
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-3">Recommendations</h4>
+                        <div className="space-y-2">
+                          {energyPrediction.recommendations?.map((rec, idx) => (
+                            <div key={idx} className="p-3 bg-blue-50 rounded-lg">
+                              <div className="flex items-start gap-2">
+                                <CheckCircle className="h-4 w-4 text-blue-600 mt-0.5" />
+                                <span className="text-sm text-blue-800">{rec}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="whatif" className="space-y-6">
+              <WhatIfScenarios userId={userId} />
+            </TabsContent>
+
+            <TabsContent value="weekly" className="space-y-6">
+              <WeeklyHealthDashboard userId={userId} />
+            </TabsContent>
+
+            <TabsContent value="correlations" className="space-y-6">
+              {renderCorrelations()}
+              
+              {/* Mood-Food Correlation Details */}
+              {moodCorrelation && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Heart className="h-5 w-5 text-purple-600" />
+                      Mood-Food Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-3 gap-6">
+                      {/* Correlations */}
+                      <div>
+                        <h4 className="font-semibold mb-3">Food Correlations</h4>
+                        <div className="space-y-2">
+                          {moodCorrelation.correlations && Object.entries(moodCorrelation.correlations).map(([key, corr]) => (
+                            <div key={key} className="p-2 border rounded">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm capitalize">{key.replace(/_/g, ' ')}</span>
+                                <Badge variant="outline">{corr.correlation?.toFixed(2)}</Badge>
+                              </div>
+                              <p className="text-xs text-gray-600 mt-1">{corr.strength} correlation</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Trigger Foods */}
+                      <div>
+                        <h4 className="font-semibold mb-3">Trigger Foods</h4>
+                        <div className="space-y-2">
+                          {moodCorrelation.trigger_foods && Object.entries(moodCorrelation.trigger_foods).map(([key, trigger]) => (
+                            <div key={key} className="p-2 border border-red-200 rounded bg-red-50">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm capitalize text-red-800">{key.replace(/_/g, ' ')}</span>
+                                <Badge className="bg-red-100 text-red-800">Impact: {trigger.impact}</Badge>
+                              </div>
+                              <p className="text-xs text-red-600 mt-1">{trigger.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Mood Predictors */}
+                      <div>
+                        <h4 className="font-semibold mb-3">Mood Predictors</h4>
+                        <div className="space-y-2">
+                          {moodCorrelation.mood_predictors && Object.entries(moodCorrelation.mood_predictors).map(([key, predictor]) => (
+                            <div key={key} className="p-2 border border-green-200 rounded bg-green-50">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm capitalize text-green-800">{key.replace(/_/g, ' ')}</span>
+                                <Badge className="bg-green-100 text-green-800">
+                                  {Math.round((predictor.importance || 0) * 100)}%
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-green-600 mt-1">{predictor.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+          </Tabs>
         )}
       </div>
     </div>
