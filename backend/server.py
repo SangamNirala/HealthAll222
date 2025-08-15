@@ -6464,6 +6464,94 @@ def get_next_action_suggestions(goals):
     
     return suggestions[:3]  # Limit to 3 suggestions
 
+# ===== INSTANT HEALTH ASSESSMENT ENDPOINT =====
+
+@api_router.post("/guest/health-assessment", response_model=HealthAssessmentResponse)
+async def create_health_assessment(assessment_request: HealthAssessmentRequest):
+    """
+    Create instant health assessment for guest users
+    Provides personalized health score, recommendations, and meal suggestions
+    """
+    try:
+        user_id = assessment_request.user_id
+        responses = assessment_request.responses
+        
+        # Validate required fields
+        required_fields = ['age_range', 'activity_level', 'health_goal', 'dietary_preferences', 'stress_level']
+        for field in required_fields:
+            if field not in responses:
+                raise HTTPException(status_code=400, detail=f"Missing required field: {field}")
+        
+        # Calculate health score and metrics
+        health_metrics = calculate_health_score(responses)
+        
+        # Generate personalized recommendations
+        recommendations = generate_health_recommendations(responses, health_metrics['health_score'])
+        
+        # Generate meal suggestions
+        meal_suggestions = generate_meal_suggestions(responses)
+        
+        # Get improvement areas and next steps
+        improvement_areas = get_improvement_areas(health_metrics['score_breakdown'])
+        next_steps = get_next_steps(health_metrics['health_score'], recommendations)
+        
+        # Create assessment response
+        assessment = HealthAssessmentResponse(
+            health_score=health_metrics['health_score'],
+            health_age=health_metrics['health_age'],
+            actual_age_range=responses['age_range'],
+            score_breakdown=HealthScoreBreakdown(**health_metrics['score_breakdown']),
+            recommendations=[HealthRecommendation(**rec) for rec in recommendations],
+            meal_suggestions=[MealSuggestion(**meal) for meal in meal_suggestions],
+            improvement_areas=improvement_areas,
+            next_steps=next_steps
+        )
+        
+        # Store assessment in database for session persistence
+        assessment_doc = {
+            "assessment_id": assessment.assessment_id,
+            "user_id": user_id,
+            "session_type": "guest",
+            "responses": responses,
+            "results": assessment.dict(),
+            "created_at": datetime.utcnow(),
+            "expires_at": datetime.utcnow() + timedelta(hours=24)  # 24-hour session storage
+        }
+        
+        await db.health_assessments.insert_one(assessment_doc)
+        
+        return assessment
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Health assessment error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to process health assessment")
+
+@api_router.get("/guest/health-assessment/{user_id}/recent")
+async def get_recent_assessment(user_id: str):
+    """Get the most recent health assessment for a guest user"""
+    try:
+        assessment = await db.health_assessments.find_one(
+            {
+                "user_id": user_id,
+                "session_type": "guest",
+                "expires_at": {"$gt": datetime.utcnow()}
+            },
+            sort=[("created_at", -1)]
+        )
+        
+        if not assessment:
+            raise HTTPException(status_code=404, detail="No recent assessment found")
+        
+        return assessment["results"]
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Assessment retrieval error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve assessment")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
