@@ -53,17 +53,25 @@ const ROLE_CONFIG = {
     navigationItems: [
       { label: 'Dashboard', path: '/provider-dashboard', icon: 'LayoutDashboard' },
       { label: 'Profile', path: '/provider-profile', icon: 'User' },
+      
+      // Clinical Management
       { label: 'Clinical Dashboard', path: '/provider-clinical-dashboard', icon: 'Monitor' },
       { label: 'Patients', path: '/provider-patients', icon: 'Users' },
+      
+      // Patient Management System
+      { label: 'Management System', path: '/enhanced-patient-management', icon: 'LayoutDashboard' },
       { label: 'Smart Assignments', path: '/smart-patient-assignments', icon: 'UserCheck' },
       { label: 'Progress Dashboard', path: '/progress-dashboard', icon: 'TrendingUp' },
-      { label: 'Meal Planning', path: '/intelligent-meal-planning', icon: 'ChefHat' },
       { label: 'Adherence Monitor', path: '/adherence-monitor', icon: 'Activity' },
-      { label: 'Report Generator', path: '/report-generator', icon: 'FileText' },
       { label: 'Alert System', path: '/alert-system', icon: 'AlertTriangle' },
+      { label: 'Report Generator', path: '/report-generator', icon: 'FileText' },
+      
+      // Patient Care & Communication
       { label: 'Virtual Consultation', path: '/virtual-consultation', icon: 'Video' },
       { label: 'Patient Engagement', path: '/patient-engagement', icon: 'MessageSquare' },
-      { label: 'Management System', path: '/enhanced-patient-management', icon: 'LayoutDashboard' },
+      { label: 'Meal Planning', path: '/intelligent-meal-planning', icon: 'ChefHat' },
+      
+      // Provider Tools & Analytics
       { label: 'Clinical Tools', path: '/provider-tools', icon: 'Stethoscope' },
       { label: 'Medication Hub', path: '/provider-medication-dashboard', icon: 'Pill' },
       { label: 'Analytics', path: '/provider-analytics', icon: 'BarChart3' },
