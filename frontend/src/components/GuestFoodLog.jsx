@@ -458,10 +458,19 @@ const GuestFoodLog = () => {
                 ) : (
                   <Button 
                     onClick={() => setShowAddForm(true)}
-                    className="w-full bg-purple-600 hover:bg-purple-700"
+                    className="w-full bg-purple-600 hover:bg-purple-700 mb-3"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Quick Add
+                  </Button>
+
+                  {/* AI Food Scan Button */}
+                  <Button 
+                    onClick={() => setShowAIModal(true)}
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                  >
+                    <Brain className="w-4 h-4 mr-2" />
+                    AI Food Scan
                   </Button>
                 )}
 
