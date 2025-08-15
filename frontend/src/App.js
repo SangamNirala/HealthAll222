@@ -108,6 +108,9 @@ function App() {
             <Route path="/smart-patient-assignments" element={<SmartPatientAssignmentPanel />} />
             <Route path="/progress-dashboard" element={<RealTimeProgressDashboard />} />
             <Route path="/intelligent-meal-planning" element={<IntelligentMealPlanGenerator />} />
+            <Route path="/adherence-monitor" element={<AdvancedAdherenceMonitor />} />
+            <Route path="/report-generator" element={<AutomatedReportGenerator />} />
+            <Route path="/alert-system" element={<IntelligentAlertSystem />} />
             
             {/* Family Navigation Routes */}
             <Route path="/family-members" element={<FamilyMembers />} />
