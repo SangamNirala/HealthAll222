@@ -513,20 +513,6 @@ const GuestHealthCalculator = () => {
             position="bottom-right"
           />
         )}
-
-        {/* Full upgrade modal */}
-        {showUpgradePrompt && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="max-w-lg">
-              <UpgradePrompt
-                type="calculator_results"
-                context={results ? `Your BMI of ${results.bmi} shows potential for health optimization. Our advanced features can help you track progress and achieve your goals faster.` : ''}
-                triggerAction={handleUpgradeAction}
-                onClose={() => setShowUpgradePrompt(false)}
-              />
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
