@@ -391,6 +391,7 @@ const InstantHealthAssessment = () => {
         </div>
 
         <Button 
+          type="button"
           onClick={nextStep}
           size="lg"
           className="bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white px-8"
