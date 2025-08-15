@@ -1474,6 +1474,172 @@ class IntelligentMealPlanCreate(BaseModel):
     food_allergies: List[str] = []
     plan_duration: int = 7
 
+# ===== PHASE 1: VIRTUAL CONSULTATION & PATIENT ENGAGEMENT MODELS =====
+
+# Virtual Consultation Models
+class ConsultationStatus(str, Enum):
+    SCHEDULED = "SCHEDULED"
+    ACTIVE = "ACTIVE" 
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+
+class ConsultationSession(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    provider_id: str
+    patient_id: str
+    session_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    status: ConsultationStatus = ConsultationStatus.SCHEDULED
+    scheduled_time: datetime
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    session_type: str = "video"  # video, audio, text
+    connection_quality: Optional[str] = None
+    recording_path: Optional[str] = None
+    notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class ConsultationSessionCreate(BaseModel):
+    provider_id: str
+    patient_id: str
+    scheduled_time: datetime
+    session_type: str = "video"
+    notes: Optional[str] = None
+
+class ConsultationSessionUpdate(BaseModel):
+    status: Optional[ConsultationStatus] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    connection_quality: Optional[str] = None
+    recording_path: Optional[str] = None
+    notes: Optional[str] = None
+
+# Real-time Communication Models  
+class ChatMessage(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    session_id: str
+    sender_id: str
+    sender_type: str  # provider, patient
+    message: str
+    message_type: str = "text"  # text, file, image
+    file_url: Optional[str] = None
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+class ChatMessageCreate(BaseModel):
+    session_id: str
+    sender_id: str
+    sender_type: str
+    message: str
+    message_type: str = "text"
+    file_url: Optional[str] = None
+
+# Patient Engagement Models
+class PatientEngagementStatus(str, Enum):
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    PENDING = "PENDING"
+
+class PatientEngagement(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    patient_id: str
+    provider_id: str
+    engagement_status: PatientEngagementStatus = PatientEngagementStatus.ACTIVE
+    last_interaction: datetime = Field(default_factory=datetime.utcnow)
+    total_interactions: int = 0
+    engagement_score: float = 0.0  # 0.0 to 100.0
+    goals_completed: int = 0
+    appointments_attended: int = 0
+    messages_sent: int = 0
+    educational_content_viewed: int = 0
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PatientEngagementCreate(BaseModel):
+    patient_id: str
+    provider_id: str
+
+class PatientEngagementUpdate(BaseModel):
+    engagement_status: Optional[PatientEngagementStatus] = None
+    last_interaction: Optional[datetime] = None
+    total_interactions: Optional[int] = None
+    engagement_score: Optional[float] = None
+    goals_completed: Optional[int] = None
+    appointments_attended: Optional[int] = None
+    messages_sent: Optional[int] = None
+    educational_content_viewed: Optional[int] = None
+
+# Educational Content Models
+class ContentType(str, Enum):
+    ARTICLE = "ARTICLE"
+    VIDEO = "VIDEO" 
+    INFOGRAPHIC = "INFOGRAPHIC"
+    QUIZ = "QUIZ"
+    CHECKLIST = "CHECKLIST"
+
+class EducationalContent(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str
+    content_type: ContentType
+    category: str  # nutrition, exercise, mental_health, etc.
+    difficulty_level: str = "beginner"  # beginner, intermediate, advanced
+    estimated_read_time: int = 5  # minutes
+    content_url: Optional[str] = None
+    content_text: Optional[str] = None
+    tags: List[str] = []
+    view_count: int = 0
+    rating: float = 0.0
+    is_featured: bool = False
+    created_by: str  # provider_id or system
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class EducationalContentCreate(BaseModel):
+    title: str
+    description: str
+    content_type: ContentType
+    category: str
+    difficulty_level: str = "beginner"
+    estimated_read_time: int = 5
+    content_url: Optional[str] = None
+    content_text: Optional[str] = None
+    tags: List[str] = []
+    is_featured: bool = False
+    created_by: str
+
+# Patient Progress Tracking Models
+class PatientProgress(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    patient_id: str
+    provider_id: str
+    metric_name: str  # weight, blood_pressure, adherence_rate, etc.
+    current_value: float
+    target_value: Optional[float] = None
+    unit: str
+    progress_percentage: float = 0.0
+    trend: str = "stable"  # improving, declining, stable
+    last_updated: datetime = Field(default_factory=datetime.utcnow)
+    goal_deadline: Optional[datetime] = None
+    notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PatientProgressCreate(BaseModel):
+    patient_id: str
+    provider_id: str
+    metric_name: str
+    current_value: float
+    target_value: Optional[float] = None
+    unit: str
+    goal_deadline: Optional[datetime] = None
+    notes: Optional[str] = None
+
+class PatientProgressUpdate(BaseModel):
+    current_value: Optional[float] = None
+    target_value: Optional[float] = None
+    progress_percentage: Optional[float] = None
+    trend: Optional[str] = None
+    notes: Optional[str] = None
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
