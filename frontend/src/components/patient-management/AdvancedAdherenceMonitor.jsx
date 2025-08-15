@@ -315,7 +315,7 @@ const AdvancedAdherenceMonitor = () => {
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
                         <span className="text-lg font-bold text-emerald-600">
-                          {(displayData.overall_adherence * 100).toFixed(0)}%
+                          {(safeDisplayData.overall_adherence * 100).toFixed(0)}%
                         </span>
                       </div>
                     </div>
