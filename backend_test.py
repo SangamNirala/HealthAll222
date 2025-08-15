@@ -9771,6 +9771,10 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Virtual Consultation APIs (REVIEW REQUEST - SPECIFIC FOCUS)...")
         virtual_consultation_success = self.test_virtual_consultation_apis()
 
+        # NEW: Health Assessment APIs (REVIEW REQUEST - COMPREHENSIVE TESTING)
+        print("\n📋 Testing Health Assessment APIs (REVIEW REQUEST - COMPREHENSIVE TESTING)...")
+        health_assessment_success = self.test_health_assessment_api()
+
         # Print final results
         print("\n" + "=" * 60)
         print(f"📊 FINAL RESULTS")
