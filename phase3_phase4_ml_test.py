@@ -165,16 +165,10 @@ class Phase3Phase4MLTester:
         feedback_data = {
             "user_id": "demo-patient-123",
             "prediction_id": f"pred_{datetime.now().strftime('%H%M%S')}",
-            "model_type": "energy_prediction",
-            "predicted_value": 7.5,
+            "model_name": "energy_prediction",
             "actual_outcome": 7.8,
             "user_rating": 4.5,
-            "feedback_text": "The prediction was quite accurate, felt energetic throughout the day",
-            "context": {
-                "time_of_day": "morning",
-                "activity_level": "moderate",
-                "mood": "good"
-            }
+            "feedback_text": "The prediction was quite accurate, felt energetic throughout the day"
         }
         
         success1, response1 = self.run_test(
