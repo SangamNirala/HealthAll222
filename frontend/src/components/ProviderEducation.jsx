@@ -179,7 +179,7 @@ const ProviderEducation = () => {
                     <Award className="w-8 h-8 text-emerald-600 mr-3" />
                     <div>
                       <div className="text-2xl font-bold text-emerald-600">
-                        {educationData.education_summary.total_credits_earned}
+                        {educationData.cme_tracking.total_credits_earned}
                       </div>
                       <p className="text-sm text-gray-600">Credits Earned</p>
                     </div>
