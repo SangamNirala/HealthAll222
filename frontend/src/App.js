@@ -115,6 +115,8 @@ function App() {
             <Route path="/report-generator" element={<AutomatedReportGenerator />} />
             <Route path="/alert-system" element={<IntelligentAlertSystem />} />
             <Route path="/virtual-consultation" element={<VirtualConsultationCenter />} />
+            <Route path="/patient-engagement" element={<PatientEngagementHub />} />
+            <Route path="/enhanced-patient-management" element={<EnhancedPatientManagementSystem />} />
             
             {/* Family Navigation Routes */}
             <Route path="/family-members" element={<FamilyMembers />} />
