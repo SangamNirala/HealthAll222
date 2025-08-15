@@ -6494,7 +6494,7 @@ async def create_health_assessment(assessment_request: HealthAssessmentRequest):
         recommendations = generate_health_recommendations(responses, health_metrics['health_score'])
         
         # Generate meal suggestions
-        meal_suggestions = generate_meal_suggestions(responses)
+        meal_suggestions = generate_health_meal_suggestions(responses)
         
         # Get improvement areas and next steps
         improvement_areas = get_improvement_areas(health_metrics['score_breakdown'])
