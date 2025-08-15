@@ -434,6 +434,341 @@ def calculate_profile_completion(profile: dict, profile_type: str) -> float:
             if section == "family_members" and isinstance(section_data, list) and len(section_data) == 0:
                 continue
             completed_sections += 1
+
+# ===== HEALTH ASSESSMENT ALGORITHMS =====
+
+def calculate_health_score(responses: Dict[str, Any]) -> Dict[str, Any]:
+    """Calculate comprehensive health score based on assessment responses"""
+    
+    age_range = responses.get('age_range', '26-35')
+    activity_level = responses.get('activity_level', 'moderate')
+    health_goal = responses.get('health_goal', 'general_wellness')
+    dietary_preferences = responses.get('dietary_preferences', [])
+    stress_level = responses.get('stress_level', 'moderate')
+    
+    # Base scores
+    activity_score = get_activity_score(activity_level)
+    nutrition_score = get_nutrition_score(dietary_preferences, health_goal)
+    stress_score = get_stress_management_score(stress_level)
+    lifestyle_score = get_lifestyle_score(age_range, activity_level, health_goal)
+    
+    # Calculate overall health score
+    overall_score = int((activity_score + nutrition_score + stress_score + lifestyle_score) / 4)
+    
+    # Calculate health age
+    actual_age_mid = get_age_range_midpoint(age_range)
+    health_age = calculate_health_age(actual_age_mid, overall_score, activity_level, stress_level)
+    
+    return {
+        'health_score': overall_score,
+        'health_age': health_age,
+        'score_breakdown': {
+            'activity': activity_score,
+            'nutrition': nutrition_score,
+            'stress_management': stress_score,
+            'lifestyle': lifestyle_score
+        }
+    }
+
+def get_activity_score(activity_level: str) -> int:
+    """Calculate activity score based on activity level"""
+    scores = {
+        'sedentary': 45,
+        'light': 60,
+        'moderate': 75,
+        'active': 90,
+        'very_active': 95
+    }
+    return scores.get(activity_level, 60)
+
+def get_nutrition_score(dietary_preferences: List[str], health_goal: str) -> int:
+    """Calculate nutrition score based on dietary choices and goals"""
+    base_score = 60
+    
+    # Bonus points for healthy dietary choices
+    healthy_diets = ['vegetarian', 'vegan', 'mediterranean', 'gluten_free']
+    for diet in dietary_preferences:
+        if diet in healthy_diets:
+            base_score += 8
+    
+    # Bonus for specific health goals
+    if health_goal in ['weight_loss', 'disease_prevention']:
+        base_score += 10
+    elif health_goal == 'general_wellness':
+        base_score += 5
+    
+    return min(base_score, 100)
+
+def get_stress_management_score(stress_level: str) -> int:
+    """Calculate stress management score"""
+    scores = {
+        'low': 90,
+        'moderate': 70,
+        'high': 45,
+        'very_high': 25
+    }
+    return scores.get(stress_level, 70)
+
+def get_lifestyle_score(age_range: str, activity_level: str, health_goal: str) -> int:
+    """Calculate lifestyle score based on age, activity, and goals"""
+    base_score = 65
+    
+    # Age factor
+    if age_range in ['18-25', '26-35']:
+        base_score += 10
+    elif age_range in ['36-45']:
+        base_score += 5
+    elif age_range == '46-55':
+        base_score += 0
+    else:  # 55+
+        base_score -= 5
+    
+    # Activity level impact
+    if activity_level in ['active', 'very_active']:
+        base_score += 15
+    elif activity_level == 'moderate':
+        base_score += 8
+    
+    # Goal alignment
+    if health_goal in ['disease_prevention', 'general_wellness']:
+        base_score += 10
+    
+    return min(base_score, 100)
+
+def get_age_range_midpoint(age_range: str) -> int:
+    """Get midpoint of age range"""
+    ranges = {
+        '18-25': 22,
+        '26-35': 30,
+        '36-45': 40,
+        '46-55': 50,
+        '55+': 62
+    }
+    return ranges.get(age_range, 30)
+
+def calculate_health_age(actual_age: int, health_score: int, activity_level: str, stress_level: str) -> int:
+    """Calculate biological health age based on lifestyle factors"""
+    health_age = actual_age
+    
+    # Health score impact
+    if health_score >= 90:
+        health_age -= 8
+    elif health_score >= 80:
+        health_age -= 5
+    elif health_score >= 70:
+        health_age -= 2
+    elif health_score <= 50:
+        health_age += 5
+    elif health_score <= 40:
+        health_age += 10
+    
+    # Activity level impact
+    if activity_level in ['active', 'very_active']:
+        health_age -= 3
+    elif activity_level == 'sedentary':
+        health_age += 4
+    
+    # Stress level impact
+    if stress_level == 'low':
+        health_age -= 2
+    elif stress_level in ['high', 'very_high']:
+        health_age += 6
+    
+    # Ensure health age is realistic
+    return max(18, min(health_age, actual_age + 20))
+
+def generate_health_recommendations(responses: Dict[str, Any], health_score: int) -> List[Dict[str, Any]]:
+    """Generate personalized health recommendations"""
+    
+    recommendations = []
+    activity_level = responses.get('activity_level', 'moderate')
+    health_goal = responses.get('health_goal', 'general_wellness')
+    stress_level = responses.get('stress_level', 'moderate')
+    dietary_preferences = responses.get('dietary_preferences', [])
+    
+    # Activity recommendations
+    if activity_level in ['sedentary', 'light']:
+        recommendations.append({
+            'title': 'Increase Daily Movement',
+            'description': 'Aim for 30 minutes of moderate exercise daily. Start with 10-minute walks after meals.',
+            'priority': 'high',
+            'impact': 'Significant improvement in cardiovascular health and energy levels',
+            'time_estimate': '30 minutes daily',
+            'category': 'activity'
+        })
+    
+    # Stress management recommendations
+    if stress_level in ['high', 'very_high']:
+        recommendations.append({
+            'title': 'Implement Stress Management Techniques',
+            'description': 'Practice deep breathing, meditation, or yoga for 10-15 minutes daily.',
+            'priority': 'high',
+            'impact': 'Reduced cortisol levels and improved mental clarity',
+            'time_estimate': '10-15 minutes daily',
+            'category': 'stress_management'
+        })
+    
+    # Nutrition recommendations
+    if 'none' in dietary_preferences or not dietary_preferences:
+        recommendations.append({
+            'title': 'Adopt a Balanced Nutrition Plan',
+            'description': 'Include more whole foods, fruits, and vegetables. Consider the Mediterranean diet pattern.',
+            'priority': 'medium',
+            'impact': 'Better nutrient absorption and sustained energy',
+            'time_estimate': 'Ongoing lifestyle change',
+            'category': 'nutrition'
+        })
+    
+    # Sleep recommendations (universal)
+    recommendations.append({
+        'title': 'Optimize Sleep Quality',
+        'description': 'Maintain 7-9 hours of sleep with consistent bedtime routine and screen-free time before bed.',
+        'priority': 'medium',
+        'impact': 'Enhanced recovery, mental clarity, and immune function',
+        'time_estimate': '7-9 hours nightly',
+        'category': 'sleep'
+    })
+    
+    # Hydration recommendations
+    recommendations.append({
+        'title': 'Increase Daily Water Intake',
+        'description': 'Drink 8-10 glasses of water daily. Start each day with a glass of water.',
+        'priority': 'low',
+        'impact': 'Better hydration supports all bodily functions',
+        'time_estimate': 'Throughout the day',
+        'category': 'hydration'
+    })
+    
+    return recommendations[:5]  # Return top 5 recommendations
+
+def generate_meal_suggestions(responses: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Generate personalized meal suggestions based on dietary preferences and goals"""
+    
+    dietary_preferences = responses.get('dietary_preferences', [])
+    health_goal = responses.get('health_goal', 'general_wellness')
+    
+    meals = []
+    
+    # Breakfast suggestions
+    if 'vegetarian' in dietary_preferences or 'vegan' in dietary_preferences:
+        meals.append({
+            'name': 'Overnight Oats with Berries',
+            'meal_type': 'breakfast',
+            'prep_time': '5 minutes (night before)',
+            'difficulty': 'easy',
+            'health_benefits': ['High fiber', 'Antioxidants', 'Sustained energy'],
+            'estimated_nutrition': {'calories': 320, 'protein': 12, 'fiber': 8, 'sugar': 15},
+            'ingredients_preview': ['Rolled oats', 'Chia seeds', 'Mixed berries', 'Almond milk']
+        })
+    else:
+        meals.append({
+            'name': 'Greek Yogurt Protein Bowl',
+            'meal_type': 'breakfast',
+            'prep_time': '3 minutes',
+            'difficulty': 'easy',
+            'health_benefits': ['High protein', 'Probiotics', 'Quick energy'],
+            'estimated_nutrition': {'calories': 280, 'protein': 20, 'fiber': 5, 'sugar': 18},
+            'ingredients_preview': ['Greek yogurt', 'Mixed nuts', 'Honey', 'Fresh fruit']
+        })
+    
+    # Lunch suggestions
+    if health_goal == 'weight_loss':
+        meals.append({
+            'name': 'Rainbow Salad with Grilled Protein',
+            'meal_type': 'lunch',
+            'prep_time': '15 minutes',
+            'difficulty': 'easy',
+            'health_benefits': ['Low calorie', 'High nutrients', 'Filling fiber'],
+            'estimated_nutrition': {'calories': 350, 'protein': 25, 'fiber': 12, 'fat': 14},
+            'ingredients_preview': ['Mixed greens', 'Cherry tomatoes', 'Cucumber', 'Lean protein']
+        })
+    else:
+        meals.append({
+            'name': 'Mediterranean Quinoa Bowl',
+            'meal_type': 'lunch',
+            'prep_time': '20 minutes',
+            'difficulty': 'medium',
+            'health_benefits': ['Complete protein', 'Healthy fats', 'Anti-inflammatory'],
+            'estimated_nutrition': {'calories': 420, 'protein': 18, 'fiber': 8, 'fat': 16},
+            'ingredients_preview': ['Quinoa', 'Chickpeas', 'Feta cheese', 'Olive oil']
+        })
+    
+    # Dinner suggestions
+    if 'keto' in dietary_preferences:
+        meals.append({
+            'name': 'Herb-Crusted Salmon with Vegetables',
+            'meal_type': 'dinner',
+            'prep_time': '25 minutes',
+            'difficulty': 'medium',
+            'health_benefits': ['Omega-3 fatty acids', 'Low carb', 'High protein'],
+            'estimated_nutrition': {'calories': 380, 'protein': 32, 'fiber': 6, 'fat': 22},
+            'ingredients_preview': ['Salmon fillet', 'Broccoli', 'Herbs', 'Olive oil']
+        })
+    else:
+        meals.append({
+            'name': 'Sweet Potato & Black Bean Bowl',
+            'meal_type': 'dinner',
+            'prep_time': '30 minutes',
+            'difficulty': 'easy',
+            'health_benefits': ['Complex carbs', 'Plant protein', 'High fiber'],
+            'estimated_nutrition': {'calories': 390, 'protein': 15, 'fiber': 14, 'fat': 8},
+            'ingredients_preview': ['Roasted sweet potato', 'Black beans', 'Avocado', 'Lime']
+        })
+    
+    return meals
+
+def get_improvement_areas(score_breakdown: Dict[str, int]) -> List[str]:
+    """Identify areas that need improvement based on scores"""
+    
+    areas = []
+    
+    if score_breakdown['activity'] < 70:
+        areas.append('Increase physical activity and exercise frequency')
+    
+    if score_breakdown['nutrition'] < 70:
+        areas.append('Improve dietary quality and nutritional balance')
+    
+    if score_breakdown['stress_management'] < 70:
+        areas.append('Develop better stress management strategies')
+    
+    if score_breakdown['lifestyle'] < 70:
+        areas.append('Optimize sleep quality and daily routines')
+    
+    if not areas:
+        areas.append('Continue maintaining your healthy lifestyle choices')
+    
+    return areas
+
+def get_next_steps(health_score: int, recommendations: List[Dict[str, Any]]) -> List[str]:
+    """Generate actionable next steps based on health score and recommendations"""
+    
+    steps = []
+    
+    if health_score >= 85:
+        steps.extend([
+            'Keep up your excellent health habits!',
+            'Consider tracking progress over time',
+            'Share your success strategies with others'
+        ])
+    elif health_score >= 70:
+        steps.extend([
+            'Focus on 1-2 high-priority recommendations this week',
+            'Set specific, measurable goals for improvement',
+            'Track your progress daily for motivation'
+        ])
+    else:
+        steps.extend([
+            'Start with the highest-priority recommendation today',
+            'Make small, sustainable changes gradually',
+            'Consider consulting with a healthcare provider'
+        ])
+    
+    # Add specific steps from high-priority recommendations
+    high_priority_recs = [r for r in recommendations if r['priority'] == 'high']
+    if high_priority_recs:
+        steps.append(f"Priority action: {high_priority_recs[0]['title']}")
+    
+    return steps[:4]  # Return top 4 steps
     
 async def analyze_food_with_ai(food_name: str, food_entry: dict):
     """Helper function to analyze food with AI"""
