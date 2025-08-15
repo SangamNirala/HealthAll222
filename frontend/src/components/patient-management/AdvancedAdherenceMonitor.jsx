@@ -482,7 +482,7 @@ const AdvancedAdherenceMonitor = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {displayData.interventions.map((intervention, index) => (
+                  {safeDisplayData.interventions.map((intervention, index) => (
                     <Card key={index} className="border-emerald-200">
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start mb-3">
