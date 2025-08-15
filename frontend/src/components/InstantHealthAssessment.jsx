@@ -821,19 +821,6 @@ const InstantHealthAssessment = () => {
         />
       )}
 
-      {/* Upgrade Prompt Modal */}
-      {showUpgradePrompt && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="max-w-lg">
-            <UpgradePrompt
-              type="health_assessment_results"
-              context={results ? `Your health score of ${results.health_score} shows great potential! Unlock advanced tracking and personalized coaching with a free account.` : 'Create a free account to save your progress and get advanced health insights.'}
-              triggerAction={() => console.log('Upgrade from health assessment')}
-              onClose={() => setShowUpgradePrompt(false)}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 };
