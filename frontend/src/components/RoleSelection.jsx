@@ -169,6 +169,21 @@ const RoleCard = ({ role, index }) => {
               )}
             </div>
           </Button>
+          
+          {/* Quick Chat Button - Only for Guest */}
+          {role.type === 'guest' && (
+            <Button 
+              onClick={() => setShowQuickChat(true)}
+              variant="outline"
+              className="w-full border-2 border-purple-300 hover:bg-purple-50 hover:border-purple-400 py-3 px-6 text-sm font-semibold group transition-all duration-200"
+            >
+              <div className="flex items-center justify-center w-full">
+                <MessageCircle className="w-4 h-4 mr-2 text-purple-600" />
+                <span className="text-purple-700">Quick Chat</span>
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200 text-purple-600" />
+              </div>
+            </Button>
+          )}
         </div>
         
         {role.type !== 'guest' && (
