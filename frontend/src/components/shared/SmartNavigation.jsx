@@ -10,7 +10,8 @@ import {
   ArrowLeft, LayoutDashboard, User, Users, Apple, Activity, Target, 
   Stethoscope, BarChart3, BookOpen, FileText, UserPlus, ChefHat, 
   Calendar, Shield, Settings, Plus, Camera, Menu, X, Home, ChevronDown,
-  Pill, Timeline, Download, MoreHorizontal, Sparkles, Zap, Calculator, Monitor
+  Pill, Timeline, Download, MoreHorizontal, Sparkles, Zap, Calculator, Monitor,
+  UserCheck, TrendingUp
 } from 'lucide-react';
 
 
