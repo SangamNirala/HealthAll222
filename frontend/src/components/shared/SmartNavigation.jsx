@@ -11,7 +11,8 @@ import {
   Stethoscope, BarChart3, BookOpen, FileText, UserPlus, ChefHat, 
   Calendar, Shield, Settings, Plus, Camera, Menu, X, Home, ChevronDown,
   Pill, Timeline, Download, MoreHorizontal, Sparkles, Zap, Calculator, Monitor,
-  UserCheck, TrendingUp, AlertTriangle
+  UserCheck, TrendingUp, AlertTriangle,
+  Video
 } from 'lucide-react';
 
 
