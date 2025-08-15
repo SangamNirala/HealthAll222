@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRole } from '../context/RoleContext';
 import SmartNavigation from './shared/SmartNavigation';
-import UpgradePrompt from './shared/UpgradePrompt';
+
 import RealTimeFeedback from './shared/RealTimeFeedback';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
