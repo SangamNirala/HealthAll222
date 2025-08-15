@@ -357,11 +357,11 @@ const AdvancedAdherenceMonitor = () => {
                 <CardContent>
                   <div className="flex items-center justify-between">
                     <span className="text-2xl font-bold text-blue-600">
-                      {(displayData.adherence_types.medication.percentage * 100).toFixed(0)}%
+                      {(safeDisplayData.adherence_types.medication.percentage * 100).toFixed(0)}%
                     </span>
-                    {getTrendIcon(displayData.adherence_types.medication.trend)}
+                    {getTrendIcon(safeDisplayData.adherence_types.medication.trend)}
                   </div>
-                  <Progress value={displayData.adherence_types.medication.percentage * 100} className="h-2 mt-2" />
+                  <Progress value={safeDisplayData.adherence_types.medication.percentage * 100} className="h-2 mt-2" />
                 </CardContent>
               </Card>
 
