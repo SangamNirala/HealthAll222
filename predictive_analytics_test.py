@@ -80,6 +80,7 @@ class PredictiveAnalyticsAPITester:
         
         # Test 1: Basic energy prediction with realistic sample data
         realistic_intake_data = {
+            "user_id": "demo-patient-123",
             "intake_data": {
                 "calories": 2000,
                 "protein_g": 100,
