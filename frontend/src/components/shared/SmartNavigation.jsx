@@ -12,7 +12,7 @@ import {
   Calendar, Shield, Settings, Plus, Camera, Menu, X, Home, ChevronDown,
   Pill, Timeline, Download, MoreHorizontal, Sparkles, Zap, Calculator, Monitor,
   UserCheck, TrendingUp, AlertTriangle, MessageSquare, Heart,
-  Video
+  Video, Brain
 } from 'lucide-react';
 
 
