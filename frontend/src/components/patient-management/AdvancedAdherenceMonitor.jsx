@@ -455,7 +455,7 @@ const AdvancedAdherenceMonitor = () => {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={400}>
-                  <LineChart data={displayData.trend_data}>
+                  <LineChart data={safeDisplayData.trend_data}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" />
                     <YAxis domain={[0, 1]} tickFormatter={(value) => `${(value * 100).toFixed(0)}%`} />
