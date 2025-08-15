@@ -602,23 +602,6 @@ const GuestFoodLog = () => {
             position="bottom-right"
           />
         )}
-
-        {/* Upgrade Modal */}
-        {showUpgradePrompt && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="max-w-lg">
-              <UpgradePrompt
-                type="food_logging_limit"
-                context={`You've logged ${loggedFoods.length} foods today with ${getTotalCalories()} calories! You're doing amazing. Unlock unlimited tracking and get personalized insights to optimize your nutrition journey.`}
-                triggerAction={() => {
-                  console.log('Upgrade triggered from food log');
-                  // Implement upgrade flow
-                }}
-                onClose={() => setShowUpgradePrompt(false)}
-              />
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
