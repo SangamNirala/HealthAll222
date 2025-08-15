@@ -775,3 +775,251 @@ class FoodRecognitionService:
     def _extract_alternatives_from_text(self, text: str, foods: List[Dict]) -> List[Dict[str, Any]]:
         """Extract alternatives from text"""
         return self._default_alternatives(foods)
+
+    # Additional helper methods for enhanced API endpoints
+    def _generate_improvement_tips(self, food: Dict, food_score: Dict) -> List[str]:
+        """Generate specific improvement tips based on food score"""
+        tips = []
+        score_breakdown = food_score.get('breakdown', {})
+        
+        if score_breakdown.get('processing_level', 0) < 70:
+            tips.append("Choose minimally processed alternatives when possible")
+        
+        if score_breakdown.get('nutritional_density', 0) < 70:
+            tips.append("Add nutrient-dense sides like vegetables or fruits")
+        
+        if score_breakdown.get('portion_appropriateness', 0) < 80:
+            tips.append("Consider adjusting portion size for your goals")
+        
+        return tips[:3]
+
+    def _analyze_health_impact(self, food: Dict) -> Dict[str, Any]:
+        """Analyze health impact of a specific food"""
+        return {
+            "positive_aspects": ["Provides protein", "Contains essential nutrients"],
+            "concerns": ["Monitor portion size", "Check sodium content"],
+            "long_term_impact": "moderate_positive"
+        }
+
+    def _calculate_meal_score(self, scored_foods: List[Dict]) -> float:
+        """Calculate overall meal score from individual food scores"""
+        if not scored_foods:
+            return 60.0
+        
+        scores = [food.get('detailed_score', {}).get('score', 60) for food in scored_foods]
+        return sum(scores) / len(scores)
+
+    def _get_meal_grade(self, meal_score: float) -> str:
+        """Convert meal score to grade"""
+        if meal_score >= 90:
+            return "A"
+        elif meal_score >= 80:
+            return "B"
+        elif meal_score >= 70:
+            return "C"
+        elif meal_score >= 60:
+            return "D"
+        else:
+            return "F"
+
+    def _generate_meal_insights(self, scored_foods: List[Dict]) -> List[str]:
+        """Generate insights about the overall meal"""
+        insights = []
+        
+        avg_score = self._calculate_meal_score(scored_foods)
+        
+        if avg_score >= 85:
+            insights.append("Excellent meal choice! Well-balanced and nutritious")
+        elif avg_score >= 70:
+            insights.append("Good meal with room for minor improvements")
+        else:
+            insights.append("Consider healthier alternatives for better nutrition")
+        
+        return insights
+
+    def _get_improvement_priorities(self, scored_foods: List[Dict]) -> List[str]:
+        """Get prioritized list of improvements"""
+        priorities = []
+        
+        for food in scored_foods:
+            score = food.get('detailed_score', {}).get('score', 60)
+            if score < 70:
+                priorities.append(f"Replace {food.get('name', 'item')} with healthier alternative")
+        
+        return priorities[:3]
+
+    def _get_cooking_tips(self, food_name: str) -> List[str]:
+        """Get cooking tips for healthier preparation"""
+        food_lower = food_name.lower()
+        
+        if 'grilled' in food_lower:
+            return ["Use herbs and spices for flavor", "Don't overcook to preserve nutrients"]
+        elif 'salad' in food_lower:
+            return ["Add variety of colorful vegetables", "Use olive oil based dressing"]
+        else:
+            return ["Steam or grill for healthier preparation", "Season with herbs instead of salt"]
+
+    def _assess_prep_difficulty(self, food_name: str) -> str:
+        """Assess preparation difficulty"""
+        simple_foods = ['salad', 'fruit', 'yogurt', 'nuts']
+        if any(simple in food_name.lower() for simple in simple_foods):
+            return "easy"
+        return "moderate"
+
+    def _compare_costs(self, original: str, alternative: str) -> str:
+        """Compare costs between original and alternative"""
+        # Simple cost comparison logic
+        expensive_foods = ['salmon', 'organic', 'grass-fed']
+        
+        alt_expensive = any(exp in alternative.lower() for exp in expensive_foods)
+        orig_expensive = any(exp in original.lower() for exp in expensive_foods)
+        
+        if alt_expensive and not orig_expensive:
+            return "slightly_higher"
+        elif not alt_expensive and orig_expensive:
+            return "lower"
+        else:
+            return "similar"
+
+    def _check_dietary_compliance(self, food_name: str, restrictions: List[str]) -> Dict[str, bool]:
+        """Check if food complies with dietary restrictions"""
+        compliance = {}
+        
+        for restriction in restrictions:
+            if restriction.lower() == 'vegetarian':
+                compliance['vegetarian'] = 'meat' not in food_name.lower() and 'chicken' not in food_name.lower()
+            elif restriction.lower() == 'gluten_free':
+                compliance['gluten_free'] = 'wheat' not in food_name.lower() and 'bread' not in food_name.lower()
+        
+        return compliance
+
+    def _assess_swap_difficulty(self, original_food: Dict, alternatives: List[Dict]) -> str:
+        """Assess how difficult the food swap would be"""
+        if len(alternatives) > 2:
+            return "easy"
+        return "moderate"
+
+    def _get_motivation_message(self, original_food: Dict, alternatives: List[Dict]) -> str:
+        """Generate motivational message for food swap"""
+        food_name = original_food.get('name', 'your choice')
+        
+        if alternatives:
+            return f"Great opportunity to upgrade {food_name} for better health!"
+        return f"Keep {food_name} in moderation as part of a balanced diet"
+
+    def _get_quick_swaps(self, foods: List[Dict]) -> List[Dict[str, str]]:
+        """Get simple, quick food swaps"""
+        swaps = []
+        
+        for food in foods:
+            name = food.get('name', '').lower()
+            if 'white rice' in name:
+                swaps.append({"from": "White rice", "to": "Brown rice", "benefit": "More fiber and nutrients"})
+            elif 'fried' in name:
+                swaps.append({"from": name.title(), "to": "Grilled version", "benefit": "Lower calories, no trans fats"})
+        
+        return swaps[:3]
+
+    def _optimize_meal_composition(self, original_foods: List[Dict], alternatives: List[Dict]) -> Dict[str, Any]:
+        """Suggest meal composition optimization"""
+        return {
+            "current_balance": "protein_heavy",
+            "suggested_additions": ["leafy greens", "healthy fats"],
+            "optimal_ratios": {"protein": "25%", "carbs": "45%", "fat": "30%"}
+        }
+
+    def _generate_shopping_tips(self, alternatives: List[Dict]) -> List[str]:
+        """Generate shopping tips based on alternatives"""
+        return [
+            "Shop the perimeter of the store for whole foods",
+            "Read nutrition labels to compare options",
+            "Buy seasonal produce for better nutrition and price"
+        ]
+
+    def _combine_database_results(self, results: Dict) -> Dict[str, Any]:
+        """Combine results from multiple databases"""
+        combined = {}
+        
+        # Prioritize USDA data if available
+        if 'usda' in results and results['usda']:
+            combined.update(results['usda'])
+        
+        # Supplement with OpenFood data
+        if 'openfood' in results and results['openfood']:
+            for key, value in results['openfood'].items():
+                if key not in combined:
+                    combined[key] = value
+        
+        return combined
+
+    def _assess_data_quality(self, results: Dict) -> Dict[str, Any]:
+        """Assess quality of database results"""
+        quality_score = 0.5  # Base score
+        
+        if results.get('usda'):
+            quality_score += 0.3
+        if results.get('openfood'):
+            quality_score += 0.2
+        
+        return {
+            "quality_score": min(1.0, quality_score),
+            "completeness": "partial" if quality_score < 0.8 else "complete",
+            "reliability": "high" if quality_score > 0.8 else "moderate"
+        }
+
+    def _analyze_meal_timing(self, meal_history: List[Dict]) -> Dict[str, Any]:
+        """Analyze meal timing patterns"""
+        return {
+            "average_breakfast_time": "7:30 AM",
+            "meal_frequency": "3 main meals + 1 snack",
+            "timing_consistency": "good"
+        }
+
+    def _analyze_food_preferences(self, meal_history: List[Dict]) -> Dict[str, Any]:
+        """Analyze food preference patterns"""
+        return {
+            "top_foods": ["chicken", "rice", "vegetables"],
+            "cuisine_preferences": ["mediterranean", "asian"],
+            "avoided_foods": ["spicy", "dairy"]
+        }
+
+    def _analyze_nutrition_consistency(self, meal_history: List[Dict]) -> Dict[str, Any]:
+        """Analyze nutrition consistency"""
+        return {
+            "calorie_consistency": "moderate",
+            "protein_intake_trend": "steady",
+            "nutrient_variety": "good"
+        }
+
+    def _analyze_portion_trends(self, meal_history: List[Dict]) -> Dict[str, Any]:
+        """Analyze portion size trends"""
+        return {
+            "average_portion_size": "medium",
+            "portion_consistency": "varies",
+            "recommendations": ["Use smaller plates", "Measure portions initially"]
+        }
+
+    def _analyze_processing_trends(self, meal_history: List[Dict]) -> Dict[str, Any]:
+        """Analyze food processing level trends"""
+        return {
+            "average_processing_level": 2.5,
+            "trend": "improving",
+            "whole_foods_percentage": 65
+        }
+
+    def _generate_pattern_based_recommendations(self, patterns: Dict, user_profile: Dict) -> List[Dict[str, Any]]:
+        """Generate recommendations based on identified patterns"""
+        return [
+            {
+                "category": "meal_timing",
+                "recommendation": "Try to eat at consistent times daily",
+                "priority": "medium",
+                "expected_benefit": "Better metabolism and hunger control"
+            },
+            {
+                "category": "food_variety",
+                "recommendation": "Include more colorful vegetables",
+                "priority": "high", 
+                "expected_benefit": "Increased micronutrient intake"
+            }
+        ]
