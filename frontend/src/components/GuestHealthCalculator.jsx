@@ -148,13 +148,6 @@ const GuestHealthCalculator = () => {
         ]
       });
       
-      // Show upgrade prompt after 2nd calculation or if BMI suggests optimization
-      if (newCount >= 2 || bmiInfo.risk !== 'low') {
-        setTimeout(() => {
-          setShowUpgradePrompt(true);
-        }, 3000);
-      }
-      
     }, 1000);
   };
 
