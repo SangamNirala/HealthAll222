@@ -541,14 +541,16 @@ class EnergyPredictionModel:
             logger.error(f"Error training energy prediction model: {e}")
             raise
     
-    def predict_energy(self, intake_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Predict energy level based on food intake and lifestyle factors"""
+    def predict_energy(self, intake_data: Dict[str, Any], specific_model=None) -> Dict[str, Any]:
+        """Enhanced energy prediction with confidence intervals and explanations"""
         if not self.is_trained:
             self.train()
         
+        model_to_use = specific_model or self.model
+        
         try:
-            # Prepare input features
-            features = np.array([[
+            # Prepare input features with enhanced engineering
+            base_features = np.array([[
                 intake_data.get('calories', 2000),
                 intake_data.get('protein_g', 100),
                 intake_data.get('carbs_g', 250),
@@ -561,18 +563,61 @@ class EnergyPredictionModel:
                 intake_data.get('meal_timing_consistency', 0.8)
             ]])
             
+            # Create DataFrame for feature engineering
+            temp_df = pd.DataFrame(base_features, columns=[
+                'calories', 'protein_g', 'carbs_g', 'fat_g', 'sleep_hours',
+                'exercise_minutes', 'stress_level', 'water_intake_ml',
+                'caffeine_mg', 'meal_timing_consistency'
+            ])
+            
+            # Apply enhanced feature engineering
+            enhanced_df = self.enhanced_feature_engineering(temp_df)
+            
+            # Use appropriate features based on model training
+            if hasattr(self, '_feature_columns'):
+                feature_cols = self._feature_columns
+            else:
+                feature_cols = ['calories', 'protein_g', 'carbs_g', 'fat_g', 'sleep_hours',
+                               'exercise_minutes', 'stress_level', 'water_intake_ml',
+                               'caffeine_mg', 'meal_timing_consistency']
+            
+            # Select features that exist in enhanced_df
+            available_features = [col for col in feature_cols if col in enhanced_df.columns]
+            features = enhanced_df[available_features].fillna(0).values
+            
             # Scale and predict
             features_scaled = self.scaler.transform(features)
-            energy_prediction = self.model.predict(features_scaled)[0]
+            energy_prediction = model_to_use.predict(features_scaled)[0]
             
-            # Calculate confidence based on how similar input is to training data
-            confidence = min(0.95, max(0.60, self.model_accuracy))
+            # Calculate enhanced confidence based on multiple factors
+            base_confidence = min(0.95, max(0.60, self.model_accuracy))
+            
+            # Adjust confidence based on input similarity to training data
+            similarity_factor = self._calculate_input_similarity(intake_data)
+            performance_factor = self._get_recent_performance_factor()
+            
+            adjusted_confidence = base_confidence * similarity_factor * performance_factor
+            
+            # Generate confidence interval
+            prediction_std = 0.5  # Estimated standard deviation
+            confidence_interval = {
+                'lower': max(1.0, energy_prediction - 1.96 * prediction_std),
+                'upper': min(10.0, energy_prediction + 1.96 * prediction_std)
+            }
+            
+            # Generate detailed explanation
+            explanation = self._generate_prediction_explanation(intake_data, energy_prediction)
             
             return {
                 'predicted_energy': round(float(energy_prediction), 1),
-                'confidence': confidence,
+                'confidence': round(adjusted_confidence, 3),
+                'confidence_interval': confidence_interval,
                 'factors': self._analyze_energy_factors(intake_data),
-                'recommendations': self._get_energy_recommendations(intake_data, energy_prediction)
+                'recommendations': self._get_energy_recommendations(intake_data, energy_prediction),
+                'model_accuracy': self.model_accuracy,
+                'model_variant': getattr(self, 'current_variant', 'linear'),
+                'explanation': explanation,
+                'feature_contributions': self._calculate_feature_contributions(intake_data, features_scaled[0])
             }
             
         except Exception as e:
@@ -580,9 +625,123 @@ class EnergyPredictionModel:
             return {
                 'predicted_energy': 6.0,
                 'confidence': 0.5,
+                'confidence_interval': {'lower': 5.0, 'upper': 7.0},
                 'factors': {'error': 'Unable to calculate factors'},
-                'recommendations': ['Maintain balanced nutrition and adequate sleep']
+                'recommendations': ['Maintain balanced nutrition and adequate sleep'],
+                'explanation': 'Prediction temporarily unavailable',
+                'error': str(e)
             }
+    
+    def _calculate_input_similarity(self, intake_data: Dict) -> float:
+        """Calculate how similar input is to training data"""
+        try:
+            # Define reasonable ranges for each input
+            ranges = {
+                'calories': (1500, 3000),
+                'protein_g': (60, 150),
+                'sleep_hours': (6, 9),
+                'exercise_minutes': (0, 120),
+                'stress_level': (1, 10)
+            }
+            
+            similarity_scores = []
+            for key, (min_val, max_val) in ranges.items():
+                value = intake_data.get(key, (min_val + max_val) / 2)
+                if min_val <= value <= max_val:
+                    similarity_scores.append(1.0)
+                else:
+                    # Calculate how far outside the range
+                    if value < min_val:
+                        distance = (min_val - value) / min_val
+                    else:
+                        distance = (value - max_val) / max_val
+                    similarity_scores.append(max(0.5, 1.0 - distance * 0.5))
+            
+            return np.mean(similarity_scores)
+            
+        except Exception:
+            return 0.8  # Default similarity
+    
+    def _get_recent_performance_factor(self) -> float:
+        """Get performance factor based on recent accuracy"""
+        try:
+            recent_performance = self.performance_tracker.calculate_accuracy('energy_prediction', days_back=7)
+            
+            if recent_performance.get('accuracy') is None:
+                return 1.0  # No recent data, use base confidence
+                
+            accuracy = recent_performance['accuracy']
+            if accuracy > 0.8:
+                return 1.0
+            elif accuracy > 0.7:
+                return 0.9
+            elif accuracy > 0.6:
+                return 0.8
+            else:
+                return 0.7
+                
+        except Exception:
+            return 1.0
+    
+    def _generate_prediction_explanation(self, intake_data: Dict, prediction: float) -> str:
+        """Generate human-readable explanation of the prediction"""
+        explanations = []
+        
+        # Energy level interpretation
+        if prediction >= 8:
+            explanations.append("High energy levels expected")
+        elif prediction >= 6:
+            explanations.append("Moderate energy levels predicted")
+        else:
+            explanations.append("Lower energy levels anticipated")
+        
+        # Key factor influences
+        sleep = intake_data.get('sleep_hours', 7.5)
+        if sleep >= 8:
+            explanations.append("Good sleep duration supports energy")
+        elif sleep < 6:
+            explanations.append("Insufficient sleep may reduce energy")
+        
+        protein = intake_data.get('protein_g', 100)
+        if protein >= 120:
+            explanations.append("High protein intake aids energy stability")
+        elif protein < 80:
+            explanations.append("Low protein may affect energy maintenance")
+        
+        exercise = intake_data.get('exercise_minutes', 30)
+        if exercise >= 60:
+            explanations.append("Regular exercise boosts energy levels")
+        elif exercise < 15:
+            explanations.append("Limited activity may decrease energy")
+        
+        stress = intake_data.get('stress_level', 5)
+        if stress >= 8:
+            explanations.append("High stress levels may drain energy")
+        elif stress <= 3:
+            explanations.append("Low stress supports optimal energy")
+        
+        return ". ".join(explanations) + "."
+    
+    def _calculate_feature_contributions(self, intake_data: Dict, scaled_features: np.ndarray) -> Dict[str, float]:
+        """Calculate how much each feature contributes to the prediction"""
+        try:
+            if hasattr(self.model, 'coef_'):
+                # Linear model - use coefficients
+                contributions = {}
+                feature_names = ['calories', 'protein_g', 'carbs_g', 'fat_g', 'sleep_hours',
+                               'exercise_minutes', 'stress_level', 'water_intake_ml',
+                               'caffeine_mg', 'meal_timing_consistency']
+                
+                for i, name in enumerate(feature_names[:len(scaled_features)]):
+                    if i < len(self.model.coef_):
+                        contributions[name] = float(scaled_features[i] * self.model.coef_[i])
+                
+                return contributions
+                
+        except Exception as e:
+            logger.warning(f"Could not calculate feature contributions: {e}")
+            
+        return {}
     
     def _analyze_energy_factors(self, intake_data: Dict) -> Dict[str, Any]:
         """Analyze key factors affecting energy prediction"""
