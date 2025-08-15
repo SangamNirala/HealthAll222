@@ -815,9 +815,6 @@ const InstantHealthAssessment = () => {
           data={feedbackData}
           onAction={(action) => {
             console.log('Assessment feedback action:', action);
-            if (action === 'learn_more') {
-              setShowUpgradePrompt(true);
-            }
           }}
           onDismiss={() => setFeedbackData(null)}
           position="bottom-right"
