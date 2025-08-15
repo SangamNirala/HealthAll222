@@ -174,14 +174,23 @@ const InstantHealthAssessment = () => {
     }
   };
 
-  const nextStep = () => {
+  const nextStep = (event) => {
+    // Prevent default form submission behavior and event bubbling
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
+    console.log('nextStep called, currentStep:', currentStep, 'assessmentSteps.length:', assessmentSteps.length);
+    
     if (currentStep === 0) {
       // Skip welcome screen
       setCurrentStep(1);
     } else if (currentStep < assessmentSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Process assessment
+      // Process assessment - final step
+      console.log('Final step reached, calling processAssessment...');
       processAssessment();
     }
   };
