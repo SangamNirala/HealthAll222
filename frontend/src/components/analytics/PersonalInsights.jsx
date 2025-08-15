@@ -559,7 +559,99 @@ const PersonalInsights = ({
     </Card>
   );
 
-  const renderTrendChart = () => (
+  const renderMLPredictionsCard = () => (
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Zap className="h-5 w-5 text-orange-600" />
+          AI Health Predictions
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid md:grid-cols-3 gap-4">
+          {/* Energy Prediction */}
+          {energyPrediction && (
+            <div className="p-4 border border-orange-200 rounded-lg bg-orange-50">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-semibold text-orange-800">Energy Level</h4>
+                <Badge className="bg-orange-100 text-orange-700">
+                  {energyPrediction.predicted_energy}/10
+                </Badge>
+              </div>
+              <p className="text-sm text-orange-700 mb-2">
+                Predicted based on your intake and lifestyle
+              </p>
+              <div className="text-xs text-orange-600">
+                Confidence: {Math.round((energyPrediction.confidence || 0) * 100)}%
+              </div>
+              {energyPrediction.recommendations && (
+                <div className="mt-2">
+                  <p className="text-xs font-medium text-orange-800">Top tip:</p>
+                  <p className="text-xs text-orange-700">
+                    {energyPrediction.recommendations[0]}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Sleep Quality Prediction */}
+          {sleepImpact && (
+            <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-semibold text-blue-800">Sleep Quality</h4>
+                <Badge className="bg-blue-100 text-blue-700">
+                  {sleepImpact.predicted_sleep_quality}/10
+                </Badge>
+              </div>
+              <p className="text-sm text-blue-700 mb-2">
+                Based on your daily choices
+              </p>
+              <div className="text-xs text-blue-600">
+                Improvement potential: +{sleepImpact.improvement_potential || 0}
+              </div>
+              {sleepImpact.recommendations && (
+                <div className="mt-2">
+                  <p className="text-xs font-medium text-blue-800">Top tip:</p>
+                  <p className="text-xs text-blue-700">
+                    {sleepImpact.recommendations[0]}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Mood Correlation */}
+          {moodCorrelation && (
+            <div className="p-4 border border-purple-200 rounded-lg bg-purple-50">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-semibold text-purple-800">Mood Patterns</h4>
+                <Badge className="bg-purple-100 text-purple-700">
+                  {Math.round((moodCorrelation.confidence || 0) * 100)}% confident
+                </Badge>
+              </div>
+              <p className="text-sm text-purple-700 mb-2">
+                Food-mood correlations identified
+              </p>
+              {moodCorrelation.correlations && Object.keys(moodCorrelation.correlations).length > 0 && (
+                <div className="text-xs text-purple-600">
+                  Strongest: {Object.keys(moodCorrelation.correlations)[0]?.replace(/_/g, ' ')}
+                </div>
+              )}
+              {moodCorrelation.recommendations && (
+                <div className="mt-2">
+                  <p className="text-xs font-medium text-purple-800">Top tip:</p>
+                  <p className="text-xs text-purple-700">
+                    {moodCorrelation.recommendations[0]}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
