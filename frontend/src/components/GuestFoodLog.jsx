@@ -651,6 +651,15 @@ const GuestFoodLog = () => {
             position="bottom-right"
           />
         )}
+
+        {/* AI Food Scan Modal */}
+        {showAIModal && (
+          <AIFoodScanModal
+            isOpen={showAIModal}
+            onClose={() => setShowAIModal(false)}
+            onFoodAnalyzed={handleAIFoodAnalyzed}
+          />
+        )}
       </div>
     </div>
   );
