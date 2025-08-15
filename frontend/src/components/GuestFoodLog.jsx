@@ -29,7 +29,6 @@ const GuestFoodLog = () => {
   const [learningMoment, setLearningMoment] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [realtimeFeedback, setRealtimeFeedback] = useState(null);
-  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [streakDays, setStreakDays] = useState(0);
 
   // Initialize guest session
