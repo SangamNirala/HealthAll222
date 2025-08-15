@@ -207,7 +207,7 @@ const ProviderEducation = () => {
                     <BookOpen className="w-8 h-8 text-purple-600 mr-3" />
                     <div>
                       <div className="text-2xl font-bold text-purple-600">
-                        {educationData.education_summary.courses_completed}
+                        {educationData.cme_tracking.courses_completed}
                       </div>
                       <p className="text-sm text-gray-600">Completed</p>
                     </div>
