@@ -285,6 +285,7 @@ class PredictiveAnalyticsAPITester:
         
         # Test 1: Good sleep habits
         good_habits_data = {
+            "user_id": "demo-patient-123",
             "daily_choices": {
                 "last_caffeine_time": "14:00",
                 "last_meal_time": "18:30",
