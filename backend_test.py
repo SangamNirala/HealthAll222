@@ -1260,6 +1260,579 @@ class HealthPlatformAPITester:
         return (success1 and success2 and success3 and success4 and success5 and 
                 success6 and success7 and success8 and cleanup_success)
 
+    def test_ai_food_recognition_endpoints(self):
+        """Test the new AI Food Recognition API endpoints as requested in review"""
+        print("\n🤖 Testing AI Food Recognition Endpoints...")
+        
+        # Test all 5 AI endpoints mentioned in the review request
+        advanced_success = self.test_advanced_food_recognition()
+        batch_success = self.test_batch_food_analysis()
+        score_success = self.test_food_score_calculator()
+        lookup_success = self.test_nutrition_database_lookup()
+        pattern_success = self.test_meal_pattern_analysis()
+        
+        print(f"\n📊 AI Food Recognition Test Summary:")
+        print(f"   ✅ Advanced Food Recognition: {'PASS' if advanced_success else 'FAIL'}")
+        print(f"   ✅ Batch Food Analysis: {'PASS' if batch_success else 'FAIL'}")
+        print(f"   ✅ Food Score Calculator: {'PASS' if score_success else 'FAIL'}")
+        print(f"   ✅ Nutrition Database Lookup: {'PASS' if lookup_success else 'FAIL'}")
+        print(f"   ✅ Meal Pattern Analysis: {'PASS' if pattern_success else 'FAIL'}")
+        
+        return advanced_success and batch_success and score_success and lookup_success and pattern_success
+
+    def test_advanced_food_recognition(self):
+        """Test POST /api/ai/food-recognition-advanced endpoint"""
+        print("\n🔍 Testing Advanced Food Recognition Endpoint...")
+        
+        # Sample base64 image data (small test image)
+        sample_image_base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+        
+        # Test 1: Basic advanced food recognition
+        test_data = {
+            "image_base64": sample_image_base64,
+            "user_preferences": {
+                "dietary_type": "vegetarian",
+                "health_focus": "weight_loss",
+                "allergies": ["nuts"]
+            },
+            "dietary_restrictions": ["vegetarian"],
+            "health_goals": ["weight_loss", "muscle_gain"]
+        }
+        
+        success1, response1 = self.run_test(
+            "Advanced Food Recognition - Basic Test",
+            "POST",
+            "ai/food-recognition-advanced",
+            200,
+            data=test_data
+        )
+        
+        # Validate response structure
+        if success1 and response1:
+            expected_keys = ['foods_detected', 'alternatives', 'session_insights', 'user_context']
+            missing_keys = [key for key in expected_keys if key not in response1]
+            if not missing_keys:
+                print(f"   ✅ Response contains all required keys: {expected_keys}")
+                
+                # Validate foods_detected structure
+                foods_detected = response1.get('foods_detected', [])
+                print(f"   📋 Foods detected: {len(foods_detected)} items")
+                
+                # Validate alternatives structure
+                alternatives = response1.get('alternatives', [])
+                print(f"   🔄 Alternatives provided: {len(alternatives)} groups")
+                
+                # Validate session_insights
+                session_insights = response1.get('session_insights', [])
+                print(f"   💡 Session insights: {len(session_insights)} insights")
+                
+                # Validate user_context
+                user_context = response1.get('user_context', {})
+                if user_context.get('preferences_considered'):
+                    print(f"   ✅ User preferences were considered in analysis")
+                
+            else:
+                print(f"   ❌ Response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: Advanced recognition with different preferences
+        test_data_2 = {
+            "image_base64": sample_image_base64,
+            "user_preferences": {
+                "dietary_type": "keto",
+                "health_focus": "diabetes_management",
+                "allergies": ["gluten", "dairy"]
+            },
+            "dietary_restrictions": ["gluten_free", "dairy_free"],
+            "health_goals": ["blood_sugar_control"]
+        }
+        
+        success2, response2 = self.run_test(
+            "Advanced Food Recognition - Keto/Diabetic Profile",
+            "POST",
+            "ai/food-recognition-advanced",
+            200,
+            data=test_data_2
+        )
+        
+        if success2 and response2:
+            user_context = response2.get('user_context', {})
+            dietary_restrictions = user_context.get('dietary_restrictions', [])
+            print(f"   🥗 Dietary restrictions processed: {dietary_restrictions}")
+            
+            health_goals = user_context.get('health_goals', [])
+            print(f"   🎯 Health goals processed: {health_goals}")
+        
+        return success1 and success2
+
+    def test_batch_food_analysis(self):
+        """Test POST /api/ai/batch-food-analysis endpoint"""
+        print("\n📸 Testing Batch Food Analysis Endpoint...")
+        
+        # Sample base64 images (multiple small test images)
+        sample_images = [
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAGA4jR9awAAAABJRU5ErkJggg==",
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+        ]
+        
+        # Test 1: Batch analysis for breakfast
+        test_data = {
+            "images": sample_images,
+            "user_session": f"batch_test_{datetime.now().strftime('%H%M%S')}",
+            "meal_context": "breakfast"
+        }
+        
+        success1, response1 = self.run_test(
+            "Batch Food Analysis - Breakfast",
+            "POST",
+            "ai/batch-food-analysis",
+            200,
+            data=test_data
+        )
+        
+        # Validate batch response structure
+        if success1 and response1:
+            expected_keys = ['batch_results', 'meal_summary', 'processing_metadata']
+            missing_keys = [key for key in expected_keys if key not in response1]
+            if not missing_keys:
+                print(f"   ✅ Batch response contains all required keys: {expected_keys}")
+                
+                # Validate batch_results
+                batch_results = response1.get('batch_results', [])
+                print(f"   📊 Batch results: {len(batch_results)} images processed")
+                
+                # Validate meal_summary
+                meal_summary = response1.get('meal_summary', {})
+                total_images = meal_summary.get('total_images_processed', 0)
+                total_foods = meal_summary.get('total_foods_detected', 0)
+                total_calories = meal_summary.get('estimated_total_calories', 0)
+                meal_context = meal_summary.get('meal_context', '')
+                
+                print(f"   🍽️ Meal Summary: {total_images} images, {total_foods} foods, ~{total_calories} calories")
+                print(f"   🌅 Meal context: {meal_context}")
+                
+                # Validate processing_metadata
+                processing_metadata = response1.get('processing_metadata', {})
+                session_id = processing_metadata.get('session_id', '')
+                processed_at = processing_metadata.get('processed_at', '')
+                print(f"   ⏰ Processed at: {processed_at} (Session: {session_id})")
+                
+            else:
+                print(f"   ❌ Batch response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: Batch analysis for dinner with more images
+        test_data_2 = {
+            "images": sample_images + sample_images[:2],  # 5 images total
+            "user_session": f"batch_dinner_{datetime.now().strftime('%H%M%S')}",
+            "meal_context": "dinner"
+        }
+        
+        success2, response2 = self.run_test(
+            "Batch Food Analysis - Dinner (5 images)",
+            "POST",
+            "ai/batch-food-analysis",
+            200,
+            data=test_data_2
+        )
+        
+        if success2 and response2:
+            meal_summary = response2.get('meal_summary', {})
+            batch_insights = meal_summary.get('batch_insights', [])
+            print(f"   💡 Batch insights: {len(batch_insights)} insights provided")
+            for insight in batch_insights[:2]:  # Show first 2 insights
+                print(f"      - {insight}")
+        
+        return success1 and success2
+
+    def test_food_score_calculator(self):
+        """Test POST /api/ai/food-score-calculator endpoint"""
+        print("\n📊 Testing Food Score Calculator Endpoint...")
+        
+        # Test 1: Score calculation for healthy foods
+        healthy_foods_data = {
+            "foods": [
+                {
+                    "name": "Grilled Salmon",
+                    "nutrition": {
+                        "calories": 206,
+                        "protein": 22,
+                        "carbs": 0,
+                        "fat": 12,
+                        "fiber": 0,
+                        "sodium": 59
+                    },
+                    "portion_size": "100g",
+                    "processing_level": "minimally_processed"
+                },
+                {
+                    "name": "Quinoa Salad",
+                    "nutrition": {
+                        "calories": 120,
+                        "protein": 4.4,
+                        "carbs": 22,
+                        "fat": 1.9,
+                        "fiber": 2.8,
+                        "sodium": 7
+                    },
+                    "portion_size": "100g",
+                    "processing_level": "whole_food"
+                }
+            ]
+        }
+        
+        success1, response1 = self.run_test(
+            "Food Score Calculator - Healthy Foods",
+            "POST",
+            "ai/food-score-calculator",
+            200,
+            data=healthy_foods_data
+        )
+        
+        # Validate scoring response structure
+        if success1 and response1:
+            expected_keys = ['scored_foods', 'meal_analysis', 'scoring_methodology']
+            missing_keys = [key for key in expected_keys if key not in response1]
+            if not missing_keys:
+                print(f"   ✅ Scoring response contains all required keys: {expected_keys}")
+                
+                # Validate scored_foods
+                scored_foods = response1.get('scored_foods', [])
+                print(f"   🍽️ Scored foods: {len(scored_foods)} items")
+                
+                for i, food in enumerate(scored_foods[:2]):  # Show first 2 foods
+                    food_name = food.get('name', 'Unknown')
+                    detailed_score = food.get('detailed_score', {})
+                    overall_score = detailed_score.get('overall_score', 0)
+                    grade = detailed_score.get('grade', 'N/A')
+                    print(f"      {i+1}. {food_name}: Score {overall_score}/100 (Grade: {grade})")
+                
+                # Validate meal_analysis
+                meal_analysis = response1.get('meal_analysis', {})
+                overall_meal_score = meal_analysis.get('overall_meal_score', 0)
+                meal_grade = meal_analysis.get('meal_grade', 'N/A')
+                print(f"   🍽️ Overall meal score: {overall_meal_score}/100 (Grade: {meal_grade})")
+                
+                # Validate scoring_methodology
+                scoring_methodology = response1.get('scoring_methodology', {})
+                factors = scoring_methodology.get('factors', [])
+                grade_ranges = scoring_methodology.get('grade_ranges', {})
+                print(f"   📋 Scoring factors: {len(factors)} criteria")
+                print(f"   📊 Grade ranges: A={grade_ranges.get('A', 'N/A')}")
+                
+            else:
+                print(f"   ❌ Scoring response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: Score calculation for processed foods
+        processed_foods_data = {
+            "foods": [
+                {
+                    "name": "Cheeseburger",
+                    "nutrition": {
+                        "calories": 540,
+                        "protein": 25,
+                        "carbs": 40,
+                        "fat": 31,
+                        "fiber": 3,
+                        "sodium": 1040
+                    },
+                    "portion_size": "1 burger",
+                    "processing_level": "highly_processed"
+                },
+                {
+                    "name": "French Fries",
+                    "nutrition": {
+                        "calories": 365,
+                        "protein": 4,
+                        "carbs": 63,
+                        "fat": 17,
+                        "fiber": 4,
+                        "sodium": 246
+                    },
+                    "portion_size": "medium",
+                    "processing_level": "highly_processed"
+                }
+            ]
+        }
+        
+        success2, response2 = self.run_test(
+            "Food Score Calculator - Processed Foods",
+            "POST",
+            "ai/food-score-calculator",
+            200,
+            data=processed_foods_data
+        )
+        
+        if success2 and response2:
+            meal_analysis = response2.get('meal_analysis', {})
+            improvement_priority = meal_analysis.get('improvement_priority', [])
+            print(f"   🎯 Improvement priorities: {len(improvement_priority)} recommendations")
+            
+            scored_foods = response2.get('scored_foods', [])
+            for food in scored_foods:
+                improvement_tips = food.get('improvement_tips', [])
+                if improvement_tips:
+                    print(f"   💡 Tips for {food.get('name', 'Unknown')}: {len(improvement_tips)} suggestions")
+        
+        return success1 and success2
+
+    def test_nutrition_database_lookup(self):
+        """Test GET /api/ai/nutrition-database-lookup/{food_name} endpoint"""
+        print("\n🔍 Testing Nutrition Database Lookup Endpoint...")
+        
+        # Test 1: USDA database lookup
+        success1, response1 = self.run_test(
+            "Nutrition Database Lookup - Apple (USDA)",
+            "GET",
+            "ai/nutrition-database-lookup/apple",
+            200,
+            params={"source": "usda"}
+        )
+        
+        # Validate USDA lookup response
+        if success1 and response1:
+            expected_keys = ['query', 'sources_checked', 'database_results', 'confidence', 'recommended_nutrition']
+            missing_keys = [key for key in expected_keys if key not in response1]
+            if not missing_keys:
+                print(f"   ✅ USDA lookup response contains all required keys: {expected_keys}")
+                
+                query = response1.get('query', '')
+                sources_checked = response1.get('sources_checked', [])
+                confidence = response1.get('confidence', 0)
+                
+                print(f"   🔍 Query: '{query}' | Sources: {sources_checked} | Confidence: {confidence}")
+                
+                # Validate database_results
+                database_results = response1.get('database_results', {})
+                usda_result = database_results.get('usda', {})
+                if usda_result:
+                    print(f"   🏛️ USDA data available: {len(usda_result)} fields")
+                
+                # Validate recommended_nutrition
+                recommended_nutrition = response1.get('recommended_nutrition', {})
+                if recommended_nutrition:
+                    calories = recommended_nutrition.get('calories', 0)
+                    protein = recommended_nutrition.get('protein', 0)
+                    print(f"   📊 Recommended nutrition: {calories} cal, {protein}g protein")
+                
+            else:
+                print(f"   ❌ USDA lookup response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: OpenFood Facts database lookup
+        success2, response2 = self.run_test(
+            "Nutrition Database Lookup - Banana (OpenFood)",
+            "GET",
+            "ai/nutrition-database-lookup/banana",
+            200,
+            params={"source": "openfood"}
+        )
+        
+        if success2 and response2:
+            database_results = response2.get('database_results', {})
+            openfood_result = database_results.get('openfood', {})
+            if openfood_result:
+                print(f"   🌍 OpenFood Facts data available: {len(openfood_result)} fields")
+        
+        # Test 3: Combined database lookup (both sources)
+        success3, response3 = self.run_test(
+            "Nutrition Database Lookup - Chicken Breast (All Sources)",
+            "GET",
+            "ai/nutrition-database-lookup/chicken breast",
+            200,
+            params={"source": "all"}
+        )
+        
+        if success3 and response3:
+            sources_checked = response3.get('sources_checked', [])
+            data_quality_assessment = response3.get('data_quality_assessment', {})
+            
+            print(f"   🔄 Combined lookup - Sources: {sources_checked}")
+            if data_quality_assessment:
+                print(f"   📈 Data quality assessment available: {len(data_quality_assessment)} metrics")
+        
+        # Test 4: Lookup for non-existent food
+        success4, response4 = self.run_test(
+            "Nutrition Database Lookup - Non-existent Food",
+            "GET",
+            "ai/nutrition-database-lookup/xyz_nonexistent_food_123",
+            200
+        )
+        
+        if success4 and response4:
+            confidence = response4.get('confidence', 0)
+            print(f"   ❓ Non-existent food confidence: {confidence} (should be low)")
+        
+        return success1 and success2 and success3 and success4
+
+    def test_meal_pattern_analysis(self):
+        """Test POST /api/ai/meal-pattern-analysis endpoint"""
+        print("\n📈 Testing Meal Pattern Analysis Endpoint...")
+        
+        # Test 1: 7-day meal pattern analysis
+        sample_meal_history = [
+            {
+                "date": "2024-01-10",
+                "meal_type": "breakfast",
+                "foods": ["oatmeal", "banana", "coffee"],
+                "calories": 320,
+                "time": "08:00"
+            },
+            {
+                "date": "2024-01-10",
+                "meal_type": "lunch",
+                "foods": ["grilled chicken", "quinoa", "vegetables"],
+                "calories": 450,
+                "time": "12:30"
+            },
+            {
+                "date": "2024-01-10",
+                "meal_type": "dinner",
+                "foods": ["salmon", "sweet potato", "broccoli"],
+                "calories": 520,
+                "time": "19:00"
+            },
+            {
+                "date": "2024-01-11",
+                "meal_type": "breakfast",
+                "foods": ["greek yogurt", "berries", "granola"],
+                "calories": 280,
+                "time": "08:15"
+            },
+            {
+                "date": "2024-01-11",
+                "meal_type": "lunch",
+                "foods": ["salad", "chicken breast", "olive oil"],
+                "calories": 380,
+                "time": "12:45"
+            }
+        ]
+        
+        test_data = {
+            "meal_history": sample_meal_history,
+            "user_profile": {
+                "age": 32,
+                "gender": "female",
+                "activity_level": "moderately_active",
+                "health_goals": ["weight_maintenance", "muscle_gain"],
+                "dietary_preferences": ["high_protein", "whole_foods"]
+            },
+            "analysis_period": "7_days"
+        }
+        
+        success1, response1 = self.run_test(
+            "Meal Pattern Analysis - 7 Days",
+            "POST",
+            "ai/meal-pattern-analysis",
+            200,
+            data=test_data
+        )
+        
+        # Validate pattern analysis response
+        if success1 and response1:
+            expected_keys = ['analysis_period', 'meals_analyzed', 'pattern_analysis', 'personalized_recommendations', 'progress_tracking']
+            missing_keys = [key for key in expected_keys if key not in response1]
+            if not missing_keys:
+                print(f"   ✅ Pattern analysis response contains all required keys: {expected_keys}")
+                
+                analysis_period = response1.get('analysis_period', '')
+                meals_analyzed = response1.get('meals_analyzed', 0)
+                print(f"   📊 Analysis: {meals_analyzed} meals over {analysis_period}")
+                
+                # Validate pattern_analysis
+                pattern_analysis = response1.get('pattern_analysis', {})
+                expected_patterns = ['meal_timing_patterns', 'food_preference_patterns', 'nutrition_consistency', 'portion_size_trends']
+                pattern_keys = list(pattern_analysis.keys())
+                print(f"   🔍 Pattern categories analyzed: {len(pattern_keys)}")
+                
+                # Check meal timing patterns
+                meal_timing = pattern_analysis.get('meal_timing_patterns', {})
+                if meal_timing:
+                    print(f"   ⏰ Meal timing patterns available: {len(meal_timing)} metrics")
+                
+                # Check food preferences
+                food_preferences = pattern_analysis.get('food_preference_patterns', {})
+                if food_preferences:
+                    print(f"   🍽️ Food preference patterns: {len(food_preferences)} categories")
+                
+                # Validate personalized_recommendations
+                recommendations = response1.get('personalized_recommendations', [])
+                print(f"   💡 Personalized recommendations: {len(recommendations)} suggestions")
+                
+                # Validate progress_tracking
+                progress_tracking = response1.get('progress_tracking', {})
+                suggested_metrics = progress_tracking.get('suggested_metrics', [])
+                next_analysis_date = progress_tracking.get('next_analysis_date', '')
+                print(f"   📈 Progress tracking: {len(suggested_metrics)} metrics, next analysis: {next_analysis_date}")
+                
+            else:
+                print(f"   ❌ Pattern analysis response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: 30-day meal pattern analysis with different profile
+        test_data_2 = {
+            "meal_history": sample_meal_history * 6,  # Simulate more data
+            "user_profile": {
+                "age": 45,
+                "gender": "male",
+                "activity_level": "lightly_active",
+                "health_goals": ["weight_loss", "diabetes_management"],
+                "dietary_preferences": ["low_carb", "diabetic_friendly"]
+            },
+            "analysis_period": "30_days"
+        }
+        
+        success2, response2 = self.run_test(
+            "Meal Pattern Analysis - 30 Days (Diabetic Profile)",
+            "POST",
+            "ai/meal-pattern-analysis",
+            200,
+            data=test_data_2
+        )
+        
+        if success2 and response2:
+            meals_analyzed = response2.get('meals_analyzed', 0)
+            pattern_analysis = response2.get('pattern_analysis', {})
+            
+            print(f"   📊 Extended analysis: {meals_analyzed} meals analyzed")
+            
+            # Check nutrition consistency for diabetic profile
+            nutrition_consistency = pattern_analysis.get('nutrition_consistency', {})
+            if nutrition_consistency:
+                print(f"   🩺 Nutrition consistency metrics for diabetic management available")
+            
+            # Check recommendations for diabetic profile
+            recommendations = response2.get('personalized_recommendations', [])
+            if recommendations:
+                print(f"   💊 Diabetic-specific recommendations: {len(recommendations)} suggestions")
+        
+        # Test 3: Minimal meal history (edge case)
+        minimal_test_data = {
+            "meal_history": sample_meal_history[:2],  # Only 2 meals
+            "user_profile": {
+                "age": 28,
+                "gender": "female",
+                "activity_level": "very_active"
+            },
+            "analysis_period": "3_days"
+        }
+        
+        success3, response3 = self.run_test(
+            "Meal Pattern Analysis - Minimal Data",
+            "POST",
+            "ai/meal-pattern-analysis",
+            200,
+            data=minimal_test_data
+        )
+        
+        if success3 and response3:
+            meals_analyzed = response3.get('meals_analyzed', 0)
+            print(f"   📊 Minimal data analysis: {meals_analyzed} meals (testing edge case)")
+        
+        return success1 and success2 and success3
+
     def test_patient_analytics_endpoints(self):
         """Test Patient Analytics endpoints for the new Patient Analytics page"""
         print("\n📋 Testing Patient Analytics Endpoints...")
