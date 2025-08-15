@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRole } from '../context/RoleContext';
 import SmartNavigation from './shared/SmartNavigation';
-import UpgradePrompt from './shared/UpgradePrompt';
 import RealTimeFeedback from './shared/RealTimeFeedback';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -15,7 +14,7 @@ import {
 } from 'lucide-react';
 
 // Component: Quick Start Guide
-const QuickStart = ({ sessionTime, setShowUpgradePrompt }) => (
+const QuickStart = ({ sessionTime }) => (
   <Card className="col-span-full lg:col-span-2">
     <CardHeader>
       <CardTitle className="flex items-center">
@@ -37,16 +36,6 @@ const QuickStart = ({ sessionTime, setShowUpgradePrompt }) => (
             <Clock className="w-4 h-4 text-purple-600" />
             <span className="text-sm text-purple-700">{Math.floor(sessionTime / 60)}:{(sessionTime % 60).toString().padStart(2, '0')}</span>
           </div>
-        </div>
-        <div className="mt-3">
-          <Button
-            size="sm"
-            className="bg-purple-600 hover:bg-purple-700 text-white"
-            onClick={() => setShowUpgradePrompt(true)}
-          >
-            <Crown className="w-4 h-4 mr-2" />
-            Save Progress - Create Free Account
-          </Button>
         </div>
       </div>
       
@@ -262,7 +251,7 @@ const SimpleGoals = () => {
 };
 
 // Component: Nutrition Tips
-const NutritionTips = ({ handleUpgradeAction }) => (
+const NutritionTips = () => (
   <Card className="col-span-full lg:col-span-2">
     <CardHeader>
       <CardTitle className="flex items-center">
@@ -311,16 +300,6 @@ const NutritionTips = ({ handleUpgradeAction }) => (
             </div>
           </div>
         </div>
-      </div>
-      
-      <div className="mt-6 text-center">
-        <Button 
-          className="bg-gradient-to-r from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700"
-          onClick={handleUpgradeAction}
-        >
-          <Heart className="w-4 h-4 mr-2" />
-          Create Free Account to Save Progress
-        </Button>
       </div>
     </CardContent>
   </Card>
@@ -448,7 +427,6 @@ const HealthCalculatorCard = () => {
 const GuestDashboard = () => {
   const { switchRole } = useRole();
   const [sessionTime, setSessionTime] = useState(0);
-  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [realtimeFeedback, setRealtimeFeedback] = useState(null);
   const [visitCount, setVisitCount] = useState(0);
 
@@ -456,7 +434,7 @@ const GuestDashboard = () => {
   useEffect(() => {
     switchRole('guest');
     
-    // Track session time and visit count for upgrade triggers
+    // Track session time and visit count
     const startTime = Date.now();
     const currentVisits = parseInt(localStorage.getItem('guest_visit_count') || '0') + 1;
     setVisitCount(currentVisits);
@@ -466,13 +444,6 @@ const GuestDashboard = () => {
     const sessionTimer = setInterval(() => {
       setSessionTime(Math.floor((Date.now() - startTime) / 1000));
     }, 30000);
-    
-    // Show upgrade prompt after 2 minutes or 3rd visit
-    const timer = setTimeout(() => {
-      if (currentVisits >= 3) {
-        setShowUpgradePrompt(true);
-      }
-    }, 120000); // 2 minutes
     
     // Show welcome feedback for new users
     if (currentVisits === 1) {
@@ -490,29 +461,23 @@ const GuestDashboard = () => {
     }
     
     return () => {
-      clearTimeout(timer);
       clearInterval(sessionTimer);
     };
   }, [switchRole]);
-
-  const handleUpgradeAction = () => {
-    console.log('Upgrade action triggered from dashboard');
-    // Implement upgrade flow
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-violet-100">
       <SmartNavigation />
       <div className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <QuickStart sessionTime={sessionTime} setShowUpgradePrompt={setShowUpgradePrompt} />
+          <QuickStart sessionTime={sessionTime} />
           <HealthSnapshotCard />
           <SimpleFoodLogging />
           <HealthCalculatorCard />
           <BasicNutritionInfo />
           <TodayCalories />
           <SimpleGoals />
-          <NutritionTips handleUpgradeAction={handleUpgradeAction} />
+          <NutritionTips />
         </div>
       </div>
 
@@ -523,27 +488,10 @@ const GuestDashboard = () => {
           data={realtimeFeedback}
           onAction={(action) => {
             console.log('Dashboard feedback action:', action);
-            if (action === 'learn_more') {
-              setShowUpgradePrompt(true);
-            }
           }}
           onDismiss={() => setRealtimeFeedback(null)}
           position="bottom-right"
         />
-      )}
-
-      {/* Upgrade Modal */}
-      {showUpgradePrompt && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="max-w-lg">
-            <UpgradePrompt
-              type="data_persistence"
-              context={`You've been exploring for ${Math.floor(sessionTime / 60)} minutes and visited ${visitCount} times. Don't lose your progress - create a free account to save everything!`}
-              triggerAction={handleUpgradeAction}
-              onClose={() => setShowUpgradePrompt(false)}
-            />
-          </div>
-        </div>
       )}
     </div>
   );
