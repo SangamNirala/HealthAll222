@@ -54,6 +54,13 @@ const PersonalInsights = ({
   const [error, setError] = useState(null);
   const [activeTimeframe, setActiveTimeframe] = useState('weekly');
   const [selectedPattern, setSelectedPattern] = useState('nutrition');
+  const [activeTab, setActiveTab] = useState('overview');
+  
+  // ML Predictions State
+  const [energyPrediction, setEnergyPrediction] = useState(null);
+  const [moodCorrelation, setMoodCorrelation] = useState(null);
+  const [sleepImpact, setSleepImpact] = useState(null);
+  const [weeklyPatterns, setWeeklyPatterns] = useState(null);
 
   const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || '';
 
