@@ -1640,6 +1640,56 @@ class PatientProgressUpdate(BaseModel):
     trend: Optional[str] = None
     notes: Optional[str] = None
 
+# ===== WEBSOCKET CONNECTION MANAGER =====
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: Dict[str, WebSocket] = {}
+        self.consultation_rooms: Dict[str, List[WebSocket]] = {}
+    
+    async def connect(self, websocket: WebSocket, session_id: str, user_id: str):
+        await websocket.accept()
+        connection_key = f"{session_id}_{user_id}"
+        self.active_connections[connection_key] = websocket
+        
+        if session_id not in self.consultation_rooms:
+            self.consultation_rooms[session_id] = []
+        self.consultation_rooms[session_id].append(websocket)
+        
+        logger.info(f"WebSocket connected: {connection_key}")
+    
+    def disconnect(self, session_id: str, user_id: str):
+        connection_key = f"{session_id}_{user_id}"
+        if connection_key in self.active_connections:
+            websocket = self.active_connections[connection_key]
+            del self.active_connections[connection_key]
+            
+            if session_id in self.consultation_rooms:
+                if websocket in self.consultation_rooms[session_id]:
+                    self.consultation_rooms[session_id].remove(websocket)
+                if not self.consultation_rooms[session_id]:
+                    del self.consultation_rooms[session_id]
+            
+            logger.info(f"WebSocket disconnected: {connection_key}")
+    
+    async def send_personal_message(self, message: str, session_id: str, user_id: str):
+        connection_key = f"{session_id}_{user_id}"
+        if connection_key in self.active_connections:
+            websocket = self.active_connections[connection_key]
+            await websocket.send_text(message)
+    
+    async def broadcast_to_session(self, message: str, session_id: str):
+        if session_id in self.consultation_rooms:
+            for connection in self.consultation_rooms[session_id]:
+                try:
+                    await connection.send_text(message)
+                except:
+                    # Connection might be closed
+                    pass
+
+# Initialize connection manager
+manager = ConnectionManager()
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
