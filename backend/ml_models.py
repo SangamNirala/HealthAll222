@@ -1169,8 +1169,11 @@ class WhatIfScenarioProcessor:
                 'current_state': current_predictions,
                 'predicted_state': modified_predictions,
                 'impact_analysis': impact_analysis,
-                'recommendations': self._get_scenario_recommendations(impact_analysis),
-                'confidence': 0.82
+                'recommendations': self._get_scenario_recommendations(impact_analysis, changes),
+                'confidence': self._calculate_scenario_confidence(impact_analysis, changes),
+                'scientific_basis': self._generate_scientific_justification(changes),
+                'timeframe': self._estimate_change_timeframe(changes),
+                'risk_factors': self._identify_risk_factors(changes, impact_analysis)
             }
             
         except Exception as e:
