@@ -7897,7 +7897,10 @@ async def analyze_sleep_impact(request: SleepImpactRequest):
             factor_analysis=sleep_result['factor_analysis'],
             recommendations=sleep_result['recommendations'],
             confidence=sleep_result['confidence'],
-            analysis_date=analysis_date
+            analysis_date=analysis_date,
+            scientific_evidence=sleep_result.get('scientific_evidence', {}),
+            actionable_insights=sleep_result.get('actionable_insights', []),
+            risk_assessment=sleep_result.get('risk_assessment', {})
         )
         
     except Exception as e:
