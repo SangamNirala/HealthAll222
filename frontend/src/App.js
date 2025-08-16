@@ -44,6 +44,7 @@ import GuestHealthCalculator from "./components/GuestHealthCalculator";
 import GuestGoals from "./components/GuestGoals";
 import InstantHealthAssessment from "./components/InstantHealthAssessment";
 import AIFoodRecognition from "./components/AIFoodRecognition";
+import QuickSymptomCheckerPage from "./components/QuickSymptomCheckerPage";
 
 // Family navigation pages
 import FamilyMembers from "./components/FamilyMembers";
