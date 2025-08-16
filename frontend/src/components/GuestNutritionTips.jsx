@@ -707,6 +707,143 @@ const GuestNutritionTips = () => {
           </div>
         </div>
       </div>
+
+      {/* Detailed Tip Modal */}
+      {showModal && selectedTip && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-xl">
+              <div className="flex items-center space-x-3">
+                <Badge className={getPriorityColor(selectedTip.priority)}>
+                  {getPriorityLabel(selectedTip.priority)}
+                </Badge>
+                <h2 className="text-2xl font-bold text-gray-900">{selectedTip.title}</h2>
+              </div>
+              <Button variant="ghost" size="sm" onClick={closeModal}>
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-8">
+              {/* Introduction */}
+              <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg p-6">
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  {selectedTip.description}
+                </p>
+                <div className="flex items-center space-x-4 mt-4">
+                  <Badge variant="outline" className="text-xs">
+                    <Clock className="w-3 h-3 mr-1" />
+                    {selectedTip.readTime}
+                  </Badge>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedTip.tags.map((tag, index) => (
+                      <Badge 
+                        key={index}
+                        variant="secondary"
+                        className="text-xs bg-purple-100 text-purple-700"
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Scientific Basis */}
+              <div className="bg-blue-50 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-blue-900 mb-3 flex items-center">
+                  <Brain className="w-5 h-5 mr-2" />
+                  Scientific Evidence
+                </h3>
+                <p className="text-blue-800 leading-relaxed">
+                  {selectedTip.detailedContent.scientificBasis}
+                </p>
+              </div>
+
+              {/* Benefits */}
+              <div className="bg-green-50 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-green-900 mb-4 flex items-center">
+                  <Heart className="w-5 h-5 mr-2" />
+                  Key Benefits
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {selectedTip.detailedContent.benefits.map((benefit, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
+                      <span className="text-green-800">{benefit}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Implementation Steps */}
+              <div className="bg-orange-50 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-orange-900 mb-4 flex items-center">
+                  <Zap className="w-5 h-5 mr-2" />
+                  How to Implement
+                </h3>
+                <div className="space-y-3">
+                  {selectedTip.detailedContent.implementationSteps.map((step, index) => (
+                    <div key={index} className="flex items-start space-x-3">
+                      <div className="w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0 mt-0.5">
+                        {index + 1}
+                      </div>
+                      <span className="text-orange-800 leading-relaxed">{step}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Meal Ideas */}
+              <div className="bg-yellow-50 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-yellow-900 mb-4 flex items-center">
+                  <Utensils className="w-5 h-5 mr-2" />
+                  Meal Ideas & Examples
+                </h3>
+                <div className="space-y-2">
+                  {selectedTip.detailedContent.mealIdeas.map((idea, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <Apple className="w-4 h-4 text-yellow-600 flex-shrink-0" />
+                      <span className="text-yellow-800">{idea}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tracking & Progress */}
+              <div className="bg-indigo-50 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-indigo-900 mb-3 flex items-center">
+                  <TrendingUp className="w-5 h-5 mr-2" />
+                  Track Your Progress
+                </h3>
+                <p className="text-indigo-800 leading-relaxed">
+                  {selectedTip.detailedContent.tracking}
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200">
+                <Button 
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  onClick={() => toggleFavorite(selectedTip.id)}
+                >
+                  <Star className={`w-4 h-4 mr-2 ${
+                    favorited.includes(selectedTip.id) 
+                      ? 'text-yellow-300 fill-current' 
+                      : 'text-white'
+                  }`} />
+                  {favorited.includes(selectedTip.id) ? 'Favorited' : 'Add to Favorites'}
+                </Button>
+                <Button variant="outline" className="flex-1" onClick={closeModal}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
