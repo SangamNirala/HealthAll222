@@ -26,6 +26,7 @@ import predictiveAnalyticsService from '../../services/predictiveAnalyticsServic
 
 const WhatIfScenarios = ({ userId = 'demo-patient-123', className = '' }) => {
   const navigate = useNavigate();
+  const { currentRole } = useRole();
   const [baselineData, setBaselineData] = useState({
     calories: 2000,
     protein_g: 100,
