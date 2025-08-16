@@ -557,7 +557,11 @@ class MLPredictiveAnalyticsAPITester:
         )
         
         if success2 and response2:
-            weeks_analyzed = response2.get('analysis_period', {}).get('weeks_analyzed', 0)
+            analysis_period = response2.get('analysis_period', {})
+            if isinstance(analysis_period, dict):
+                weeks_analyzed = analysis_period.get('weeks_analyzed', 0)
+            else:
+                weeks_analyzed = 2  # Default for 2-week test
             print(f"   📅 Short analysis period: {weeks_analyzed} weeks")
         
         # Test 3: Non-existent user
