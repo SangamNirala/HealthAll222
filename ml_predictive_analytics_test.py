@@ -530,8 +530,11 @@ class MLPredictiveAnalyticsAPITester:
                         print(f"   📊 {pattern_type}: {score}/10")
                 
                 # Display insights
-                for i, insight in enumerate(insights[:3]):
-                    print(f"   💡 Insight {i+1}: {insight[:60]}...")
+                if isinstance(insights, list):
+                    for i, insight in enumerate(insights[:3]):
+                        print(f"   💡 Insight {i+1}: {insight[:60]}...")
+                else:
+                    print(f"   💡 Insights: {insights}")
                 
             else:
                 print(f"   ❌ Response missing keys: {missing_keys}")
