@@ -238,7 +238,8 @@ class SymptomCheckerAPITester:
             "notes": "Feeling slightly better after rest and medication",
             "overall_improvement": 6,
             "quality_of_life_impact": 7,
-            "sleep_quality": 6
+            "sleep_quality": 6,
+            "energy_level": 5
         }
         
         success1, response1 = self.run_test(
