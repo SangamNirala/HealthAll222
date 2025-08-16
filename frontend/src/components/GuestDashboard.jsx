@@ -12,8 +12,10 @@ import {
   TrendingUp, Info, AlertCircle, Zap, Crown,
   Calculator, BookOpen, Award, Star, Activity,
   User, Utensils, Settings, Brain, Camera,
-  Scan, BarChart3, Edit
+  Scan, BarChart3, Edit, Stethoscope, Shield,
+  Calendar
 } from 'lucide-react';
+import QuickSymptomChecker from './QuickSymptomChecker';
 
 // Component: Quick Start Guide
 const QuickStart = ({ sessionTime }) => (
