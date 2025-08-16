@@ -106,7 +106,7 @@ class PredictiveAnalyticsService {
   /**
    * Analyze sleep impact based on daily choices
    */
-  async analyzeSleepImpact(dailyChoices) {
+  async analyzeSleepImpact(dailyChoices, userId = 'demo-patient-123') {
     try {
       const response = await fetch(`${API_BASE_URL}/api/ai/sleep-impact-analysis`, {
         method: 'POST',
@@ -114,6 +114,7 @@ class PredictiveAnalyticsService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          user_id: userId,
           daily_choices: dailyChoices
         })
       });
