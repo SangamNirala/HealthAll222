@@ -91,3 +91,4 @@ realtime
 storage3
 supabase-functions
 deprecation>=2.1.0
+httpcore
