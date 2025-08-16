@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import uuid
 
 class Phase3Phase4MLTester:
-    def __init__(self, base_url="https://e57f4381-fb0b-42c8-9687-a06bf171e772.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://guest-login-fix.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
