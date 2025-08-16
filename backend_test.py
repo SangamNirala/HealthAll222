@@ -11524,7 +11524,8 @@ class HealthPlatformAPITester:
             "notes": "Much better today. Headache almost gone, energy levels improving.",
             "overall_improvement": 8,
             "quality_of_life_impact": 8,
-            "sleep_quality": 7
+            "sleep_quality": 7,
+            "energy_level": 8
         }
         
         success4, day2_response = self.run_test(
