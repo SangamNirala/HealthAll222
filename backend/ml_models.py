@@ -1381,6 +1381,116 @@ class WhatIfScenarioProcessor:
         
         return combined[:6]  # Limit to 6 items to avoid overwhelming
     
+    def _generate_reliability_indicators(self, changes: Dict, impact_analysis: Dict) -> Dict[str, Any]:
+        """Generate reliability indicators for scenario predictions"""
+        indicators = {
+            'data_quality': self._assess_data_quality(changes),
+            'scientific_support': self._assess_scientific_support(changes),
+            'prediction_strength': self._assess_prediction_strength(impact_analysis),
+            'implementation_feasibility': self._assess_implementation_feasibility(changes),
+            'overall_reliability': 0.0
+        }
+        
+        # Calculate overall reliability
+        weights = {'data_quality': 0.25, 'scientific_support': 0.35, 'prediction_strength': 0.25, 'implementation_feasibility': 0.15}
+        indicators['overall_reliability'] = sum(indicators[key] * weights[key] for key in weights.keys())
+        
+        # Add reliability interpretation
+        reliability = indicators['overall_reliability']
+        if reliability >= 0.8:
+            indicators['interpretation'] = "High reliability - Strong scientific backing with feasible implementation"
+        elif reliability >= 0.65:
+            indicators['interpretation'] = "Good reliability - Moderate confidence in predicted outcomes"  
+        elif reliability >= 0.5:
+            indicators['interpretation'] = "Fair reliability - Some uncertainty in predictions, monitor results"
+        else:
+            indicators['interpretation'] = "Low reliability - High uncertainty, consider consulting healthcare provider"
+            
+        return indicators
+    
+    def _assess_data_quality(self, changes: Dict) -> float:
+        """Assess quality of input data for scenario"""
+        score = 0.7  # Base score
+        
+        # Check for reasonable values
+        for key, value in changes.items():
+            if key == 'sleep_hours' and 6 <= value <= 10:
+                score += 0.05
+            elif key == 'exercise_minutes' and 0 <= value <= 120:
+                score += 0.05
+            elif key == 'protein_g' and 50 <= value <= 200:
+                score += 0.05
+            elif key == 'stress_level' and 1 <= value <= 10:
+                score += 0.05
+        
+        return min(1.0, score)
+    
+    def _assess_scientific_support(self, changes: Dict) -> float:
+        """Assess level of scientific support for changes"""
+        # Well-researched factors get higher scores
+        support_levels = {
+            'sleep_hours': 0.95,      # Extremely well studied
+            'exercise_minutes': 0.90,  # Very well studied  
+            'stress_level': 0.85,     # Well documented
+            'protein_g': 0.80,        # Good evidence base
+            'water_intake_ml': 0.75,  # Moderate evidence
+            'caffeine_mg': 0.70,      # Some evidence, timing dependent
+            'meal_timing_consistency': 0.65  # Emerging research
+        }
+        
+        if not changes:
+            return 0.5
+            
+        scores = [support_levels.get(key, 0.5) for key in changes.keys()]
+        return sum(scores) / len(scores)
+    
+    def _assess_prediction_strength(self, impact_analysis: Dict) -> float:
+        """Assess strength of predicted changes"""
+        if not impact_analysis:
+            return 0.5
+            
+        total_impact = 0
+        count = 0
+        
+        for metric_data in impact_analysis.values():
+            if isinstance(metric_data, dict) and 'impact_level' in metric_data:
+                impact_level = metric_data['impact_level']
+                if impact_level == 'high':
+                    total_impact += 0.9
+                elif impact_level == 'medium':
+                    total_impact += 0.7
+                else:
+                    total_impact += 0.4
+                count += 1
+        
+        return total_impact / count if count > 0 else 0.5
+    
+    def _assess_implementation_feasibility(self, changes: Dict) -> float:
+        """Assess how feasible the changes are to implement"""
+        feasibility_scores = {
+            'sleep_hours': 0.7,       # Moderate - requires schedule changes
+            'exercise_minutes': 0.8,  # Good - relatively easy to add
+            'stress_level': 0.6,      # Challenging - requires techniques/therapy
+            'protein_g': 0.9,         # Easy - dietary adjustment
+            'water_intake_ml': 0.95,  # Very easy - simple habit
+            'caffeine_mg': 0.85,      # Easy - consumption adjustment
+            'meal_timing_consistency': 0.75  # Moderate - schedule dependent
+        }
+        
+        if not changes:
+            return 0.5
+            
+        # Consider magnitude of changes
+        magnitude_factor = 1.0
+        for key, value in changes.items():
+            if key == 'sleep_hours' and abs(value) > 2:
+                magnitude_factor *= 0.8  # Large sleep changes harder
+            elif key == 'exercise_minutes' and value > 60:
+                magnitude_factor *= 0.85  # Large exercise increases need gradual approach
+        
+        base_feasibility = sum(feasibility_scores.get(key, 0.5) for key in changes.keys()) / len(changes)
+        return base_feasibility * magnitude_factor
+    
     def _calculate_scenario_confidence(self, impact_analysis: Dict, changes: Dict) -> float:
         """Calculate confidence based on change magnitude and scientific backing"""
         base_confidence = 0.75
