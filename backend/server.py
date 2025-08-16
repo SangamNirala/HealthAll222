@@ -8008,7 +8008,9 @@ async def enhanced_energy_prediction(request: EnergyPredictionRequest, user_agen
             "model_variant": prediction_result.get('ab_test_variant', 'A'),
             "prediction_date": prediction_date,
             "model_accuracy": energy_prediction_model.model_accuracy,
-            "enhanced_features": True
+            "enhanced_features": True,
+            "scientific_basis": prediction_result.get('scientific_basis', {}),
+            "reliability_score": prediction_result.get('reliability_score', prediction_result['confidence'])
         }
         
     except Exception as e:
