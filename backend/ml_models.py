@@ -1219,24 +1219,77 @@ class WhatIfScenarioProcessor:
         
         return impacts
     
-    def _get_scenario_recommendations(self, impact_analysis: Dict) -> List[str]:
-        """Generate recommendations based on scenario results"""
+    def _get_scenario_recommendations(self, impact_analysis: Dict, changes: Dict) -> List[str]:
+        """Generate detailed recommendations based on scenario results"""
         recommendations = []
+        justifications = []
         
+        # Analyze specific changes and their impacts
         for metric, data in impact_analysis.items():
-            if data['percentage_change'] > 10:
-                recommendations.append(
-                    f"This change could improve {metric.replace('_', ' ')} by {data['percentage_change']:.1f}%"
-                )
-            elif data['percentage_change'] < -10:
-                recommendations.append(
-                    f"This change might reduce {metric.replace('_', ' ')} by {abs(data['percentage_change']):.1f}%"
-                )
+            percentage_change = data['percentage_change']
+            current_val = data['current_value']
+            predicted_val = data['predicted_value']
+            
+            if metric == 'energy_level':
+                if percentage_change > 15:
+                    recommendations.append(f"🚀 Energy level boost: +{percentage_change:.1f}% (from {current_val}/10 to {predicted_val}/10)")
+                    justifications.append("Higher energy levels support better focus, productivity, and overall daily performance")
+                elif percentage_change > 5:
+                    recommendations.append(f"⚡ Moderate energy improvement: +{percentage_change:.1f}% (from {current_val}/10 to {predicted_val}/10)")
+                    justifications.append("This improvement can enhance your daily activities and reduce afternoon fatigue")
+                elif percentage_change < -15:
+                    recommendations.append(f"⚠️ Significant energy reduction: {percentage_change:.1f}% (from {current_val}/10 to {predicted_val}/10)")
+                    justifications.append("Lower energy may impact your ability to maintain daily activities and concentration")
+                elif percentage_change < -5:
+                    recommendations.append(f"📉 Minor energy decrease: {percentage_change:.1f}% (from {current_val}/10 to {predicted_val}/10)")
+                    justifications.append("This slight decrease might be noticeable during high-demand periods")
+                    
+            elif metric == 'sleep_quality':
+                if percentage_change > 10:
+                    recommendations.append(f"😴 Better sleep quality: +{percentage_change:.1f}% (from {current_val}/10 to {predicted_val}/10)")
+                    justifications.append("Improved sleep quality enhances recovery, immune function, and mental clarity")
+                elif percentage_change > 3:
+                    recommendations.append(f"🌙 Sleep improvement: +{percentage_change:.1f}% (from {current_val}/10 to {predicted_val}/10)")
+                    justifications.append("Better sleep can improve mood regulation and cognitive performance")
+                elif percentage_change < -10:
+                    recommendations.append(f"⚠️ Sleep quality decline: {percentage_change:.1f}% (from {current_val}/10 to {predicted_val}/10)")
+                    justifications.append("Poor sleep may affect recovery, metabolism, and emotional wellbeing")
+                    
+            elif metric == 'mood_stability':
+                if percentage_change > 8:
+                    recommendations.append(f"🎯 Enhanced mood stability: +{percentage_change:.1f}% (from {current_val}/10 to {predicted_val}/10)")
+                    justifications.append("Better mood stability supports emotional resilience and social interactions")
+                elif percentage_change > 3:
+                    recommendations.append(f"🌈 Mood improvement: +{percentage_change:.1f}% (from {current_val}/10 to {predicted_val}/10)")
+                    justifications.append("Improved mood can positively impact motivation and stress management")
         
+        # Add change-specific scientific justifications
+        if 'sleep_hours' in changes and changes['sleep_hours'] > 0:
+            justifications.append("💤 Research shows each additional hour of quality sleep can improve cognitive performance by 8-12%")
+        if 'exercise_minutes' in changes and changes['exercise_minutes'] > 0:
+            justifications.append("🏃‍♂️ Regular exercise increases mitochondrial efficiency, boosting natural energy production")
+        if 'stress_level' in changes and changes['stress_level'] < 0:
+            justifications.append("🧘‍♀️ Lower stress levels reduce cortisol production, supporting better energy and sleep patterns")
+        if 'protein_g' in changes and changes['protein_g'] > 0:
+            justifications.append("💪 Increased protein supports stable blood sugar and sustained energy throughout the day")
+        if 'water_intake_ml' in changes and changes['water_intake_ml'] > 0:
+            justifications.append("💧 Proper hydration optimizes cellular function and can improve energy levels by 15-20%")
+        if 'caffeine_mg' in changes and changes['caffeine_mg'] > 0:
+            justifications.append("☕ Moderate caffeine can enhance alertness, but timing matters for sleep quality")
+        
+        # If no significant changes, provide minimal impact message
         if not recommendations:
-            recommendations.append("This change would have minimal impact on your health metrics")
+            recommendations.append("📊 Minimal overall impact expected from these adjustments")
+            justifications.append("Small changes can still contribute to long-term health trends over time")
         
-        return recommendations
+        # Combine recommendations with justifications
+        combined = []
+        for i, rec in enumerate(recommendations):
+            combined.append(rec)
+            if i < len(justifications):
+                combined.append(f"   └─ {justifications[i]}")
+        
+        return combined[:6]  # Limit to 6 items to avoid overwhelming
     
     def _generate_scenario_id(self, changes: Dict) -> str:
         """Generate unique scenario ID"""
