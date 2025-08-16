@@ -293,7 +293,8 @@ class SymptomCheckerAPITester:
             "notes": "Significant improvement, meditation really helped",
             "overall_improvement": 8,
             "quality_of_life_impact": 8,
-            "sleep_quality": 8
+            "sleep_quality": 8,
+            "energy_level": 7
         }
         
         success2, response2 = self.run_test(
