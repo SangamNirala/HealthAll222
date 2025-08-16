@@ -10157,8 +10157,340 @@ async def get_patient_management_dashboard(provider_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get dashboard data: {str(e)}")
 
+# =====================================================
+# SYMPTOM CHECKER & WELLNESS ADVISOR API ENDPOINTS
+# =====================================================
+
+# Initialize symptom checker services
+symptom_assessor = SymptomAssessmentEngine()
+ai_service_manager = AIServiceManager()
+relief_recommender = ReliefRecommendationSystem(ai_service_manager)
+action_plan_generator = ActionPlanGenerator()
+medical_advisory = MedicalAdvisorySystem()
+progress_tracker = SymptomProgressTracker(db)
+
+# Pydantic models for Symptom Checker
+class SymptomData(BaseModel):
+    name: str
+    severity: int = Field(ge=1, le=10, description="Severity on 1-10 scale")
+    frequency: int = Field(ge=1, le=5, description="Frequency: 1=rare, 5=constant")
+    duration_days: int = Field(ge=0, description="Duration in days")
+    life_impact: int = Field(ge=1, le=5, description="Impact on daily life: 1=none, 5=severe")
+    description: Optional[str] = ""
+    triggers: List[str] = []
+
+class SymptomAssessmentRequest(BaseModel):
+    user_id: str
+    symptoms: List[SymptomData]
+    additional_info: Optional[Dict[str, Any]] = {}
+
+class ActionPlanProgressUpdate(BaseModel):
+    plan_id: str
+    user_id: str
+    day: int = Field(ge=1, le=3, description="Day of the 3-day plan")
+    time_of_day: str = Field(description="morning, midday, or evening")
+    symptom_ratings: Dict[str, int] = {}
+    interventions_used: List[str] = []
+    intervention_effectiveness: Dict[str, int] = {}
+    side_effects: List[str] = []
+    triggers_identified: List[str] = []
+    notes: str = ""
+    overall_improvement: int = Field(ge=0, le=10, description="Overall improvement rating")
+    quality_of_life_impact: int = Field(ge=1, le=10, description="Quality of life impact")
+    sleep_quality: int = Field(ge=1, le=10, description="Sleep quality rating")
+    energy_level: int = Field(ge=1, le=10, description="Energy level rating")
+
+@api_router.post("/symptom-checker/assess")
+async def assess_symptoms(request: SymptomAssessmentRequest):
+    """Comprehensive symptom assessment with AI-powered analysis"""
+    try:
+        # Step 1: Assess symptoms using the assessment engine
+        symptom_data = {
+            "symptoms": [symptom.dict() for symptom in request.symptoms],
+            "user_id": request.user_id,
+            "additional_info": request.additional_info
+        }
+        
+        symptom_profile = symptom_assessor.assess_symptoms(symptom_data)
+        
+        # Step 2: Generate relief recommendations
+        relief_recommendations = await relief_recommender.generate_relief_recommendations(symptom_profile)
+        
+        # Step 3: Generate action plan
+        action_plan = action_plan_generator.generate_action_plan(symptom_profile, relief_recommendations)
+        
+        # Step 4: Medical advisory assessment
+        medical_advisory_result = medical_advisory.assess_medical_urgency(symptom_profile)
+        
+        # Step 5: Store assessment in database
+        assessment_record = {
+            "assessment_id": symptom_profile["assessment_id"],
+            "user_id": request.user_id,
+            "session_type": "guest",  # For guest mode
+            "symptom_profile": symptom_profile,
+            "relief_recommendations": relief_recommendations,
+            "action_plan": action_plan.dict() if hasattr(action_plan, 'dict') else action_plan,
+            "medical_advisory": medical_advisory_result,
+            "created_at": datetime.utcnow(),
+            "expires_at": datetime.utcnow() + timedelta(hours=24)  # 24-hour session storage
+        }
+        
+        await db.symptom_assessments.insert_one(assessment_record)
+        
+        return {
+            "assessment_id": symptom_profile["assessment_id"],
+            "symptom_profile": symptom_profile,
+            "instant_relief": relief_recommendations.get("instant_relief", []),
+            "action_plan": action_plan,
+            "medical_advisory": medical_advisory_result,
+            "ai_recommendations": relief_recommendations.get("ai_recommendations", {}),
+            "estimated_relief_time": relief_recommendations.get("estimated_relief_time", "24-72 hours"),
+            "confidence_score": relief_recommendations.get("confidence_score", 0.8)
+        }
+        
+    except Exception as e:
+        logger.error(f"Symptom assessment error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to process symptom assessment")
+
+@api_router.get("/symptom-checker/assessment/{assessment_id}")
+async def get_symptom_assessment(assessment_id: str):
+    """Retrieve a specific symptom assessment"""
+    try:
+        assessment = await db.symptom_assessments.find_one({
+            "assessment_id": assessment_id,
+            "expires_at": {"$gt": datetime.utcnow()}
+        })
+        
+        if not assessment:
+            raise HTTPException(status_code=404, detail="Assessment not found or expired")
+        
+        return {
+            "assessment_id": assessment_id,
+            "symptom_profile": assessment.get("symptom_profile", {}),
+            "action_plan": assessment.get("action_plan", {}),
+            "medical_advisory": assessment.get("medical_advisory", {}),
+            "relief_recommendations": assessment.get("relief_recommendations", {}),
+            "created_at": assessment.get("created_at").isoformat() if assessment.get("created_at") else None
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Assessment retrieval error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve assessment")
+
+@api_router.post("/symptom-checker/progress-update")
+async def update_action_plan_progress(update: ActionPlanProgressUpdate):
+    """Update progress for a 3-day action plan"""
+    try:
+        progress_result = await progress_tracker.log_progress_update(
+            update.plan_id, 
+            update.user_id, 
+            update.dict()
+        )
+        
+        return {
+            "success": True,
+            "progress_logged": True,
+            "current_analytics": progress_result.get("current_analytics", {}),
+            "adjustment_needed": progress_result.get("adjustment_needed", False),
+            "next_milestone": progress_result.get("next_milestone", {}),
+            "recommendations": [
+                "Continue tracking your symptoms and interventions",
+                "Note any triggers or patterns you observe",
+                "Adjust interventions based on what's working best"
+            ]
+        }
+        
+    except Exception as e:
+        logger.error(f"Progress update error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update progress")
+
+@api_router.get("/symptom-checker/progress/{plan_id}/{user_id}")
+async def get_action_plan_progress(plan_id: str, user_id: str):
+    """Get comprehensive progress analytics for an action plan"""
+    try:
+        analytics = await progress_tracker.calculate_progress_analytics(plan_id, user_id)
+        adjustment_assessment = await progress_tracker.assess_plan_adjustment_need(plan_id, user_id)
+        next_milestone = await progress_tracker.get_next_milestone(plan_id)
+        
+        return {
+            "plan_id": plan_id,
+            "user_id": user_id,
+            "analytics": analytics,
+            "adjustment_needed": adjustment_assessment.get("adjustment_needed", False),
+            "adjustment_recommendations": adjustment_assessment.get("recommendations", []),
+            "next_milestone": next_milestone,
+            "success_probability": analytics.get("success_probability", {}),
+            "key_insights": [
+                "Track patterns between triggers and symptom intensity",
+                "Note which interventions provide the best relief",
+                "Monitor sleep and stress levels as they impact symptoms"
+            ]
+        }
+        
+    except Exception as e:
+        logger.error(f"Progress analytics error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve progress analytics")
+
+@api_router.post("/symptom-checker/emergency-check")
+async def emergency_symptom_check(symptom_data: dict):
+    """Quick emergency symptom assessment"""
+    try:
+        symptoms = symptom_data.get("symptoms", [])
+        
+        # Quick emergency assessment
+        emergency_symptoms = ["chest_pain", "difficulty_breathing", "severe_headache", "loss_consciousness"]
+        severe_symptoms = any(symptom.get("name", "").lower() in emergency_symptoms for symptom in symptoms)
+        
+        high_severity_count = sum(1 for s in symptoms if s.get("severity", 0) >= 8)
+        
+        if severe_symptoms or high_severity_count >= 2:
+            alert_level = AlertLevel.EMERGENCY
+        elif high_severity_count >= 1:
+            alert_level = AlertLevel.RED
+        else:
+            alert_level = AlertLevel.YELLOW
+        
+        emergency_advice = medical_advisory._get_recommended_action(alert_level)
+        urgency_message = medical_advisory._get_urgency_message(alert_level)
+        emergency_contacts = medical_advisory._get_relevant_contacts(alert_level)
+        
+        return {
+            "alert_level": alert_level.value,
+            "urgency_message": urgency_message,
+            "immediate_actions": emergency_advice,
+            "emergency_contacts": emergency_contacts,
+            "disclaimer": "This is not a substitute for professional medical advice. In case of emergency, call 911.",
+            "assessment_time": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Emergency check error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to process emergency check")
+
+@api_router.get("/symptom-checker/remedies/{symptom_name}")
+async def get_symptom_remedies(symptom_name: str):
+    """Get specific remedies and information for a symptom"""
+    try:
+        from symptom_checker_service import REMEDY_DATABASE
+        
+        symptom_key = symptom_name.lower()
+        
+        if symptom_key in REMEDY_DATABASE:
+            remedy_info = REMEDY_DATABASE[symptom_key]
+            return {
+                "symptom": symptom_name,
+                "instant_relief": remedy_info.get("instant_relief", []),
+                "three_day_plan": remedy_info.get("action_plan", {}),
+                "common_triggers": remedy_info.get("triggers", []),
+                "prevention_tips": remedy_info.get("prevention", []),
+                "when_to_seek_help": [
+                    "Symptoms persist for more than 3 days without improvement",
+                    "Symptoms worsen despite following recommendations", 
+                    "New or concerning symptoms develop",
+                    "You feel unsure about your condition"
+                ]
+            }
+        else:
+            # Generate generic advice
+            return {
+                "symptom": symptom_name,
+                "instant_relief": [
+                    "Rest and avoid strenuous activities",
+                    "Stay hydrated with water",
+                    "Apply heat or cold as appropriate",
+                    "Practice deep breathing exercises"
+                ],
+                "general_advice": [
+                    "Monitor symptoms and track any changes",
+                    "Maintain a healthy diet and sleep schedule",
+                    "Reduce stress through relaxation techniques",
+                    "Consult healthcare provider if symptoms persist"
+                ],
+                "when_to_seek_help": [
+                    "Symptoms are severe or getting worse",
+                    "You experience concerning new symptoms",
+                    "Self-care measures aren't providing relief",
+                    "You have questions about your condition"
+                ]
+            }
+            
+    except Exception as e:
+        logger.error(f"Remedy lookup error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve remedy information")
+
+@api_router.get("/symptom-checker/user-history/{user_id}")
+async def get_user_symptom_history(user_id: str, limit: int = 10):
+    """Get user's symptom assessment history"""
+    try:
+        cursor = db.symptom_assessments.find({
+            "user_id": user_id,
+            "expires_at": {"$gt": datetime.utcnow()}
+        }).sort("created_at", -1).limit(limit)
+        
+        assessments = await cursor.to_list(length=limit)
+        
+        # Process assessments for summary view
+        history = []
+        for assessment in assessments:
+            symptom_profile = assessment.get("symptom_profile", {})
+            primary_symptoms = symptom_profile.get("primary_symptoms", [])
+            
+            history.append({
+                "assessment_id": assessment.get("assessment_id"),
+                "date": assessment.get("created_at").isoformat() if assessment.get("created_at") else None,
+                "primary_symptoms": primary_symptoms,
+                "severity_score": symptom_profile.get("severity_score", 0),
+                "alert_level": symptom_profile.get("alert_level", "green"),
+                "action_plan_id": assessment.get("action_plan", {}).get("plan_id")
+            })
+        
+        return {
+            "user_id": user_id,
+            "total_assessments": len(history),
+            "recent_assessments": history,
+            "patterns": {
+                "most_common_symptoms": _analyze_common_symptoms(assessments),
+                "average_severity": _calculate_average_severity(assessments),
+                "improvement_trends": "Improving" if len(assessments) > 1 else "Insufficient data"
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"History retrieval error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve symptom history")
+
+def _analyze_common_symptoms(assessments):
+    """Helper function to analyze common symptoms"""
+    all_symptoms = []
+    for assessment in assessments:
+        symptoms = assessment.get("symptom_profile", {}).get("primary_symptoms", [])
+        all_symptoms.extend(symptoms)
+    
+    if not all_symptoms:
+        return []
+    
+    # Count frequency
+    from collections import Counter
+    symptom_counts = Counter(all_symptoms)
+    return [{"symptom": symptom, "count": count} for symptom, count in symptom_counts.most_common(5)]
+
+def _calculate_average_severity(assessments):
+    """Helper function to calculate average severity"""
+    if not assessments:
+        return 0
+    
+    severities = [assessment.get("symptom_profile", {}).get("severity_score", 0) for assessment in assessments]
+    return sum(severities) / len(severities) if severities else 0
+
 # Include the router in the main app (after all endpoints are defined)
 app.include_router(api_router)
+
+# Add root route
+@app.get("/")
+async def read_root():
+    return {"message": "Healthcare Platform API with Symptom Checker", "version": "1.0.0", "status": "running"}
 
 # Configure logging
 logging.basicConfig(
