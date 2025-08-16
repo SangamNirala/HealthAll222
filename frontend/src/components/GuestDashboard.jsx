@@ -15,7 +15,6 @@ import {
   Scan, BarChart3, Edit, Stethoscope, Shield,
   Calendar
 } from 'lucide-react';
-import QuickSymptomChecker from './QuickSymptomChecker';
 
 // Component: Quick Start Guide
 const QuickStart = ({ sessionTime }) => (
