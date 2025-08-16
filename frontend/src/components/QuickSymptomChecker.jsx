@@ -78,7 +78,7 @@ const QuickSymptomChecker = ({ userId }) => {
     setError(null);
 
     try {
-      const response = await fetch(`${import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL}/api/symptom-checker/assess`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/symptom-checker/assess`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
