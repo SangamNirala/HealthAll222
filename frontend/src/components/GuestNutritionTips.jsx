@@ -683,7 +683,12 @@ const GuestNutritionTips = () => {
                       ))}
                     </div>
                     
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full"
+                      onClick={() => handleLearnMore(tip)}
+                    >
                       Learn More
                       <ChevronRight className="w-4 h-4 ml-2" />
                     </Button>
