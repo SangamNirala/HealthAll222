@@ -316,104 +316,188 @@ const WhatIfScenarios = ({ userId = 'demo-patient-123', className = '' }) => {
               )}
 
               {!loading && prediction && (
-                <div className="space-y-4">
-                  {/* Confidence Score */}
-                  <div className="text-center pb-3 border-b">
-                    <Badge className="bg-blue-100 text-blue-800">
-                      Confidence: {Math.round((prediction.confidence || 0.7) * 100)}%
-                    </Badge>
+                <div className="space-y-6">
+                  {/* Header with Confidence and Timeframe */}
+                  <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <Badge className="bg-green-100 text-green-800 font-semibold">
+                        Confidence: {Math.round((prediction.confidence || 0.7) * 100)}%
+                      </Badge>
+                      <span className="text-xs text-gray-600">Based on ML analysis</span>
+                    </div>
+                    <h4 className="font-semibold text-gray-800">Predicted Health Impact Analysis</h4>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Personalized predictions based on scientific research and your health profile
+                    </p>
                   </div>
 
-                  {/* Main Impacts */}
+                  {/* Main Impacts - Enhanced Display */}
                   {prediction.impact_analysis && (
                     <div className="space-y-3">
-                      <h4 className="font-semibold text-sm text-gray-700">Predicted Changes:</h4>
+                      <h4 className="font-semibold text-sm text-gray-700 flex items-center gap-2">
+                        <Target className="h-4 w-4" />
+                        Detailed Impact Analysis:
+                      </h4>
                       
-                      {/* Energy Impact */}
-                      {prediction.current_state?.energy && prediction.predicted_state?.energy && (
-                        <div className={`p-3 rounded-lg border ${getImpactColor(prediction.impact_analysis.energy_change || 0)}`}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Zap className="h-4 w-4" />
-                              <span className="font-medium text-sm">Energy Level</span>
+                      {/* Render each impact metric */}
+                      {Object.entries(prediction.impact_analysis).map(([metric, data]) => {
+                        const isPositive = data.percentage_change > 0;
+                        const isSignificant = Math.abs(data.percentage_change) > 5;
+                        
+                        const metricConfig = {
+                          'energy_level': { icon: Zap, label: 'Energy Level', color: 'orange' },
+                          'sleep_quality': { icon: Moon, label: 'Sleep Quality', color: 'indigo' },
+                          'mood_stability': { icon: Heart, label: 'Mood Stability', color: 'pink' }
+                        };
+                        
+                        const config = metricConfig[metric] || { icon: Target, label: metric.replace('_', ' '), color: 'gray' };
+                        const Icon = config.icon;
+                        
+                        return (
+                          <div key={metric} className={`p-4 rounded-lg border-l-4 ${
+                            isPositive 
+                              ? `bg-green-50 border-green-400 ${isSignificant ? 'ring-1 ring-green-200' : ''}` 
+                              : data.percentage_change < 0 
+                              ? `bg-red-50 border-red-400 ${isSignificant ? 'ring-1 ring-red-200' : ''}` 
+                              : 'bg-gray-50 border-gray-300'
+                          }`}>
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Icon className={`h-5 w-5 text-${config.color}-600`} />
+                                <span className="font-semibold text-sm text-gray-800">{config.label}</span>
+                                {isSignificant && (
+                                  <Badge variant="outline" className="text-xs">
+                                    {data.impact_level} impact
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="text-right">
+                                <div className="flex items-center gap-1">
+                                  {getImpactIcon(data.percentage_change)}
+                                  <span className="font-bold text-sm">
+                                    {data.percentage_change > 0 ? '+' : ''}{data.percentage_change.toFixed(1)}%
+                                  </span>
+                                </div>
+                                <span className="text-xs text-gray-500">
+                                  {data.current_value} → {data.predicted_value}/10
+                                </span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                              {getImpactIcon(prediction.impact_analysis.energy_change || 0)}
-                              <span className="text-sm font-semibold">
-                                {formatImpact(
-                                  prediction.current_state.energy,
-                                  prediction.predicted_state.energy
-                                ).formatted}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Sleep Impact */}
-                      {prediction.current_state?.sleep && prediction.predicted_state?.sleep && (
-                        <div className={`p-3 rounded-lg border ${getImpactColor(prediction.impact_analysis.sleep_change || 0)}`}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Moon className="h-4 w-4" />
-                              <span className="font-medium text-sm">Sleep Quality</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              {getImpactIcon(prediction.impact_analysis.sleep_change || 0)}
-                              <span className="text-sm font-semibold">
-                                {formatImpact(
-                                  prediction.current_state.sleep,
-                                  prediction.predicted_state.sleep
-                                ).formatted}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Mood Impact */}
-                      {prediction.current_state?.mood && prediction.predicted_state?.mood && (
-                        <div className={`p-3 rounded-lg border ${getImpactColor(prediction.impact_analysis.mood_change || 0)}`}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Heart className="h-4 w-4" />
-                              <span className="font-medium text-sm">Mood Stability</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              {getImpactIcon(prediction.impact_analysis.mood_change || 0)}
-                              <span className="text-sm font-semibold">
-                                {formatImpact(
-                                  prediction.current_state.mood,
-                                  prediction.predicted_state.mood
-                                ).formatted}
-                              </span>
+                            
+                            {/* Impact Explanation */}
+                            <div className="text-xs text-gray-600 mt-2">
+                              {Math.abs(data.percentage_change) > 10 
+                                ? `This represents a ${isPositive ? 'significant improvement' : 'notable decrease'} that you would likely notice in daily activities.`
+                                : Math.abs(data.percentage_change) > 3
+                                ? `This is a ${isPositive ? 'moderate improvement' : 'small decrease'} that may be subtle but meaningful over time.`
+                                : 'This change represents a minimal impact on this health metric.'
+                              }
                             </div>
                           </div>
-                        </div>
-                      )}
+                        );
+                      })}
                     </div>
                   )}
 
-                  {/* Recommendations */}
-                  {prediction.recommendations && prediction.recommendations.length > 0 && (
-                    <div className="pt-3 border-t">
-                      <h4 className="font-semibold text-sm text-gray-700 mb-2">AI Recommendations:</h4>
+                  {/* Scientific Justification */}
+                  {prediction.scientific_basis && Object.keys(prediction.scientific_basis).length > 0 && (
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-sm text-blue-900 mb-3 flex items-center gap-2">
+                        <Sparkles className="h-4 w-4" />
+                        Scientific Evidence:
+                      </h4>
                       <div className="space-y-2">
-                        {prediction.recommendations.slice(0, 3).map((rec, idx) => (
-                          <div key={idx} className="flex items-start gap-2 p-2 bg-blue-50 rounded-lg">
-                            <CheckCircle className="h-3 w-3 text-blue-600 mt-0.5 flex-shrink-0" />
-                            <span className="text-xs text-blue-800">{rec}</span>
+                        {Object.entries(prediction.scientific_basis).map(([key, evidence], idx) => (
+                          <div key={key} className="flex items-start gap-2 text-xs">
+                            <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-blue-800">{evidence}</span>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* Action Button */}
-                  <Button className="w-full mt-4" size="sm">
-                    Apply These Changes
-                    <ArrowRight className="h-3 w-3 ml-2" />
-                  </Button>
+                  {/* Expected Timeframes */}
+                  {prediction.timeframe && Object.keys(prediction.timeframe).length > 0 && (
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-sm text-purple-900 mb-3 flex items-center gap-2">
+                        <Clock className="h-4 w-4" />
+                        Expected Timeline:
+                      </h4>
+                      <div className="space-y-2">
+                        {Object.entries(prediction.timeframe).map(([key, timeline], idx) => (
+                          <div key={key} className="flex items-start gap-2 text-xs">
+                            <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-purple-800">
+                              <span className="font-medium capitalize">{key.replace('_', ' ')}:</span> {timeline}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* AI Recommendations - Enhanced */}
+                  {prediction.recommendations && prediction.recommendations.length > 0 && (
+                    <div className="border-t pt-4">
+                      <h4 className="font-semibold text-sm text-gray-700 mb-3 flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        AI-Powered Insights & Recommendations:
+                      </h4>
+                      <div className="space-y-2">
+                        {prediction.recommendations.map((rec, idx) => {
+                          const isJustification = rec.includes('└─');
+                          return (
+                            <div key={idx} className={`
+                              ${isJustification 
+                                ? 'ml-4 text-xs text-gray-600 italic bg-gray-50 p-2 rounded-md border-l-2 border-gray-200' 
+                                : 'p-3 bg-green-50 rounded-lg border-l-3 border-green-400'
+                              }
+                            `}>
+                              {isJustification ? (
+                                <span>{rec.replace('└─ ', '💡 ')}</span>
+                              ) : (
+                                <div className="flex items-start gap-2">
+                                  <span className="text-sm text-green-800 font-medium">{rec}</span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Risk Factors & Considerations */}
+                  {prediction.risk_factors && prediction.risk_factors.length > 0 && (
+                    <div className="bg-amber-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-sm text-amber-900 mb-3 flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4" />
+                        Important Considerations:
+                      </h4>
+                      <div className="space-y-2">
+                        {prediction.risk_factors.map((risk, idx) => (
+                          <div key={idx} className="flex items-start gap-2 text-xs text-amber-800">
+                            <span>{risk}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Button - Enhanced */}
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 rounded-lg text-white">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h5 className="font-semibold text-sm">Ready to implement these changes?</h5>
+                        <p className="text-xs opacity-90 mt-1">Track your progress and adjust as needed</p>
+                      </div>
+                      <Button className="bg-white text-blue-600 hover:bg-gray-100" size="sm">
+                        Start Tracking
+                        <ArrowRight className="h-3 w-3 ml-2" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               )}
             </CardContent>
