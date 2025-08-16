@@ -128,6 +128,30 @@ const WhatIfScenarios = ({ userId = 'demo-patient-123', className = '' }) => {
     setAdjustments(newAdjustments);
   };
 
+  const handleStartTracking = () => {
+    // Determine appropriate goals page based on current role
+    let targetPath;
+    
+    switch (currentRole) {
+      case 'patient':
+        // For patients, navigate to advanced goals since they're using advanced analytics
+        targetPath = '/advanced-goals';
+        break;
+      case 'guest':
+        targetPath = '/guest-goals';
+        break;
+      case 'family':
+        targetPath = '/family-goals';
+        break;
+      default:
+        // Default to patient goals for any other role
+        targetPath = '/patient-goals';
+    }
+    
+    // Navigate to the goals page
+    navigate(targetPath);
+  };
+
   const getImpactColor = (change) => {
     if (change > 10) return 'text-green-600 bg-green-50';
     if (change > 0) return 'text-blue-600 bg-blue-50';
