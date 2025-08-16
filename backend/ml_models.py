@@ -1209,7 +1209,10 @@ class SleepImpactCalculator:
                 'improvement_potential': max(0, 9 - predicted_sleep),
                 'factor_analysis': impact_analysis,
                 'recommendations': self._generate_sleep_recommendations(impact_analysis),
-                'confidence': 0.78
+                'confidence': 0.78,
+                'scientific_evidence': self._generate_sleep_scientific_evidence(impact_analysis),
+                'actionable_insights': self._generate_sleep_insights(impact_analysis, predicted_sleep),
+                'risk_assessment': self._assess_sleep_risks(impact_analysis, predicted_sleep)
             }
             
         except Exception as e:
