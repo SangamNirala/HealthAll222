@@ -325,7 +325,8 @@ class SymptomCheckerAPITester:
             "notes": "Symptoms worsened, medication less effective",
             "overall_improvement": 3,
             "quality_of_life_impact": 4,
-            "sleep_quality": 3
+            "sleep_quality": 3,
+            "energy_level": 3
         }
         
         success3, response3 = self.run_test(
