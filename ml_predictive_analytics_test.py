@@ -110,7 +110,17 @@ class MLPredictiveAnalyticsAPITester:
                 print(f"   🔋 Predicted energy: {predicted_energy}/10")
                 print(f"   📊 Confidence: {confidence:.2f}")
                 print(f"   📈 Model accuracy: {model_accuracy:.1f}%")
-                print(f"   🎯 Top factors: {[f.get('factor', '') for f in factors[:3]]}")
+                
+                # Handle factors - could be dict or list
+                if isinstance(factors, dict):
+                    top_factors = list(factors.keys())[:3]
+                    print(f"   🎯 Top factors: {top_factors}")
+                elif isinstance(factors, list):
+                    top_factors = [f.get('factor', '') for f in factors[:3]]
+                    print(f"   🎯 Top factors: {top_factors}")
+                else:
+                    print(f"   🎯 Factors: {factors}")
+                
                 print(f"   💡 Recommendations: {len(recommendations)}")
                 
                 # Validate energy is in expected range (1-10)
