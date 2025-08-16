@@ -11572,7 +11572,8 @@ class HealthPlatformAPITester:
             "notes": "Test invalid day",
             "overall_improvement": 5,
             "quality_of_life_impact": 5,
-            "sleep_quality": 5
+            "sleep_quality": 5,
+            "energy_level": 5
         }
         
         success6, _ = self.run_test(
