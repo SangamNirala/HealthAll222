@@ -612,6 +612,43 @@ class ReliefRecommendationSystem:
             "when_to_seek_help": when_to_seek_help,
             "disclaimer": "This is general wellness advice, not medical diagnosis or treatment. Consult healthcare provider for persistent or severe symptoms."
         }
+    
+    def _estimate_relief_time(self, symptom_profile: Dict[str, Any]) -> str:
+        """Estimate time to relief based on symptom complexity and severity"""
+        complexity = symptom_profile.get("complexity_level", "simple")
+        severity_score = symptom_profile.get("severity_score", 0)
+        
+        if complexity == "complex" or severity_score > 70:
+            return "3-7 days with consistent intervention"
+        elif complexity == "moderate" or severity_score > 40:
+            return "1-3 days with proper care"
+        else:
+            return "6-24 hours with appropriate measures"
+    
+    def _calculate_confidence(self, symptom_profile: Dict[str, Any]) -> float:
+        """Calculate confidence score for recommendations"""
+        base_confidence = 0.7
+        
+        # Adjust based on symptom clarity
+        primary_symptoms = symptom_profile.get("primary_symptoms", [])
+        if len(primary_symptoms) >= 2:
+            base_confidence += 0.1
+        
+        # Adjust based on complexity
+        complexity = symptom_profile.get("complexity_level", "simple")
+        if complexity == "simple":
+            base_confidence += 0.15
+        elif complexity == "complex":
+            base_confidence -= 0.1
+        
+        # Adjust based on severity
+        severity_score = symptom_profile.get("severity_score", 0)
+        if severity_score < 30:
+            base_confidence += 0.1
+        elif severity_score > 70:
+            base_confidence -= 0.15
+        
+        return round(min(max(base_confidence, 0.3), 0.95), 2)
 
 class ActionPlanGenerator:
     """Generate structured 3-day action plans"""
