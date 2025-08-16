@@ -1832,10 +1832,17 @@ class EnergyPredictionResponse(BaseModel):
     user_id: str
     predicted_energy: float
     confidence: float
+    confidence_interval: Dict[str, float]
     factors: Dict[str, Any]
     recommendations: List[str]
+    explanation: str
+    feature_contributions: Dict[str, float]
+    model_variant: str
     prediction_date: str
     model_accuracy: float
+    enhanced_features: bool
+    scientific_basis: Optional[Dict[str, str]] = None
+    reliability_score: Optional[float] = None
 
 class MoodFoodCorrelationRequest(BaseModel):
     user_id: str
