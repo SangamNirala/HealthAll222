@@ -7872,7 +7872,10 @@ async def analyze_mood_food_correlation(request: MoodFoodCorrelationRequest):
             mood_predictors=correlation_result['mood_predictors'],
             recommendations=correlation_result['recommendations'],
             analysis_period=f"{request.timeframe_days} days",
-            confidence=correlation_result['confidence']
+            confidence=correlation_result['confidence'],
+            scientific_validation=correlation_result.get('scientific_validation', {}),
+            behavioral_insights=correlation_result.get('behavioral_insights', []),
+            personalization_factors=correlation_result.get('personalization_factors', {})
         )
         
     except Exception as e:
