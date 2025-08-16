@@ -17,7 +17,8 @@ import {
   CheckCircle,
   Sparkles,
   ArrowRight,
-  Info
+  Info,
+  Clock
 } from 'lucide-react';
 import predictiveAnalyticsService from '../../services/predictiveAnalyticsService';
 
