@@ -612,4 +612,107 @@ const GuestDashboard = () => {
   );
 };
 
+// Component: Quick Symptom Checker Card
+const QuickSymptomCheckerCard = () => {
+  const [showSymptomChecker, setShowSymptomChecker] = useState(false);
+
+  if (showSymptomChecker) {
+    return (
+      <div className="col-span-full">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center">
+                <Stethoscope className="w-6 h-6 mr-3 text-green-600" />
+                Quick Symptom Checker & Wellness Advisor
+              </CardTitle>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowSymptomChecker(false)}
+              >
+                Back to Dashboard
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <QuickSymptomChecker userId={`guest_${Date.now()}`} />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <Card className="col-span-full lg:col-span-2 border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50">
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <Stethoscope className="w-6 h-6 mr-3 text-green-600" />
+          <div>
+            <div className="text-xl text-green-900">Quick Symptom Checker & Wellness Advisor</div>
+            <div className="text-sm text-green-700 font-normal">Feel Better Fast - AI-powered symptom relief in 3 steps</div>
+          </div>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="p-4 bg-white rounded-lg shadow-sm border">
+              <div className="font-medium text-green-900 mb-3">What You'll Get:</div>
+              <div className="space-y-2 text-sm text-gray-700">
+                <div className="flex items-center">
+                  <Zap className="w-4 h-4 text-green-600 mr-2" />
+                  Instant Relief Recommendations
+                </div>
+                <div className="flex items-center">
+                  <Calendar className="w-4 h-4 text-green-600 mr-2" />
+                  Personalized 3-Day Action Plan
+                </div>
+                <div className="flex items-center">
+                  <Shield className="w-4 h-4 text-green-600 mr-2" />
+                  Medical Advisory & Safety Alerts
+                </div>
+                <div className="flex items-center">
+                  <TrendingUp className="w-4 h-4 text-green-600 mr-2" />
+                  Progress Tracking & Analytics
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="p-4 bg-gradient-to-r from-emerald-100 to-green-100 rounded-lg border border-emerald-200">
+              <div className="flex items-center space-x-2 mb-2">
+                <Heart className="w-5 h-5 text-emerald-600" />
+                <div className="font-medium text-emerald-900">Common Symptoms</div>
+              </div>
+              <div className="text-sm text-emerald-800">
+                • Headaches & Fatigue<br/>
+                • Digestive Issues & Bloating<br/>
+                • Sleep Problems & Mood Issues<br/>
+                • Brain Fog & Energy Crashes
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <Button 
+                onClick={() => setShowSymptomChecker(true)}
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3"
+                size="lg"
+              >
+                <Stethoscope className="w-5 h-5 mr-2" />
+                Quick Symptom Checker & Wellness Advisor
+              </Button>
+              
+              <div className="text-center text-xs text-green-600">
+                🩺 Feel Better Fast • 3-day wellness plans • AI-powered relief
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 export default GuestDashboard;
