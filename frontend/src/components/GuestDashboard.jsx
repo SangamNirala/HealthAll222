@@ -12,7 +12,7 @@ import {
   TrendingUp, Info, AlertCircle, Zap, Crown,
   Calculator, BookOpen, Award, Star, Activity,
   User, Utensils, Settings, Brain, Camera,
-  Scan, BarChart3, UserX
+  Scan, BarChart3
 } from 'lucide-react';
 
 // Component: Quick Start Guide
