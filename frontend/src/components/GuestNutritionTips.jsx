@@ -4,7 +4,7 @@ import SmartNavigation from './shared/SmartNavigation';
 import { Button } from './ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
-import { BookOpen, Heart, Apple, Droplets, Clock, Star, ChevronRight, TrendingUp } from 'lucide-react';
+import { BookOpen, Heart, Apple, Droplets, Clock, Star, ChevronRight, TrendingUp, X, Brain, Activity, Utensils, Leaf, Zap } from 'lucide-react';
 
 const GuestNutritionTips = () => {
   const { switchRole } = useRole();
