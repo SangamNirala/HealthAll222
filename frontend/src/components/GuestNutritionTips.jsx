@@ -487,6 +487,16 @@ const GuestNutritionTips = () => {
     }
   };
 
+  const handleLearnMore = (tip) => {
+    setSelectedTip(tip);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedTip(null);
+  };
+
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 'high': return 'bg-red-100 text-red-800';
