@@ -1294,6 +1294,87 @@ class WhatIfScenarioProcessor:
         
         return combined[:6]  # Limit to 6 items to avoid overwhelming
     
+    def _calculate_scenario_confidence(self, impact_analysis: Dict, changes: Dict) -> float:
+        """Calculate confidence based on change magnitude and scientific backing"""
+        base_confidence = 0.75
+        
+        # Higher confidence for well-researched changes
+        confidence_modifiers = 0
+        if 'sleep_hours' in changes:
+            confidence_modifiers += 0.1  # Sleep impact is well-studied
+        if 'exercise_minutes' in changes:
+            confidence_modifiers += 0.08  # Exercise benefits are proven
+        if 'protein_g' in changes:
+            confidence_modifiers += 0.06  # Protein effects on energy are documented
+        if 'stress_level' in changes:
+            confidence_modifiers += 0.05  # Stress-health relationship established
+        
+        # Adjust for magnitude of changes
+        total_impact = sum(abs(data.get('percentage_change', 0)) for data in impact_analysis.values())
+        if total_impact > 30:  # Large combined impact
+            confidence_modifiers += 0.1
+        elif total_impact > 15:  # Moderate impact
+            confidence_modifiers += 0.05
+            
+        return min(0.95, base_confidence + confidence_modifiers)
+    
+    def _generate_scientific_justification(self, changes: Dict) -> Dict[str, str]:
+        """Provide scientific backing for predictions"""
+        justifications = {}
+        
+        if 'sleep_hours' in changes:
+            justifications['sleep'] = "CDC research shows 7-9 hours of sleep optimizes cognitive function and metabolic health"
+        if 'exercise_minutes' in changes:
+            justifications['exercise'] = "Harvard studies demonstrate 30+ minutes of daily activity improves energy and mood"
+        if 'protein_g' in changes:
+            justifications['protein'] = "Journal of Nutrition findings show adequate protein (0.8-1.2g/kg) stabilizes energy levels"
+        if 'stress_level' in changes:
+            justifications['stress'] = "Mayo Clinic research links stress reduction to improved sleep and energy regulation"
+        if 'water_intake_ml' in changes:
+            justifications['hydration'] = "European Journal of Nutrition shows proper hydration enhances cognitive performance"
+            
+        return justifications
+    
+    def _estimate_change_timeframe(self, changes: Dict) -> Dict[str, str]:
+        """Estimate how long changes will take to show effect"""
+        timeframes = {}
+        
+        if 'sleep_hours' in changes:
+            timeframes['sleep_impact'] = "Effects typically visible within 3-7 days"
+        if 'exercise_minutes' in changes:
+            timeframes['energy_boost'] = "Initial energy improvements in 1-2 weeks, full benefits in 4-6 weeks"
+        if 'protein_g' in changes:
+            timeframes['energy_stability'] = "Blood sugar stabilization within 24-48 hours"
+        if 'stress_level' in changes:
+            timeframes['stress_benefits'] = "Acute benefits within hours, long-term improvements in 2-4 weeks"
+        if 'water_intake_ml' in changes:
+            timeframes['hydration_effects'] = "Cognitive improvements within 2-4 hours"
+            
+        return timeframes
+    
+    def _identify_risk_factors(self, changes: Dict, impact_analysis: Dict) -> List[str]:
+        """Identify potential risks or considerations"""
+        risks = []
+        
+        # Check for extreme changes
+        if 'sleep_hours' in changes and changes['sleep_hours'] > 2:
+            risks.append("⚠️ Sudden sleep schedule changes may cause temporary adjustment period")
+        if 'exercise_minutes' in changes and changes['exercise_minutes'] > 60:
+            risks.append("⚠️ Rapid exercise increases should be gradual to prevent injury")
+        if 'caffeine_mg' in changes and changes['caffeine_mg'] > 100:
+            risks.append("⚠️ Higher caffeine intake may affect sleep if consumed after 2 PM")
+        if 'protein_g' in changes and changes['protein_g'] > 50:
+            risks.append("⚠️ Ensure adequate hydration with increased protein intake")
+            
+        # Check for contradictory changes
+        if 'caffeine_mg' in changes and changes['caffeine_mg'] > 0 and 'sleep_hours' in changes:
+            risks.append("💡 Balance caffeine timing to maintain sleep quality improvements")
+            
+        if not risks:
+            risks.append("✅ No significant risk factors identified for these changes")
+            
+        return risks[:3]  # Limit to top 3 risk factors
+    
     def _generate_scenario_id(self, changes: Dict) -> str:
         """Generate unique scenario ID"""
         import hashlib
