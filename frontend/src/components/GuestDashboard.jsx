@@ -383,6 +383,82 @@ const HealthSnapshotCard = () => {
   );
 };
 
+// Component: Your Health Intelligence Card
+const YourHealthIntelligenceCard = () => {
+  const navigate = useNavigate();
+
+  return (
+    <Card className="col-span-full lg:col-span-2 border-2 border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50">
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <Brain className="w-6 h-6 mr-3 text-indigo-600" />
+          <div>
+            <div className="text-xl text-indigo-900">Your Health Intelligence</div>
+            <div className="text-sm text-indigo-700 font-normal">Advanced AI-powered health predictions & insights</div>
+          </div>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="p-4 bg-white rounded-lg shadow-sm border">
+              <div className="font-medium text-indigo-900 mb-3">Advanced Features:</div>
+              <div className="space-y-2 text-sm text-gray-700">
+                <div className="flex items-center">
+                  <Zap className="w-4 h-4 text-indigo-600 mr-2" />
+                  Daily Energy Level Predictions
+                </div>
+                <div className="flex items-center">
+                  <Heart className="w-4 h-4 text-indigo-600 mr-2" />
+                  Mood-Food Correlation Analysis
+                </div>
+                <div className="flex items-center">
+                  <Clock className="w-4 h-4 text-indigo-600 mr-2" />
+                  Sleep Quality Impact Calculator
+                </div>
+                <div className="flex items-center">
+                  <Sparkles className="w-4 h-4 text-indigo-600 mr-2" />
+                  Interactive "What-If" Scenarios
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="p-4 bg-gradient-to-r from-violet-100 to-indigo-100 rounded-lg border border-violet-200">
+              <div className="flex items-center space-x-2 mb-2">
+                <TrendingUp className="w-5 h-5 text-violet-600" />
+                <div className="font-medium text-violet-900">Predictive Analytics</div>
+              </div>
+              <div className="text-sm text-violet-800">
+                • Weekly Health Pattern Analysis<br/>
+                • ML-powered Health Predictions<br/>
+                • Personalized Recommendations<br/>
+                • Quantified Impact Scenarios
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <Button 
+                onClick={() => navigate('/personal-insights')}
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-3"
+                size="lg"
+              >
+                <Brain className="w-5 h-5 mr-2" />
+                Your Health Intelligence
+              </Button>
+              
+              <div className="text-center text-xs text-indigo-600">
+                🧠 AI-powered insights • Predictive health analytics
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 // Component: AI Food Scanner Card
 const AIFoodScannerCard = () => {
   const navigate = useNavigate();
