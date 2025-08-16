@@ -313,10 +313,13 @@ class MLPredictiveAnalyticsAPITester:
                 print(f"   ✅ Good sleep habits validation: {'PASS' if good_sleep_valid else 'FAIL'}")
                 
                 # Display top factors
-                for factor in factor_analysis[:3]:
-                    factor_name = factor.get('factor', '')
-                    impact = factor.get('impact', 0)
-                    print(f"   📊 {factor_name}: {impact:.2f} impact")
+                if isinstance(factor_analysis, list):
+                    for factor in factor_analysis[:3]:
+                        factor_name = factor.get('factor', '')
+                        impact = factor.get('impact', 0)
+                        print(f"   📊 {factor_name}: {impact:.2f} impact")
+                else:
+                    print(f"   📊 Factor analysis: {factor_analysis}")
                 
             else:
                 print(f"   ❌ Response missing keys: {missing_keys}")
