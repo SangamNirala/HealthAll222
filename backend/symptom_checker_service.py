@@ -828,6 +828,73 @@ class ActionPlanGenerator:
             "Inability to complete plan activities",
             "Severe side effects from any intervention"
         ]
+    
+    def _get_additional_interventions(self, day: int, complexity: str) -> List[Dict[str, Any]]:
+        """Get additional interventions for moderate/complex cases"""
+        interventions = []
+        
+        if complexity == "moderate":
+            interventions.extend([
+                {
+                    "type": "enhanced_monitoring",
+                    "action": "Track symptoms every 4 hours using 1-10 scale",
+                    "timing": "throughout_day",
+                    "importance": "high"
+                },
+                {
+                    "type": "targeted_therapy",
+                    "action": "Apply specific relief measures based on symptom patterns",
+                    "timing": "as_needed",
+                    "importance": "medium"
+                }
+            ])
+        
+        elif complexity == "complex":
+            interventions.extend([
+                {
+                    "type": "comprehensive_monitoring",
+                    "action": "Detailed symptom diary with triggers, timing, and relief measures",
+                    "timing": "continuous",
+                    "importance": "critical"
+                },
+                {
+                    "type": "multi_modal_therapy",
+                    "action": "Combine multiple intervention strategies simultaneously",
+                    "timing": "scheduled",
+                    "importance": "high"
+                },
+                {
+                    "type": "professional_consultation",
+                    "action": "Consider telemedicine consultation if no improvement by day 2",
+                    "timing": f"day_{min(day + 1, 3)}",
+                    "importance": "high"
+                }
+            ])
+        
+        # Add day-specific interventions
+        if day == 1:
+            interventions.append({
+                "type": "baseline_establishment",
+                "action": "Establish baseline measurements and identify primary triggers",
+                "timing": "morning",
+                "importance": "critical"
+            })
+        elif day == 2:
+            interventions.append({
+                "type": "pattern_analysis",
+                "action": "Analyze day 1 patterns and adjust intervention strategies",
+                "timing": "morning",
+                "importance": "high"
+            })
+        elif day == 3:
+            interventions.append({
+                "type": "outcome_evaluation",
+                "action": "Evaluate overall progress and plan next steps",
+                "timing": "evening",
+                "importance": "high"
+            })
+        
+        return interventions
 
 class MedicalAdvisorySystem:
     """Medical advisory and emergency detection system"""
