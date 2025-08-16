@@ -10,7 +10,7 @@ import {
   Search, Plus, Clock, Trash2, Target, Apple, 
   Lightbulb, Heart, CheckCircle, Sparkles, 
   TrendingUp, Info, AlertCircle, Zap, Crown,
-  Calculator, BookBook, Award, Star, Activity,
+  Calculator, BookOpen, Award, Star, Activity,
   User, Utensils, Settings, Brain, Camera,
   Scan, BarChart3, Edit
 } from 'lucide-react';
