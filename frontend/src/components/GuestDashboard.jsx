@@ -28,7 +28,7 @@ const QuickStart = ({ sessionTime }) => (
       <div className="bg-purple-100 border border-purple-200 rounded-lg p-6 mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <UserX className="w-6 h-6 text-purple-600" />
+            <User className="w-6 h-6 text-purple-600" />
             <div>
               <h3 className="text-lg font-semibold text-purple-900">Guest Mode Active</h3>
               <p className="text-purple-700">Your data is temporarily stored and will not be saved permanently.</p>
