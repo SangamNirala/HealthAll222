@@ -1888,6 +1888,10 @@ class WhatIfScenarioResponse(BaseModel):
     impact_analysis: Dict[str, Any]
     recommendations: List[str]
     confidence: float
+    scientific_basis: Optional[Dict[str, str]] = None
+    timeframe: Optional[Dict[str, str]] = None
+    risk_factors: Optional[List[str]] = None
+    reliability_indicators: Optional[Dict[str, Any]] = None
 
 class WeeklyHealthPattern(BaseModel):
     user_id: str
