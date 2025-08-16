@@ -11032,6 +11032,10 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Phase 3 & 4 ML Pipeline APIs (REVIEW REQUEST - PRIORITY TESTING)...")
         phase3_phase4_ml_success = self.test_phase3_phase4_ml_endpoints()
 
+        # NEW: Symptom Checker APIs (REVIEW REQUEST - SPECIFIC FOCUS)
+        print("\n📋 Testing Symptom Checker APIs (REVIEW REQUEST - SPECIFIC FOCUS)...")
+        symptom_checker_success = self.test_symptom_checker_endpoints()
+
         # Print final results
         print("\n" + "=" * 60)
         print(f"📊 FINAL RESULTS")
