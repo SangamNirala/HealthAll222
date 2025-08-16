@@ -974,7 +974,10 @@ class MoodCorrelationEngine:
                 'trigger_foods': trigger_foods,
                 'mood_predictors': mood_predictors,
                 'recommendations': self._generate_mood_recommendations(correlations, trigger_foods),
-                'confidence': 0.75
+                'confidence': 0.75,
+                'scientific_validation': self._generate_mood_science_validation(correlations, trigger_foods),
+                'behavioral_insights': self._generate_behavioral_insights(correlations, trigger_foods),
+                'personalization_factors': self._assess_personalization_factors(user_data)
             }
             
         except Exception as e:
