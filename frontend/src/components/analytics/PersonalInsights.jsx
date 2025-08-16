@@ -96,9 +96,9 @@ const PersonalInsights = ({
 
       // Fetch all ML predictions
       const [energyResult, moodResult, sleepResult, weeklyResult] = await Promise.all([
-        predictiveAnalyticsService.predictEnergy(sampleIntakeData),
+        predictiveAnalyticsService.predictEnergy(sampleIntakeData, userId),
         predictiveAnalyticsService.analyzeMoodFoodCorrelation(userId, 30),
-        predictiveAnalyticsService.analyzeSleepImpact(sampleDailyChoices),
+        predictiveAnalyticsService.analyzeSleepImpact(sampleDailyChoices, userId),
         predictiveAnalyticsService.getWeeklyHealthPatterns(userId, 4)
       ]);
 
