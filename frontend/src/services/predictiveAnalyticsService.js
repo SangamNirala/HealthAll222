@@ -145,7 +145,7 @@ class PredictiveAnalyticsService {
   /**
    * Process "What-If" scenarios for health predictions
    */
-  async processWhatIfScenarios(baseData, proposedChanges) {
+  async processWhatIfScenarios(baseData, proposedChanges, userId = 'demo-patient-123') {
     try {
       const response = await fetch(`${API_BASE_URL}/api/ai/what-if-scenarios`, {
         method: 'POST',
@@ -153,6 +153,7 @@ class PredictiveAnalyticsService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          user_id: userId,
           base_data: baseData,
           proposed_changes: proposedChanges
         })
