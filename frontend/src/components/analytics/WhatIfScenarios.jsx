@@ -78,7 +78,8 @@ const WhatIfScenarios = ({ userId = 'demo-patient-123', className = '' }) => {
     try {
       const result = await predictiveAnalyticsService.processWhatIfScenarios(
         baselineData,
-        adjustments
+        adjustments,
+        userId
       );
 
       if (result.success) {
