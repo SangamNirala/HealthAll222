@@ -615,34 +615,7 @@ const GuestDashboard = () => {
 
 // Component: Quick Symptom Checker Card
 const QuickSymptomCheckerCard = () => {
-  const [showSymptomChecker, setShowSymptomChecker] = useState(false);
-
-  if (showSymptomChecker) {
-    return (
-      <div className="col-span-full">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center">
-                <Stethoscope className="w-6 h-6 mr-3 text-green-600" />
-                Quick Symptom Checker & Wellness Advisor
-              </CardTitle>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowSymptomChecker(false)}
-              >
-                Back to Dashboard
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <QuickSymptomChecker userId={`guest_${Date.now()}`} />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const navigate = useNavigate();
 
   return (
     <Card className="col-span-full lg:col-span-2 border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50">
@@ -697,7 +670,7 @@ const QuickSymptomCheckerCard = () => {
             
             <div className="space-y-3">
               <Button 
-                onClick={() => setShowSymptomChecker(true)}
+                onClick={() => navigate('/quick-symptom-checker')}
                 className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3"
                 size="lg"
               >
