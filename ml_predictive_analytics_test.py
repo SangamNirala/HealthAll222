@@ -606,8 +606,11 @@ class MLPredictiveAnalyticsAPITester:
                 print(f"   📈 Confidence score: {confidence:.2f}")
                 
                 # Display sample insights
-                for i, insight in enumerate(insights[:2]):
-                    print(f"   💡 Insight {i+1}: {insight[:80]}...")
+                if isinstance(insights, list):
+                    for i, insight in enumerate(insights[:2]):
+                        print(f"   💡 Insight {i+1}: {insight[:80]}...")
+                else:
+                    print(f"   💡 Insights: {insights}")
                 
             else:
                 print(f"   ❌ Response missing keys: {missing_keys}")
