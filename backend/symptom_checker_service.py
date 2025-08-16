@@ -514,6 +514,104 @@ class ReliefRecommendationSystem:
                 "Early, light dinner if digestive issues present"
             ]
         }
+    
+    def _parse_text_recommendations(self, response_text: str) -> Dict[str, Any]:
+        """Parse text-based AI recommendations when JSON parsing fails"""
+        try:
+            # Extract key sections from text response
+            lines = response_text.split('\n')
+            
+            dietary_interventions = []
+            lifestyle_modifications = []
+            natural_remedies = []
+            when_to_seek_help = []
+            
+            current_section = None
+            
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+                    
+                # Identify sections
+                if 'dietary' in line.lower() or 'nutrition' in line.lower():
+                    current_section = 'dietary'
+                elif 'lifestyle' in line.lower() or 'modification' in line.lower():
+                    current_section = 'lifestyle'
+                elif 'natural' in line.lower() or 'remedy' in line.lower():
+                    current_section = 'natural'
+                elif 'seek help' in line.lower() or 'medical' in line.lower():
+                    current_section = 'medical'
+                elif line.startswith('-') or line.startswith('•') or line.startswith('*'):
+                    # This is a recommendation item
+                    item = line.lstrip('-•* ').strip()
+                    if current_section == 'dietary':
+                        dietary_interventions.append(item)
+                    elif current_section == 'lifestyle':
+                        lifestyle_modifications.append(item)
+                    elif current_section == 'natural':
+                        natural_remedies.append(item)
+                    elif current_section == 'medical':
+                        when_to_seek_help.append(item)
+            
+            return {
+                "source": "groq_ai_parsed",
+                "dietary_interventions": dietary_interventions[:3],  # Limit to 3 items each
+                "lifestyle_modifications": lifestyle_modifications[:3],
+                "natural_remedies": natural_remedies[:3],
+                "when_to_seek_help": when_to_seek_help[:2],
+                "disclaimer": "This is not medical advice. Consult healthcare provider for persistent symptoms."
+            }
+            
+        except Exception as e:
+            logger.error(f"Error parsing text recommendations: {e}")
+            return self._fallback_recommendations({})
+    
+    def _fallback_recommendations(self, symptom_profile: Dict[str, Any]) -> Dict[str, Any]:
+        """Provide fallback recommendations when AI services fail"""
+        primary_symptoms = symptom_profile.get("primary_symptoms", [])
+        
+        # Basic recommendations based on common symptoms
+        dietary_interventions = [
+            "Stay well hydrated with water throughout the day",
+            "Eat light, easily digestible meals",
+            "Avoid inflammatory foods (processed, high sugar)"
+        ]
+        
+        lifestyle_modifications = [
+            "Get adequate rest and sleep (7-9 hours)",
+            "Practice stress reduction techniques",
+            "Gentle movement or light exercise as tolerated"
+        ]
+        
+        natural_remedies = [
+            "Apply heat or cold therapy as appropriate",
+            "Practice deep breathing exercises",
+            "Consider herbal teas (ginger, chamomile)"
+        ]
+        
+        when_to_seek_help = [
+            "If symptoms worsen or persist beyond 3 days",
+            "If you develop fever, severe pain, or difficulty breathing"
+        ]
+        
+        # Add symptom-specific recommendations
+        if "headache" in [s.lower() for s in primary_symptoms]:
+            natural_remedies.insert(0, "Apply cold compress to forehead or warm compress to neck")
+            dietary_interventions.insert(0, "Limit caffeine and ensure regular meals")
+        
+        if "fatigue" in [s.lower() for s in primary_symptoms]:
+            dietary_interventions.insert(0, "Include protein and complex carbohydrates in meals")
+            lifestyle_modifications.insert(0, "Take short breaks throughout the day")
+        
+        return {
+            "source": "fallback_system",
+            "dietary_interventions": dietary_interventions,
+            "lifestyle_modifications": lifestyle_modifications,
+            "natural_remedies": natural_remedies,
+            "when_to_seek_help": when_to_seek_help,
+            "disclaimer": "This is general wellness advice, not medical diagnosis or treatment. Consult healthcare provider for persistent or severe symptoms."
+        }
 
 class ActionPlanGenerator:
     """Generate structured 3-day action plans"""
