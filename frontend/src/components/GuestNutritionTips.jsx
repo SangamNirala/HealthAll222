@@ -10,6 +10,8 @@ const GuestNutritionTips = () => {
   const { switchRole } = useRole();
   const [activeCategory, setActiveCategory] = useState('all');
   const [favorited, setFavorited] = useState([]);
+  const [selectedTip, setSelectedTip] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   // Switch to guest role when component mounts
   useEffect(() => {
@@ -19,9 +21,14 @@ const GuestNutritionTips = () => {
   const categories = [
     { id: 'all', name: 'All Tips', icon: BookOpen },
     { id: 'hydration', name: 'Hydration', icon: Droplets },
-    { id: 'nutrition', name: 'Nutrition', icon: Apple },
+    { id: 'nutrition', name: 'Basic Nutrition', icon: Apple },
     { id: 'habits', name: 'Healthy Habits', icon: Heart },
-    { id: 'timing', name: 'Meal Timing', icon: Clock }
+    { id: 'timing', name: 'Meal Timing', icon: Clock },
+    { id: 'gut-health', name: 'Gut Health', icon: Leaf },
+    { id: 'brain-foods', name: 'Brain Foods', icon: Brain },
+    { id: 'heart-health', name: 'Heart Health', icon: Activity },
+    { id: 'meal-prep', name: 'Meal Prep', icon: Utensils },
+    { id: 'metabolism', name: 'Metabolism', icon: Zap }
   ];
 
   const nutritionTips = [
