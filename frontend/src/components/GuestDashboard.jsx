@@ -587,6 +587,7 @@ const GuestDashboard = () => {
           <QuickStart sessionTime={sessionTime} />
           <HealthSnapshotCard />
           <YourHealthIntelligenceCard />
+          <QuickSymptomCheckerCard />
           <AIFoodScannerCard />
           <SimpleFoodLogging />
           <BasicNutritionInfo />
