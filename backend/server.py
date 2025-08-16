@@ -1857,6 +1857,9 @@ class MoodFoodCorrelationResponse(BaseModel):
     recommendations: List[str]
     analysis_period: str
     confidence: float
+    scientific_validation: Optional[Dict[str, str]] = None
+    behavioral_insights: Optional[List[str]] = None
+    personalization_factors: Optional[Dict[str, Any]] = None
 
 class SleepImpactRequest(BaseModel):
     user_id: str
