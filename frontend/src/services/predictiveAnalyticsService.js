@@ -14,7 +14,7 @@ class PredictiveAnalyticsService {
   /**
    * Predict daily energy levels based on food intake and lifestyle factors
    */
-  async predictEnergy(intakeData) {
+  async predictEnergy(intakeData, userId = 'demo-patient-123') {
     try {
       const response = await fetch(`${API_BASE_URL}/api/ai/energy-prediction`, {
         method: 'POST',
@@ -22,6 +22,7 @@ class PredictiveAnalyticsService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          user_id: userId,
           intake_data: intakeData
         })
       });
