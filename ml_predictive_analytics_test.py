@@ -584,14 +584,48 @@ class MLPredictiveAnalyticsAPITester:
         return success1 and success2 and success3 and success4
 
     def test_health_insights_endpoint(self):
-        """Test GET /api/ai/health-insights - Personal AI Insights component support"""
+        """Test POST /api/ai/health-insights - Personal AI Insights component support"""
         print("\n🧠 Testing Health Insights Endpoint...")
         
-        # Test 1: Health insights for demo patient
+        # Test 1: Health insights with proper healthData structure
         health_insights_data = {
             "user_id": "demo-patient-123",
-            "analysis_type": "comprehensive",
-            "timeframe": "30_days"
+            "healthData": {
+                "demographics": {
+                    "age": 35,
+                    "gender": "male",
+                    "activity_level": "moderately_active"
+                },
+                "nutrition_data": {
+                    "daily_calories": 2000,
+                    "protein_intake": 100,
+                    "carb_intake": 250,
+                    "fat_intake": 70
+                },
+                "health_metrics": {
+                    "weight": 75,
+                    "height": 175,
+                    "bmi": 24.5
+                },
+                "goals": ["weight_loss", "muscle_gain"],
+                "daily_logs": [
+                    {
+                        "date": "2025-08-15",
+                        "calories": 1950,
+                        "exercise_minutes": 45,
+                        "sleep_hours": 7.5,
+                        "stress_level": 3
+                    },
+                    {
+                        "date": "2025-08-14",
+                        "calories": 2100,
+                        "exercise_minutes": 30,
+                        "sleep_hours": 8.0,
+                        "stress_level": 4
+                    }
+                ]
+            },
+            "analysis_type": "comprehensive"
         }
         
         success1, response1 = self.run_test(
@@ -630,11 +664,38 @@ class MLPredictiveAnalyticsAPITester:
                 print(f"   ❌ Response missing keys: {missing_keys}")
                 success1 = False
         
-        # Test 2: Weekly analysis
+        # Test 2: Weekly analysis with proper structure
         weekly_insights_data = {
             "user_id": "demo-patient-123",
-            "analysis_type": "weekly_summary",
-            "timeframe": "7_days"
+            "healthData": {
+                "demographics": {
+                    "age": 35,
+                    "gender": "male",
+                    "activity_level": "moderately_active"
+                },
+                "nutrition_data": {
+                    "daily_calories": 1800,
+                    "protein_intake": 90,
+                    "carb_intake": 200,
+                    "fat_intake": 60
+                },
+                "health_metrics": {
+                    "weight": 75,
+                    "height": 175,
+                    "bmi": 24.5
+                },
+                "goals": ["weight_loss"],
+                "daily_logs": [
+                    {
+                        "date": "2025-08-15",
+                        "calories": 1750,
+                        "exercise_minutes": 60,
+                        "sleep_hours": 8.0,
+                        "stress_level": 2
+                    }
+                ]
+            },
+            "analysis_type": "weekly_summary"
         }
         
         success2, response2 = self.run_test(
