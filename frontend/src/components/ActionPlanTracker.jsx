@@ -70,7 +70,7 @@ const ActionPlanTracker = ({ actionPlan, assessmentId, userId }) => {
     
     try {
       // For guest users, we'll store locally and optionally sync with backend
-      const response = await fetch(`${import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL}/api/symptom-checker/progress-update`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/symptom-checker/progress-update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
