@@ -11353,6 +11353,244 @@ class HealthPlatformAPITester:
         
         return success1 and success2 and success3 and success4
 
+    def test_symptom_checker_endpoints(self):
+        """Test Quick Symptom Checker API endpoints as requested in review"""
+        print("\n🩺 Testing Quick Symptom Checker Endpoints...")
+        
+        # Test 1: POST /api/symptom-checker/assess - Comprehensive symptom assessment
+        symptom_assessment_data = {
+            "user_id": "guest-test-user-123",
+            "symptoms": [
+                {
+                    "name": "headache",
+                    "severity": 6,
+                    "frequency": 3,
+                    "duration_days": 1,
+                    "life_impact": 3,
+                    "description": "Started this morning, feels stress-related",
+                    "triggers": ["stress", "lack_of_sleep"]
+                },
+                {
+                    "name": "fatigue",
+                    "severity": 7,
+                    "frequency": 4,
+                    "duration_days": 1,
+                    "life_impact": 4,
+                    "description": "Feeling very tired and low energy",
+                    "triggers": ["stress", "poor_sleep"]
+                }
+            ],
+            "additional_info": {
+                "stress_level": "high",
+                "sleep_hours": 5,
+                "recent_changes": "work deadline pressure"
+            }
+        }
+        
+        success1, assessment_response = self.run_test(
+            "Symptom Assessment - Headache & Fatigue",
+            "POST",
+            "symptom-checker/assess",
+            200,
+            data=symptom_assessment_data
+        )
+        
+        # Validate assessment response structure
+        assessment_id = None
+        if success1 and assessment_response:
+            expected_keys = ['assessment_id', 'symptom_profile', 'instant_relief', 'action_plan', 
+                           'medical_advisory', 'ai_recommendations', 'estimated_relief_time', 'confidence_score']
+            missing_keys = [key for key in expected_keys if key not in assessment_response]
+            if not missing_keys:
+                print(f"   ✅ Assessment response contains all required keys: {expected_keys}")
+                
+                assessment_id = assessment_response.get('assessment_id', '')
+                symptom_profile = assessment_response.get('symptom_profile', {})
+                instant_relief = assessment_response.get('instant_relief', [])
+                action_plan = assessment_response.get('action_plan', {})
+                medical_advisory = assessment_response.get('medical_advisory', {})
+                confidence_score = assessment_response.get('confidence_score', 0)
+                
+                print(f"   🆔 Assessment ID: {assessment_id}")
+                print(f"   📊 Confidence score: {confidence_score}")
+                print(f"   💊 Instant relief options: {len(instant_relief)}")
+                print(f"   📋 Action plan generated: {'Yes' if action_plan else 'No'}")
+                print(f"   🏥 Medical advisory: {medical_advisory.get('urgency_level', 'N/A')}")
+                
+            else:
+                print(f"   ❌ Assessment response missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: POST /api/symptom-checker/progress-update - Progress update for 3-day action plan
+        progress_update_data = {
+            "plan_id": "test-plan-123",
+            "user_id": "guest-test-user-123",
+            "day": 1,
+            "time_of_day": "evening",
+            "symptom_ratings": {
+                "headache": 4,
+                "fatigue": 5
+            },
+            "interventions_used": ["hydration", "rest", "stress_management"],
+            "intervention_effectiveness": {
+                "hydration": 7,
+                "rest": 8,
+                "stress_management": 6
+            },
+            "side_effects": [],
+            "triggers_identified": ["work_stress", "screen_time"],
+            "notes": "Feeling better after rest and hydration. Headache reduced significantly.",
+            "overall_improvement": 6,
+            "quality_of_life_impact": 7,
+            "sleep_quality": 6
+        }
+        
+        success2, progress_response = self.run_test(
+            "Progress Update - Day 1 Evening",
+            "POST",
+            "symptom-checker/progress-update",
+            200,
+            data=progress_update_data
+        )
+        
+        # Validate progress update response
+        if success2 and progress_response:
+            expected_keys = ['success', 'progress_logged', 'current_analytics', 'adjustment_needed', 
+                           'next_milestone', 'recommendations']
+            missing_keys = [key for key in expected_keys if key not in progress_response]
+            if not missing_keys:
+                print(f"   ✅ Progress response contains all required keys: {expected_keys}")
+                
+                progress_logged = progress_response.get('progress_logged', False)
+                current_analytics = progress_response.get('current_analytics', {})
+                adjustment_needed = progress_response.get('adjustment_needed', False)
+                recommendations = progress_response.get('recommendations', [])
+                
+                print(f"   📝 Progress logged: {progress_logged}")
+                print(f"   📊 Analytics available: {'Yes' if current_analytics else 'No'}")
+                print(f"   🔄 Adjustment needed: {adjustment_needed}")
+                print(f"   💡 Recommendations: {len(recommendations)}")
+                
+            else:
+                print(f"   ❌ Progress response missing keys: {missing_keys}")
+                success2 = False
+        
+        # Test 3: Test with different symptom data (single symptom)
+        single_symptom_data = {
+            "user_id": "guest-test-user-456",
+            "symptoms": [
+                {
+                    "name": "nausea",
+                    "severity": 5,
+                    "frequency": 2,
+                    "duration_days": 0,
+                    "life_impact": 2,
+                    "description": "Mild nausea after eating",
+                    "triggers": ["spicy_food"]
+                }
+            ],
+            "additional_info": {
+                "recent_meals": "spicy dinner last night"
+            }
+        }
+        
+        success3, single_response = self.run_test(
+            "Symptom Assessment - Single Symptom (Nausea)",
+            "POST",
+            "symptom-checker/assess",
+            200,
+            data=single_symptom_data
+        )
+        
+        # Test 4: Test progress update with different day
+        progress_day2_data = {
+            "plan_id": "test-plan-123",
+            "user_id": "guest-test-user-123",
+            "day": 2,
+            "time_of_day": "morning",
+            "symptom_ratings": {
+                "headache": 2,
+                "fatigue": 3
+            },
+            "interventions_used": ["hydration", "rest", "light_exercise"],
+            "intervention_effectiveness": {
+                "hydration": 8,
+                "rest": 9,
+                "light_exercise": 7
+            },
+            "side_effects": [],
+            "triggers_identified": [],
+            "notes": "Much better today. Headache almost gone, energy levels improving.",
+            "overall_improvement": 8,
+            "quality_of_life_impact": 8,
+            "sleep_quality": 7
+        }
+        
+        success4, day2_response = self.run_test(
+            "Progress Update - Day 2 Morning",
+            "POST",
+            "symptom-checker/progress-update",
+            200,
+            data=progress_day2_data
+        )
+        
+        # Test 5: Test error handling with invalid data
+        invalid_symptom_data = {
+            "user_id": "guest-test-user-789",
+            "symptoms": [
+                {
+                    "name": "headache",
+                    "severity": 15,  # Invalid severity (should be 1-10)
+                    "frequency": 3,
+                    "duration_days": 1,
+                    "life_impact": 3
+                }
+            ]
+        }
+        
+        success5, _ = self.run_test(
+            "Invalid Symptom Data (Should Fail)",
+            "POST",
+            "symptom-checker/assess",
+            422,  # Expecting validation error
+            data=invalid_symptom_data
+        )
+        
+        # Test 6: Test progress update with invalid day
+        invalid_progress_data = {
+            "plan_id": "test-plan-123",
+            "user_id": "guest-test-user-123",
+            "day": 5,  # Invalid day (should be 1-3)
+            "time_of_day": "morning",
+            "symptom_ratings": {"headache": 2},
+            "interventions_used": ["rest"],
+            "intervention_effectiveness": {"rest": 8},
+            "side_effects": [],
+            "triggers_identified": [],
+            "notes": "Test invalid day",
+            "overall_improvement": 5,
+            "quality_of_life_impact": 5,
+            "sleep_quality": 5
+        }
+        
+        success6, _ = self.run_test(
+            "Invalid Progress Update (Should Fail)",
+            "POST",
+            "symptom-checker/progress-update",
+            422,  # Expecting validation error
+            data=invalid_progress_data
+        )
+        
+        print(f"\n📊 Symptom Checker Test Summary:")
+        print(f"   ✅ Symptom Assessment (Multi-symptom): {'PASS' if success1 else 'FAIL'}")
+        print(f"   ✅ Progress Update (Day 1): {'PASS' if success2 else 'FAIL'}")
+        print(f"   ✅ Symptom Assessment (Single symptom): {'PASS' if success3 else 'FAIL'}")
+        print(f"   ✅ Progress Update (Day 2): {'PASS' if success4 else 'FAIL'}")
+        print(f"   ✅ Invalid Symptom Data Validation: {'PASS' if success5 else 'FAIL'}")
+        print(f"   ✅ Invalid Progress Data Validation: {'PASS' if success6 else 'FAIL'}")
+        
+        return success1 and success2 and success3 and success4 and success5 and success6
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
