@@ -521,7 +521,11 @@ const WhatIfScenarios = ({ userId = 'demo-patient-123', className = '' }) => {
                         <h5 className="font-semibold text-sm">Ready to implement these changes?</h5>
                         <p className="text-xs opacity-90 mt-1">Track your progress and adjust as needed</p>
                       </div>
-                      <Button className="bg-white text-blue-600 hover:bg-gray-100" size="sm">
+                      <Button 
+                        className="bg-white text-blue-600 hover:bg-gray-100" 
+                        size="sm"
+                        onClick={handleStartTracking}
+                      >
                         Start Tracking
                         <ArrowRight className="h-3 w-3 ml-2" />
                       </Button>
