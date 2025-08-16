@@ -517,7 +517,14 @@ class MLPredictiveAnalyticsAPITester:
                 trend_direction = response1.get('trend_direction', '')
                 
                 print(f"   👤 User ID: {user_id}")
-                print(f"   📅 Analysis period: {analysis_period.get('weeks_analyzed', 0)} weeks")
+                
+                # Handle analysis_period - could be dict or string
+                if isinstance(analysis_period, dict):
+                    weeks_analyzed = analysis_period.get('weeks_analyzed', 0)
+                    print(f"   📅 Analysis period: {weeks_analyzed} weeks")
+                else:
+                    print(f"   📅 Analysis period: {analysis_period}")
+                
                 print(f"   📊 Pattern types: {len(patterns)}")
                 print(f"   💡 Insights: {len(insights)}")
                 print(f"   🚨 Anomalies: {len(anomalies)}")
