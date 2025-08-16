@@ -1871,6 +1871,9 @@ class SleepImpactResponse(BaseModel):
     recommendations: List[str]
     confidence: float
     analysis_date: str
+    scientific_evidence: Optional[Dict[str, str]] = None
+    actionable_insights: Optional[List[str]] = None
+    risk_assessment: Optional[Dict[str, Any]] = None
 
 class WhatIfScenarioRequest(BaseModel):
     user_id: str
