@@ -1259,7 +1259,8 @@ class WhatIfScenarioProcessor:
                 'confidence': self._calculate_scenario_confidence(impact_analysis, changes),
                 'scientific_basis': self._generate_scientific_justification(changes),
                 'timeframe': self._estimate_change_timeframe(changes),
-                'risk_factors': self._identify_risk_factors(changes, impact_analysis)
+                'risk_factors': self._identify_risk_factors(changes, impact_analysis),
+                'reliability_indicators': self._generate_reliability_indicators(changes, impact_analysis)
             }
             
         except Exception as e:
