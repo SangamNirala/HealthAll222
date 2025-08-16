@@ -123,7 +123,7 @@ const WeeklyHealthDashboard = ({ userId = 'demo-patient-123', className = '' }) 
   // Convert patterns object to array for radar chart
   const radarData = weeklyData?.patterns ? Object.entries(weeklyData.patterns).map(([key, value]) => ({
     pattern: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-    score: value,
+    score: typeof value === 'number' && !isNaN(value) ? value : 0,
     fullMark: 10
   })) : [];
 
