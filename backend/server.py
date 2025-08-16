@@ -7925,7 +7925,11 @@ async def process_what_if_scenario(request: WhatIfScenarioRequest):
             predicted_state=scenario_result['predicted_state'],
             impact_analysis=scenario_result['impact_analysis'],
             recommendations=scenario_result['recommendations'],
-            confidence=scenario_result['confidence']
+            confidence=scenario_result['confidence'],
+            scientific_basis=scenario_result.get('scientific_basis', {}),
+            timeframe=scenario_result.get('timeframe', {}),
+            risk_factors=scenario_result.get('risk_factors', []),
+            reliability_indicators=scenario_result.get('reliability_indicators', {})
         )
         
     except Exception as e:
