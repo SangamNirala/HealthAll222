@@ -652,8 +652,10 @@ class EnergyPredictionModel:
                 'upper': min(10.0, energy_prediction + 1.96 * prediction_std)
             }
             
-            # Generate detailed explanation
+            # Generate detailed explanation and scientific backing
             explanation = self._generate_prediction_explanation(intake_data, energy_prediction)
+            scientific_basis = self._generate_scientific_basis(intake_data, energy_prediction)
+            reliability_score = self._calculate_reliability_score(intake_data, adjusted_confidence)
             
             return {
                 'predicted_energy': round(float(energy_prediction), 1),
@@ -664,7 +666,9 @@ class EnergyPredictionModel:
                 'model_accuracy': self.model_accuracy,
                 'model_variant': getattr(self, 'current_variant', 'linear'),
                 'explanation': explanation,
-                'feature_contributions': self._calculate_feature_contributions(intake_data, features_scaled[0])
+                'feature_contributions': self._calculate_feature_contributions(intake_data, features_scaled[0]),
+                'scientific_basis': scientific_basis,
+                'reliability_score': reliability_score
             }
             
         except Exception as e:
