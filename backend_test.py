@@ -11442,7 +11442,8 @@ class HealthPlatformAPITester:
             "notes": "Feeling better after rest and hydration. Headache reduced significantly.",
             "overall_improvement": 6,
             "quality_of_life_impact": 7,
-            "sleep_quality": 6
+            "sleep_quality": 6,
+            "energy_level": 6
         }
         
         success2, progress_response = self.run_test(
