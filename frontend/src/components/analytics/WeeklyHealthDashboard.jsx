@@ -218,7 +218,9 @@ const WeeklyHealthDashboard = ({ userId = 'demo-patient-123', className = '' }) 
         </Card>
 
         {weeklyData?.patterns && Object.entries(weeklyData.patterns).slice(0, 3).map(([key, value]) => {
-          const patternInfo = getPatternScore(value);
+          // Ensure value is a number, default to 0 if not
+          const numericValue = typeof value === 'number' && !isNaN(value) ? value : 0;
+          const patternInfo = getPatternScore(numericValue);
           const icon = {
             nutrition_consistency: <Apple className="h-5 w-5" />,
             energy_patterns: <Zap className="h-5 w-5" />,
@@ -234,7 +236,7 @@ const WeeklyHealthDashboard = ({ userId = 'demo-patient-123', className = '' }) 
                   {icon}
                 </div>
                 <div className={`text-lg font-bold ${patternInfo.color.split(' ')[0]} mb-1`}>
-                  {value.toFixed(1)}/10
+                  {numericValue.toFixed(1)}/10
                 </div>
                 <p className="text-sm text-gray-600 capitalize">
                   {key.replace(/_/g, ' ')}
