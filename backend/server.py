@@ -35,6 +35,16 @@ from pathlib import Path
 from ai_services import get_nutrition_insights, get_smart_food_suggestions, get_health_correlations, get_clinical_insights, get_goal_insights, get_achievement_insights, AIServiceManager
 from food_recognition_service import FoodRecognitionService
 
+# Import Symptom Checker services
+from symptom_checker_service import (
+    SymptomAssessmentEngine, 
+    ReliefRecommendationSystem, 
+    ActionPlanGenerator, 
+    MedicalAdvisorySystem,
+    AlertLevel
+)
+from symptom_progress_tracker import SymptomProgressTracker
+
 # Import ML Models for Predictive Analytics (Phase 4 Enhanced)
 from ml_models import (
     energy_prediction_model,
