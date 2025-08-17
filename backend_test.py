@@ -11892,6 +11892,8 @@ class HealthPlatformAPITester:
         """Test Medical AI Initialization with basic and comprehensive patient data"""
         print("\n🔬 Testing Medical AI Initialization...")
         
+        consultation_id = ""  # Initialize variable
+        
         # Test 1: Basic patient data initialization (patient_id only)
         basic_init_data = {
             "patient_id": "demo-patient-123"
