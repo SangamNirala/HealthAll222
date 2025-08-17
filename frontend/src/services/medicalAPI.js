@@ -90,7 +90,7 @@ class MedicalAPIService {
   /**
    * Generate a professional medical report from the consultation
    */
-  async generateMedicalReport(params) {
+  async generateMedicalReport(params = {}) {
     try {
       const response = await fetch(`${this.baseURL}/report`, {
         method: 'POST',
@@ -99,8 +99,13 @@ class MedicalAPIService {
         },
         body: JSON.stringify({
           consultation_id: params.consultation_id,
-          messages: params.messages,
-          context: params.context
+          messages: params.messages || [],
+          context: params.context || {},
+          soap_data: params.soap_data || {},
+          consultation_data: params.consultation_data || {},
+          include_differential: params.include_differential !== false,
+          include_recommendations: params.include_recommendations !== false,
+          report_type: params.report_type || 'comprehensive'
         })
       });
 
@@ -110,16 +115,73 @@ class MedicalAPIService {
 
       const data = await response.json();
       return {
-        report: {
-          id: data.report_id,
-          soap_note: data.soap_note,
-          summary: data.summary,
-          recommendations: data.recommendations,
-          generated_at: data.generated_at
-        }
+        report: data.report,
+        soap_notes: data.soap_notes,
+        consultation_summary: data.consultation_summary,
+        generated_at: data.generated_at,
+        pdf_base64: data.pdf_base64,
+        pdf_url: data.pdf_url
       };
     } catch (error) {
       console.error('Failed to generate medical report:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get medical knowledge information for a specific condition or symptom
+   */
+  async getMedicalKnowledge(params = {}) {
+    try {
+      const response = await fetch(`${this.baseURL}/knowledge`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: params.query,
+          type: params.type || 'symptom', // 'symptom', 'condition', 'treatment'
+          detailed: params.detailed || false
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Failed to get medical knowledge:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Assess emergency risk for given symptoms
+   */
+  async assessEmergencyRisk(params = {}) {
+    try {
+      const response = await fetch(`${this.baseURL}/emergency-assessment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          symptoms: params.symptoms || [],
+          context: params.context || {},
+          patient_demographics: params.demographics || {}
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Failed to assess emergency risk:', error);
       throw error;
     }
   }
