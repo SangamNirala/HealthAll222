@@ -62,6 +62,7 @@ class WorldClassMedicalAI:
         # Load medical knowledge base
         self.medical_knowledge = self._load_medical_knowledge()
         self.emergency_keywords = self._load_emergency_keywords()
+        self.differential_database = self._load_differential_database()
         
     def _load_medical_knowledge(self) -> Dict[str, Any]:
         """Load comprehensive medical knowledge base"""
