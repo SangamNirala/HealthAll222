@@ -464,7 +464,7 @@ class WorldClassMedicalAI:
         """
         
         try:
-            response = await self.model.generate_content_async(prompt)
+            response = await self._generate_content_with_fallback(prompt)
             
             # Extract and parse JSON from response
             response_text = response.text.strip()
