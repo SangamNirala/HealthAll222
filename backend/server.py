@@ -10913,8 +10913,11 @@ def _calculate_average_severity(assessments):
 
 # ===== MEDICAL AI CONSULTATION ENDPOINTS =====
 
-# Lazy initialization for Medical AI Service
+# Lazy initialization for Medical AI Service and related services
 medical_ai = None
+medical_knowledge_db = None
+pdf_generator = None
+soap_generator = None
 
 def get_medical_ai():
     """Get Medical AI service with lazy initialization"""
@@ -10927,6 +10930,42 @@ def get_medical_ai():
             print(f"Error initializing Medical AI Service: {e}")
             raise HTTPException(status_code=503, detail=f"Medical AI service initialization failed: {str(e)}")
     return medical_ai
+
+def get_medical_knowledge_db():
+    """Get Medical Knowledge Database with lazy initialization"""
+    global medical_knowledge_db
+    if medical_knowledge_db is None:
+        try:
+            medical_knowledge_db = ComprehensiveMedicalKnowledgeDatabase()
+            print("Medical Knowledge Database initialized successfully")
+        except Exception as e:
+            print(f"Error initializing Medical Knowledge Database: {e}")
+            raise HTTPException(status_code=503, detail=f"Medical knowledge database initialization failed: {str(e)}")
+    return medical_knowledge_db
+
+def get_pdf_generator():
+    """Get PDF Generator service with lazy initialization"""
+    global pdf_generator
+    if pdf_generator is None:
+        try:
+            pdf_generator = MedicalReportPDFGenerator()
+            print("PDF Generator Service initialized successfully")
+        except Exception as e:
+            print(f"Error initializing PDF Generator: {e}")
+            raise HTTPException(status_code=503, detail=f"PDF generator initialization failed: {str(e)}")
+    return pdf_generator
+
+def get_soap_generator():
+    """Get SOAP Generator service with lazy initialization"""
+    global soap_generator
+    if soap_generator is None:
+        try:
+            soap_generator = ProfessionalSOAPGenerator()
+            print("SOAP Generator Service initialized successfully")
+        except Exception as e:
+            print(f"Error initializing SOAP Generator: {e}")
+            raise HTTPException(status_code=503, detail=f"SOAP generator initialization failed: {str(e)}")
+    return soap_generator
 
 @api_router.post("/medical-ai/initialize", response_model=MedicalConsultationResponse)
 async def initialize_medical_consultation(request: MedicalConsultationInit):
