@@ -412,7 +412,7 @@ class WorldClassMedicalAI:
             
             # Extract and parse JSON from response
             response_text = response.text.strip()
-            differential_data = self._parse_ai_response(response_text)
+            differential_data = self._parse_ai_response(response_text, context)
             
             # Validate and enhance the response
             differential_data = self._validate_differential_response(differential_data, context)
