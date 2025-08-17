@@ -10905,12 +10905,20 @@ def _calculate_average_severity(assessments):
 
 # ===== MEDICAL AI CONSULTATION ENDPOINTS =====
 
-# Initialize Medical AI Service
-try:
-    medical_ai = WorldClassMedicalAI()
-except Exception as e:
-    print(f"Warning: Could not initialize Medical AI Service: {e}")
-    medical_ai = None
+# Lazy initialization for Medical AI Service
+medical_ai = None
+
+def get_medical_ai():
+    """Get Medical AI service with lazy initialization"""
+    global medical_ai
+    if medical_ai is None:
+        try:
+            medical_ai = WorldClassMedicalAI()
+            print("Medical AI Service initialized successfully")
+        except Exception as e:
+            print(f"Error initializing Medical AI Service: {e}")
+            raise HTTPException(status_code=503, detail=f"Medical AI service initialization failed: {str(e)}")
+    return medical_ai
 
 @api_router.post("/medical-ai/initialize", response_model=MedicalConsultationResponse)
 async def initialize_medical_consultation(request: MedicalConsultationInit):
