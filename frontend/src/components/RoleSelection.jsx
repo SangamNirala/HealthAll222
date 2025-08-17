@@ -76,7 +76,7 @@ const roleOptions = [
   }
 ];
 
-const RoleCard = ({ role, index }) => {
+const RoleCard = ({ role, index, onQuickChatClick }) => {
   const navigate = useNavigate();
   const IconComponent = role.icon;
 
