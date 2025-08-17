@@ -11594,6 +11594,277 @@ class HealthPlatformAPITester:
         
         return success1 and success2 and success3 and success4 and success5 and success6
 
+    def test_family_emergency_hub_endpoints(self):
+        """Test Family Emergency Hub API endpoints as requested in review"""
+        print("\n🚨 Testing Family Emergency Hub Endpoints...")
+        
+        family_id = "demo-family-123"
+        
+        # Test 1: GET /api/family/{family_id}/emergency-hub - Main emergency hub dashboard
+        success1, hub_response = self.run_test(
+            "Family Emergency Hub Dashboard",
+            "GET",
+            f"family/{family_id}/emergency-hub",
+            200
+        )
+        
+        # Validate hub response structure
+        if success1 and hub_response:
+            expected_keys = ['family_id', 'emergency_contacts', 'medical_profiles', 'family_members', 
+                           'recent_incidents', 'emergency_services', 'hub_status', 'last_updated']
+            missing_keys = [key for key in expected_keys if key not in hub_response]
+            if not missing_keys:
+                print(f"   ✅ Emergency hub contains all required keys: {expected_keys}")
+                print(f"   📊 Emergency contacts: {len(hub_response.get('emergency_contacts', []))}")
+                print(f"   📊 Medical profiles: {len(hub_response.get('medical_profiles', []))}")
+                print(f"   📊 Family members: {len(hub_response.get('family_members', []))}")
+                print(f"   📊 Recent incidents: {len(hub_response.get('recent_incidents', []))}")
+                print(f"   📊 Hub status: {hub_response.get('hub_status', 'unknown')}")
+            else:
+                print(f"   ❌ Emergency hub missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: GET /api/family/{family_id}/emergency-contacts - Get all emergency contacts
+        success2, contacts_response = self.run_test(
+            "Get Family Emergency Contacts",
+            "GET",
+            f"family/{family_id}/emergency-contacts",
+            200
+        )
+        
+        # Validate contacts response
+        if success2 and contacts_response:
+            expected_keys = ['family_id', 'contacts']
+            missing_keys = [key for key in expected_keys if key not in contacts_response]
+            if not missing_keys:
+                print(f"   ✅ Emergency contacts response valid")
+                print(f"   📞 Total contacts: {len(contacts_response.get('contacts', []))}")
+            else:
+                print(f"   ❌ Emergency contacts missing keys: {missing_keys}")
+                success2 = False
+        
+        # Test 3: POST /api/family/{family_id}/emergency-contacts - Create new emergency contact
+        contact_data = {
+            "family_id": family_id,
+            "contact_name": "Dr. Sarah Johnson",
+            "relationship": "Family Doctor",
+            "primary_phone": "+1-555-0123",
+            "secondary_phone": "+1-555-0124",
+            "email": "dr.johnson@healthcenter.com",
+            "address": "123 Medical Center Dr, Health City, HC 12345",
+            "is_primary_contact": True,
+            "availability_notes": "Available weekdays 9 AM - 5 PM",
+            "medical_authorization": True,
+            "notes": "Primary care physician for the family"
+        }
+        
+        success3, contact_response = self.run_test(
+            "Create Emergency Contact",
+            "POST",
+            f"family/{family_id}/emergency-contacts",
+            200,
+            data=contact_data
+        )
+        
+        # Validate created contact
+        contact_id = None
+        if success3 and contact_response:
+            expected_keys = ['id', 'family_id', 'contact_name', 'relationship', 'primary_phone']
+            missing_keys = [key for key in expected_keys if key not in contact_response]
+            if not missing_keys:
+                print(f"   ✅ Emergency contact created successfully")
+                contact_id = contact_response.get('id')
+                print(f"   📞 Contact ID: {contact_id}")
+                print(f"   👤 Contact name: {contact_response.get('contact_name')}")
+                print(f"   🔗 Relationship: {contact_response.get('relationship')}")
+                print(f"   📱 Primary phone: {contact_response.get('primary_phone')}")
+                print(f"   🏥 Medical authorization: {contact_response.get('medical_authorization')}")
+            else:
+                print(f"   ❌ Created contact missing keys: {missing_keys}")
+                success3 = False
+        
+        # Test 4: GET /api/family/{family_id}/medical-profiles - Get medical profiles
+        success4, profiles_response = self.run_test(
+            "Get Family Medical Profiles",
+            "GET",
+            f"family/{family_id}/medical-profiles",
+            200
+        )
+        
+        # Validate medical profiles response
+        if success4 and profiles_response:
+            expected_keys = ['family_id', 'medical_profiles']
+            missing_keys = [key for key in expected_keys if key not in profiles_response]
+            if not missing_keys:
+                print(f"   ✅ Medical profiles response valid")
+                print(f"   🏥 Total medical profiles: {len(profiles_response.get('medical_profiles', []))}")
+            else:
+                print(f"   ❌ Medical profiles missing keys: {missing_keys}")
+                success4 = False
+        
+        # Test 5: POST /api/family/{family_id}/medical-profiles - Create medical profile
+        medical_profile_data = {
+            "family_id": family_id,
+            "family_member_id": "member-001",
+            "member_name": "John Smith",
+            "medical_info": {
+                "allergies": ["peanuts", "shellfish", "penicillin"],
+                "chronic_conditions": ["asthma", "hypertension"],
+                "current_medications": [
+                    {
+                        "name": "Albuterol Inhaler",
+                        "dosage": "2 puffs",
+                        "frequency": "as needed for asthma"
+                    },
+                    {
+                        "name": "Lisinopril",
+                        "dosage": "10mg",
+                        "frequency": "once daily"
+                    }
+                ],
+                "medical_devices": ["inhaler", "blood_pressure_monitor"],
+                "blood_type": "A+",
+                "emergency_medical_notes": "Severe peanut allergy - carry EpiPen at all times",
+                "preferred_hospital": "City General Hospital",
+                "insurance_info": {
+                    "provider": "HealthCare Plus",
+                    "policy_number": "HP123456789",
+                    "group_number": "GRP001"
+                }
+            },
+            "emergency_medical_consent": True
+        }
+        
+        success5, profile_response = self.run_test(
+            "Create Medical Profile",
+            "POST",
+            f"family/{family_id}/medical-profiles",
+            200,
+            data=medical_profile_data
+        )
+        
+        # Validate created medical profile
+        profile_id = None
+        if success5 and profile_response:
+            expected_keys = ['id', 'family_id', 'family_member_id', 'member_name', 'medical_info']
+            missing_keys = [key for key in expected_keys if key not in profile_response]
+            if not missing_keys:
+                print(f"   ✅ Medical profile created successfully")
+                profile_id = profile_response.get('id')
+                print(f"   🏥 Profile ID: {profile_id}")
+                print(f"   👤 Member name: {profile_response.get('member_name')}")
+                
+                medical_info = profile_response.get('medical_info', {})
+                print(f"   🚨 Allergies: {len(medical_info.get('allergies', []))}")
+                print(f"   💊 Medications: {len(medical_info.get('current_medications', []))}")
+                print(f"   🩸 Blood type: {medical_info.get('blood_type', 'Unknown')}")
+                print(f"   ✅ Emergency consent: {profile_response.get('emergency_medical_consent')}")
+            else:
+                print(f"   ❌ Created medical profile missing keys: {missing_keys}")
+                success5 = False
+        
+        # Test 6: GET /api/emergency-services/directory - Get emergency services directory
+        success6, services_response = self.run_test(
+            "Get Emergency Services Directory",
+            "GET",
+            "emergency-services/directory",
+            200
+        )
+        
+        # Validate emergency services directory
+        if success6 and services_response:
+            expected_categories = ['national_emergency', 'mental_health', 'child_services', 'specialized']
+            missing_categories = [cat for cat in expected_categories if cat not in services_response]
+            if not missing_categories:
+                print(f"   ✅ Emergency services directory complete")
+                
+                # Count services in each category
+                for category in expected_categories:
+                    services = services_response.get(category, [])
+                    print(f"   📞 {category.replace('_', ' ').title()}: {len(services)} services")
+                
+                # Check for local instructions
+                local_instructions = services_response.get('local_instructions', {})
+                if local_instructions:
+                    print(f"   📍 Local instructions provided: {local_instructions.get('note', '')[:50]}...")
+            else:
+                print(f"   ❌ Emergency services missing categories: {missing_categories}")
+                success6 = False
+        
+        # Test 7: POST /api/family/{family_id}/emergency-alert - Send emergency alert
+        alert_data = {
+            "incident_type": "medical",
+            "member_affected": "John Smith",
+            "description": "Family member experiencing chest pain, calling 911 and notifying emergency contacts",
+            "services_contacted": ["911", "City General Hospital"]
+        }
+        
+        success7, alert_response = self.run_test(
+            "Send Emergency Alert",
+            "POST",
+            f"family/{family_id}/emergency-alert",
+            200,
+            data=alert_data
+        )
+        
+        # Validate emergency alert response
+        if success7 and alert_response:
+            expected_keys = ['alert_sent', 'contacts_to_notify', 'incident_logged', 'incident_id', 'message']
+            missing_keys = [key for key in expected_keys if key not in alert_response]
+            if not missing_keys:
+                print(f"   ✅ Emergency alert sent successfully")
+                print(f"   🚨 Alert sent: {alert_response.get('alert_sent')}")
+                print(f"   📞 Contacts to notify: {alert_response.get('contacts_to_notify')}")
+                print(f"   📝 Incident logged: {alert_response.get('incident_logged')}")
+                print(f"   🆔 Incident ID: {alert_response.get('incident_id')}")
+                
+                # Check contacts summary
+                contacts_summary = alert_response.get('contacts_summary', [])
+                if contacts_summary:
+                    print(f"   👥 Emergency contacts summary: {len(contacts_summary)} contacts")
+                    for contact in contacts_summary[:2]:  # Show first 2 contacts
+                        print(f"      - {contact.get('name')} ({contact.get('relationship')}): {contact.get('phone')}")
+            else:
+                print(f"   ❌ Emergency alert missing keys: {missing_keys}")
+                success7 = False
+        
+        # Test 8: Error handling - Test with invalid family_id
+        success8, _ = self.run_test(
+            "Emergency Hub with Invalid Family ID (Should Fail)",
+            "GET",
+            "family/invalid-family-id/emergency-hub",
+            200  # Should still return 200 with empty data
+        )
+        
+        # Test 9: Error handling - Test creating contact with missing required fields
+        invalid_contact_data = {
+            "family_id": family_id,
+            "contact_name": "Incomplete Contact"
+            # Missing required fields like relationship, primary_phone
+        }
+        
+        success9, _ = self.run_test(
+            "Create Emergency Contact with Missing Fields (Should Fail)",
+            "POST",
+            f"family/{family_id}/emergency-contacts",
+            422,  # Expecting validation error
+            data=invalid_contact_data
+        )
+        
+        print(f"\n📊 Family Emergency Hub Test Summary:")
+        print(f"   ✅ Emergency Hub Dashboard: {'PASS' if success1 else 'FAIL'}")
+        print(f"   ✅ Get Emergency Contacts: {'PASS' if success2 else 'FAIL'}")
+        print(f"   ✅ Create Emergency Contact: {'PASS' if success3 else 'FAIL'}")
+        print(f"   ✅ Get Medical Profiles: {'PASS' if success4 else 'FAIL'}")
+        print(f"   ✅ Create Medical Profile: {'PASS' if success5 else 'FAIL'}")
+        print(f"   ✅ Emergency Services Directory: {'PASS' if success6 else 'FAIL'}")
+        print(f"   ✅ Send Emergency Alert: {'PASS' if success7 else 'FAIL'}")
+        print(f"   ✅ Invalid Family ID Handling: {'PASS' if success8 else 'FAIL'}")
+        print(f"   ✅ Validation Error Handling: {'PASS' if success9 else 'FAIL'}")
+        
+        return (success1 and success2 and success3 and success4 and success5 and 
+                success6 and success7 and success8 and success9)
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
