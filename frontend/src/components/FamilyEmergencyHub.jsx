@@ -8,34 +8,34 @@ import {
   PhoneCall, Mail, Home, Activity, AlertCircle
 } from 'lucide-react';
 
-// Emergency Quick Access Component
+// Emergency Quick Access Component - Smaller and lighter colors
 const EmergencyQuickAccess = ({ onCallEmergency, onViewContacts, onAlertContacts }) => (
-  <div className="grid grid-cols-2 gap-3 mb-6">
+  <div className="grid grid-cols-2 gap-3 mb-4">
     <Button 
       onClick={onCallEmergency}
-      className="h-16 bg-red-600 hover:bg-red-700 text-white font-bold text-lg"
+      className="h-12 bg-red-500 hover:bg-red-600 text-white font-semibold"
     >
-      <PhoneCall className="w-6 h-6 mr-2" />
+      <PhoneCall className="w-4 h-4 mr-2" />
       Call 911
     </Button>
     <Button 
       onClick={onViewContacts}
-      className="h-16 bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg"
+      className="h-12 bg-orange-400 hover:bg-orange-500 text-white font-semibold"
     >
-      <Users className="w-6 h-6 mr-2" />
+      <Users className="w-4 h-4 mr-2" />
       Contacts
     </Button>
     <Button 
       onClick={onAlertContacts}
-      className="h-16 bg-yellow-600 hover:bg-yellow-700 text-white font-bold text-lg"
+      className="h-12 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold"
     >
-      <AlertTriangle className="w-6 h-6 mr-2" />
+      <AlertTriangle className="w-4 h-4 mr-2" />
       Alert All
     </Button>
     <Button 
-      className="h-16 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg"
+      className="h-12 bg-blue-500 hover:bg-blue-600 text-white font-semibold"
     >
-      <MapPin className="w-6 h-6 mr-2" />
+      <MapPin className="w-4 h-4 mr-2" />
       Hospitals
     </Button>
   </div>
