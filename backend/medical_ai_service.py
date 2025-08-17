@@ -795,3 +795,26 @@ class WorldClassMedicalAI:
             summary_parts.append(f"Allergies: {', '.join(context.allergies)}")
         
         return " | ".join(summary_parts)
+    
+    def _parse_ai_response(self, response_text: str, context: MedicalContext) -> Dict[str, Any]:
+        """Parse AI response and extract JSON data"""
+        try:
+            # Clean up the response text
+            if response_text.startswith('```json'):
+                response_text = response_text[7:-3]
+            elif response_text.startswith('```'):
+                response_text = response_text[3:-3]
+            
+            # Find JSON content within the text
+            json_start = response_text.find('{')
+            json_end = response_text.rfind('}') + 1
+            
+            if json_start != -1 and json_end > json_start:
+                json_text = response_text[json_start:json_end]
+                return json.loads(json_text)
+            else:
+                raise json.JSONDecodeError("No valid JSON found", response_text, 0)
+                
+        except json.JSONDecodeError as e:
+            print(f"JSON parsing error: {e}")
+            return self._generate_fallback_assessment_data(context)
