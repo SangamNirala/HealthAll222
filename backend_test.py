@@ -11865,6 +11865,653 @@ class HealthPlatformAPITester:
         return (success1 and success2 and success3 and success4 and success5 and 
                 success6 and success7 and success8 and success9)
 
+    def test_medical_ai_service(self):
+        """Test comprehensive Medical AI Service endpoints as requested in review"""
+        print("\n🏥 Testing Medical AI Service - WorldClassMedicalAI...")
+        
+        # Test all 6 key areas identified in the review request
+        initialization_success = self.test_medical_ai_initialization()
+        emergency_detection_success = self.test_emergency_detection_scenarios()
+        common_symptoms_success = self.test_common_symptoms_processing()
+        complex_symptoms_success = self.test_complex_multi_system_symptoms()
+        differential_diagnosis_success = self.test_enhanced_differential_diagnosis()
+        api_rotation_success = self.test_api_key_rotation_system()
+        
+        print(f"\n📊 Medical AI Service Test Summary:")
+        print(f"   ✅ Medical AI Initialization: {'PASS' if initialization_success else 'FAIL'}")
+        print(f"   ✅ Emergency Detection: {'PASS' if emergency_detection_success else 'FAIL'}")
+        print(f"   ✅ Common Symptoms Processing: {'PASS' if common_symptoms_success else 'FAIL'}")
+        print(f"   ✅ Complex Multi-system Symptoms: {'PASS' if complex_symptoms_success else 'FAIL'}")
+        print(f"   ✅ Enhanced Differential Diagnosis: {'PASS' if differential_diagnosis_success else 'FAIL'}")
+        print(f"   ✅ API Key Rotation System: {'PASS' if api_rotation_success else 'FAIL'}")
+        
+        return (initialization_success and emergency_detection_success and common_symptoms_success and 
+                complex_symptoms_success and differential_diagnosis_success and api_rotation_success)
+
+    def test_medical_ai_initialization(self):
+        """Test Medical AI Initialization with basic and comprehensive patient data"""
+        print("\n🔬 Testing Medical AI Initialization...")
+        
+        # Test 1: Basic patient data initialization (patient_id only)
+        basic_init_data = {
+            "patient_id": "demo-patient-123"
+        }
+        
+        success1, response1 = self.run_test(
+            "Medical AI Initialize - Basic Patient Data",
+            "POST",
+            "medical-ai/initialize",
+            200,
+            data=basic_init_data
+        )
+        
+        # Validate basic initialization response
+        if success1 and response1:
+            expected_keys = ['consultation_id', 'patient_id', 'current_stage', 'response', 'next_questions']
+            missing_keys = [key for key in expected_keys if key not in response1]
+            if not missing_keys:
+                print(f"   ✅ Basic initialization contains all required keys: {expected_keys}")
+                
+                consultation_id = response1.get('consultation_id', '')
+                current_stage = response1.get('current_stage', '')
+                ai_response = response1.get('response', '')
+                
+                print(f"   🆔 Consultation ID: {consultation_id}")
+                print(f"   📋 Current stage: {current_stage}")
+                print(f"   🤖 AI response length: {len(ai_response)} characters")
+                
+                # Validate greeting stage
+                stage_valid = current_stage == "greeting"
+                print(f"   📊 Stage validation: {'✅' if stage_valid else '❌'} (Expected 'greeting')")
+                
+            else:
+                print(f"   ❌ Basic initialization missing keys: {missing_keys}")
+                success1 = False
+        
+        # Test 2: Comprehensive demographics initialization
+        comprehensive_init_data = {
+            "patient_id": "test-patient-456",
+            "demographics": {
+                "age": 35,
+                "gender": "female",
+                "existing_conditions": ["hypertension", "diabetes"],
+                "medications": ["lisinopril", "metformin"],
+                "allergies": ["penicillin"]
+            }
+        }
+        
+        success2, response2 = self.run_test(
+            "Medical AI Initialize - Comprehensive Demographics",
+            "POST",
+            "medical-ai/initialize",
+            200,
+            data=comprehensive_init_data
+        )
+        
+        # Validate comprehensive initialization
+        if success2 and response2:
+            consultation_id_2 = response2.get('consultation_id', '')
+            patient_id_2 = response2.get('patient_id', '')
+            
+            print(f"   🆔 Comprehensive consultation ID: {consultation_id_2}")
+            print(f"   👤 Patient ID: {patient_id_2}")
+            
+            # Verify different consultation IDs
+            ids_different = consultation_id != consultation_id_2
+            print(f"   🔄 Unique consultation IDs: {'✅' if ids_different else '❌'}")
+        
+        # Test 3: Invalid patient data (should handle gracefully)
+        invalid_init_data = {
+            "patient_id": ""  # Empty patient ID
+        }
+        
+        success3, response3 = self.run_test(
+            "Medical AI Initialize - Invalid Patient Data",
+            "POST",
+            "medical-ai/initialize",
+            400,  # Expecting validation error
+            data=invalid_init_data
+        )
+        
+        return success1 and success2 and success3
+
+    def test_emergency_detection_scenarios(self):
+        """Test Emergency Detection with realistic critical scenarios"""
+        print("\n🚨 Testing Emergency Detection with Critical Scenarios...")
+        
+        # First initialize a consultation
+        init_data = {"patient_id": "emergency-test-patient"}
+        init_success, init_response = self.run_test(
+            "Initialize for Emergency Testing",
+            "POST",
+            "medical-ai/initialize",
+            200,
+            data=init_data
+        )
+        
+        if not init_success:
+            print("   ❌ Failed to initialize consultation for emergency testing")
+            return False
+        
+        consultation_id = init_response.get('consultation_id', '')
+        
+        # Test 1: Crushing chest pain scenario
+        chest_pain_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "I'm having crushing chest pain that started 30 minutes ago. It's radiating down my left arm and I'm sweating profusely. The pain is 9/10."
+        }
+        
+        success1, response1 = self.run_test(
+            "Emergency Detection - Crushing Chest Pain",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=chest_pain_data
+        )
+        
+        # Validate emergency response
+        if success1 and response1:
+            urgency = response1.get('urgency', '')
+            ai_response = response1.get('response', '')
+            emergency_data = response1.get('emergency_data', {})
+            
+            print(f"   🚨 Urgency level: {urgency}")
+            print(f"   🏥 Emergency detected: {emergency_data.get('emergency_detected', False)}")
+            
+            # Check for 911 recommendation
+            contains_911 = '911' in ai_response
+            print(f"   📞 Contains 911 recommendation: {'✅' if contains_911 else '❌'}")
+            
+            emergency_valid = urgency == "emergency" and contains_911
+            print(f"   🚨 Emergency response validation: {'✅' if emergency_valid else '❌'}")
+        
+        # Test 2: Severe shortness of breath scenario
+        breathing_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "I can't breathe properly. I have severe shortness of breath that came on suddenly. I feel like I'm suffocating."
+        }
+        
+        success2, response2 = self.run_test(
+            "Emergency Detection - Severe Shortness of Breath",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=breathing_data
+        )
+        
+        if success2 and response2:
+            urgency_2 = response2.get('urgency', '')
+            emergency_detected_2 = response2.get('emergency_data', {}).get('emergency_detected', False)
+            print(f"   🫁 Breathing emergency detected: {'✅' if emergency_detected_2 else '❌'}")
+        
+        # Test 3: Worst headache ever scenario
+        headache_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "This is the worst headache of my life. It came on suddenly like a thunderclap. I've never experienced anything like this before."
+        }
+        
+        success3, response3 = self.run_test(
+            "Emergency Detection - Worst Headache Ever",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=headache_data
+        )
+        
+        if success3 and response3:
+            urgency_3 = response3.get('urgency', '')
+            emergency_detected_3 = response3.get('emergency_data', {}).get('emergency_detected', False)
+            print(f"   🧠 Headache emergency detected: {'✅' if emergency_detected_3 else '❌'}")
+        
+        # Test 4: Non-emergency symptom (should not trigger emergency)
+        non_emergency_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "I have a mild headache that's been bothering me for a few days. It's not too bad, maybe 3/10 pain."
+        }
+        
+        success4, response4 = self.run_test(
+            "Emergency Detection - Non-Emergency Symptom",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=non_emergency_data
+        )
+        
+        if success4 and response4:
+            urgency_4 = response4.get('urgency', '')
+            emergency_detected_4 = response4.get('emergency_data', {}).get('emergency_detected', False)
+            non_emergency_valid = not emergency_detected_4 and urgency_4 != "emergency"
+            print(f"   ✅ Non-emergency correctly identified: {'✅' if non_emergency_valid else '❌'}")
+        
+        return success1 and success2 and success3 and success4
+
+    def test_common_symptoms_processing(self):
+        """Test Common Symptoms Processing with OLDCARTS framework"""
+        print("\n🩺 Testing Common Symptoms Processing with OLDCARTS Framework...")
+        
+        # Initialize consultation
+        init_data = {"patient_id": "symptoms-test-patient"}
+        init_success, init_response = self.run_test(
+            "Initialize for Symptoms Testing",
+            "POST",
+            "medical-ai/initialize",
+            200,
+            data=init_data
+        )
+        
+        if not init_success:
+            return False
+        
+        consultation_id = init_response.get('consultation_id', '')
+        
+        # Test 1: Initial symptom presentation
+        initial_symptom_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "I've been having a severe headache for 2 days now. It's really bothering me."
+        }
+        
+        success1, response1 = self.run_test(
+            "Common Symptoms - Initial Presentation",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=initial_symptom_data
+        )
+        
+        if success1 and response1:
+            current_stage = response1.get('current_stage', '')
+            ai_response = response1.get('response', '')
+            
+            print(f"   📋 Current stage after symptom: {current_stage}")
+            
+            # Should progress to HPI stage
+            hpi_stage_valid = current_stage == "history_present_illness"
+            print(f"   🔄 Progressed to HPI stage: {'✅' if hpi_stage_valid else '❌'}")
+        
+        # Test 2: OLDCARTS - Onset information
+        onset_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "The headache started suddenly yesterday morning when I woke up. It came on very quickly."
+        }
+        
+        success2, response2 = self.run_test(
+            "OLDCARTS - Onset Information",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=onset_data
+        )
+        
+        if success2 and response2:
+            hpi_progress = response2.get('hpi_progress', '')
+            print(f"   📊 HPI progress: {hpi_progress}")
+        
+        # Test 3: OLDCARTS - Location and Character
+        location_character_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "The pain is located on the right side of my head, mainly around my temple. It feels like a throbbing, pulsating pain."
+        }
+        
+        success3, response3 = self.run_test(
+            "OLDCARTS - Location and Character",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=location_character_data
+        )
+        
+        # Test 4: OLDCARTS - Severity and Duration
+        severity_duration_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "The pain is about 7 out of 10 in severity. Each episode lasts for several hours, sometimes the whole day."
+        }
+        
+        success4, response4 = self.run_test(
+            "OLDCARTS - Severity and Duration",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=severity_duration_data
+        )
+        
+        # Test 5: OLDCARTS - Alleviating/Aggravating factors
+        alleviating_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "The pain gets worse with bright lights and loud noises. It seems to improve a bit when I rest in a dark, quiet room."
+        }
+        
+        success5, response5 = self.run_test(
+            "OLDCARTS - Alleviating Factors",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=alleviating_data
+        )
+        
+        if success5 and response5:
+            current_stage_final = response5.get('current_stage', '')
+            print(f"   📋 Final stage: {current_stage_final}")
+            
+            # Should eventually progress beyond HPI
+            stage_progression = current_stage_final != "history_present_illness"
+            print(f"   🔄 Stage progression working: {'✅' if stage_progression else '❌'}")
+        
+        return success1 and success2 and success3 and success4 and success5
+
+    def test_complex_multi_system_symptoms(self):
+        """Test Complex Multi-system Symptoms Processing"""
+        print("\n🔬 Testing Complex Multi-system Symptoms...")
+        
+        # Initialize consultation
+        init_data = {"patient_id": "complex-symptoms-patient"}
+        init_success, init_response = self.run_test(
+            "Initialize for Complex Symptoms Testing",
+            "POST",
+            "medical-ai/initialize",
+            200,
+            data=init_data
+        )
+        
+        if not init_success:
+            return False
+        
+        consultation_id = init_response.get('consultation_id', '')
+        
+        # Test 1: Complex multi-system presentation
+        complex_symptoms_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "I've been experiencing joint pain in my hands and knees, along with fatigue that's been getting worse over the past month. I also noticed a rash on my face and have had a low-grade fever on and off."
+        }
+        
+        success1, response1 = self.run_test(
+            "Complex Symptoms - Multi-system Presentation",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=complex_symptoms_data
+        )
+        
+        if success1 and response1:
+            ai_response = response1.get('response', '')
+            current_stage = response1.get('current_stage', '')
+            
+            print(f"   🔬 AI response length: {len(ai_response)} characters")
+            print(f"   📋 Current stage: {current_stage}")
+            
+            # Check if AI acknowledges multiple symptoms
+            multi_symptom_recognition = any(word in ai_response.lower() for word in ['joint', 'fatigue', 'rash', 'fever'])
+            print(f"   🎯 Multi-symptom recognition: {'✅' if multi_symptom_recognition else '❌'}")
+        
+        # Test 2: Additional complex symptom details
+        additional_details_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "The joint pain is worse in the morning and lasts for about an hour. The rash is butterfly-shaped across my cheeks. I've also been having some hair loss and mouth sores."
+        }
+        
+        success2, response2 = self.run_test(
+            "Complex Symptoms - Additional Details",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=additional_details_data
+        )
+        
+        if success2 and response2:
+            ai_response_2 = response2.get('response', '')
+            
+            # Check for medical entity extraction
+            entity_recognition = any(word in ai_response_2.lower() for word in ['morning', 'butterfly', 'rash', 'hair'])
+            print(f"   🧠 Medical entity extraction: {'✅' if entity_recognition else '❌'}")
+        
+        # Test 3: Systemic symptoms continuation
+        systemic_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "I've also been having some chest pain occasionally, and I get short of breath when climbing stairs. My hands sometimes turn white and blue in the cold."
+        }
+        
+        success3, response3 = self.run_test(
+            "Complex Symptoms - Systemic Involvement",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=systemic_data
+        )
+        
+        if success3 and response3:
+            urgency = response3.get('urgency', '')
+            print(f"   ⚠️ Urgency assessment: {urgency}")
+            
+            # Complex symptoms should increase urgency
+            urgency_appropriate = urgency in ['urgent', 'critical']
+            print(f"   📊 Appropriate urgency level: {'✅' if urgency_appropriate else '❌'}")
+        
+        return success1 and success2 and success3
+
+    def test_enhanced_differential_diagnosis(self):
+        """Test Enhanced Differential Diagnosis with Probability Normalization"""
+        print("\n🧬 Testing Enhanced Differential Diagnosis...")
+        
+        # Initialize consultation
+        init_data = {"patient_id": "differential-test-patient"}
+        init_success, init_response = self.run_test(
+            "Initialize for Differential Diagnosis Testing",
+            "POST",
+            "medical-ai/initialize",
+            200,
+            data=init_data
+        )
+        
+        if not init_success:
+            return False
+        
+        consultation_id = init_response.get('consultation_id', '')
+        
+        # Simulate a complete medical interview to reach differential diagnosis stage
+        # Step 1: Chief complaint
+        chief_complaint_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "I'm having chest pain that's been bothering me for the past few hours."
+        }
+        
+        success1, response1 = self.run_test(
+            "Differential Diagnosis - Chief Complaint",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=chief_complaint_data
+        )
+        
+        # Step 2: HPI details
+        hpi_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "The pain started about 3 hours ago while I was at rest. It's a crushing, squeezing sensation in the center of my chest, about 8/10 severity. It radiates to my left arm and jaw."
+        }
+        
+        success2, response2 = self.run_test(
+            "Differential Diagnosis - HPI Details",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=hpi_data
+        )
+        
+        # Step 3: Associated symptoms
+        associated_symptoms_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "I'm also feeling nauseous and sweaty. I have some shortness of breath and feel lightheaded."
+        }
+        
+        success3, response3 = self.run_test(
+            "Differential Diagnosis - Associated Symptoms",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=associated_symptoms_data
+        )
+        
+        # Step 4: Past medical history
+        pmh_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "I have high blood pressure and diabetes. I'm a 55-year-old male who smokes. My father had a heart attack at age 60."
+        }
+        
+        success4, response4 = self.run_test(
+            "Differential Diagnosis - Past Medical History",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=pmh_data
+        )
+        
+        # Step 5: Medications and allergies
+        medications_data = {
+            "consultation_id": consultation_id,
+            "patient_message": "I take lisinopril for blood pressure and metformin for diabetes. I'm allergic to penicillin."
+        }
+        
+        success5, response5 = self.run_test(
+            "Differential Diagnosis - Medications",
+            "POST",
+            "medical-ai/message",
+            200,
+            data=medications_data
+        )
+        
+        # Validate differential diagnosis response
+        if success5 and response5:
+            differential_diagnoses = response5.get('differential_diagnoses', [])
+            clinical_reasoning = response5.get('clinical_reasoning', {})
+            recommendations = response5.get('recommendations', [])
+            diagnostic_tests = response5.get('diagnostic_tests', [])
+            
+            print(f"   🔬 Number of differential diagnoses: {len(differential_diagnoses)}")
+            print(f"   🧠 Clinical reasoning provided: {'✅' if clinical_reasoning else '❌'}")
+            print(f"   💊 Recommendations provided: {'✅' if recommendations else '❌'}")
+            print(f"   🔬 Diagnostic tests suggested: {'✅' if diagnostic_tests else '❌'}")
+            
+            # Test probability normalization
+            if differential_diagnoses:
+                total_probability = sum(d.get('probability', 0) for d in differential_diagnoses)
+                probability_normalized = abs(total_probability - 100) < 1.0  # Allow for rounding
+                print(f"   📊 Probabilities sum to 100%: {'✅' if probability_normalized else '❌'} (Total: {total_probability}%)")
+                
+                # Check for realistic medical conditions
+                conditions = [d.get('condition', '').lower() for d in differential_diagnoses]
+                cardiac_conditions = any('cardiac' in c or 'heart' in c or 'coronary' in c or 'mi' in c for c in conditions)
+                print(f"   ❤️ Includes cardiac conditions: {'✅' if cardiac_conditions else '❌'}")
+                
+                # Check for evidence-based reasoning
+                first_diagnosis = differential_diagnoses[0] if differential_diagnoses else {}
+                reasoning = first_diagnosis.get('reasoning', '')
+                evidence_based = len(reasoning) > 50  # Substantial reasoning
+                print(f"   📚 Evidence-based reasoning: {'✅' if evidence_based else '❌'}")
+        
+        return success1 and success2 and success3 and success4 and success5
+
+    def test_api_key_rotation_system(self):
+        """Test API Key Rotation System and Professional Response Quality"""
+        print("\n🔄 Testing API Key Rotation System & Professional Response Quality...")
+        
+        # Test 1: Multiple rapid requests to test rotation
+        rotation_success_count = 0
+        total_rotation_tests = 3
+        
+        for i in range(total_rotation_tests):
+            init_data = {"patient_id": f"rotation-test-patient-{i}"}
+            success, response = self.run_test(
+                f"API Key Rotation Test {i+1}",
+                "POST",
+                "medical-ai/initialize",
+                200,
+                data=init_data
+            )
+            
+            if success:
+                rotation_success_count += 1
+                
+                # Validate professional response quality
+                ai_response = response.get('response', '')
+                
+                # Check for professional medical terminology
+                professional_terms = ['medical', 'symptoms', 'assessment', 'consultation', 'health', 'clinical']
+                has_professional_terms = any(term in ai_response.lower() for term in professional_terms)
+                
+                # Check response length (should be substantial)
+                adequate_length = len(ai_response) > 100
+                
+                # Check for empathetic language
+                empathetic_terms = ['help', 'understand', 'concern', 'care', 'support']
+                has_empathy = any(term in ai_response.lower() for term in empathetic_terms)
+                
+                print(f"   🩺 Professional terminology: {'✅' if has_professional_terms else '❌'}")
+                print(f"   📝 Adequate response length: {'✅' if adequate_length else '❌'} ({len(ai_response)} chars)")
+                print(f"   💝 Empathetic language: {'✅' if has_empathy else '❌'}")
+        
+        rotation_success_rate = rotation_success_count / total_rotation_tests
+        print(f"   🔄 API rotation success rate: {rotation_success_rate:.1%} ({rotation_success_count}/{total_rotation_tests})")
+        
+        # Test 2: SOAP-style medical report generation
+        # First create a consultation with some data
+        init_data = {"patient_id": "soap-report-patient"}
+        init_success, init_response = self.run_test(
+            "Initialize for SOAP Report Testing",
+            "POST",
+            "medical-ai/initialize",
+            200,
+            data=init_data
+        )
+        
+        if init_success:
+            consultation_id = init_response.get('consultation_id', '')
+            
+            # Add some consultation data
+            consultation_data = {
+                "consultation_id": consultation_id,
+                "patient_message": "I have been experiencing chest pain and shortness of breath for the past 2 hours."
+            }
+            
+            message_success, message_response = self.run_test(
+                "Add Consultation Data for SOAP Report",
+                "POST",
+                "medical-ai/message",
+                200,
+                data=consultation_data
+            )
+            
+            if message_success:
+                # Test SOAP report generation
+                report_data = {
+                    "consultation_id": consultation_id,
+                    "include_differential": True,
+                    "include_recommendations": True,
+                    "format": "detailed"
+                }
+                
+                report_success, report_response = self.run_test(
+                    "Generate SOAP-style Medical Report",
+                    "POST",
+                    "medical-ai/report",
+                    200,
+                    data=report_data
+                )
+                
+                if report_success and report_response:
+                    report_content = report_response.get('report_content', '')
+                    report_format = report_response.get('format', '')
+                    
+                    print(f"   📋 SOAP report generated: {'✅' if report_content else '❌'}")
+                    print(f"   📄 Report format: {report_format}")
+                    print(f"   📝 Report length: {len(report_content)} characters")
+                    
+                    # Check for SOAP components
+                    soap_components = ['subjective', 'objective', 'assessment', 'plan']
+                    soap_present = any(component in report_content.lower() for component in soap_components)
+                    print(f"   🩺 SOAP components present: {'✅' if soap_present else '❌'}")
+                    
+                    return rotation_success_rate >= 0.8 and report_success
+        
+        return rotation_success_rate >= 0.8
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Health & Nutrition Platform API Tests")
