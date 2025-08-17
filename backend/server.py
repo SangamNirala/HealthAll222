@@ -10993,6 +10993,8 @@ async def process_medical_message(request: MedicalConsultationRequest):
             stage=response["stage"],
             urgency=response.get("urgency", "routine"),
             consultation_id=response["context"]["consultation_id"],
+            patient_id=response["context"]["patient_id"],
+            current_stage=response["stage"],
             emergency_detected=response.get("urgency") == "emergency",
             next_questions=response.get("next_questions", []),
             differential_diagnoses=response.get("differential_diagnoses", []),
