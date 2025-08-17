@@ -52,17 +52,73 @@ class WorldClassMedicalAI:
     """
     
     def __init__(self):
+        # Get primary API key
         self.gemini_api_key = os.getenv('GEMINI_API_KEY')
-        if not self.gemini_api_key:
-            raise ValueError("GEMINI_API_KEY environment variable not set")
         
-        genai.configure(api_key=self.gemini_api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-pro')
+        # Get fallback API keys
+        gemini_keys_str = os.getenv('GEMINI_API_KEYS', '')
+        self.gemini_api_keys = [key.strip() for key in gemini_keys_str.split(',') if key.strip()]
+        
+        # Add primary key to the beginning of the list if it's not already there
+        if self.gemini_api_key and self.gemini_api_key not in self.gemini_api_keys:
+            self.gemini_api_keys.insert(0, self.gemini_api_key)
+        
+        if not self.gemini_api_keys:
+            raise ValueError("No GEMINI_API_KEY or GEMINI_API_KEYS environment variables set")
+        
+        self.current_key_index = 0
+        self.model = None
+        self._initialize_gemini_model()
         
         # Load medical knowledge base
         self.medical_knowledge = self._load_medical_knowledge()
         self.emergency_keywords = self._load_emergency_keywords()
         self.differential_database = self._load_differential_database()
+    
+    def _initialize_gemini_model(self):
+        """Initialize Gemini model with current API key"""
+        try:
+            current_key = self.gemini_api_keys[self.current_key_index]
+            genai.configure(api_key=current_key)
+            self.model = genai.GenerativeModel('gemini-1.5-pro')
+            print(f"Initialized Gemini model with API key index {self.current_key_index}")
+        except Exception as e:
+            print(f"Error initializing Gemini model with key {self.current_key_index}: {e}")
+            raise e
+    
+    def _rotate_api_key(self):
+        """Rotate to next available API key"""
+        if len(self.gemini_api_keys) > 1:
+            self.current_key_index = (self.current_key_index + 1) % len(self.gemini_api_keys)
+            print(f"Rotating to API key index {self.current_key_index}")
+            self._initialize_gemini_model()
+            return True
+        return False
+    
+    async def _generate_content_with_fallback(self, prompt: str, max_retries: int = 3):
+        """Generate content with automatic API key rotation on quota exceeded"""
+        for attempt in range(max_retries):
+            try:
+                response = await self.model.generate_content_async(prompt)
+                return response
+            except Exception as e:
+                error_message = str(e).lower()
+                
+                # Check if it's a quota exceeded error
+                if "quota" in error_message or "429" in error_message or "exceeded" in error_message:
+                    print(f"Quota exceeded on key {self.current_key_index}, attempting to rotate...")
+                    
+                    # Try to rotate to next key
+                    if self._rotate_api_key():
+                        print(f"Rotated to key index {self.current_key_index}, retrying...")
+                        continue
+                    else:
+                        raise Exception("All API keys have exceeded quota")
+                else:
+                    # For other errors, don't retry
+                    raise e
+        
+        raise Exception(f"Failed to generate content after {max_retries} attempts")
         
     def _load_medical_knowledge(self) -> Dict[str, Any]:
         """Load comprehensive medical knowledge base"""
