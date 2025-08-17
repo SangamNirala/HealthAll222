@@ -8,7 +8,7 @@ import uuid
 import time
 
 class NutritionalTipsHealthTrackingTester:
-    def __init__(self, base_url="https://d91e2759-3fc0-4efc-9de3-b29fa92587b7.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://crisis-ready-3.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
