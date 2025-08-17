@@ -317,6 +317,10 @@ const FamilyEmergencyHub = ({ familyId }) => {
     window.location.href = `tel:${phoneNumber}`;
   };
 
+  const handleAddService = () => {
+    alert('Add Custom Emergency Service functionality will be implemented in Phase 2');
+  };
+
   if (loading) {
     return (
       <Card className="border-red-200 shadow-lg">
