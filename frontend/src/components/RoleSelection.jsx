@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { ArrowRight, User, Stethoscope, Users, UserCheck, MessageCircle } from 'lucide-react';
+import ChatbotModal from './ChatbotModal';
 
 const roleOptions = [
   {
