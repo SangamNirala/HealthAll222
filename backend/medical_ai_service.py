@@ -818,3 +818,29 @@ class WorldClassMedicalAI:
         except json.JSONDecodeError as e:
             print(f"JSON parsing error: {e}")
             return self._generate_fallback_assessment_data(context)
+    
+    def _validate_differential_response(self, differential_data: Dict[str, Any], context: MedicalContext) -> Dict[str, Any]:
+        """Validate and enhance differential diagnosis response"""
+        
+        # Ensure required keys exist
+        if 'differential_diagnoses' not in differential_data:
+            differential_data['differential_diagnoses'] = []
+        
+        # Validate probability totals
+        diagnoses = differential_data['differential_diagnoses']
+        if diagnoses:
+            total_probability = sum(d.get('probability', 0) for d in diagnoses)
+            if total_probability != 100:
+                # Normalize probabilities to sum to 100
+                adjustment_factor = 100 / total_probability if total_probability > 0 else 1
+                for diagnosis in diagnoses:
+                    if 'probability' in diagnosis:
+                        diagnosis['probability'] = round(diagnosis['probability'] * adjustment_factor, 1)
+        
+        # Ensure minimum required fields
+        required_keys = ['recommendations', 'diagnostic_tests', 'red_flags']
+        for key in required_keys:
+            if key not in differential_data:
+                differential_data[key] = []
+        
+        return differential_data
