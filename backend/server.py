@@ -373,6 +373,116 @@ class FamilyProfileUpdate(BaseModel):
     household_management: Optional[HouseholdManagement] = None
     care_coordination: Optional[CareCoordination] = None
 
+# ===== FAMILY EMERGENCY HUB MODELS =====
+
+class EmergencyContact(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    family_id: str
+    contact_name: str
+    relationship: str  # Parent, Sibling, Neighbor, Doctor, etc.
+    primary_phone: str
+    secondary_phone: Optional[str] = None
+    work_phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    is_primary_contact: bool = False
+    availability_notes: Optional[str] = None  # e.g., "Available weekdays 9-5"
+    medical_authorization: bool = False  # Can make medical decisions
+    notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class MedicalInfo(BaseModel):
+    allergies: List[str] = []  # ["peanuts", "shellfish", "penicillin"]
+    chronic_conditions: List[str] = []  # ["asthma", "diabetes", "epilepsy"]
+    current_medications: List[Dict[str, Any]] = []  # [{"name": "Inhaler", "dosage": "2 puffs", "frequency": "as needed"}]
+    medical_devices: List[str] = []  # ["inhaler", "epipen", "glucose_monitor"]
+    blood_type: Optional[str] = None  # "A+", "O-", etc.
+    emergency_medical_notes: Optional[str] = None
+    preferred_hospital: Optional[str] = None
+    insurance_info: Optional[Dict[str, str]] = None
+
+class FamilyMedicalProfile(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    family_id: str
+    family_member_id: str  # References FamilyMember.id
+    member_name: str
+    medical_info: MedicalInfo
+    emergency_medical_consent: bool = False
+    last_updated: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class EmergencyService(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    service_type: str  # "hospital", "urgent_care", "poison_control", "mental_health", "pediatric"
+    name: str
+    phone: str
+    address: Optional[str] = None
+    is_24_hour: bool = True
+    accepts_pediatric: bool = True
+    services_offered: List[str] = []
+    region: Optional[str] = None
+    notes: Optional[str] = None
+
+class EmergencyIncident(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    family_id: str
+    incident_type: str  # "medical", "accident", "natural_disaster", "other"
+    family_member_affected: Optional[str] = None
+    description: str
+    emergency_contacts_notified: List[str] = []  # List of contact IDs
+    services_contacted: List[str] = []  # List of service names
+    resolution_notes: Optional[str] = None
+    lessons_learned: Optional[str] = None
+    incident_date: datetime = Field(default_factory=datetime.utcnow)
+
+# Request/Response Models for Emergency Hub
+class EmergencyContactCreate(BaseModel):
+    family_id: str
+    contact_name: str
+    relationship: str
+    primary_phone: str
+    secondary_phone: Optional[str] = None
+    work_phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    is_primary_contact: bool = False
+    availability_notes: Optional[str] = None
+    medical_authorization: bool = False
+    notes: Optional[str] = None
+
+class EmergencyContactUpdate(BaseModel):
+    contact_name: Optional[str] = None
+    relationship: Optional[str] = None
+    primary_phone: Optional[str] = None
+    secondary_phone: Optional[str] = None
+    work_phone: Optional[str] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    is_primary_contact: Optional[bool] = None
+    availability_notes: Optional[str] = None
+    medical_authorization: Optional[bool] = None
+    notes: Optional[str] = None
+
+class FamilyMedicalProfileCreate(BaseModel):
+    family_id: str
+    family_member_id: str
+    member_name: str
+    medical_info: MedicalInfo
+    emergency_medical_consent: bool = False
+
+class FamilyMedicalProfileUpdate(BaseModel):
+    medical_info: Optional[MedicalInfo] = None
+    emergency_medical_consent: Optional[bool] = None
+
+class EmergencyIncidentCreate(BaseModel):
+    family_id: str
+    incident_type: str
+    family_member_affected: Optional[str] = None
+    description: str
+    emergency_contacts_notified: List[str] = []
+    services_contacted: List[str] = []
+
 # Guest Profile Models
 class BasicDemographics(BaseModel):
     age: int
