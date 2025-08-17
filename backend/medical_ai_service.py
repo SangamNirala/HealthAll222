@@ -769,3 +769,29 @@ class WorldClassMedicalAI:
                 "Severe pain or distress"
             ]
         }
+    
+    def _prepare_clinical_summary(self, context: MedicalContext) -> str:
+        """Prepare structured clinical summary for AI analysis"""
+        summary_parts = []
+        
+        if context.chief_complaint:
+            summary_parts.append(f"Chief Complaint: {context.chief_complaint}")
+        
+        if context.symptom_data:
+            hpi_elements = []
+            for key, value in context.symptom_data.items():
+                if value:
+                    hpi_elements.append(f"{key.replace('_', ' ').title()}: {value}")
+            if hpi_elements:
+                summary_parts.append("HPI Elements: " + "; ".join(hpi_elements))
+        
+        if context.medical_history:
+            summary_parts.append(f"PMH: {context.medical_history}")
+        
+        if context.medications:
+            summary_parts.append(f"Medications: {', '.join(context.medications)}")
+        
+        if context.allergies:
+            summary_parts.append(f"Allergies: {', '.join(context.allergies)}")
+        
+        return " | ".join(summary_parts)
