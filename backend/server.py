@@ -2163,6 +2163,8 @@ class MedicalConsultationResponse(BaseModel):
     stage: str
     urgency: str
     consultation_id: str
+    patient_id: str
+    current_stage: str
     emergency_detected: bool = False
     next_questions: Optional[List[str]] = None
     differential_diagnoses: Optional[List[Dict[str, Any]]] = None
