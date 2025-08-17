@@ -2149,6 +2149,41 @@ class PatientEngagementStatus(str, Enum):
     INACTIVE = "INACTIVE"
     PENDING = "PENDING"
 
+# ===== MEDICAL AI CONSULTATION MODELS =====
+
+class MedicalConsultationRequest(BaseModel):
+    patient_id: Optional[str] = "anonymous"
+    message: str
+    consultation_id: Optional[str] = None
+    context: Optional[Dict[str, Any]] = None
+
+class MedicalConsultationResponse(BaseModel):
+    response: str
+    context: Dict[str, Any]
+    stage: str
+    urgency: str
+    consultation_id: str
+    emergency_detected: bool = False
+    next_questions: Optional[List[str]] = None
+    differential_diagnoses: Optional[List[Dict[str, Any]]] = None
+    recommendations: Optional[List[str]] = None
+
+class MedicalConsultationInit(BaseModel):
+    patient_id: Optional[str] = "anonymous"
+    demographics: Optional[Dict[str, Any]] = None
+
+class MedicalReportRequest(BaseModel):
+    consultation_id: str
+    messages: List[Dict[str, Any]]
+    context: Dict[str, Any]
+
+class MedicalReportResponse(BaseModel):
+    report_id: str
+    soap_note: str
+    summary: str
+    recommendations: List[str]
+    generated_at: str
+
 class PatientEngagement(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     patient_id: str
