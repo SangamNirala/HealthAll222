@@ -12000,7 +12000,7 @@ class HealthPlatformAPITester:
         # Test 1: Crushing chest pain scenario
         chest_pain_data = {
             "consultation_id": consultation_id,
-            "patient_message": "I'm having crushing chest pain that started 30 minutes ago. It's radiating down my left arm and I'm sweating profusely. The pain is 9/10."
+            "message": "I'm having crushing chest pain that started 30 minutes ago. It's radiating down my left arm and I'm sweating profusely. The pain is 9/10."
         }
         
         success1, response1 = self.run_test(
