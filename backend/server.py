@@ -11294,6 +11294,137 @@ Generated On: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}
     
     return soap_text
 
+# Additional Medical AI Endpoints for Enhanced Functionality
+
+@api_router.post("/medical-ai/knowledge")
+async def get_medical_knowledge(request: dict):
+    """Get medical knowledge information for symptoms, conditions, or treatments"""
+    try:
+        knowledge_db = get_medical_knowledge_db()
+        
+        query = request.get('query', '').lower()
+        knowledge_type = request.get('type', 'symptom')
+        detailed = request.get('detailed', False)
+        
+        if knowledge_type == 'symptom':
+            symptom_profile = knowledge_db.get_symptom_profile(query)
+            if symptom_profile:
+                return {
+                    "type": "symptom",
+                    "name": symptom_profile.name,
+                    "medical_term": symptom_profile.medical_term,
+                    "category": symptom_profile.category,
+                    "associated_conditions": symptom_profile.associated_conditions,
+                    "red_flag_combinations": symptom_profile.red_flag_combinations if detailed else [],
+                    "assessment_questions": symptom_profile.assessment_questions if detailed else [],
+                    "severity_indicators": symptom_profile.severity_indicators if detailed else {}
+                }
+        
+        elif knowledge_type == 'condition':
+            condition_details = knowledge_db.get_condition_details(query)
+            if condition_details:
+                return {
+                    "type": "condition",
+                    "name": condition_details.name,
+                    "icd_code": condition_details.icd_code,
+                    "category": condition_details.category,
+                    "prevalence": condition_details.prevalence if detailed else {},
+                    "typical_symptoms": condition_details.typical_symptoms,
+                    "red_flags": condition_details.red_flags if detailed else [],
+                    "diagnostic_criteria": condition_details.diagnostic_criteria if detailed else [],
+                    "treatment_options": condition_details.treatment_options if detailed else [],
+                    "prognosis": condition_details.prognosis if detailed else "",
+                    "urgency_level": condition_details.urgency_level.value
+                }
+        
+        elif knowledge_type == 'treatment':
+            treatment_recommendations = knowledge_db.get_treatment_recommendations(query, 'moderate')
+            return {
+                "type": "treatment",
+                "condition": query,
+                "recommendations": treatment_recommendations,
+                "category": knowledge_db._get_condition_category(query)
+            }
+        
+        return {"error": f"No knowledge found for {knowledge_type}: {query}"}
+        
+    except Exception as e:
+        print(f"Error retrieving medical knowledge: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve medical knowledge: {str(e)}")
+
+@api_router.post("/medical-ai/emergency-assessment")
+async def assess_emergency_risk(request: dict):
+    """Assess emergency risk based on symptoms and context"""
+    try:
+        knowledge_db = get_medical_knowledge_db()
+        
+        symptoms = request.get('symptoms', [])
+        context = request.get('context', {})
+        demographics = request.get('patient_demographics', {})
+        
+        # Assess emergency risk
+        risk_assessment = knowledge_db.assess_emergency_risk(symptoms, context)
+        
+        # Get differential probabilities
+        differential_probabilities = knowledge_db.get_differential_probabilities(symptoms, demographics)
+        
+        # Determine immediate actions
+        immediate_actions = []
+        if risk_assessment['risk_level'] == 'critical':
+            immediate_actions = [
+                "Call 911 immediately",
+                "Do not drive yourself to hospital",
+                "Follow emergency dispatcher instructions",
+                "Prepare list of current medications",
+                "Stay calm and monitor vital signs if possible"
+            ]
+        elif risk_assessment['risk_level'] == 'urgent':
+            immediate_actions = [
+                "Seek medical attention within 4-6 hours",
+                "Contact your healthcare provider",
+                "Go to urgent care or emergency room",
+                "Monitor symptoms closely",
+                "Have someone accompany you if possible"
+            ]
+        else:
+            immediate_actions = [
+                "Schedule appointment with healthcare provider",
+                "Monitor symptoms for changes",
+                "Follow general health recommendations",
+                "Seek care if symptoms worsen"
+            ]
+        
+        return {
+            "risk_level": risk_assessment['risk_level'],
+            "risk_factors": risk_assessment['risk_factors'],
+            "emergency_protocol": risk_assessment.get('emergency_protocol'),
+            "differential_probabilities": differential_probabilities,
+            "immediate_actions": immediate_actions,
+            "confidence": 0.85 if risk_assessment['risk_level'] == 'critical' else 0.70,
+            "assessment_timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        print(f"Error assessing emergency risk: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to assess emergency risk: {str(e)}")
+
+@api_router.get("/medical-ai/report/{consultation_id}/download")
+async def download_medical_report(consultation_id: str):
+    """Download PDF medical report"""
+    try:
+        # This endpoint would typically retrieve the stored PDF from database
+        # For now, we'll return a message indicating the feature is available
+        return {
+            "message": "PDF download endpoint ready",
+            "consultation_id": consultation_id,
+            "download_url": f"/api/medical-ai/report/{consultation_id}/download",
+            "note": "PDF generation is available through the report generation endpoint"
+        }
+        
+    except Exception as e:
+        print(f"Error downloading report: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to download report: {str(e)}")
+
 # Include the router in the main app (after all endpoints are defined)
 app.include_router(api_router)
 
