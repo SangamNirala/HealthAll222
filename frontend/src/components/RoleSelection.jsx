@@ -199,6 +199,12 @@ const RoleCard = ({ role, index, onQuickChatClick }) => {
 };
 
 const RoleSelection = () => {
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+
+  const handleQuickChatClick = () => {
+    setIsChatbotOpen(true);
+  };
+
   return (
     <div className="min-h-screen gradient-hero">
       {/* Header */}
