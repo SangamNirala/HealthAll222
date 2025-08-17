@@ -331,48 +331,98 @@ class WorldClassMedicalAI:
     async def _generate_differential_diagnosis(self, context: MedicalContext) -> Dict[str, Any]:
         """Generate evidence-based differential diagnosis with probabilities"""
         
-        # Generate advanced medical assessment
+        # Pre-process clinical data for AI analysis
+        clinical_summary = self._prepare_clinical_summary(context)
+        
+        # Generate advanced medical assessment with structured prompt
         prompt = f"""
-        As an expert physician, provide a comprehensive differential diagnosis based on this patient presentation:
-        
+        As a board-certified physician with expertise in internal medicine, emergency medicine, and differential diagnosis, 
+        provide a comprehensive clinical assessment based on this patient presentation.
+
         PATIENT PRESENTATION:
-        - Chief Complaint: {context.chief_complaint}
-        - Demographics: {context.demographics}
-        - Symptom Details: {context.symptom_data}
-        - Medical History: {context.medical_history}
-        - Medications: {context.medications}
-        - Social History: {context.social_history}
+        Chief Complaint: {context.chief_complaint}
         
-        Provide a JSON response with:
-        1. Top 5 differential diagnoses with realistic probabilities (must total 100%)
-        2. Clinical reasoning for each diagnosis
-        3. Recommended diagnostic tests
-        4. Treatment recommendations
-        5. Red flag symptoms to watch for
-        6. When to seek immediate care
+        CLINICAL DATA:
+        Demographics: {context.demographics}
+        HPI (History of Present Illness): {context.symptom_data}
+        Past Medical History: {context.medical_history}
+        Medications: {context.medications}
+        Allergies: {context.allergies}
+        Social History: {context.social_history}
+        Family History: {context.family_history}
         
-        Use evidence-based medicine and current clinical guidelines.
+        CLINICAL REASONING FRAMEWORK:
+        Use evidence-based medicine and apply the following systematic approach:
+        1. Analyze symptom patterns and clinical presentation
+        2. Consider epidemiological factors (age, sex, prevalence)
+        3. Apply Bayesian reasoning for probability estimates
+        4. Prioritize by clinical urgency and likelihood
+        
+        REQUIRED JSON RESPONSE FORMAT:
+        {{
+            "differential_diagnoses": [
+                {{
+                    "condition": "Most likely diagnosis name",
+                    "probability": 45,
+                    "reasoning": "Detailed clinical reasoning with evidence",
+                    "supporting_evidence": ["symptom 1", "risk factor 2"],
+                    "contradicting_evidence": ["absence of fever"],
+                    "urgency_level": "routine|urgent|critical"
+                }}
+            ],
+            "clinical_reasoning": {{
+                "primary_concerns": ["most concerning possibilities"],
+                "diagnostic_approach": "systematic approach used",
+                "risk_stratification": "low|moderate|high risk assessment"
+            }},
+            "recommendations": [
+                "Immediate: specific immediate actions",
+                "Short-term: follow-up within timeframe", 
+                "Long-term: ongoing management"
+            ],
+            "diagnostic_tests": [
+                {{
+                    "test": "ECG",
+                    "indication": "rule out cardiac etiology",
+                    "urgency": "immediate|urgent|routine",
+                    "expected_yield": "high|moderate|low"
+                }}
+            ],
+            "red_flags": [
+                "Seek emergency care if: specific concerning symptoms"
+            ],
+            "follow_up_plan": {{
+                "timeframe": "specific timeframe for follow-up",
+                "provider_type": "primary care|specialist|emergency",
+                "monitoring_parameters": ["what to monitor"]
+            }},
+            "confidence_assessment": {{
+                "diagnostic_confidence": 0.85,
+                "factors_affecting_confidence": ["complete history", "typical presentation"],
+                "additional_information_needed": ["physical exam findings"]
+            }}
+        }}
+        
+        Ensure probabilities sum to exactly 100% across all differential diagnoses.
+        Base all recommendations on current clinical guidelines and evidence-based medicine.
         """
         
         try:
             response = await self.model.generate_content_async(prompt)
             
-            # Extract JSON from response text
+            # Extract and parse JSON from response
             response_text = response.text.strip()
-            if response_text.startswith('```json'):
-                response_text = response_text[7:-3]
-            elif response_text.startswith('```'):
-                response_text = response_text[3:-3]
+            differential_data = self._parse_ai_response(response_text)
             
-            try:
-                differential_data = json.loads(response_text)
-            except json.JSONDecodeError:
-                # Fallback if JSON parsing fails
-                differential_data = self._generate_fallback_assessment_data(context)
+            # Validate and enhance the response
+            differential_data = self._validate_differential_response(differential_data, context)
             
             # Update context with final assessment
             context.current_stage = MedicalInterviewStage.COMPLETED
             context.clinical_hypotheses = differential_data.get('differential_diagnoses', [])
+            
+            # Calculate overall urgency
+            overall_urgency = self._calculate_overall_urgency(differential_data)
             
             return {
                 "response": self._format_final_assessment(differential_data),
@@ -382,7 +432,10 @@ class WorldClassMedicalAI:
                 "recommendations": differential_data.get('recommendations', []),
                 "diagnostic_tests": differential_data.get('diagnostic_tests', []),
                 "red_flags": differential_data.get('red_flags', []),
-                "urgency": self._assess_overall_urgency(differential_data)
+                "clinical_reasoning": differential_data.get('clinical_reasoning', {}),
+                "confidence_assessment": differential_data.get('confidence_assessment', {}),
+                "urgency": overall_urgency,
+                "follow_up_plan": differential_data.get('follow_up_plan', {})
             }
             
         except Exception as e:
