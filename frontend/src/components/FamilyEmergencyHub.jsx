@@ -92,12 +92,12 @@ const EmergencyContactItem = ({ contact, onEdit, onDelete, onCall }) => (
   </div>
 );
 
-// Medical Profile Item Component
+// Medical Profile Item Component - Smaller with lighter colors
 const MedicalProfileItem = ({ profile }) => (
-  <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+  <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-300">
     <div className="flex justify-between items-start mb-2">
-      <span className="font-semibold text-blue-900">{profile.member_name}</span>
-      <Badge className="bg-blue-100 text-blue-800 text-xs">
+      <span className="font-medium text-blue-900">{profile.member_name}</span>
+      <Badge className="bg-blue-100 text-blue-700 text-xs">
         {profile.medical_info?.blood_type || 'Unknown'}
       </Badge>
     </div>
@@ -107,7 +107,7 @@ const MedicalProfileItem = ({ profile }) => (
         <div className="text-xs font-medium text-gray-700 mb-1">Allergies:</div>
         <div className="flex flex-wrap gap-1">
           {profile.medical_info.allergies.map((allergy, idx) => (
-            <Badge key={idx} className="bg-red-100 text-red-800 text-xs">
+            <Badge key={idx} className="bg-red-50 text-red-700 text-xs">
               {allergy}
             </Badge>
           ))}
@@ -120,7 +120,7 @@ const MedicalProfileItem = ({ profile }) => (
         <div className="text-xs font-medium text-gray-700 mb-1">Conditions:</div>
         <div className="flex flex-wrap gap-1">
           {profile.medical_info.chronic_conditions.map((condition, idx) => (
-            <Badge key={idx} className="bg-orange-100 text-orange-800 text-xs">
+            <Badge key={idx} className="bg-orange-50 text-orange-700 text-xs">
               {condition}
             </Badge>
           ))}
