@@ -11051,12 +11051,13 @@ async def process_medical_message(request: MedicalConsultationRequest):
 
 @api_router.post("/medical-ai/report", response_model=MedicalReportResponse)
 async def generate_medical_report(request: MedicalReportRequest):
-    """Generate professional medical report from consultation"""
+    """Generate professional medical report with PDF generation"""
     try:
-        # Initialize SOAP generator
-        soap_generator = ProfessionalSOAPGenerator()
+        # Get required services
+        soap_generator = get_soap_generator()
+        pdf_generator = get_pdf_generator()
         
-        # Prepare consultation data for SOAP generation
+        # Prepare comprehensive consultation data
         consultation_data = {
             "consultation_id": request.consultation_id,
             "messages": request.messages,
@@ -11070,131 +11071,228 @@ async def generate_medical_report(request: MedicalReportRequest):
             "family_history": request.context.get("family_history", {}),
             "clinical_hypotheses": request.context.get("clinical_hypotheses", []),
             "emergency_level": request.context.get("emergency_level", "none"),
-            "red_flags": request.context.get("red_flags", [])
+            "red_flags": request.context.get("red_flags", []),
+            "emergency_detected": request.context.get("emergency_detected", False),
+            "differential_diagnoses": request.context.get("differential_diagnoses", []),
+            "recommendations": request.context.get("recommendations", []),
+            "urgency": request.context.get("urgency", "routine"),
+            "confidence": request.context.get("confidence", 0.0)
         }
         
         # Generate comprehensive SOAP note
         soap_note_data = await soap_generator.generate_comprehensive_soap(consultation_data)
         
-        # Format SOAP note as text
-        soap_note_text = f"""
-MEDICAL CONSULTATION REPORT
-{soap_note_data['header']['documentation_time']}
-
-PATIENT INFORMATION:
-{soap_note_data['header']['patient_demographics']}
-Consultation Type: {soap_note_data['header']['consultation_type']}
-Provider: {soap_note_data['header']['provider']}
-
-SUBJECTIVE:
-Chief Complaint: {soap_note_data['subjective']['chief_complaint']}
-History of Present Illness: {soap_note_data['subjective']['history_present_illness']}
-Review of Systems: {soap_note_data['subjective']['review_of_systems']}
-Past Medical History: {soap_note_data['subjective']['past_medical_history']}
-Current Medications: {soap_note_data['subjective']['medications']}
-Allergies: {soap_note_data['subjective']['allergies']}
-Social History: {soap_note_data['subjective']['social_history']}
-Family History: {soap_note_data['subjective']['family_history']}
-
-OBJECTIVE:
-Vital Signs: {soap_note_data['objective']['vital_signs']}
-Physical Examination: {soap_note_data['objective']['physical_examination']}
-Clinical Observations: {soap_note_data['objective']['clinical_observations']}
-
-ASSESSMENT:
-Clinical Impression: {soap_note_data['assessment']['clinical_impression']}
-Risk Stratification: {soap_note_data['assessment']['risk_stratification']['risk_level']} - {soap_note_data['assessment']['risk_stratification']['risk_factors']}
-Clinical Reasoning: {soap_note_data['assessment']['clinical_reasoning']}
-
-Differential Diagnosis:"""
-
-        # Add differential diagnoses if available
-        if soap_note_data['assessment']['differential_diagnosis']:
-            for diagnosis in soap_note_data['assessment']['differential_diagnosis']:
-                soap_note_text += f"""
-{diagnosis['rank']}. {diagnosis['condition']} ({diagnosis['probability']})
-   ICD-10: {diagnosis['icd_code']}
-   Clinical Reasoning: {diagnosis['clinical_reasoning']}"""
+        # Generate PDF report
+        pdf_bytes = await pdf_generator.generate_comprehensive_medical_report(
+            soap_data=soap_note_data,
+            consultation_data=consultation_data,
+            include_differential=True,
+            include_recommendations=True
+        )
         
-        soap_note_text += f"""
-
-PLAN:
-Diagnostic Workup:"""
+        # Encode PDF as base64 for API response
+        pdf_base64 = pdf_generator.encode_pdf_base64(pdf_bytes)
         
-        # Add diagnostic tests
-        for test in soap_note_data['plan']['diagnostic_workup']:
-            soap_note_text += f"""
-• {test['test']} ({test['urgency']}) - {test['indication']}"""
+        # Generate AI consult summary (Doctronic-style)
+        consultation_summary = soap_generator.generate_ai_consult_summary(consultation_data)
         
-        soap_note_text += f"""
-
-Therapeutic Interventions:"""
-        
-        # Add treatments
-        for treatment in soap_note_data['plan']['therapeutic_interventions']:
-            soap_note_text += f"""
-• {treatment['treatment']} - {treatment['indication']}
-  Duration: {treatment['duration']}, Monitoring: {treatment['monitoring']}"""
-        
-        soap_note_text += f"""
-
-Follow-up Plan:
-• Primary Care: {soap_note_data['plan']['follow_up_plan']['primary_care_physician']}
-• Specialist Referral: {soap_note_data['plan']['follow_up_plan']['specialist_referral']}
-
-Patient Education:"""
-        
-        # Add education points
-        for education_point in soap_note_data['plan']['patient_education']:
-            soap_note_text += f"""
-• {education_point}"""
-        
-        soap_note_text += f"""
-
-Return Precautions:"""
-        
-        # Add return precautions
-        for precaution in soap_note_data['plan']['return_precautions']:
-            soap_note_text += f"""
-• {precaution}"""
-        
-        soap_note_text += f"""
-
-MEDICAL DISCLAIMER:
-This AI-generated assessment is for informational purposes only and does not constitute professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for medical decisions and treatment plans.
-        """
-        
-        # Generate AI Consult Summary (Doctronic.ai style)
-        ai_summary = soap_generator.generate_ai_consult_summary(consultation_data)
-        
-        # Extract recommendations from plan
-        recommendations = []
-        
-        # Add key recommendations from the plan
-        recommendations.extend([
-            soap_note_data['plan']['follow_up_plan']['primary_care_physician'],
-            "Complete recommended diagnostic testing as outlined",
-            "Follow prescribed therapeutic interventions",
-            "Monitor symptoms as described in return precautions"
-        ])
-        
-        # Add specific recommendations from therapeutic interventions
-        for treatment in soap_note_data['plan']['therapeutic_interventions'][:2]:  # Top 2 treatments
-            recommendations.append(f"{treatment['treatment']} - {treatment['indication']}")
-        
-        # Generate report ID
-        report_id = f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        # Create comprehensive report text
+        soap_note_text = await _format_soap_note_text(soap_note_data, consultation_data)
         
         return MedicalReportResponse(
-            report_id=report_id,
-            soap_note=soap_note_text.strip(),
-            summary=ai_summary,
-            recommendations=recommendations,
-            generated_at=datetime.now().isoformat()
+            report_id=f"report_{consultation_data['consultation_id']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            consultation_id=consultation_data["consultation_id"],
+            soap_note=soap_note_text,
+            soap_notes=soap_note_data,
+            consultation_summary=consultation_summary,
+            summary=consultation_summary,
+            recommendations=consultation_data.get("recommendations", []),
+            differential_diagnoses=consultation_data.get("differential_diagnoses", []),
+            emergency_detected=consultation_data.get("emergency_detected", False),
+            urgency_level=consultation_data.get("urgency", "routine"),
+            pdf_base64=pdf_base64,
+            pdf_url=f"/api/medical-ai/report/{consultation_data['consultation_id']}/download",
+            generated_at=datetime.now().isoformat(),
+            report_version="1.0"
         )
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate report: {str(e)}")
+        print(f"Error generating medical report: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate medical report: {str(e)}")
+
+async def _format_soap_note_text(soap_data: Dict[str, Any], consultation_data: Dict[str, Any]) -> str:
+    """Format SOAP note as comprehensive text report"""
+    
+    header = soap_data.get('header', {})
+    subjective = soap_data.get('subjective', {})
+    objective = soap_data.get('objective', {})
+    assessment = soap_data.get('assessment', {})
+    plan = soap_data.get('plan', {})
+    
+    soap_text = f"""MEDICAL CONSULTATION REPORT
+Generated: {header.get('documentation_time', datetime.now().strftime('%B %d, %Y at %I:%M %p'))}
+
+PATIENT INFORMATION:
+Demographics: {header.get('patient_demographics', 'Not specified')}
+Consultation Type: {header.get('consultation_type', 'AI-Assisted Medical Consultation')}
+Provider: {header.get('provider', 'Dr. AI (Advanced Medical AI Assistant)')}
+Consultation ID: {consultation_data.get('consultation_id', 'Unknown')}
+
+SUBJECTIVE:
+Chief Complaint: {subjective.get('chief_complaint', 'Not specified')}
+
+History of Present Illness:
+{subjective.get('history_present_illness', 'Not documented')}
+
+Review of Systems: {subjective.get('review_of_systems', 'Not performed')}
+Past Medical History: {subjective.get('past_medical_history', 'Not documented')}
+Current Medications: {subjective.get('medications', 'None reported')}
+Allergies: {subjective.get('allergies', 'None reported')}
+Social History: {subjective.get('social_history', 'Not documented')}
+Family History: {subjective.get('family_history', 'Not documented')}
+
+OBJECTIVE:
+Physical examination not performed in telemedicine consultation.
+Assessment based on patient-reported symptoms and medical history.
+Recommend in-person evaluation for complete physical examination.
+
+ASSESSMENT:
+Clinical Impression: {assessment.get('clinical_impression', 'Assessment pending')}
+Risk Stratification: {assessment.get('risk_stratification', 'Standard risk')}
+Clinical Reasoning: {assessment.get('clinical_reasoning', 'Based on symptom presentation and medical history')}
+
+DIFFERENTIAL DIAGNOSIS:"""
+    
+    # Add differential diagnoses
+    differential_diagnoses = assessment.get('differential_diagnosis', []) or consultation_data.get('differential_diagnoses', [])
+    if differential_diagnoses:
+        for i, diagnosis in enumerate(differential_diagnoses[:5], 1):
+            if isinstance(diagnosis, dict):
+                condition = diagnosis.get('condition', 'Unknown condition')
+                probability = diagnosis.get('probability', 'Unknown')
+                reasoning = diagnosis.get('reasoning', 'No reasoning provided')
+                icd_code = diagnosis.get('icd_code', 'Not specified')
+                
+                soap_text += f"""
+{i}. {condition} ({probability}% probability)
+   ICD-10: {icd_code}
+   Clinical Reasoning: {reasoning}"""
+    else:
+        soap_text += "\nNo differential diagnoses available."
+    
+    soap_text += f"""
+
+PLAN:
+Diagnostic Workup:"""
+    
+    # Add diagnostic tests
+    diagnostic_workup = plan.get('diagnostic_workup', [])
+    if diagnostic_workup and isinstance(diagnostic_workup, list):
+        for test in diagnostic_workup[:10]:  # Limit to 10 tests
+            if isinstance(test, dict):
+                test_name = test.get('test', 'Unknown test')
+                indication = test.get('indication', 'Not specified')
+                urgency = test.get('urgency', 'routine')
+                soap_text += f"""
+• {test_name} ({urgency}) - {indication}"""
+            else:
+                soap_text += f"""
+• {test}"""
+    else:
+        soap_text += "\nNo specific diagnostic tests recommended at this time."
+    
+    soap_text += f"""
+
+Therapeutic Interventions:"""
+    
+    # Add treatments
+    therapeutic_interventions = plan.get('therapeutic_interventions', [])
+    if therapeutic_interventions and isinstance(therapeutic_interventions, list):
+        for treatment in therapeutic_interventions[:10]:  # Limit to 10 treatments
+            if isinstance(treatment, dict):
+                treatment_name = treatment.get('treatment', 'Unknown treatment')
+                indication = treatment.get('indication', 'Not specified')
+                duration = treatment.get('duration', 'As needed')
+                monitoring = treatment.get('monitoring', 'Monitor response')
+                soap_text += f"""
+• {treatment_name} - {indication}
+  Duration: {duration}, Monitoring: {monitoring}"""
+            else:
+                soap_text += f"""
+• {treatment}"""
+    else:
+        soap_text += "\nGeneral supportive care recommended."
+    
+    soap_text += f"""
+
+Patient Education:"""
+    
+    # Add education points
+    patient_education = plan.get('patient_education', [])
+    if patient_education and isinstance(patient_education, list):
+        for education_point in patient_education:
+            soap_text += f"""
+• {education_point}"""
+    else:
+        soap_text += "\nGeneral health education provided."
+    
+    soap_text += f"""
+
+Follow-up Plan:"""
+    
+    # Add follow-up plan
+    follow_up = plan.get('follow_up_plan', {})
+    if isinstance(follow_up, dict):
+        for key, value in follow_up.items():
+            key_formatted = key.replace('_', ' ').title()
+            soap_text += f"""
+• {key_formatted}: {value}"""
+    else:
+        soap_text += f"""
+• Follow up with primary care physician as needed
+• Return for worsening symptoms"""
+    
+    soap_text += f"""
+
+Return Precautions - Seek Immediate Care If:"""
+    
+    # Add return precautions
+    return_precautions = plan.get('return_precautions', [])
+    if return_precautions and isinstance(return_precautions, list):
+        for precaution in return_precautions:
+            soap_text += f"""
+• {precaution}"""
+    else:
+        soap_text += f"""
+• Symptoms significantly worsen
+• New concerning symptoms develop
+• Any emergency symptoms appear"""
+    
+    # Add emergency alert if present
+    if consultation_data.get('emergency_detected'):
+        soap_text += f"""
+
+🚨 EMERGENCY ALERT:
+This consultation identified symptoms that may indicate a medical emergency.
+If not already done, seek immediate medical attention by calling 911 or
+going to the nearest emergency room.
+
+Emergency Factors Identified: {', '.join(consultation_data.get('red_flags', []))}"""
+    
+    soap_text += f"""
+
+IMPORTANT DISCLAIMER:
+This AI-generated report is for informational purposes only and does not
+constitute medical advice. Always consult with a qualified healthcare
+provider for proper medical evaluation and treatment. In case of emergency,
+call 911 or seek immediate medical attention.
+
+Report Generated By: Medical AI Assistant (Advanced Version)
+System Version: 1.0
+Generated On: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}
+"""
+    
+    return soap_text
 
 # Include the router in the main app (after all endpoints are defined)
 app.include_router(api_router)
