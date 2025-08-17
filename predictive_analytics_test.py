@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import uuid
 
 class PredictiveAnalyticsAPITester:
-    def __init__(self, base_url="https://crisis-ready-3.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://mockup-chat-btn.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
