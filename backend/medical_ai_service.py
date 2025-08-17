@@ -844,3 +844,26 @@ class WorldClassMedicalAI:
                 differential_data[key] = []
         
         return differential_data
+    
+    def _calculate_overall_urgency(self, differential_data: Dict[str, Any]) -> str:
+        """Calculate overall clinical urgency based on differential diagnoses"""
+        diagnoses = differential_data.get('differential_diagnoses', [])
+        
+        max_urgency_score = 0
+        urgency_weights = {'critical': 3, 'urgent': 2, 'routine': 1}
+        
+        for diagnosis in diagnoses:
+            urgency = diagnosis.get('urgency_level', 'routine')
+            probability = diagnosis.get('probability', 0)
+            
+            # Weight urgency by probability
+            urgency_score = urgency_weights.get(urgency, 1) * (probability / 100)
+            max_urgency_score = max(max_urgency_score, urgency_score)
+        
+        # Convert back to urgency level
+        if max_urgency_score >= 2.0:
+            return 'critical'
+        elif max_urgency_score >= 1.0:
+            return 'urgent'
+        else:
+            return 'routine'
