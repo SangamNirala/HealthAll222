@@ -252,6 +252,12 @@ const RoleSelection = () => {
           </div>
         </div>
       </div>
+      
+      {/* Medical AI Chatbot Modal */}
+      <ChatbotModal 
+        isOpen={isChatbotOpen} 
+        onClose={() => setIsChatbotOpen(false)} 
+      />
     </div>
   );
 };
