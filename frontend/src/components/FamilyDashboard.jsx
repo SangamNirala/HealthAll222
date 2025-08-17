@@ -404,6 +404,9 @@ const FamilyDashboard = () => {
             <FamilyEmergencyHub familyId={familyId} />
           </div>
           
+          {/* Original Family Overview - now in second position */}
+          <FamilyOverview />
+          
           {/* Rest of the dashboard components */}
           <FamilyMealPlanning />
           <HealthSummaries />
