@@ -598,26 +598,20 @@
   }
 }
 
-/* Dark Mode Support for Medical Interface */
-@media (prefers-color-scheme: dark) {
-  .medical-interface {
-    background-color: var(--medical-gray-900);
-    color: var(--medical-gray-200);
-  }
-  
-  .medical-card {
-    background-color: var(--medical-gray-800);
-    border-color: var(--medical-gray-700);
-  }
-  
-  .medical-input {
-    background-color: var(--medical-gray-700);
-    border-color: var(--medical-gray-600);
-    color: var(--medical-gray-200);
-  }
-  
-  .medical-nav {
-    background-color: var(--medical-gray-800);
-    border-bottom-color: var(--medical-gray-700);
-  }
+/* Medical Interface - Light Mode Only for Clinical Clarity */
+/* Dark mode disabled for medical interface to ensure optimal visibility and clinical safety */
+.medical-interface {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%) !important;
+  color: var(--medical-gray-800) !important;
+}
+
+.medical-card {
+  background-color: white !important;
+  border-color: var(--medical-gray-300) !important;
+}
+
+.medical-input {
+  background-color: white !important;
+  border-color: var(--medical-gray-400) !important;
+  color: var(--medical-gray-800) !important;
 }
