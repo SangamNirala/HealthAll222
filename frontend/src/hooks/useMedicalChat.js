@@ -70,7 +70,6 @@ What brings you here today? Please describe any symptoms or health concerns you'
 
     // Add user message immediately
     setMessages(prev => [...prev, userMessage]);
-    conversationHistory.current = [...conversationHistory.current, userMessage];
     setIsLoading(true);
 
     try {
@@ -79,11 +78,11 @@ What brings you here today? Please describe any symptoms or health concerns you'
         message: messageContent,
         consultation_id: consultation?.id,
         context: medicalContext,
-        patient_id: 'anonymous'
+        conversation_history: conversationHistory.current
       });
 
       // Handle emergency detection
-      if (response.emergency_detected || response.urgency === 'emergency') {
+      if (response.urgency === 'emergency') {
         setEmergencyDetected(true);
       }
 
@@ -109,7 +108,7 @@ What brings you here today? Please describe any symptoms or health concerns you'
       setMedicalContext(response.context);
       
       // Update conversation history
-      conversationHistory.current = [...conversationHistory.current, aiMessage];
+      conversationHistory.current = [...conversationHistory.current, userMessage, aiMessage];
 
       return response;
 
