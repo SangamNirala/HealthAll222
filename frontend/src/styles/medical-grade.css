@@ -434,7 +434,7 @@
 .medical-modal-content {
   padding: var(--medical-spacing-lg);
   overflow-y: auto;
-  flex-1;
+  flex: 1;
 }
 
 /* Medical Status Indicators */
