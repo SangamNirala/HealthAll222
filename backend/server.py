@@ -10943,6 +10943,8 @@ async def initialize_medical_consultation(request: MedicalConsultationInit):
             stage=initial_response["stage"],
             urgency=initial_response.get("urgency", "routine"),
             consultation_id=context.consultation_id,
+            patient_id=context.patient_id,
+            current_stage=initial_response["stage"],
             emergency_detected=initial_response.get("urgency") == "emergency",
             next_questions=initial_response.get("next_questions", [])
         )
