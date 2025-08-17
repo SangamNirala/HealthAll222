@@ -12133,7 +12133,7 @@ class HealthPlatformAPITester:
         # Test 2: OLDCARTS - Onset information
         onset_data = {
             "consultation_id": consultation_id,
-            "patient_message": "The headache started suddenly yesterday morning when I woke up. It came on very quickly."
+            "message": "The headache started suddenly yesterday morning when I woke up. It came on very quickly."
         }
         
         success2, response2 = self.run_test(
@@ -12151,7 +12151,7 @@ class HealthPlatformAPITester:
         # Test 3: OLDCARTS - Location and Character
         location_character_data = {
             "consultation_id": consultation_id,
-            "patient_message": "The pain is located on the right side of my head, mainly around my temple. It feels like a throbbing, pulsating pain."
+            "message": "The pain is located on the right side of my head, mainly around my temple. It feels like a throbbing, pulsating pain."
         }
         
         success3, response3 = self.run_test(
@@ -12165,7 +12165,7 @@ class HealthPlatformAPITester:
         # Test 4: OLDCARTS - Severity and Duration
         severity_duration_data = {
             "consultation_id": consultation_id,
-            "patient_message": "The pain is about 7 out of 10 in severity. Each episode lasts for several hours, sometimes the whole day."
+            "message": "The pain is about 7 out of 10 in severity. Each episode lasts for several hours, sometimes the whole day."
         }
         
         success4, response4 = self.run_test(
@@ -12179,7 +12179,7 @@ class HealthPlatformAPITester:
         # Test 5: OLDCARTS - Alleviating/Aggravating factors
         alleviating_data = {
             "consultation_id": consultation_id,
-            "patient_message": "The pain gets worse with bright lights and loud noises. It seems to improve a bit when I rest in a dark, quiet room."
+            "message": "The pain gets worse with bright lights and loud noises. It seems to improve a bit when I rest in a dark, quiet room."
         }
         
         success5, response5 = self.run_test(
@@ -12222,7 +12222,7 @@ class HealthPlatformAPITester:
         # Test 1: Complex multi-system presentation
         complex_symptoms_data = {
             "consultation_id": consultation_id,
-            "patient_message": "I've been experiencing joint pain in my hands and knees, along with fatigue that's been getting worse over the past month. I also noticed a rash on my face and have had a low-grade fever on and off."
+            "message": "I've been experiencing joint pain in my hands and knees, along with fatigue that's been getting worse over the past month. I also noticed a rash on my face and have had a low-grade fever on and off."
         }
         
         success1, response1 = self.run_test(
@@ -12247,7 +12247,7 @@ class HealthPlatformAPITester:
         # Test 2: Additional complex symptom details
         additional_details_data = {
             "consultation_id": consultation_id,
-            "patient_message": "The joint pain is worse in the morning and lasts for about an hour. The rash is butterfly-shaped across my cheeks. I've also been having some hair loss and mouth sores."
+            "message": "The joint pain is worse in the morning and lasts for about an hour. The rash is butterfly-shaped across my cheeks. I've also been having some hair loss and mouth sores."
         }
         
         success2, response2 = self.run_test(
@@ -12268,7 +12268,7 @@ class HealthPlatformAPITester:
         # Test 3: Systemic symptoms continuation
         systemic_data = {
             "consultation_id": consultation_id,
-            "patient_message": "I've also been having some chest pain occasionally, and I get short of breath when climbing stairs. My hands sometimes turn white and blue in the cold."
+            "message": "I've also been having some chest pain occasionally, and I get short of breath when climbing stairs. My hands sometimes turn white and blue in the cold."
         }
         
         success3, response3 = self.run_test(
@@ -12312,7 +12312,7 @@ class HealthPlatformAPITester:
         # Step 1: Chief complaint
         chief_complaint_data = {
             "consultation_id": consultation_id,
-            "patient_message": "I'm having chest pain that's been bothering me for the past few hours."
+            "message": "I'm having chest pain that's been bothering me for the past few hours."
         }
         
         success1, response1 = self.run_test(
@@ -12326,7 +12326,7 @@ class HealthPlatformAPITester:
         # Step 2: HPI details
         hpi_data = {
             "consultation_id": consultation_id,
-            "patient_message": "The pain started about 3 hours ago while I was at rest. It's a crushing, squeezing sensation in the center of my chest, about 8/10 severity. It radiates to my left arm and jaw."
+            "message": "The pain started about 3 hours ago while I was at rest. It's a crushing, squeezing sensation in the center of my chest, about 8/10 severity. It radiates to my left arm and jaw."
         }
         
         success2, response2 = self.run_test(
@@ -12340,7 +12340,7 @@ class HealthPlatformAPITester:
         # Step 3: Associated symptoms
         associated_symptoms_data = {
             "consultation_id": consultation_id,
-            "patient_message": "I'm also feeling nauseous and sweaty. I have some shortness of breath and feel lightheaded."
+            "message": "I'm also feeling nauseous and sweaty. I have some shortness of breath and feel lightheaded."
         }
         
         success3, response3 = self.run_test(
@@ -12354,7 +12354,7 @@ class HealthPlatformAPITester:
         # Step 4: Past medical history
         pmh_data = {
             "consultation_id": consultation_id,
-            "patient_message": "I have high blood pressure and diabetes. I'm a 55-year-old male who smokes. My father had a heart attack at age 60."
+            "message": "I have high blood pressure and diabetes. I'm a 55-year-old male who smokes. My father had a heart attack at age 60."
         }
         
         success4, response4 = self.run_test(
@@ -12368,7 +12368,7 @@ class HealthPlatformAPITester:
         # Step 5: Medications and allergies
         medications_data = {
             "consultation_id": consultation_id,
-            "patient_message": "I take lisinopril for blood pressure and metformin for diabetes. I'm allergic to penicillin."
+            "message": "I take lisinopril for blood pressure and metformin for diabetes. I'm allergic to penicillin."
         }
         
         success5, response5 = self.run_test(
@@ -12469,7 +12469,7 @@ class HealthPlatformAPITester:
             # Add some consultation data
             consultation_data = {
                 "consultation_id": consultation_id,
-                "patient_message": "I have been experiencing chest pain and shortness of breath for the past 2 hours."
+                "message": "I have been experiencing chest pain and shortness of breath for the past 2 hours."
             }
             
             message_success, message_response = self.run_test(
