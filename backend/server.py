@@ -10952,8 +10952,7 @@ async def initialize_medical_consultation(request: MedicalConsultationInit):
 async def process_medical_message(request: MedicalConsultationRequest):
     """Process patient message in medical consultation"""
     try:
-        if not medical_ai:
-            raise HTTPException(status_code=503, detail="Medical AI service not available")
+        medical_ai_service = get_medical_ai()
         
         # Reconstruct medical context from request
         from medical_ai_service import MedicalContext, MedicalInterviewStage
