@@ -7513,6 +7513,248 @@ async def export_guest_data(session_id: str, format: str = "json"):
         logger.error(f"Error exporting guest data: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
 
+# ===== FAMILY EMERGENCY HUB API ENDPOINTS =====
+
+@api_router.get("/family/{family_id}/emergency-hub")
+async def get_family_emergency_hub(family_id: str):
+    """Get complete emergency hub dashboard data for family"""
+    try:
+        # Get emergency contacts
+        contacts_cursor = db.emergency_contacts.find({"family_id": family_id})
+        contacts = await contacts_cursor.to_list(length=None)
+        
+        # Get medical profiles
+        profiles_cursor = db.family_medical_profiles.find({"family_id": family_id})
+        medical_profiles = await profiles_cursor.to_list(length=None)
+        
+        # Get recent emergency incidents
+        incidents_cursor = db.emergency_incidents.find(
+            {"family_id": family_id}
+        ).sort("incident_date", -1).limit(10)
+        recent_incidents = await incidents_cursor.to_list(length=None)
+        
+        # Get family profile for member info
+        family_profile = await db.family_profiles.find_one({"user_id": family_id})
+        family_members = family_profile.get("family_members", []) if family_profile else []
+        
+        return {
+            "family_id": family_id,
+            "emergency_contacts": contacts,
+            "medical_profiles": medical_profiles,
+            "family_members": family_members,
+            "recent_incidents": recent_incidents,
+            "emergency_services": await get_emergency_services_directory(),
+            "hub_status": "active",
+            "last_updated": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting emergency hub: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to load emergency hub")
+
+@api_router.get("/family/{family_id}/emergency-contacts")
+async def get_emergency_contacts(family_id: str):
+    """Get all emergency contacts for family"""
+    try:
+        cursor = db.emergency_contacts.find({"family_id": family_id})
+        contacts = await cursor.to_list(length=None)
+        return {"family_id": family_id, "contacts": contacts}
+    except Exception as e:
+        logger.error(f"Error getting emergency contacts: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get emergency contacts")
+
+@api_router.post("/family/{family_id}/emergency-contacts", response_model=EmergencyContact)
+async def create_emergency_contact(family_id: str, contact: EmergencyContactCreate):
+    """Add new emergency contact"""
+    try:
+        contact_dict = contact.dict()
+        contact_dict["family_id"] = family_id
+        contact_obj = EmergencyContact(**contact_dict)
+        
+        result = await db.emergency_contacts.insert_one(contact_obj.dict())
+        contact_obj.id = str(result.inserted_id)
+        
+        logger.info(f"Created emergency contact {contact_obj.id} for family {family_id}")
+        return contact_obj
+        
+    except Exception as e:
+        logger.error(f"Error creating emergency contact: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to create emergency contact")
+
+@api_router.put("/family/{family_id}/emergency-contacts/{contact_id}", response_model=EmergencyContact)
+async def update_emergency_contact(family_id: str, contact_id: str, update: EmergencyContactUpdate):
+    """Update emergency contact"""
+    try:
+        existing = await db.emergency_contacts.find_one({"id": contact_id, "family_id": family_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Emergency contact not found")
+            
+        update_dict = {k: v for k, v in update.dict().items() if v is not None}
+        update_dict["updated_at"] = datetime.utcnow()
+        
+        await db.emergency_contacts.update_one(
+            {"id": contact_id, "family_id": family_id},
+            {"$set": update_dict}
+        )
+        
+        updated = await db.emergency_contacts.find_one({"id": contact_id, "family_id": family_id})
+        return EmergencyContact(**updated)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating emergency contact: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update emergency contact")
+
+@api_router.delete("/family/{family_id}/emergency-contacts/{contact_id}")
+async def delete_emergency_contact(family_id: str, contact_id: str):
+    """Delete emergency contact"""
+    try:
+        result = await db.emergency_contacts.delete_one({"id": contact_id, "family_id": family_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Emergency contact not found")
+        return {"message": "Emergency contact deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting emergency contact: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete emergency contact")
+
+@api_router.get("/family/{family_id}/medical-profiles")
+async def get_family_medical_profiles(family_id: str):
+    """Get medical profiles for all family members"""
+    try:
+        cursor = db.family_medical_profiles.find({"family_id": family_id})
+        profiles = await cursor.to_list(length=None)
+        return {"family_id": family_id, "medical_profiles": profiles}
+    except Exception as e:
+        logger.error(f"Error getting medical profiles: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get medical profiles")
+
+@api_router.post("/family/{family_id}/medical-profiles", response_model=FamilyMedicalProfile)
+async def create_medical_profile(family_id: str, profile: FamilyMedicalProfileCreate):
+    """Create medical profile for family member"""
+    try:
+        profile_dict = profile.dict()
+        profile_dict["family_id"] = family_id
+        profile_obj = FamilyMedicalProfile(**profile_dict)
+        
+        result = await db.family_medical_profiles.insert_one(profile_obj.dict())
+        profile_obj.id = str(result.inserted_id)
+        
+        logger.info(f"Created medical profile {profile_obj.id} for family {family_id}")
+        return profile_obj
+        
+    except Exception as e:
+        logger.error(f"Error creating medical profile: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to create medical profile")
+
+@api_router.put("/family/{family_id}/medical-profiles/{profile_id}", response_model=FamilyMedicalProfile)
+async def update_medical_profile(family_id: str, profile_id: str, update: FamilyMedicalProfileUpdate):
+    """Update family member medical profile"""
+    try:
+        existing = await db.family_medical_profiles.find_one({"id": profile_id, "family_id": family_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Medical profile not found")
+            
+        update_dict = {k: v for k, v in update.dict().items() if v is not None}
+        update_dict["last_updated"] = datetime.utcnow()
+        
+        await db.family_medical_profiles.update_one(
+            {"id": profile_id, "family_id": family_id},
+            {"$set": update_dict}
+        )
+        
+        updated = await db.family_medical_profiles.find_one({"id": profile_id, "family_id": family_id})
+        return FamilyMedicalProfile(**updated)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating medical profile: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update medical profile")
+
+@api_router.get("/emergency-services/directory")
+async def get_emergency_services_directory():
+    """Get directory of emergency services (free/static data)"""
+    return {
+        "national_emergency": [
+            {"service_type": "emergency", "name": "Emergency Services", "phone": "911", "description": "Police, Fire, Medical Emergency"},
+            {"service_type": "poison_control", "name": "Poison Control Center", "phone": "1-800-222-1222", "description": "24/7 Poison Control Hotline"}
+        ],
+        "mental_health": [
+            {"service_type": "mental_health", "name": "National Suicide Prevention Lifeline", "phone": "988", "description": "24/7 Mental Health Crisis Support"},
+            {"service_type": "mental_health", "name": "Crisis Text Line", "phone": "Text HOME to 741741", "description": "24/7 Text Crisis Support"}
+        ],
+        "child_services": [
+            {"service_type": "child_abuse", "name": "Childhelp National Child Abuse Hotline", "phone": "1-800-422-4453", "description": "24/7 Child Abuse Prevention and Treatment"},
+            {"service_type": "missing_child", "name": "National Center for Missing Children", "phone": "1-800-843-5678", "description": "Missing and Exploited Children Hotline"}
+        ],
+        "specialized": [
+            {"service_type": "domestic_violence", "name": "National Domestic Violence Hotline", "phone": "1-800-799-7233", "description": "24/7 Domestic Violence Support"},
+            {"service_type": "substance_abuse", "name": "SAMHSA National Helpline", "phone": "1-800-662-4357", "description": "24/7 Substance Abuse Support"}
+        ],
+        "local_instructions": {
+            "note": "Contact your local emergency services for area-specific hospitals and urgent care centers",
+            "how_to_find": "Search online for '[Your City] emergency services' or '[Your City] hospitals near me'"
+        }
+    }
+
+@api_router.post("/family/{family_id}/emergency-alert")
+async def send_emergency_alert(family_id: str, alert_data: dict):
+    """Send emergency alert to contacts (basic logging - no actual SMS/calls)"""
+    try:
+        # Get emergency contacts
+        contacts_cursor = db.emergency_contacts.find({"family_id": family_id})
+        contacts = await contacts_cursor.to_list(length=None)
+        
+        # Log the emergency incident
+        incident = EmergencyIncident(
+            family_id=family_id,
+            incident_type=alert_data.get("incident_type", "general"),
+            family_member_affected=alert_data.get("member_affected"),
+            description=alert_data.get("description", "Emergency alert sent"),
+            emergency_contacts_notified=[c["id"] for c in contacts],
+            services_contacted=alert_data.get("services_contacted", [])
+        )
+        
+        await db.emergency_incidents.insert_one(incident.dict())
+        
+        # Return notification summary (actual notifications would require SMS/email service)
+        return {
+            "alert_sent": True,
+            "contacts_to_notify": len(contacts),
+            "incident_logged": True,
+            "incident_id": incident.id,
+            "message": "Emergency alert logged. In production, this would send SMS/calls to contacts.",
+            "contacts_summary": [
+                {"name": c["contact_name"], "relationship": c["relationship"], "phone": c["primary_phone"]} 
+                for c in contacts
+            ]
+        }
+        
+    except Exception as e:
+        logger.error(f"Error sending emergency alert: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to send emergency alert")
+
+@api_router.post("/family/{family_id}/emergency-incident", response_model=EmergencyIncident)
+async def log_emergency_incident(family_id: str, incident: EmergencyIncidentCreate):
+    """Log an emergency incident for future reference"""
+    try:
+        incident_dict = incident.dict()
+        incident_dict["family_id"] = family_id
+        incident_obj = EmergencyIncident(**incident_dict)
+        
+        result = await db.emergency_incidents.insert_one(incident_obj.dict())
+        incident_obj.id = str(result.inserted_id)
+        
+        logger.info(f"Logged emergency incident {incident_obj.id} for family {family_id}")
+        return incident_obj
+        
+    except Exception as e:
+        logger.error(f"Error logging emergency incident: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to log emergency incident")
+
 # AI API Models
 class FoodRecognitionRequest(BaseModel):
     image: str  # base64 encoded image
