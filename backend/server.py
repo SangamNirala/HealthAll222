@@ -10978,10 +10978,10 @@ async def process_medical_message(request: MedicalConsultationRequest):
             )
         else:
             # Initialize new context if none provided
-            context = await medical_ai.initialize_consultation({"patient_id": request.patient_id})
+            context = await medical_ai_service.initialize_consultation({"patient_id": request.patient_id})
         
         # Process the message
-        response = await medical_ai.process_patient_message(request.message, context)
+        response = await medical_ai_service.process_patient_message(request.message, context)
         
         return MedicalConsultationResponse(
             response=response["response"],
