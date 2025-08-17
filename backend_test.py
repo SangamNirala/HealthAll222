@@ -12049,7 +12049,7 @@ class HealthPlatformAPITester:
         # Test 3: Worst headache ever scenario
         headache_data = {
             "consultation_id": consultation_id,
-            "patient_message": "This is the worst headache of my life. It came on suddenly like a thunderclap. I've never experienced anything like this before."
+            "message": "This is the worst headache of my life. It came on suddenly like a thunderclap. I've never experienced anything like this before."
         }
         
         success3, response3 = self.run_test(
