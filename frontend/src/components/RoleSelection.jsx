@@ -174,10 +174,7 @@ const RoleCard = ({ role, index, onQuickChatClick }) => {
           {/* Quick Chat Button - Only for guest role */}
           {role.type === 'guest' && (
             <Button 
-              onClick={() => {
-                // Clickable but non-functional - just a visual click effect
-                console.log('Quick Chat clicked - functionality not implemented yet');
-              }}
+              onClick={onQuickChatClick}
               variant="outline"
               className="w-full border-2 border-purple-300 hover:bg-purple-50 hover:border-purple-400 transition-all duration-200 py-3 px-6 text-sm font-semibold group"
             >
