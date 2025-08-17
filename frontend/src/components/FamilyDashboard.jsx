@@ -391,12 +391,20 @@ const FamilyDashboard = () => {
     switchRole('family');
   }, [switchRole]);
 
+  // Get family ID (in production, this would come from auth/context)
+  const familyId = localStorage.getItem('family_user_id') || 'demo-family-123';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
       <SmartNavigation />
       <div className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <FamilyOverview />
+          {/* 🚨 TOP-LEFT PRIMARY CARD: FAMILY EMERGENCY HUB */}
+          <div className="col-span-full lg:col-span-2 order-first">
+            <FamilyEmergencyHub familyId={familyId} />
+          </div>
+          
+          {/* Rest of the dashboard components */}
           <FamilyMealPlanning />
           <HealthSummaries />
           <SharedGoals />
