@@ -41,50 +41,50 @@ const EmergencyQuickAccess = ({ onCallEmergency, onViewContacts, onAlertContacts
   </div>
 );
 
-// Emergency Contact Item Component
+// Emergency Contact Item Component - Smaller with lighter colors
 const EmergencyContactItem = ({ contact, onEdit, onDelete, onCall }) => (
-  <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-red-500">
+  <div className="p-3 bg-gray-50 rounded-lg border-l-4 border-red-300">
     <div className="flex justify-between items-start mb-2">
       <div className="flex-1">
         <div className="flex items-center space-x-2 mb-1">
-          <span className="font-semibold text-gray-900">{contact.contact_name}</span>
+          <span className="font-medium text-gray-900">{contact.contact_name}</span>
           {contact.is_primary_contact && (
-            <Badge className="bg-red-100 text-red-800 text-xs">Primary</Badge>
+            <Badge className="bg-red-50 text-red-700 text-xs">Primary</Badge>
           )}
           {contact.medical_authorization && (
-            <Badge className="bg-blue-100 text-blue-800 text-xs">Medical Auth</Badge>
+            <Badge className="bg-blue-50 text-blue-700 text-xs">Medical Auth</Badge>
           )}
         </div>
         <div className="text-sm text-gray-600 mb-1">{contact.relationship}</div>
         <div className="flex items-center text-sm text-gray-700">
-          <Phone className="w-4 h-4 mr-1" />
+          <Phone className="w-3 h-3 mr-1" />
           {contact.primary_phone}
         </div>
         {contact.email && (
           <div className="flex items-center text-sm text-gray-700 mt-1">
-            <Mail className="w-4 h-4 mr-1" />
+            <Mail className="w-3 h-3 mr-1" />
             {contact.email}
           </div>
         )}
       </div>
-      <div className="flex space-x-2">
+      <div className="flex space-x-1">
         <Button 
           size="sm" 
           onClick={() => onCall(contact.primary_phone)}
-          className="bg-green-600 hover:bg-green-700"
+          className="h-8 px-2 bg-green-500 hover:bg-green-600"
         >
-          <PhoneCall className="w-4 h-4" />
+          <PhoneCall className="w-3 h-3" />
         </Button>
-        <Button size="sm" variant="outline" onClick={() => onEdit(contact)}>
-          <Edit className="w-4 h-4" />
+        <Button size="sm" variant="outline" onClick={() => onEdit(contact)} className="h-8 px-2">
+          <Edit className="w-3 h-3" />
         </Button>
-        <Button size="sm" variant="outline" onClick={() => onDelete(contact.id)}>
-          <Trash2 className="w-4 h-4" />
+        <Button size="sm" variant="outline" onClick={() => onDelete(contact.id)} className="h-8 px-2">
+          <Trash2 className="w-3 h-3" />
         </Button>
       </div>
     </div>
     {contact.availability_notes && (
-      <div className="text-xs text-gray-500 mt-2">
+      <div className="text-xs text-gray-500 mt-1">
         <Clock className="w-3 h-3 inline mr-1" />
         {contact.availability_notes}
       </div>
