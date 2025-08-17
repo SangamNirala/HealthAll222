@@ -71,8 +71,11 @@ from provider_medication_service import provider_medication_service
 # Import Supabase
 from supabase import create_client, Client
 
-# Import Medical AI Service
+# Import Medical AI Service and new services
 from medical_ai_service import WorldClassMedicalAI
+from services.medical_knowledge_database import ComprehensiveMedicalKnowledgeDatabase
+from services.pdf_report_generator import MedicalReportPDFGenerator
+from services.soap_generator import ProfessionalSOAPGenerator
 
 
 ROOT_DIR = Path(__file__).parent
