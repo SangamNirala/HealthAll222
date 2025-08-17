@@ -109,6 +109,75 @@ class WorldClassMedicalAI:
             "seizure", "overdose", "suicide", "self harm"
         ]
     
+    def _load_differential_database(self) -> Dict[str, Any]:
+        """Load comprehensive differential diagnosis database"""
+        return {
+            "common_presentations": {
+                "chest_pain": {
+                    "cardiovascular": {
+                        "acute_coronary_syndrome": {
+                            "probability_factors": ["age>45", "male", "diabetes", "smoking", "family_history"],
+                            "clinical_features": ["crushing_pain", "radiation_arm", "diaphoresis", "nausea"],
+                            "urgency": "critical",
+                            "tests": ["ECG", "troponin", "chest_xray"]
+                        },
+                        "stable_angina": {
+                            "probability_factors": ["exertional", "relieved_rest", "known_CAD"],
+                            "clinical_features": ["predictable_pattern", "stable_symptoms"],
+                            "urgency": "urgent",
+                            "tests": ["stress_test", "ECG", "lipid_panel"]
+                        }
+                    },
+                    "pulmonary": {
+                        "pulmonary_embolism": {
+                            "probability_factors": ["immobilization", "surgery", "cancer", "pregnancy"],
+                            "clinical_features": ["sudden_onset", "dyspnea", "tachycardia"],
+                            "urgency": "critical",
+                            "tests": ["D-dimer", "CT_angiogram", "ABG"]
+                        },
+                        "pneumothorax": {
+                            "probability_factors": ["young_male", "tall_thin", "smoking"],
+                            "clinical_features": ["sudden_onset", "pleuritic_pain", "dyspnea"],
+                            "urgency": "urgent",
+                            "tests": ["chest_xray", "CT_chest"]
+                        }
+                    }
+                },
+                "headache": {
+                    "primary": {
+                        "migraine": {
+                            "probability_factors": ["female", "family_history", "triggers"],
+                            "clinical_features": ["unilateral", "pulsating", "nausea", "photophobia"],
+                            "urgency": "routine",
+                            "tests": ["clinical_diagnosis", "MRI_if_atypical"]
+                        },
+                        "tension_headache": {
+                            "probability_factors": ["stress", "muscle_tension", "frequent"],
+                            "clinical_features": ["bilateral", "pressure", "no_nausea"],
+                            "urgency": "routine",
+                            "tests": ["clinical_diagnosis"]
+                        }
+                    },
+                    "secondary": {
+                        "meningitis": {
+                            "probability_factors": ["fever", "neck_stiffness", "altered_mental"],
+                            "clinical_features": ["severe_headache", "fever", "photophobia"],
+                            "urgency": "critical",
+                            "tests": ["lumbar_puncture", "blood_cultures", "CT_head"]
+                        }
+                    }
+                }
+            },
+            "risk_stratification": {
+                "age_groups": {
+                    "pediatric": {"age_range": [0, 18], "special_considerations": ["growth", "development"]},
+                    "young_adult": {"age_range": [18, 40], "common_conditions": ["anxiety", "muscle_strain"]},
+                    "middle_aged": {"age_range": [40, 65], "common_conditions": ["hypertension", "diabetes"]},
+                    "elderly": {"age_range": [65, 120], "common_conditions": ["polypharmacy", "falls"]}
+                }
+            }
+        }
+    
     async def initialize_consultation(self, patient_data: Dict[str, Any]) -> MedicalContext:
         """Initialize a new medical consultation"""
         
