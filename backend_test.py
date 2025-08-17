@@ -12030,7 +12030,7 @@ class HealthPlatformAPITester:
         # Test 2: Severe shortness of breath scenario
         breathing_data = {
             "consultation_id": consultation_id,
-            "patient_message": "I can't breathe properly. I have severe shortness of breath that came on suddenly. I feel like I'm suffocating."
+            "message": "I can't breathe properly. I have severe shortness of breath that came on suddenly. I feel like I'm suffocating."
         }
         
         success2, response2 = self.run_test(
