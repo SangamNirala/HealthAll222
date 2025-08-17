@@ -11991,6 +11991,10 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Family Emergency Hub APIs (REVIEW REQUEST - SPECIFIC FOCUS)...")
         family_emergency_hub_success = self.test_family_emergency_hub_endpoints()
 
+        # NEW: Medical AI Service APIs (REVIEW REQUEST - HIGH PRIORITY COMPREHENSIVE TESTING)
+        print("\n📋 Testing Medical AI Service APIs (REVIEW REQUEST - HIGH PRIORITY COMPREHENSIVE TESTING)...")
+        medical_ai_success = self.test_medical_ai_service()
+
         # Print final results
         print("\n" + "=" * 60)
         print(f"📊 FINAL RESULTS")
