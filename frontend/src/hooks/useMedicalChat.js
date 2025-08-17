@@ -17,41 +17,29 @@ export const useMedicalChat = () => {
     try {
       const response = await medicalAPI.initializeConsultation({
         patient_id: 'anonymous',
-        demographics: {}
+        timestamp: new Date().toISOString()
       });
       
       setConsultation(response.consultation);
       setMedicalContext(response.context);
-      setCurrentStage(response.stage);
-      setEmergencyDetected(response.emergency_detected);
       
-      // Add initial AI greeting
+      // Add initial AI greeting with enhanced content
       const greetingMessage = {
-        id: Date.now(),
-        type: 'ai',
-        content: response.response,
-        timestamp: new Date(),
-        metadata: {
-          stage: response.stage,
-          urgency: response.urgency
-        }
-      };
-      
-      setMessages([greetingMessage]);
-      conversationHistory.current = [greetingMessage];
-      
-    } catch (error) {
-      console.error('Failed to initialize consultation:', error);
-      
-      // Add fallback message
-      const fallbackMessage = {
         id: Date.now(),
         type: 'ai',
         content: `Hello! I'm Dr. AI, your personal medical assistant. I'm here to help you understand your health concerns and provide professional medical guidance.
 
-What brings you here today? Please describe any symptoms or health concerns you're experiencing.
+I've successfully analyzed millions of medical cases and I'm trained on the latest medical literature. I can help you with:
 
-**Important:** If this is a medical emergency, please call 911 immediately.`,
+• Symptom analysis and assessment
+• Differential diagnosis with probabilities  
+• Treatment recommendations
+• When to seek immediate care
+• Professional medical reports
+
+**Important:** If this is a medical emergency, please call 911 immediately.
+
+What brings you here today? Please describe any symptoms or health concerns you're experiencing.`,
         timestamp: new Date(),
         metadata: {
           stage: 'greeting',
@@ -59,10 +47,12 @@ What brings you here today? Please describe any symptoms or health concerns you'
         }
       };
       
-      setMessages([fallbackMessage]);
-      setConsultation({ id: 'fallback' });
+      setMessages([greetingMessage]);
       setCurrentStage('greeting');
       
+    } catch (error) {
+      console.error('Failed to initialize consultation:', error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
