@@ -237,7 +237,7 @@ const RoleSelection = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {roleOptions.map((role, index) => (
-              <RoleCard key={role.type} role={role} index={index} />
+              <RoleCard key={role.type} role={role} index={index} onQuickChatClick={handleQuickChatClick} />
             ))}
           </div>
           
