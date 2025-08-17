@@ -68,6 +68,9 @@ from provider_medication_service import provider_medication_service
 # Import Supabase
 from supabase import create_client, Client
 
+# Import Medical AI Service
+from medical_ai_service import WorldClassMedicalAI
+
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
