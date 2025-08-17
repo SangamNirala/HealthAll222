@@ -10924,17 +10924,16 @@ def get_medical_ai():
 async def initialize_medical_consultation(request: MedicalConsultationInit):
     """Initialize a new medical AI consultation"""
     try:
-        if not medical_ai:
-            raise HTTPException(status_code=503, detail="Medical AI service not available")
+        medical_ai_service = get_medical_ai()
         
         # Initialize consultation context
-        context = await medical_ai.initialize_consultation({
+        context = await medical_ai_service.initialize_consultation({
             "patient_id": request.patient_id,
             "demographics": request.demographics or {}
         })
         
         # Get initial greeting response
-        initial_response = await medical_ai.process_patient_message("Hello", context)
+        initial_response = await medical_ai_service.process_patient_message("Hello", context)
         
         return MedicalConsultationResponse(
             response=initial_response["response"],
