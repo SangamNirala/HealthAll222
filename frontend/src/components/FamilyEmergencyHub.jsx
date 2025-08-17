@@ -335,15 +335,15 @@ const FamilyEmergencyHub = ({ familyId }) => {
   }
 
   return (
-    <Card className="border-red-200 shadow-lg bg-gradient-to-br from-red-50 to-orange-50">
-      <CardHeader className="bg-red-600 text-white">
-        <CardTitle className="flex items-center text-xl">
-          <AlertTriangle className="w-6 h-6 mr-3" />
+    <Card className="border-red-200 shadow-md bg-gradient-to-br from-red-25 to-orange-25">
+      <CardHeader className="bg-red-500 text-white">
+        <CardTitle className="flex items-center text-lg">
+          <AlertTriangle className="w-5 h-5 mr-2" />
           🚨 FAMILY EMERGENCY HUB
-          <Badge className="ml-auto bg-white text-red-600">PRIORITY</Badge>
+          <Badge className="ml-auto bg-white text-red-500 text-xs">PRIORITY</Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
+      <CardContent className="p-4">
         {/* Emergency Quick Access */}
         <EmergencyQuickAccess 
           onCallEmergency={handleCallEmergency}
@@ -352,14 +352,14 @@ const FamilyEmergencyHub = ({ familyId }) => {
         />
 
         {/* Tab Navigation */}
-        <div className="flex space-x-4 mb-6 border-b">
+        <div className="flex space-x-4 mb-4 border-b">
           {['overview', 'contacts', 'medical', 'services'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-2 px-3 text-sm font-medium ${
+              className={`pb-2 px-2 text-sm font-medium ${
                 activeTab === tab 
-                  ? 'border-b-2 border-red-500 text-red-600' 
+                  ? 'border-b-2 border-red-400 text-red-600' 
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -371,39 +371,39 @@ const FamilyEmergencyHub = ({ familyId }) => {
         {/* Tab Content */}
         {activeTab === 'overview' && (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="text-center p-3 bg-red-50 rounded-lg">
-                <div className="text-2xl font-bold text-red-600">
+                <div className="text-xl font-bold text-red-600">
                   {hubData?.emergency_contacts?.length || 0}
                 </div>
-                <div className="text-sm text-gray-600">Emergency Contacts</div>
+                <div className="text-xs text-gray-600">Emergency Contacts</div>
               </div>
               <div className="text-center p-3 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">
+                <div className="text-xl font-bold text-blue-600">
                   {hubData?.medical_profiles?.length || 0}
                 </div>
-                <div className="text-sm text-gray-600">Medical Profiles</div>
+                <div className="text-xs text-gray-600">Medical Profiles</div>
               </div>
               <div className="text-center p-3 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">
+                <div className="text-xl font-bold text-green-600">
                   {hubData?.family_members?.length || 0}
                 </div>
-                <div className="text-sm text-gray-600">Family Members</div>
+                <div className="text-xs text-gray-600">Family Members</div>
               </div>
               <div className="text-center p-3 bg-yellow-50 rounded-lg">
-                <div className="text-2xl font-bold text-yellow-600">
+                <div className="text-xl font-bold text-yellow-600">
                   {hubData?.recent_incidents?.length || 0}
                 </div>
-                <div className="text-sm text-gray-600">Recent Incidents</div>
+                <div className="text-xs text-gray-600">Recent Incidents</div>
               </div>
             </div>
             
-            <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+            <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
               <div className="flex items-start space-x-2">
-                <Info className="w-5 h-5 text-yellow-600 mt-0.5" />
+                <Info className="w-4 h-4 text-yellow-600 mt-0.5" />
                 <div>
-                  <div className="font-semibold text-yellow-800">Emergency Preparedness</div>
-                  <div className="text-sm text-yellow-700 mt-1">
+                  <div className="font-medium text-yellow-800 text-sm">Emergency Preparedness</div>
+                  <div className="text-xs text-yellow-700 mt-1">
                     Keep this information updated. In emergencies, every second counts.
                     Ensure all family members know how to access this hub.
                   </div>
@@ -414,19 +414,20 @@ const FamilyEmergencyHub = ({ familyId }) => {
         )}
 
         {activeTab === 'contacts' && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900">Emergency Contacts</h3>
+              <h3 className="text-base font-medium text-gray-900">Emergency Contacts</h3>
               <Button 
                 onClick={() => setShowAddContact(true)}
-                className="bg-red-600 hover:bg-red-700"
+                size="sm"
+                className="bg-red-500 hover:bg-red-600"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-3 h-3 mr-1" />
                 Add Contact
               </Button>
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-2">
               {hubData?.emergency_contacts?.map((contact) => (
                 <EmergencyContactItem 
                   key={contact.id}
@@ -438,10 +439,10 @@ const FamilyEmergencyHub = ({ familyId }) => {
               ))}
               
               {(!hubData?.emergency_contacts || hubData.emergency_contacts.length === 0) && (
-                <div className="text-center py-8 text-gray-500">
-                  <AlertCircle className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                  <div>No emergency contacts added yet</div>
-                  <div className="text-sm">Add contacts to ensure help is always available</div>
+                <div className="text-center py-6 text-gray-500">
+                  <AlertCircle className="w-10 h-10 mx-auto mb-2 text-gray-400" />
+                  <div className="text-sm">No emergency contacts added yet</div>
+                  <div className="text-xs">Add contacts to ensure help is always available</div>
                 </div>
               )}
             </div>
@@ -449,25 +450,28 @@ const FamilyEmergencyHub = ({ familyId }) => {
         )}
 
         {activeTab === 'medical' && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900">Medical Profiles</h3>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="w-4 h-4 mr-2" />
+              <h3 className="text-base font-medium text-gray-900">Medical Profiles</h3>
+              <Button 
+                size="sm" 
+                className="bg-blue-500 hover:bg-blue-600"
+              >
+                <Plus className="w-3 h-3 mr-1" />
                 Add Profile
               </Button>
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-2">
               {hubData?.medical_profiles?.map((profile) => (
                 <MedicalProfileItem key={profile.id} profile={profile} />
               ))}
               
               {(!hubData?.medical_profiles || hubData.medical_profiles.length === 0) && (
-                <div className="text-center py-8 text-gray-500">
-                  <Heart className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                  <div>No medical profiles created yet</div>
-                  <div className="text-sm">Add profiles to provide critical medical information during emergencies</div>
+                <div className="text-center py-6 text-gray-500">
+                  <Heart className="w-10 h-10 mx-auto mb-2 text-gray-400" />
+                  <div className="text-sm">No medical profiles created yet</div>
+                  <div className="text-xs">Add profiles to provide critical medical information during emergencies</div>
                 </div>
               )}
             </div>
@@ -475,9 +479,11 @@ const FamilyEmergencyHub = ({ familyId }) => {
         )}
 
         {activeTab === 'services' && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Emergency Services</h3>
-            <EmergencyServices services={hubData?.emergency_services} />
+          <div className="space-y-3">
+            <EmergencyServices 
+              services={hubData?.emergency_services}
+              onAddService={handleAddService}
+            />
           </div>
         )}
       </CardContent>
