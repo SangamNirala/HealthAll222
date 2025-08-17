@@ -10903,6 +10903,153 @@ def _calculate_average_severity(assessments):
     severities = [assessment.get("symptom_profile", {}).get("severity_score", 0) for assessment in assessments]
     return sum(severities) / len(severities) if severities else 0
 
+# ===== MEDICAL AI CONSULTATION ENDPOINTS =====
+
+# Initialize Medical AI Service
+try:
+    medical_ai = WorldClassMedicalAI()
+except Exception as e:
+    print(f"Warning: Could not initialize Medical AI Service: {e}")
+    medical_ai = None
+
+@api_router.post("/medical-ai/initialize", response_model=MedicalConsultationResponse)
+async def initialize_medical_consultation(request: MedicalConsultationInit):
+    """Initialize a new medical AI consultation"""
+    try:
+        if not medical_ai:
+            raise HTTPException(status_code=503, detail="Medical AI service not available")
+        
+        # Initialize consultation context
+        context = await medical_ai.initialize_consultation({
+            "patient_id": request.patient_id,
+            "demographics": request.demographics or {}
+        })
+        
+        # Get initial greeting response
+        initial_response = await medical_ai.process_patient_message("Hello", context)
+        
+        return MedicalConsultationResponse(
+            response=initial_response["response"],
+            context=initial_response["context"],
+            stage=initial_response["stage"],
+            urgency=initial_response.get("urgency", "routine"),
+            consultation_id=context.consultation_id,
+            emergency_detected=initial_response.get("urgency") == "emergency",
+            next_questions=initial_response.get("next_questions", [])
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to initialize consultation: {str(e)}")
+
+@api_router.post("/medical-ai/message", response_model=MedicalConsultationResponse)
+async def process_medical_message(request: MedicalConsultationRequest):
+    """Process patient message in medical consultation"""
+    try:
+        if not medical_ai:
+            raise HTTPException(status_code=503, detail="Medical AI service not available")
+        
+        # Reconstruct medical context from request
+        from medical_ai_service import MedicalContext, MedicalInterviewStage
+        
+        if request.context:
+            context = MedicalContext(
+                patient_id=request.context.get("patient_id", "anonymous"),
+                consultation_id=request.context.get("consultation_id", ""),
+                current_stage=MedicalInterviewStage(request.context.get("current_stage", "greeting")),
+                demographics=request.context.get("demographics", {}),
+                chief_complaint=request.context.get("chief_complaint", ""),
+                symptom_data=request.context.get("symptom_data", {}),
+                medical_history=request.context.get("medical_history", {}),
+                medications=request.context.get("medications", []),
+                allergies=request.context.get("allergies", []),
+                social_history=request.context.get("social_history", {}),
+                family_history=request.context.get("family_history", {}),
+                risk_factors=request.context.get("risk_factors", []),
+                red_flags=request.context.get("red_flags", []),
+                emergency_level=request.context.get("emergency_level", "none"),
+                clinical_hypotheses=request.context.get("clinical_hypotheses", []),
+                confidence_score=request.context.get("confidence_score", 0.0)
+            )
+        else:
+            # Initialize new context if none provided
+            context = await medical_ai.initialize_consultation({"patient_id": request.patient_id})
+        
+        # Process the message
+        response = await medical_ai.process_patient_message(request.message, context)
+        
+        return MedicalConsultationResponse(
+            response=response["response"],
+            context=response["context"],
+            stage=response["stage"],
+            urgency=response.get("urgency", "routine"),
+            consultation_id=response["context"]["consultation_id"],
+            emergency_detected=response.get("urgency") == "emergency",
+            next_questions=response.get("next_questions", []),
+            differential_diagnoses=response.get("differential_diagnoses", []),
+            recommendations=response.get("recommendations", [])
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to process message: {str(e)}")
+
+@api_router.post("/medical-ai/report", response_model=MedicalReportResponse)
+async def generate_medical_report(request: MedicalReportRequest):
+    """Generate professional medical report from consultation"""
+    try:
+        # Generate SOAP note and summary
+        report_id = f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        
+        # Create basic SOAP note structure
+        soap_note = f"""
+MEDICAL CONSULTATION REPORT
+Generated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}
+Consultation ID: {request.consultation_id}
+
+SUBJECTIVE:
+Chief Complaint: {request.context.get('chief_complaint', 'Not specified')}
+History of Present Illness: Patient presented with {request.context.get('chief_complaint', 'symptoms')}
+
+OBJECTIVE:
+Based on AI analysis of reported symptoms and patient responses.
+
+ASSESSMENT:
+{len(request.context.get('clinical_hypotheses', []))} differential diagnoses considered.
+Primary considerations based on symptom pattern analysis.
+
+PLAN:
+Recommendations provided for further evaluation and symptom management.
+Follow-up advised with healthcare provider for comprehensive assessment.
+
+MEDICAL DISCLAIMER:
+This AI-generated assessment is for informational purposes only and does not constitute professional medical advice, diagnosis, or treatment.
+        """
+        
+        # Generate summary
+        summary = f"Medical consultation completed with {len(request.messages)} message exchanges. "
+        if request.context.get('clinical_hypotheses'):
+            summary += f"Assessment provided {len(request.context.get('clinical_hypotheses', []))} diagnostic considerations. "
+        summary += "Follow-up with healthcare provider recommended."
+        
+        # Extract recommendations
+        recommendations = request.context.get('recommendations', [])
+        if not recommendations:
+            recommendations = [
+                "Follow up with primary care physician for comprehensive evaluation",
+                "Monitor symptoms and note any changes",
+                "Seek immediate care if symptoms worsen"
+            ]
+        
+        return MedicalReportResponse(
+            report_id=report_id,
+            soap_note=soap_note.strip(),
+            summary=summary,
+            recommendations=recommendations,
+            generated_at=datetime.now().isoformat()
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate report: {str(e)}")
+
 # Include the router in the main app (after all endpoints are defined)
 app.include_router(api_router)
 
