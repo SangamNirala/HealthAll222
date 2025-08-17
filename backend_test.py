@@ -12068,7 +12068,7 @@ class HealthPlatformAPITester:
         # Test 4: Non-emergency symptom (should not trigger emergency)
         non_emergency_data = {
             "consultation_id": consultation_id,
-            "patient_message": "I have a mild headache that's been bothering me for a few days. It's not too bad, maybe 3/10 pain."
+            "message": "I have a mild headache that's been bothering me for a few days. It's not too bad, maybe 3/10 pain."
         }
         
         success4, response4 = self.run_test(
