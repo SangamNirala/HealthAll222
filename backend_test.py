@@ -11987,6 +11987,10 @@ class HealthPlatformAPITester:
         print("\n📋 Testing Symptom Checker APIs (REVIEW REQUEST - SPECIFIC FOCUS)...")
         symptom_checker_success = self.test_symptom_checker_endpoints()
 
+        # NEW: Family Emergency Hub APIs (REVIEW REQUEST - SPECIFIC FOCUS)
+        print("\n📋 Testing Family Emergency Hub APIs (REVIEW REQUEST - SPECIFIC FOCUS)...")
+        family_emergency_hub_success = self.test_family_emergency_hub_endpoints()
+
         # Print final results
         print("\n" + "=" * 60)
         print(f"📊 FINAL RESULTS")
