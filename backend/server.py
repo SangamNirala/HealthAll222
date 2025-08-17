@@ -2187,10 +2187,19 @@ class MedicalReportRequest(BaseModel):
 
 class MedicalReportResponse(BaseModel):
     report_id: str
+    consultation_id: str
     soap_note: str
+    soap_notes: Optional[Dict[str, Any]] = None
+    consultation_summary: Optional[str] = None
     summary: str
     recommendations: List[str]
+    differential_diagnoses: Optional[List[Dict[str, Any]]] = None
+    emergency_detected: Optional[bool] = False
+    urgency_level: Optional[str] = "routine"
+    pdf_base64: Optional[str] = None
+    pdf_url: Optional[str] = None
     generated_at: str
+    report_version: Optional[str] = "1.0"
 
 class PatientEngagement(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
