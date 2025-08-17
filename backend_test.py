@@ -12109,7 +12109,7 @@ class HealthPlatformAPITester:
         # Test 1: Initial symptom presentation
         initial_symptom_data = {
             "consultation_id": consultation_id,
-            "patient_message": "I've been having a severe headache for 2 days now. It's really bothering me."
+            "message": "I've been having a severe headache for 2 days now. It's really bothering me."
         }
         
         success1, response1 = self.run_test(
