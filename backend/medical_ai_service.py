@@ -448,40 +448,125 @@ class WorldClassMedicalAI:
         assessment_parts = []
         
         # Summary
-        assessment_parts.append("Based on your symptoms and medical history, here is my clinical assessment:")
+        assessment_parts.append("**🏥 AI MEDICAL CONSULTATION COMPLETE**")
+        assessment_parts.append("")
+        assessment_parts.append("Based on your comprehensive symptom assessment and medical history, here is my clinical analysis:")
         assessment_parts.append("")
         
         # Differential Diagnoses
-        assessment_parts.append("**Most Likely Conditions:**")
-        for i, diagnosis in enumerate(differential_data.get('differential_diagnoses', [])[:3], 1):
-            assessment_parts.append(f"{i}. **{diagnosis.get('condition', 'Unknown')}** ({diagnosis.get('probability', 0)}% probability)")
-            assessment_parts.append(f"   • {diagnosis.get('reasoning', 'Clinical reasoning not available')}")
-        
-        assessment_parts.append("")
-        
-        # Recommendations
-        if differential_data.get('recommendations'):
-            assessment_parts.append("**My Recommendations:**")
-            for rec in differential_data['recommendations']:
-                assessment_parts.append(f"• {rec}")
+        assessment_parts.append("**📋 CLINICAL ASSESSMENT - Most Likely Conditions:**")
+        diagnoses = differential_data.get('differential_diagnoses', [])
+        for i, diagnosis in enumerate(diagnoses[:5], 1):  # Top 5 diagnoses
+            condition = diagnosis.get('condition', 'Unknown')
+            probability = diagnosis.get('probability', 0)
+            reasoning = diagnosis.get('reasoning', 'Clinical reasoning not available')
+            urgency = diagnosis.get('urgency_level', 'routine')
+            
+            urgency_emoji = {"critical": "🚨", "urgent": "⚠️", "routine": "ℹ️"}.get(urgency, "ℹ️")
+            
+            assessment_parts.append(f"{i}. {urgency_emoji} **{condition}** ({probability}% probability)")
+            assessment_parts.append(f"   • *Clinical Reasoning:* {reasoning}")
+            
+            # Add supporting/contradicting evidence if available
+            supporting = diagnosis.get('supporting_evidence', [])
+            if supporting:
+                assessment_parts.append(f"   • *Supporting Evidence:* {', '.join(supporting)}")
+            
+            contradicting = diagnosis.get('contradicting_evidence', [])
+            if contradicting:
+                assessment_parts.append(f"   • *Contradicting Evidence:* {', '.join(contradicting)}")
+            
             assessment_parts.append("")
         
-        # Next Steps
-        if differential_data.get('diagnostic_tests'):
-            assessment_parts.append("**Recommended Tests:**")
-            for test in differential_data['diagnostic_tests']:
-                assessment_parts.append(f"• {test}")
+        # Clinical Reasoning Summary
+        clinical_reasoning = differential_data.get('clinical_reasoning', {})
+        if clinical_reasoning:
+            assessment_parts.append("**🧠 CLINICAL REASONING:**")
+            
+            if 'primary_concerns' in clinical_reasoning:
+                assessment_parts.append(f"• *Primary Concerns:* {', '.join(clinical_reasoning['primary_concerns'])}")
+            
+            if 'diagnostic_approach' in clinical_reasoning:
+                assessment_parts.append(f"• *Diagnostic Approach:* {clinical_reasoning['diagnostic_approach']}")
+            
+            if 'risk_stratification' in clinical_reasoning:
+                assessment_parts.append(f"• *Risk Assessment:* {clinical_reasoning['risk_stratification']}")
+            
             assessment_parts.append("")
         
-        # Red Flags
-        if differential_data.get('red_flags'):
-            assessment_parts.append("**⚠️ Seek immediate medical attention if you experience:**")
-            for flag in differential_data['red_flags']:
+        # Immediate Recommendations
+        recommendations = differential_data.get('recommendations', [])
+        if recommendations:
+            assessment_parts.append("**💊 MY PROFESSIONAL RECOMMENDATIONS:**")
+            for i, rec in enumerate(recommendations, 1):
+                assessment_parts.append(f"{i}. {rec}")
+            assessment_parts.append("")
+        
+        # Diagnostic Tests
+        diagnostic_tests = differential_data.get('diagnostic_tests', [])
+        if diagnostic_tests:
+            assessment_parts.append("**🔬 RECOMMENDED DIAGNOSTIC TESTS:**")
+            for test in diagnostic_tests:
+                if isinstance(test, dict):
+                    test_name = test.get('test', 'Test')
+                    indication = test.get('indication', '')
+                    urgency = test.get('urgency', 'routine')
+                    urgency_emoji = {"immediate": "🚨", "urgent": "⚠️", "routine": "📋"}.get(urgency, "📋")
+                    
+                    assessment_parts.append(f"• {urgency_emoji} **{test_name}** - {indication}")
+                else:
+                    assessment_parts.append(f"• {test}")
+            assessment_parts.append("")
+        
+        # Red Flags - Critical
+        red_flags = differential_data.get('red_flags', [])
+        if red_flags:
+            assessment_parts.append("**🚨 URGENT - SEEK IMMEDIATE MEDICAL ATTENTION IF YOU EXPERIENCE:**")
+            for flag in red_flags:
                 assessment_parts.append(f"• {flag}")
             assessment_parts.append("")
         
-        # Disclaimer
-        assessment_parts.append("**Important:** This assessment is for informational purposes only and does not replace professional medical diagnosis. Please consult with a healthcare provider for proper evaluation and treatment.")
+        # Follow-up Plan
+        follow_up = differential_data.get('follow_up_plan', {})
+        if follow_up:
+            assessment_parts.append("**📅 FOLLOW-UP PLAN:**")
+            
+            if 'timeframe' in follow_up:
+                assessment_parts.append(f"• *Timeline:* {follow_up['timeframe']}")
+            
+            if 'provider_type' in follow_up:
+                assessment_parts.append(f"• *Provider:* {follow_up['provider_type']}")
+            
+            if 'monitoring_parameters' in follow_up:
+                params = ', '.join(follow_up['monitoring_parameters'])
+                assessment_parts.append(f"• *Monitor:* {params}")
+            
+            assessment_parts.append("")
+        
+        # Confidence Assessment
+        confidence = differential_data.get('confidence_assessment', {})
+        if confidence:
+            conf_score = confidence.get('diagnostic_confidence', 0.8)
+            conf_percentage = int(conf_score * 100)
+            assessment_parts.append(f"**📊 DIAGNOSTIC CONFIDENCE: {conf_percentage}%**")
+            
+            factors = confidence.get('factors_affecting_confidence', [])
+            if factors:
+                assessment_parts.append(f"• *Confidence factors:* {', '.join(factors)}")
+            
+            additional_info = confidence.get('additional_information_needed', [])
+            if additional_info:
+                assessment_parts.append(f"• *Additional information needed:* {', '.join(additional_info)}")
+            
+            assessment_parts.append("")
+        
+        # Professional Disclaimer
+        assessment_parts.append("---")
+        assessment_parts.append("**⚖️ IMPORTANT MEDICAL DISCLAIMER:**")
+        assessment_parts.append("This AI-powered assessment is for informational and educational purposes only. It does not constitute professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for proper medical evaluation, diagnosis, and treatment decisions. In case of medical emergency, call 911 or seek immediate emergency care.")
+        assessment_parts.append("")
+        assessment_parts.append("*Consultation completed by Dr. AI - Advanced Medical AI Assistant*")
+        assessment_parts.append(f"*Generated on: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}*")
         
         return "\n".join(assessment_parts)
     
