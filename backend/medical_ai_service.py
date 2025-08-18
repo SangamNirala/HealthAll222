@@ -958,7 +958,7 @@ class WorldClassMedicalAI:
             }
             
             # Determine overall urgency level
-            overall_urgency = self._determine_overall_urgency(validated_data['differential_diagnoses'])
+            overall_urgency = self._calculate_overall_urgency(validated_data)
             if context.emergency_level in ["urgent", "critical"]:
                 overall_urgency = context.emergency_level  # Preserve emergency detection
 
