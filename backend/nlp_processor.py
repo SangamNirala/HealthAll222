@@ -142,7 +142,7 @@ class IntelligentTextNormalizer:
         ]
     
     def _load_medical_spell_corrections(self) -> Dict[str, str]:
-        """Load medical spelling corrections dictionary"""
+        """Load medical spelling corrections dictionary - Enhanced for Step 1.3 compatibility"""
         return {
             # Common medical term misspellings
             "haedache": "headache",
@@ -151,7 +151,7 @@ class IntelligentTextNormalizer:
             "cheast": "chest",
             "stomache": "stomach",
             "stomack": "stomach",
-            "tummy": "stomach",
+            # Note: Removed "tummy": "stomach" as it should be handled by colloquial conversion
             "diabetis": "diabetes",
             "diabeties": "diabetes",
             "preassure": "pressure",
@@ -165,6 +165,7 @@ class IntelligentTextNormalizer:
             "dizy": "dizzy",
             "throwin up": "throwing up",
             "trowing up": "throwing up",
+            # Note: Do not spell-correct valid colloquial terms like "gut", "wiped", etc.
         }
     
     def _load_informal_to_formal_medical(self) -> Dict[str, str]:
