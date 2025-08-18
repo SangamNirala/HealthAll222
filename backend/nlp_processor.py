@@ -130,7 +130,6 @@ class IntelligentTextNormalizer:
             "headach": "headache", 
             "headake": "headache",
             "cheast": "chest",
-            "cheast": "chest",
             "stomache": "stomach",
             "stomack": "stomach",
             "tummy": "stomach",
@@ -145,10 +144,6 @@ class IntelligentTextNormalizer:
             "nausia": "nausea",
             "dizzy": "dizzy",
             "dizy": "dizzy",
-            "breath": "breathing",  # Context-dependent
-            "breathe": "breathing",  # When used as noun
-            "vomiting": "vomiting",
-            "vomiting": "vomiting",
             "throwin up": "throwing up",
             "trowing up": "throwing up",
         }
