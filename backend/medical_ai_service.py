@@ -18,6 +18,9 @@ import google.generativeai as genai
 # Import the new intelligent text normalizer
 from nlp_processor import IntelligentTextNormalizer, NormalizationResult
 
+# 🧠 STEP 2.2: CONTEXT-AWARE MEDICAL REASONING ENGINE IMPORTS
+from abc import ABC, abstractmethod
+
 # 🚀 PHASE 4: REVOLUTIONARY ADVANCED ENTITY CLASSES WITH CLINICAL INTELLIGENCE
 
 @dataclass
