@@ -1847,7 +1847,8 @@ class AdvancedSymptomRecognizer:
             for match in matches:
                 entity = SeverityEntity(
                     raw_expression=match.group(),
-                    normalized_score=0.0  # Will be calculated
+                    normalized_score=0.0,  # Will be calculated
+                    scale_type="unknown"   # Will be determined by normalize_severity_scale
                 )
                 entity.normalized_score = entity.normalize_severity_scale()
                 severity_entities.append(entity)
