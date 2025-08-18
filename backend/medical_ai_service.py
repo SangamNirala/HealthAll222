@@ -944,7 +944,7 @@ class WorldClassMedicalAI:
                 return await self._generate_fallback_assessment(context)
             
             # Parse JSON response
-            differential_data = self._parse_differential_response(response.text, context)
+            differential_data = self._parse_ai_response(response.text, context)
             
             # PHASE 2: Validate and enhance response with entity data
             validated_data = self._validate_differential_response(differential_data, context)
