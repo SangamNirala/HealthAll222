@@ -163,6 +163,7 @@ class CausalRelationship:
         return final_strength
 
 @dataclass  
+@dataclass
 class QualityEntity:
     """
     💎 SOPHISTICATED SYMPTOM QUALITY ANALYSIS BEYOND HUMAN CAPABILITY 💎
