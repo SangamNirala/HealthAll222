@@ -97,7 +97,9 @@ class IntelligentTextNormalizer:
     def _load_grammar_patterns(self) -> List[Dict[str, str]]:
         """Load grammar correction patterns for medical text"""
         return [
-            # Basic subject-verb corrections
+            # Basic subject-verb corrections - with more specific patterns
+            {"pattern": r"\bi\s+having\s+fever\s+(\d+)\s+days?\b", "replacement": r"I have been having a fever for \1 days", "desc": "i having fever X days -> I have been having a fever for X days"},
+            {"pattern": r"\bi\s+having\s+(.+?)\s+(\d+)\s+days?\b", "replacement": r"I have been having \1 for \2 days", "desc": "i having X Y days -> I have been having X for Y days"},
             {"pattern": r"\bi\s+having\s+", "replacement": "I have been having ", "desc": "i having -> I have been having"},
             {"pattern": r"\bi\s+have\s+", "replacement": "I have ", "desc": "capitalize I"},
             {"pattern": r"\bi\s+am\s+having\s+", "replacement": "I have been having ", "desc": "i am having -> I have been having"},
