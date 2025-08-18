@@ -1,21 +1,39 @@
 #!/usr/bin/env python3
 """
-STEP 2.2 CONTEXT-AWARE MEDICAL REASONING ENGINE TESTING
-=======================================================
+🧠 PHASE 3: CLINICAL VALIDATION & OPTIMIZATION TESTING 🧠
 
-Comprehensive testing of the newly implemented Step 2.2 Context-Aware Medical Reasoning Engine
-integration with the Advanced Symptom Recognizer.
+Comprehensive backend testing suite for Step 2.2 Context-Aware Medical Reasoning Engine
+that validates ultra-challenging contextual reasoning scenarios, performance requirements,
+and clinical logic consistency as requested in the review.
 
-TESTING FOCUS AREAS:
-1. Context-Aware Reasoning Integration
-2. Ultra-Challenging Contextual Scenarios (3 specific scenarios)
-3. Contextual Reasoning Features in API responses
-4. Algorithm Version Upgrade to "4.0_contextual_reasoning"
-5. Performance Requirements
-6. Medical AI Service Compatibility
+TESTING OBJECTIVES:
+✅ TEST all 3 ultra-challenging contextual reasoning scenarios and validate results
+✅ VALIDATE clinical logic consistency and medical coherence >0.97  
+✅ VERIFY causal relationship accuracy >94% and diagnostic reasoning quality
+✅ OPTIMIZE for <25ms contextual processing performance
+✅ ENSURE zero disruption to existing Phase 1-4 functionality
+
+CURRENT VALIDATION RESULTS ANALYSIS:
+The Phase 3 validation has been executed and reveals critical issues:
+
+PERFORMANCE ISSUES:
+- Processing time 50.97ms average exceeds 25ms target by 100%
+- Needs immediate optimization of contextual pattern processing
+
+CONTEXTUAL FACTOR DETECTION:
+- Expected contextual factors missing in all 3 scenarios  
+- Need enhancement of factor population logic
+
+CLINICAL COHERENCE: 
+- 0.578 vs target >0.97
+- Requires improvement in entity-context alignment and causal plausibility scoring
+
+CAUSAL ACCURACY:
+- 0.578 vs target >0.94  
+- Need better causal relationship detection and validation
 
 Author: Testing Agent
-Date: 2025-01-17
+Date: 2025-01-17 (Updated for Phase 3)
 """
 
 import requests
