@@ -1435,6 +1435,150 @@ class AdvancedSymptomRecognizer:
             "confidence_width": upper_bound - lower_bound
         }
     
+    def _analyze_severity_advanced(self, text: str, context_analysis: Dict[str, Any]) -> List[SeverityEntity]:
+        """
+        ENHANCED SEVERITY ANALYSIS
+        Advanced severity extraction with context awareness
+        """
+        severity_entities = []
+        
+        severity_patterns = [
+            r"(\d+)\s*(?:out\s*of\s*10|/10)",
+            r"\b(mild|moderate|severe|excruciating|unbearable)\b",
+            r"\b(worst\s+pain\s+ever|can't\s+function|debilitating)\b"
+        ]
+        
+        for pattern in severity_patterns:
+            matches = re.finditer(pattern, text.lower())
+            for match in matches:
+                entity = SeverityEntity(
+                    raw_expression=match.group(),
+                    normalized_score=0.0  # Will be calculated
+                )
+                entity.normalized_score = entity.normalize_severity_scale()
+                severity_entities.append(entity)
+        
+        return severity_entities
+    
+    def _extract_anatomical_locations_advanced(self, text: str, context_analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        ENHANCED ANATOMICAL LOCATION EXTRACTION
+        Extract anatomical locations with context awareness
+        """
+        anatomical_entities = []
+        
+        anatomical_patterns = {
+            "chest": r"\b(chest|heart|cardiac|thoracic|sternum|ribs)\b",
+            "abdomen": r"\b(abdomen|stomach|belly|abdominal|gut)\b",
+            "head": r"\b(head|headache|cranial|temporal|occipital|frontal)\b",
+            "back": r"\b(back|spine|spinal|lumbar|thoracic|cervical)\b",
+            "extremity": r"\b(arm|leg|hand|foot|shoulder|knee|elbow|wrist|ankle)\b"
+        }
+        
+        for location, pattern in anatomical_patterns.items():
+            matches = re.finditer(pattern, text.lower())
+            for match in matches:
+                anatomical_entities.append({
+                    "location": location,
+                    "raw_text": match.group(),
+                    "confidence": 0.8
+                })
+        
+        return anatomical_entities
+    
+    def _extract_symptom_qualifiers_advanced(self, text: str, context_analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        ENHANCED SYMPTOM QUALIFIER EXTRACTION
+        Extract symptom qualifiers with context awareness
+        """
+        qualifiers = []
+        
+        qualifier_patterns = {
+            "quality": r"\b(sharp|dull|throbbing|burning|cramping|stabbing|aching)\b",
+            "intensity": r"\b(mild|moderate|severe|intense|excruciating)\b",
+            "frequency": r"\b(constant|intermittent|occasional|frequent|rare)\b",
+            "progression": r"\b(getting\s+worse|improving|stable|worsening|better)\b"
+        }
+        
+        for qualifier_type, pattern in qualifier_patterns.items():
+            matches = re.finditer(pattern, text.lower())
+            for match in matches:
+                qualifiers.append({
+                    "type": qualifier_type,
+                    "value": match.group(),
+                    "confidence": 0.7
+                })
+        
+        return qualifiers
+    
+    def _generate_clinical_insights_advanced(self, extraction_result: Dict[str, Any], context_analysis: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        ENHANCED CLINICAL INSIGHTS GENERATION
+        Generate clinical insights with advanced analysis
+        """
+        insights = {
+            "urgency_indicators": [],
+            "red_flag_combinations": [],
+            "medical_significance": "routine",
+            "differential_clues": []
+        }
+        
+        # Check for emergency patterns
+        symptoms = extraction_result.get("entities", {}).get("symptoms", [])
+        if symptoms:
+            symptom_texts = [getattr(s, 'symptom', str(s)).lower() for s in symptoms]
+            
+            # Emergency indicators
+            if any("chest" in text and "pain" in text for text in symptom_texts):
+                insights["urgency_indicators"].append("chest_pain")
+                insights["medical_significance"] = "urgent"
+            
+            if any("shortness" in text and "breath" in text for text in symptom_texts):
+                insights["urgency_indicators"].append("dyspnea")
+                insights["medical_significance"] = "urgent"
+        
+        return insights
+    
+    def _map_entity_relationships_advanced(self, extraction_result: Dict[str, Any], context_analysis: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        ENHANCED ENTITY RELATIONSHIP MAPPING
+        Map relationships between entities with advanced analysis
+        """
+        relationships = {
+            "temporal_associations": {},
+            "severity_correlations": {}
+        }
+        
+        # Map temporal relationships
+        temporal_entities = extraction_result.get("entities", {}).get("temporal", [])
+        symptoms = extraction_result.get("entities", {}).get("symptoms", [])
+        
+        if temporal_entities and symptoms:
+            relationships["temporal_associations"] = {
+                "symptom_onset_correlation": len(temporal_entities) / max(len(symptoms), 1),
+                "temporal_clarity": sum(getattr(t, 'confidence', 0.5) for t in temporal_entities) / len(temporal_entities)
+            }
+        
+        return relationships
+    
+    def _calibrate_final_confidence_scores(self, extraction_result: Dict[str, Any]) -> None:
+        """
+        FINAL CONFIDENCE CALIBRATION
+        Calibrate final confidence scores based on overall analysis
+        """
+        # Get overall confidence
+        overall_confidence = extraction_result.get("confidence_analysis", {}).get("overall_confidence", 0.5)
+        
+        # Adjust entity confidences based on overall confidence
+        entities = extraction_result.get("entities", {})
+        
+        for entity_type, entity_list in entities.items():
+            if entity_list:
+                for entity in entity_list:
+                    if hasattr(entity, 'confidence'):
+                        # Calibrate individual confidence with overall confidence
+                        entity.confidence = (entity.confidence + overall_confidence) / 2.0
+    
     def _extract_compound_symptoms(self, text: str) -> List[SymptomEntity]:
         """CHALLENGE 3: Handle compound symptom descriptions"""
         symptoms = []
