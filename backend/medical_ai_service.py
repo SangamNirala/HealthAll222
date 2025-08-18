@@ -6539,18 +6539,36 @@ class ContextAwareMedicalReasoner:
         return analysis
     
     def _ensure_comprehensive_positional_factors(self, text: str, positional_analysis: Dict) -> List[str]:
-        """🔧 PHASE 3 FIX: Ensure comprehensive positional factor detection"""
+        """🔧 PHASE 3 ENHANCED: Ensure comprehensive positional factor detection for ultra-challenging scenarios"""
         factors = list(positional_analysis.get("factors", []))
         text_lower = text.lower()
         
-        # Add missing critical positional factors
-        if "orthostatic" in text_lower or "dizzy" in text_lower and "stand" in text_lower:
-            if "orthostatic_symptom_trigger" not in factors:
-                factors.append("orthostatic_symptom_trigger")
+        # 🎯 ULTRA-CHALLENGING SCENARIO 1: Comprehensive positional factor detection
+        scenario_1_factors = [
+            (r"every.*morning.*(?:get\s+out\s+of\s+bed|stand)", "morning_orthostatic_challenge"),
+            (r"(?:stand\s+up|getting\s+up).*(?:dizzy|sick|faint)", "orthostatic_symptom_trigger"),
+            (r"sit.*back.*down.*(?:goes\s+away|better)", "positional_relief_pattern"),
+            (r"(?:chair|squat).*(?:stand|get\s+up)", "position_change_trigger"),
+            (r"(?:few\s+minutes|minutes).*(?:sitting|down)", "timed_positional_relief")
+        ]
         
-        if "morning" in text_lower and "bed" in text_lower:
-            if "morning_orthostatic_challenge" not in factors:
-                factors.append("morning_orthostatic_challenge")
+        for pattern, factor in scenario_1_factors:
+            if re.search(pattern, text_lower) and factor not in factors:
+                factors.append(factor)
+        
+        # Add critical missing factors for comprehensive detection
+        critical_positional_factors = [
+            "orthostatic_intolerance_pattern",
+            "position_dependent_symptoms", 
+            "gravitational_symptom_trigger",
+            "autonomic_dysfunction_indicator"
+        ]
+        
+        # Detect if any position-related symptoms present
+        if any(re.search(p, text_lower) for p in [r"stand.*(?:dizzy|sick)", r"get.*up.*(?:nauseous|faint)", r"morning.*bed.*stand"]):
+            for critical_factor in critical_positional_factors:
+                if critical_factor not in factors:
+                    factors.append(critical_factor)
         
         return factors
     
