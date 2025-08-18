@@ -6569,7 +6569,7 @@ class WorldClassMedicalAI:
         emergency_keywords_enhanced = [
             "crushing chest pain", "can't breathe", "difficulty breathing", 
             "worst headache ever", "thunderclap headache", "sudden severe",
-            "loss of consciousness", "passed out", "severe allergic reaction",
+            "loss of consciousness", "passed out", "unconscious", "severe allergic reaction",
             "anaphylaxis", "throat swelling", "severe bleeding"
         ]
         
