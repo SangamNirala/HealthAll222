@@ -213,7 +213,7 @@ class WorldClassMedicalIntentClassifier:
                     IntentPattern(r"\b(excruciating|unbearable|worst (pain|symptom) ever)\b", 0.95, ClinicalSignificance.CRITICAL, urgency_boost=0.5),
                     IntentPattern(r"\b(really bad|terrible|severe|intense|extreme)\b", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.3),
                     IntentPattern(r"\b(moderate|manageable|tolerable)\b", 0.85, ClinicalSignificance.MEDIUM),
-                    IntentPattern(r"\b(mild|slight|minor|little bit)\b", 0.8, ClinicalSignificance.LOW),
+                    IntentPattern(r"\b(mild|slight|minor|little bit)\b", 0.8, ClinicalSignificance.ROUTINE),
                     IntentPattern(r"\b(scale of|out of 10|rate the (pain|symptom))\b", 0.9, ClinicalSignificance.MEDIUM),
                 ],
                 "severity_mapping": {"mild": (1, 3), "moderate": (4, 6), "severe": (7, 8), "extreme": (9, 10)},
