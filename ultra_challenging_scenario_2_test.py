@@ -216,14 +216,13 @@ class UltraChallengingScenario2Tester:
                     return False
                 
                 # Check contextual reasoning fields - ALL should be populated for cardiac scenario
-                context = data.get('context', {})
                 contextual_fields = ['causal_relationships', 'clinical_hypotheses', 
                                    'contextual_factors', 'context_based_recommendations',
                                    'trigger_avoidance_strategies', 'specialist_referral_context']
                 
                 empty_fields = []
                 for field in contextual_fields:
-                    field_value = context.get(field)
+                    field_value = data.get(field)  # Check in main response data, not context
                     if not field_value or (isinstance(field_value, list) and len(field_value) == 0):
                         empty_fields.append(field)
                 
@@ -232,38 +231,40 @@ class UltraChallengingScenario2Tester:
                 urgency_appropriate = urgency == 'emergency'
                 
                 # Check for cardiac-specific pattern detection
-                causal_relationships = context.get('causal_relationships', [])
+                causal_relationships = data.get('causal_relationships', [])
                 has_exertional_trigger = any('exertion' in str(rel).lower() or 'activity' in str(rel).lower() 
                                            or 'stairs' in str(rel).lower() or 'uphill' in str(rel).lower()
                                            for rel in causal_relationships)
                 
                 # Check for enhanced cardiac contextual analysis
-                clinical_hypotheses = context.get('clinical_hypotheses', [])
+                clinical_hypotheses = data.get('clinical_hypotheses', [])
                 has_cardiac_analysis = any('cardiac' in str(hyp).lower() or 'angina' in str(hyp).lower() 
                                          or 'coronary' in str(hyp).lower() or 'Enhanced Cardiac Analysis' in str(hyp)
                                          for hyp in clinical_hypotheses)
                 
                 # Check for emergency protocols in recommendations
                 recommendations = data.get('recommendations', [])
+                context_recommendations = data.get('context_based_recommendations', [])
+                all_recommendations = recommendations + context_recommendations
                 has_emergency_protocol = any('911' in str(rec) or 'emergency' in str(rec).lower() 
                                            or 'CRITICAL' in str(rec) or 'STAT' in str(rec)
-                                           for rec in recommendations)
+                                           for rec in all_recommendations)
                 
                 # Check for sophisticated cardiac avoidance strategies
-                trigger_avoidance = context.get('trigger_avoidance_strategies', [])
+                trigger_avoidance = data.get('trigger_avoidance_strategies', [])
                 has_cardiac_avoidance = any('activity' in str(strat).lower() or 'exertion' in str(strat).lower()
                                           or 'cardiac' in str(strat).lower() or 'rest' in str(strat).lower()
                                           for strat in trigger_avoidance)
                 
                 # Check for comprehensive specialist referral protocols
-                specialist_referral = context.get('specialist_referral_context', '')
+                specialist_referral = data.get('specialist_referral_context', '')
                 has_cardiology_referral = ('cardiology' in str(specialist_referral).lower() or 
                                          'cardiac' in str(specialist_referral).lower() or
                                          'emergency' in str(specialist_referral).lower())
                 
                 # Check for 5 cardiac-specific pattern types detection
-                contextual_factors = context.get('contextual_factors', {})
-                activity_relationships = contextual_factors.get('activity_relationships', [])
+                contextual_factors = data.get('contextual_factors', {})  # Check in main response data
+                activity_relationships = contextual_factors.get('activity', [])
                 has_activity_analysis = len(activity_relationships) > 0
                 
                 success_criteria = {
