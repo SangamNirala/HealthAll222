@@ -6737,6 +6737,11 @@ class WorldClassMedicalAI:
         medical_entities = await self._extract_medical_entities(message)
         symptoms_detected = medical_entities.get("symptoms", [])
         
+        # 🧠 STEP 2.2: UPDATE MEDICAL CONTEXT WITH CONTEXTUAL REASONING
+        # This will include the contextual reasoning data in context
+        updated_context = await self._update_medical_context(medical_entities, context, message)
+        context = updated_context
+        
         # Check for common greetings or non-medical responses
         greetings = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'greetings']
         message_lower = message.lower().strip()
