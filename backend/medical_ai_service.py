@@ -5547,16 +5547,42 @@ class ContextAwareMedicalReasoner:
         
         recommendations = []
         
+        # 🧠 ENHANCED CONTEXT-BASED RECOMMENDATIONS for Ultra-Challenging Scenarios
         for rel in causal_relationships:
             if rel.relationship_type == "positional":
-                recommendations.append("Consider orthostatic vitals and cardiovascular evaluation")
+                if rel.clinical_significance == "urgent":
+                    recommendations.append("Urgent orthostatic vitals measurement and cardiovascular evaluation - fall risk assessment needed")
+                    recommendations.append("Consider 24-hour blood pressure monitoring for orthostatic hypotension")
+                else:
+                    recommendations.append("Orthostatic vitals and basic cardiovascular evaluation")
+            
             elif rel.relationship_type == "exertional":
-                recommendations.append("Exercise stress testing and cardiac evaluation indicated")
+                if rel.clinical_significance == "emergency":
+                    recommendations.append("URGENT: Immediate cardiac evaluation with ECG and troponins - possible unstable angina")
+                    recommendations.append("Exercise stress testing contraindicated until cardiac clearance")
+                else:
+                    recommendations.append("Exercise stress testing and cardiac evaluation indicated")
+            
+            elif rel.relationship_type == "dietary_stress_interaction":
+                recommendations.append("Comprehensive stress assessment and dietary modification counseling")
+                recommendations.append("Consider psychological evaluation for stress-related GI symptoms")
+                recommendations.append("Lactose tolerance testing under controlled conditions")
+            
             elif rel.relationship_type == "dietary":
                 recommendations.append("Dietary elimination trial and nutritional consultation")
         
+        # Add hypothesis-based recommendations
+        for hypothesis in hypotheses:
+            if "orthostatic hypotension" in hypothesis.lower():
+                recommendations.append("Increase fluid and salt intake unless contraindicated")
+                recommendations.append("Compression stockings evaluation")
+            elif "angina" in hypothesis.lower() or "cardiac" in hypothesis.lower():
+                recommendations.append("Cardiology referral for advanced cardiac risk stratification")
+            elif "stress-modulated" in hypothesis.lower():
+                recommendations.append("Integrated approach: gastroenterology and behavioral health consultation")
+        
         if not recommendations:
-            recommendations.append("Comprehensive medical evaluation recommended")
+            recommendations.append("Comprehensive medical evaluation with attention to symptom triggers")
         
         return recommendations
     
