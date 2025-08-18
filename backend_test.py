@@ -1,4 +1,1013 @@
 #!/usr/bin/env python3
+"""
+PHASE 4 COMPREHENSIVE MEDICAL PATTERN RECOGNITION ENGINE TESTING
+================================================================
+
+Comprehensive testing suite for the Phase 4 Comprehensive Medical Pattern Recognition Engine
+that has been implemented in the Medical AI Service. This tests the most advanced medical AI 
+system ever created with thorough validation of all revolutionary capabilities.
+
+Testing Focus:
+- Ultra-challenging scenario testing (100% success required)
+- Performance requirements validation (<40ms processing, >0.95 coherence)
+- Advanced entity class testing (5 new entity classes)
+- Medical AI service integration testing
+- Syndrome detection engine validation
+"""
+
+import asyncio
+import json
+import time
+import requests
+import sys
+import os
+from datetime import datetime
+from typing import Dict, Any, List
+
+# Add the backend directory to the Python path
+sys.path.append('/app/backend')
+
+# Import the Medical AI service and related components
+from medical_ai_service import WorldClassMedicalAI, AdvancedSymptomRecognizer
+
+# Backend URL from environment
+BACKEND_URL = "https://symptomgenius.preview.emergentagent.com/api"
+
+class Phase4ComprehensiveTester:
+    """
+    🚀 PHASE 4 COMPREHENSIVE MEDICAL PATTERN RECOGNITION ENGINE TESTER 🚀
+    
+    Advanced testing suite for validating the revolutionary Phase 4 medical AI system
+    with ultra-challenging scenarios and performance requirements validation.
+    """
+    
+    def __init__(self):
+        self.backend_url = BACKEND_URL
+        self.test_results = []
+        self.performance_metrics = []
+        self.syndrome_detections = []
+        self.entity_extractions = []
+        
+        # Initialize the Medical AI service for direct testing
+        self.medical_ai = WorldClassMedicalAI()
+        self.symptom_recognizer = AdvancedSymptomRecognizer()
+        
+        print("🚀 PHASE 4 COMPREHENSIVE MEDICAL PATTERN RECOGNITION ENGINE TESTER INITIALIZED")
+        print("=" * 80)
+        
+    async def run_comprehensive_tests(self):
+        """Run all comprehensive Phase 4 tests"""
+        
+        print("\n🎯 STARTING PHASE 4 COMPREHENSIVE TESTING SUITE")
+        print("=" * 80)
+        
+        # Test 1: Ultra-Challenging Scenario Testing (MUST achieve 100% success)
+        await self.test_ultra_challenging_scenarios()
+        
+        # Test 2: Performance Requirements Validation
+        await self.test_performance_requirements()
+        
+        # Test 3: Advanced Entity Class Testing (5 new entity classes)
+        await self.test_advanced_entity_classes()
+        
+        # Test 4: Medical AI Service Integration
+        await self.test_medical_ai_integration()
+        
+        # Test 5: Syndrome Detection Engine
+        await self.test_syndrome_detection_engine()
+        
+        # Generate comprehensive test report
+        self.generate_comprehensive_report()
+        
+    async def test_ultra_challenging_scenarios(self):
+        """
+        🔥 ULTRA-CHALLENGING SCENARIO TESTING (Must achieve 100% success)
+        
+        Tests the two ultra-challenging scenarios provided in the review request
+        with detailed validation of expected results.
+        """
+        
+        print("\n🔥 ULTRA-CHALLENGING SCENARIO TESTING")
+        print("-" * 50)
+        
+        # SCENARIO 1: Comprehensive Pattern Mastery
+        scenario_1_input = """Sharp stabbing pain in my left upper chest that started suddenly this morning after lifting heavy boxes at work, getting progressively worse with deep breathing and movement, radiating down my left arm to my fingers with tingling, accompanied by mild nausea and cold sweats, comes in waves every 2-3 minutes lasting about 30 seconds each, completely disappears when I sit perfectly still and breathe shallow"""
+        
+        print("🎯 SCENARIO 1: Comprehensive Pattern Mastery")
+        print(f"Input: {scenario_1_input[:100]}...")
+        
+        # Test direct entity extraction
+        start_time = time.time()
+        extraction_result = self.symptom_recognizer.extract_medical_entities(scenario_1_input)
+        processing_time = (time.time() - start_time) * 1000  # Convert to milliseconds
+        
+        # Validate expected results for Scenario 1
+        scenario_1_results = self.validate_scenario_1_results(extraction_result, processing_time)
+        self.test_results.append({
+            "test": "Ultra-Challenging Scenario 1",
+            "status": "PASS" if scenario_1_results["success"] else "FAIL",
+            "details": scenario_1_results,
+            "processing_time_ms": processing_time
+        })
+        
+        # SCENARIO 2: Complex Multi-System Analysis
+        scenario_2_input = """For the past month I've been getting these absolutely terrible headaches on the right side of my head, usually starting behind my right eye, throbbing and pulsating like my heart is beating in my head, typically triggered by fluorescent lights at work or when my kids are being loud, almost always accompanied by severe nausea and sensitivity to light and sound, sometimes progressing to vomiting, lasting anywhere from 4-12 hours, happening about 2-3 times per week usually in the late afternoon, completely debilitating - I have to lie in a dark quiet room and can't function at all"""
+        
+        print("🎯 SCENARIO 2: Complex Multi-System Analysis")
+        print(f"Input: {scenario_2_input[:100]}...")
+        
+        # Test direct entity extraction
+        start_time = time.time()
+        extraction_result_2 = self.symptom_recognizer.extract_medical_entities(scenario_2_input)
+        processing_time_2 = (time.time() - start_time) * 1000
+        
+        # Validate expected results for Scenario 2
+        scenario_2_results = self.validate_scenario_2_results(extraction_result_2, processing_time_2)
+        self.test_results.append({
+            "test": "Ultra-Challenging Scenario 2",
+            "status": "PASS" if scenario_2_results["success"] else "FAIL",
+            "details": scenario_2_results,
+            "processing_time_ms": processing_time_2
+        })
+        
+        # Test Medical AI API integration with scenarios
+        await self.test_scenarios_with_medical_ai_api(scenario_1_input, scenario_2_input)
+        
+    def validate_scenario_1_results(self, extraction_result: Dict[str, Any], processing_time: float) -> Dict[str, Any]:
+        """
+        Validate Scenario 1 expected results:
+        - Anatomical entities: "left upper chest" + "left arm to fingers" (radiation mapping)
+        - Quality entities: "sharp stabbing" + "sudden onset" + "progressive worsening"
+        - Associated symptoms: "mild nausea" + "cold sweats" + "tingling paresthesias"
+        - Frequency patterns: "waves every 2-3 minutes" + "30-second episodes"
+        - Trigger contexts: "heavy lifting at work" + "positional relief"
+        - Medical significance: Emergency level detection
+        - Confidence: >0.92 with high coherence
+        """
+        
+        validation_results = {
+            "success": True,
+            "findings": [],
+            "missing_elements": [],
+            "performance_metrics": {}
+        }
+        
+        # Check anatomical entities
+        anatomical_found = False
+        radiation_found = False
+        
+        if "anatomical_advanced" in extraction_result.get("entities", {}):
+            for entity in extraction_result["entities"]["anatomical_advanced"]:
+                if hasattr(entity, 'location'):
+                    if "left" in entity.location.lower() and "chest" in entity.location.lower():
+                        anatomical_found = True
+                        validation_results["findings"].append("✅ Left upper chest anatomical location detected")
+                    
+                    if hasattr(entity, 'radiation_pattern') and entity.radiation_pattern:
+                        if any("arm" in pattern.lower() for pattern in entity.radiation_pattern):
+                            radiation_found = True
+                            validation_results["findings"].append("✅ Radiation to arm pattern detected")
+        
+        if not anatomical_found:
+            validation_results["missing_elements"].append("❌ Left upper chest anatomical location not detected")
+            validation_results["success"] = False
+            
+        if not radiation_found:
+            validation_results["missing_elements"].append("❌ Radiation pattern to arm not detected")
+            validation_results["success"] = False
+        
+        # Check quality entities
+        quality_found = False
+        onset_found = False
+        
+        if "quality_descriptors" in extraction_result.get("entities", {}):
+            for entity in extraction_result["entities"]["quality_descriptors"]:
+                if hasattr(entity, 'quality_descriptor'):
+                    if "sharp" in entity.quality_descriptor.lower() or "stabbing" in entity.quality_descriptor.lower():
+                        quality_found = True
+                        validation_results["findings"].append("✅ Sharp stabbing quality detected")
+                
+                if hasattr(entity, 'onset_pattern'):
+                    if "sudden" in entity.onset_pattern.lower():
+                        onset_found = True
+                        validation_results["findings"].append("✅ Sudden onset pattern detected")
+        
+        if not quality_found:
+            validation_results["missing_elements"].append("❌ Sharp stabbing quality not detected")
+            validation_results["success"] = False
+            
+        if not onset_found:
+            validation_results["missing_elements"].append("❌ Sudden onset not detected")
+            validation_results["success"] = False
+        
+        # Check associated symptoms
+        nausea_found = False
+        sweats_found = False
+        
+        if "associated_symptoms" in extraction_result.get("entities", {}):
+            for entity in extraction_result["entities"]["associated_symptoms"]:
+                if hasattr(entity, 'associated_symptoms'):
+                    symptoms_text = " ".join(entity.associated_symptoms).lower()
+                    if "nausea" in symptoms_text:
+                        nausea_found = True
+                        validation_results["findings"].append("✅ Nausea associated symptom detected")
+                    if "sweat" in symptoms_text or "diaphoresis" in symptoms_text:
+                        sweats_found = True
+                        validation_results["findings"].append("✅ Cold sweats associated symptom detected")
+        
+        if not nausea_found:
+            validation_results["missing_elements"].append("❌ Nausea associated symptom not detected")
+            validation_results["success"] = False
+            
+        if not sweats_found:
+            validation_results["missing_elements"].append("❌ Cold sweats associated symptom not detected")
+            validation_results["success"] = False
+        
+        # Check frequency patterns
+        frequency_found = False
+        
+        if "frequency_patterns" in extraction_result.get("entities", {}):
+            for entity in extraction_result["entities"]["frequency_patterns"]:
+                if hasattr(entity, 'frequency_pattern'):
+                    if "2-3 minutes" in entity.frequency_pattern or "waves" in entity.frequency_pattern.lower():
+                        frequency_found = True
+                        validation_results["findings"].append("✅ Wave frequency pattern detected")
+        
+        if not frequency_found:
+            validation_results["missing_elements"].append("❌ Wave frequency pattern (2-3 minutes) not detected")
+            validation_results["success"] = False
+        
+        # Check trigger contexts
+        trigger_found = False
+        
+        if "trigger_contexts" in extraction_result.get("entities", {}):
+            for entity in extraction_result["entities"]["trigger_contexts"]:
+                if hasattr(entity, 'environmental_factors'):
+                    factors_text = " ".join(entity.environmental_factors).lower()
+                    if "lifting" in factors_text or "work" in factors_text:
+                        trigger_found = True
+                        validation_results["findings"].append("✅ Heavy lifting work trigger detected")
+        
+        if not trigger_found:
+            validation_results["missing_elements"].append("❌ Heavy lifting work trigger not detected")
+            validation_results["success"] = False
+        
+        # Check performance requirements
+        validation_results["performance_metrics"] = {
+            "processing_time_ms": processing_time,
+            "meets_40ms_target": processing_time < 40,
+            "overall_confidence": extraction_result.get("confidence_analysis", {}).get("overall_confidence", 0.0),
+            "meets_confidence_target": extraction_result.get("confidence_analysis", {}).get("overall_confidence", 0.0) > 0.92,
+            "medical_coherence": extraction_result.get("comprehensive_analysis", {}).get("medical_coherence_score", 0.0),
+            "meets_coherence_target": extraction_result.get("comprehensive_analysis", {}).get("medical_coherence_score", 0.0) > 0.95
+        }
+        
+        # Check emergency detection
+        urgency_assessment = extraction_result.get("comprehensive_analysis", {}).get("urgency_assessment", {})
+        if urgency_assessment.get("level") == "emergency" or urgency_assessment.get("level") == "urgent":
+            validation_results["findings"].append("✅ Emergency/urgent level detection successful")
+        else:
+            validation_results["missing_elements"].append("❌ Emergency level detection failed")
+            validation_results["success"] = False
+        
+        return validation_results
+    
+    def validate_scenario_2_results(self, extraction_result: Dict[str, Any], processing_time: float) -> Dict[str, Any]:
+        """
+        Validate Scenario 2 expected results:
+        - Extract 20+ distinct medical entities across all 5 pattern categories
+        - Identify migraine syndrome with >0.98 confidence
+        - Map environmental triggers (fluorescent lights, noise)
+        - Analyze temporal patterns (late afternoon, 2-3x weekly)
+        - Detect functional impact and disability scoring
+        - Generate treatment implications and lifestyle modifications
+        """
+        
+        validation_results = {
+            "success": True,
+            "findings": [],
+            "missing_elements": [],
+            "performance_metrics": {},
+            "entity_count": 0
+        }
+        
+        # Count total entities across all 5 categories
+        total_entities = 0
+        categories_with_entities = 0
+        
+        entity_categories = [
+            "anatomical_advanced", "quality_descriptors", "associated_symptoms", 
+            "frequency_patterns", "trigger_contexts"
+        ]
+        
+        for category in entity_categories:
+            if category in extraction_result.get("entities", {}):
+                category_count = len(extraction_result["entities"][category])
+                total_entities += category_count
+                if category_count > 0:
+                    categories_with_entities += 1
+                    validation_results["findings"].append(f"✅ {category}: {category_count} entities detected")
+        
+        validation_results["entity_count"] = total_entities
+        
+        if total_entities >= 20:
+            validation_results["findings"].append(f"✅ Target achieved: {total_entities} entities detected (≥20 required)")
+        else:
+            validation_results["missing_elements"].append(f"❌ Insufficient entities: {total_entities} detected (<20 required)")
+            validation_results["success"] = False
+        
+        if categories_with_entities == 5:
+            validation_results["findings"].append("✅ All 5 pattern categories have detected entities")
+        else:
+            validation_results["missing_elements"].append(f"❌ Only {categories_with_entities}/5 pattern categories have entities")
+            validation_results["success"] = False
+        
+        # Check migraine syndrome detection
+        syndrome_detected = False
+        syndrome_confidence = 0.0
+        
+        syndrome_probability = extraction_result.get("comprehensive_analysis", {}).get("syndrome_probability", {})
+        for syndrome, confidence in syndrome_probability.items():
+            if "migraine" in syndrome.lower():
+                syndrome_detected = True
+                syndrome_confidence = confidence
+                if confidence > 0.98:
+                    validation_results["findings"].append(f"✅ Migraine syndrome detected with confidence {confidence:.3f} (>0.98)")
+                else:
+                    validation_results["missing_elements"].append(f"❌ Migraine confidence {confidence:.3f} below target (>0.98)")
+                    validation_results["success"] = False
+                break
+        
+        if not syndrome_detected:
+            validation_results["missing_elements"].append("❌ Migraine syndrome not detected")
+            validation_results["success"] = False
+        
+        # Check environmental triggers
+        fluorescent_found = False
+        noise_found = False
+        
+        if "trigger_contexts" in extraction_result.get("entities", {}):
+            for entity in extraction_result["entities"]["trigger_contexts"]:
+                if hasattr(entity, 'environmental_factors'):
+                    factors_text = " ".join(entity.environmental_factors).lower()
+                    if "fluorescent" in factors_text or "light" in factors_text:
+                        fluorescent_found = True
+                        validation_results["findings"].append("✅ Fluorescent light trigger detected")
+                    if "noise" in factors_text or "loud" in factors_text or "sound" in factors_text:
+                        noise_found = True
+                        validation_results["findings"].append("✅ Noise trigger detected")
+        
+        if not fluorescent_found:
+            validation_results["missing_elements"].append("❌ Fluorescent light trigger not detected")
+            validation_results["success"] = False
+            
+        if not noise_found:
+            validation_results["missing_elements"].append("❌ Noise trigger not detected")
+            validation_results["success"] = False
+        
+        # Check temporal patterns
+        temporal_found = False
+        
+        if "frequency_patterns" in extraction_result.get("entities", {}):
+            for entity in extraction_result["entities"]["frequency_patterns"]:
+                if hasattr(entity, 'frequency_pattern'):
+                    pattern_text = entity.frequency_pattern.lower()
+                    if "2-3 times" in pattern_text and "week" in pattern_text:
+                        temporal_found = True
+                        validation_results["findings"].append("✅ Temporal pattern (2-3x weekly) detected")
+                        break
+                
+                if hasattr(entity, 'circadian_correlation'):
+                    if entity.circadian_correlation and "afternoon" in entity.circadian_correlation.lower():
+                        validation_results["findings"].append("✅ Circadian correlation (afternoon) detected")
+        
+        if not temporal_found:
+            validation_results["missing_elements"].append("❌ Temporal pattern (2-3x weekly) not detected")
+            validation_results["success"] = False
+        
+        # Check functional impact
+        functional_impact_found = False
+        
+        if "quality_descriptors" in extraction_result.get("entities", {}):
+            for entity in extraction_result["entities"]["quality_descriptors"]:
+                if hasattr(entity, 'functional_impact_score') and entity.functional_impact_score > 7:
+                    functional_impact_found = True
+                    validation_results["findings"].append(f"✅ High functional impact detected (score: {entity.functional_impact_score})")
+                    break
+        
+        if not functional_impact_found:
+            validation_results["missing_elements"].append("❌ High functional impact not detected")
+            validation_results["success"] = False
+        
+        # Check performance metrics
+        validation_results["performance_metrics"] = {
+            "processing_time_ms": processing_time,
+            "meets_40ms_target": processing_time < 40,
+            "overall_confidence": extraction_result.get("confidence_analysis", {}).get("overall_confidence", 0.0),
+            "medical_coherence": extraction_result.get("comprehensive_analysis", {}).get("medical_coherence_score", 0.0),
+            "meets_coherence_target": extraction_result.get("comprehensive_analysis", {}).get("medical_coherence_score", 0.0) > 0.95,
+            "syndrome_confidence": syndrome_confidence,
+            "meets_syndrome_confidence": syndrome_confidence > 0.98
+        }
+        
+        return validation_results
+    
+    async def test_scenarios_with_medical_ai_api(self, scenario_1: str, scenario_2: str):
+        """Test ultra-challenging scenarios with Medical AI API endpoints"""
+        
+        print("\n🔗 TESTING SCENARIOS WITH MEDICAL AI API")
+        print("-" * 40)
+        
+        # Test Scenario 1 with Medical AI API
+        try:
+            # Initialize consultation
+            init_response = requests.post(f"{self.backend_url}/medical-ai/initialize", 
+                json={"patient_id": "test-scenario-1", "timestamp": datetime.now().isoformat()})
+            
+            if init_response.status_code == 200:
+                init_data = init_response.json()
+                consultation_id = init_data.get("consultation_id")
+                
+                # Send scenario message
+                message_response = requests.post(f"{self.backend_url}/medical-ai/message",
+                    json={
+                        "consultation_id": consultation_id,
+                        "message": scenario_1,
+                        "timestamp": datetime.now().isoformat()
+                    })
+                
+                if message_response.status_code == 200:
+                    response_data = message_response.json()
+                    
+                    # Validate Phase 4 integration
+                    scenario_1_api_results = {
+                        "status": "PASS",
+                        "emergency_detected": response_data.get("emergency_detected", False),
+                        "urgency": response_data.get("urgency", "routine"),
+                        "response_quality": len(response_data.get("response", "")) > 100,
+                        "medical_reasoning": "medical_reasoning" in response_data or "context" in response_data
+                    }
+                    
+                    self.test_results.append({
+                        "test": "Scenario 1 Medical AI API Integration",
+                        "status": "PASS" if all(scenario_1_api_results.values()) else "FAIL",
+                        "details": scenario_1_api_results
+                    })
+                    
+                    print(f"✅ Scenario 1 API Test: Emergency={response_data.get('emergency_detected')}, Urgency={response_data.get('urgency')}")
+                else:
+                    print(f"❌ Scenario 1 API message failed: {message_response.status_code}")
+            else:
+                print(f"❌ Scenario 1 API initialization failed: {init_response.status_code}")
+                
+        except Exception as e:
+            print(f"❌ Scenario 1 API test error: {str(e)}")
+        
+        # Test Scenario 2 with Medical AI API
+        try:
+            # Initialize consultation
+            init_response = requests.post(f"{self.backend_url}/medical-ai/initialize", 
+                json={"patient_id": "test-scenario-2", "timestamp": datetime.now().isoformat()})
+            
+            if init_response.status_code == 200:
+                init_data = init_response.json()
+                consultation_id = init_data.get("consultation_id")
+                
+                # Send scenario message
+                message_response = requests.post(f"{self.backend_url}/medical-ai/message",
+                    json={
+                        "consultation_id": consultation_id,
+                        "message": scenario_2,
+                        "timestamp": datetime.now().isoformat()
+                    })
+                
+                if message_response.status_code == 200:
+                    response_data = message_response.json()
+                    
+                    # Validate Phase 4 integration
+                    scenario_2_api_results = {
+                        "status": "PASS",
+                        "urgency_appropriate": response_data.get("urgency") in ["urgent", "routine"],
+                        "response_quality": len(response_data.get("response", "")) > 100,
+                        "medical_reasoning": "medical_reasoning" in response_data or "context" in response_data,
+                        "differential_diagnoses": len(response_data.get("differential_diagnoses", [])) > 0
+                    }
+                    
+                    self.test_results.append({
+                        "test": "Scenario 2 Medical AI API Integration",
+                        "status": "PASS" if all(scenario_2_api_results.values()) else "FAIL",
+                        "details": scenario_2_api_results
+                    })
+                    
+                    print(f"✅ Scenario 2 API Test: Urgency={response_data.get('urgency')}, Differentials={len(response_data.get('differential_diagnoses', []))}")
+                else:
+                    print(f"❌ Scenario 2 API message failed: {message_response.status_code}")
+            else:
+                print(f"❌ Scenario 2 API initialization failed: {init_response.status_code}")
+                
+        except Exception as e:
+            print(f"❌ Scenario 2 API test error: {str(e)}")
+    
+    async def test_performance_requirements(self):
+        """
+        🚀 PERFORMANCE REQUIREMENTS VALIDATION
+        
+        Tests:
+        - Processing Speed: <40ms per analysis
+        - Pattern Recognition Accuracy: >98% across all 5 categories
+        - Medical Coherence Score: >0.95 for clinical consistency
+        - Cross-Pattern Validation: 100% consistency between pattern categories
+        """
+        
+        print("\n🚀 PERFORMANCE REQUIREMENTS VALIDATION")
+        print("-" * 50)
+        
+        # Test multiple inputs for performance consistency
+        test_inputs = [
+            "Severe crushing chest pain with shortness of breath and nausea",
+            "Throbbing headache with light sensitivity and nausea for 6 hours",
+            "Sharp abdominal pain in right lower quadrant with fever and vomiting",
+            "Sudden weakness on left side with facial drooping and speech difficulty",
+            "Burning chest pain after meals with acid taste in mouth"
+        ]
+        
+        performance_results = []
+        
+        for i, test_input in enumerate(test_inputs, 1):
+            print(f"🔬 Performance Test {i}: {test_input[:50]}...")
+            
+            # Measure processing time
+            start_time = time.time()
+            extraction_result = self.symptom_recognizer.extract_medical_entities(test_input)
+            processing_time = (time.time() - start_time) * 1000  # Convert to milliseconds
+            
+            # Analyze results
+            performance_metrics = {
+                "test_number": i,
+                "input_length": len(test_input),
+                "processing_time_ms": processing_time,
+                "meets_40ms_target": processing_time < 40,
+                "overall_confidence": extraction_result.get("confidence_analysis", {}).get("overall_confidence", 0.0),
+                "medical_coherence": extraction_result.get("comprehensive_analysis", {}).get("medical_coherence_score", 0.0),
+                "meets_coherence_target": extraction_result.get("comprehensive_analysis", {}).get("medical_coherence_score", 0.0) > 0.95,
+                "patterns_detected": extraction_result.get("processing_metadata", {}).get("comprehensive_patterns_analyzed", 0),
+                "cross_pattern_correlations": extraction_result.get("processing_metadata", {}).get("cross_pattern_correlations", 0)
+            }
+            
+            performance_results.append(performance_metrics)
+            
+            # Print immediate results
+            status = "✅ PASS" if performance_metrics["meets_40ms_target"] and performance_metrics["meets_coherence_target"] else "❌ FAIL"
+            print(f"   {status} - Time: {processing_time:.1f}ms, Coherence: {performance_metrics['medical_coherence']:.3f}")
+        
+        # Calculate aggregate performance metrics
+        avg_processing_time = sum(r["processing_time_ms"] for r in performance_results) / len(performance_results)
+        avg_coherence = sum(r["medical_coherence"] for r in performance_results) / len(performance_results)
+        performance_pass_rate = sum(1 for r in performance_results if r["meets_40ms_target"] and r["meets_coherence_target"]) / len(performance_results)
+        
+        aggregate_results = {
+            "average_processing_time_ms": avg_processing_time,
+            "meets_avg_40ms_target": avg_processing_time < 40,
+            "average_coherence_score": avg_coherence,
+            "meets_avg_coherence_target": avg_coherence > 0.95,
+            "performance_pass_rate": performance_pass_rate,
+            "meets_consistency_target": performance_pass_rate >= 0.98,  # >98% accuracy target
+            "individual_results": performance_results
+        }
+        
+        self.test_results.append({
+            "test": "Performance Requirements Validation",
+            "status": "PASS" if aggregate_results["meets_avg_40ms_target"] and aggregate_results["meets_avg_coherence_target"] and aggregate_results["meets_consistency_target"] else "FAIL",
+            "details": aggregate_results
+        })
+        
+        print(f"\n📊 PERFORMANCE SUMMARY:")
+        print(f"   Average Processing Time: {avg_processing_time:.1f}ms (Target: <40ms)")
+        print(f"   Average Coherence Score: {avg_coherence:.3f} (Target: >0.95)")
+        print(f"   Performance Pass Rate: {performance_pass_rate*100:.1f}% (Target: >98%)")
+    
+    async def test_advanced_entity_classes(self):
+        """
+        🧬 ADVANCED ENTITY CLASS TESTING
+        
+        Tests each of the 5 new entity classes:
+        - AnatomicalEntity: Precision medical mapping with anatomical systems
+        - QualityEntity: Clinical intelligence with modifying factors  
+        - AssociatedSymptomEntity: Syndrome detection with urgency assessment
+        - FrequencyEntity: Temporal intelligence with circadian correlation
+        - TriggerContextEntity: Environmental/behavioral pattern analysis
+        """
+        
+        print("\n🧬 ADVANCED ENTITY CLASS TESTING")
+        print("-" * 50)
+        
+        # Test inputs designed to trigger each entity class
+        entity_test_cases = [
+            {
+                "name": "AnatomicalEntity Test",
+                "input": "Sharp pain in the left substernal region radiating to the left arm and jaw",
+                "expected_entity": "anatomical_advanced",
+                "validation_criteria": ["location", "anatomical_system", "radiation_pattern"]
+            },
+            {
+                "name": "QualityEntity Test", 
+                "input": "Crushing, vice-like chest pain that started suddenly and is getting progressively worse",
+                "expected_entity": "quality_descriptors",
+                "validation_criteria": ["quality_descriptor", "onset_pattern", "progression"]
+            },
+            {
+                "name": "AssociatedSymptomEntity Test",
+                "input": "Chest pain with shortness of breath, nausea, and cold sweats",
+                "expected_entity": "associated_symptoms",
+                "validation_criteria": ["primary_symptom", "associated_symptoms", "syndrome_probability"]
+            },
+            {
+                "name": "FrequencyEntity Test",
+                "input": "Headaches that occur 2-3 times per week, usually in the late afternoon",
+                "expected_entity": "frequency_patterns", 
+                "validation_criteria": ["frequency_pattern", "circadian_correlation", "temporal_distribution"]
+            },
+            {
+                "name": "TriggerContextEntity Test",
+                "input": "Pain triggered by stress at work and fluorescent lights in the office",
+                "expected_entity": "trigger_contexts",
+                "validation_criteria": ["trigger_type", "environmental_factors", "behavioral_insights"]
+            }
+        ]
+        
+        for test_case in entity_test_cases:
+            print(f"🔬 {test_case['name']}: {test_case['input'][:60]}...")
+            
+            # Extract entities
+            extraction_result = self.symptom_recognizer.extract_medical_entities(test_case["input"])
+            
+            # Validate expected entity class
+            entity_found = False
+            entity_details = {}
+            
+            if test_case["expected_entity"] in extraction_result.get("entities", {}):
+                entities = extraction_result["entities"][test_case["expected_entity"]]
+                if entities:
+                    entity_found = True
+                    entity = entities[0]  # Check first entity
+                    
+                    # Validate criteria
+                    criteria_met = 0
+                    for criterion in test_case["validation_criteria"]:
+                        if hasattr(entity, criterion):
+                            value = getattr(entity, criterion)
+                            if value:  # Not None, empty string, or empty list
+                                criteria_met += 1
+                                entity_details[criterion] = str(value)[:100]  # Truncate for display
+                    
+                    entity_details["criteria_met"] = f"{criteria_met}/{len(test_case['validation_criteria'])}"
+                    entity_details["success"] = criteria_met >= len(test_case["validation_criteria"]) * 0.7  # 70% threshold
+            
+            test_result = {
+                "entity_detected": entity_found,
+                "entity_details": entity_details,
+                "success": entity_found and entity_details.get("success", False)
+            }
+            
+            self.test_results.append({
+                "test": test_case["name"],
+                "status": "PASS" if test_result["success"] else "FAIL",
+                "details": test_result
+            })
+            
+            status = "✅ PASS" if test_result["success"] else "❌ FAIL"
+            print(f"   {status} - Entity detected: {entity_found}, Criteria: {entity_details.get('criteria_met', '0/0')}")
+    
+    async def test_medical_ai_integration(self):
+        """
+        🏥 MEDICAL AI SERVICE INTEGRATION TESTING
+        
+        Tests Phase 4 integration with existing Medical AI endpoints:
+        - POST /api/medical-ai/initialize
+        - POST /api/medical-ai/message (with Phase 4 entity extraction)
+        - Verify enhanced response structures include Phase 4 comprehensive analysis
+        - Test emergency detection with syndrome recognition
+        - Validate medical coherence scoring in real-time responses
+        """
+        
+        print("\n🏥 MEDICAL AI SERVICE INTEGRATION TESTING")
+        print("-" * 50)
+        
+        integration_tests = [
+            {
+                "name": "Emergency Detection Integration",
+                "input": "Crushing chest pain with shortness of breath and sweating",
+                "expected_urgency": "emergency",
+                "expected_emergency": True
+            },
+            {
+                "name": "Syndrome Recognition Integration", 
+                "input": "Severe headache with nausea, light sensitivity, and visual aura",
+                "expected_urgency": "urgent",
+                "expected_syndrome": "migraine"
+            },
+            {
+                "name": "Complex Pattern Integration",
+                "input": "Right lower quadrant abdominal pain with fever, nausea, and rebound tenderness",
+                "expected_urgency": "emergency",
+                "expected_condition": "appendicitis"
+            }
+        ]
+        
+        for test_case in integration_tests:
+            print(f"🔬 {test_case['name']}: {test_case['input'][:50]}...")
+            
+            try:
+                # Initialize consultation
+                init_response = requests.post(f"{self.backend_url}/medical-ai/initialize", 
+                    json={"patient_id": f"test-{test_case['name'].lower().replace(' ', '-')}", 
+                          "timestamp": datetime.now().isoformat()})
+                
+                if init_response.status_code == 200:
+                    init_data = init_response.json()
+                    consultation_id = init_data.get("consultation_id")
+                    
+                    # Send test message
+                    message_response = requests.post(f"{self.backend_url}/medical-ai/message",
+                        json={
+                            "consultation_id": consultation_id,
+                            "message": test_case["input"],
+                            "timestamp": datetime.now().isoformat()
+                        })
+                    
+                    if message_response.status_code == 200:
+                        response_data = message_response.json()
+                        
+                        # Validate integration results
+                        integration_results = {
+                            "api_success": True,
+                            "urgency_correct": response_data.get("urgency") == test_case["expected_urgency"],
+                            "emergency_detection": response_data.get("emergency_detected", False) == test_case.get("expected_emergency", False),
+                            "response_quality": len(response_data.get("response", "")) > 50,
+                            "has_medical_context": "context" in response_data,
+                            "has_recommendations": len(response_data.get("recommendations", [])) > 0,
+                            "has_differential": len(response_data.get("differential_diagnoses", [])) > 0
+                        }
+                        
+                        # Check for syndrome/condition mentions in response
+                        if "expected_syndrome" in test_case:
+                            response_text = response_data.get("response", "").lower()
+                            integration_results["syndrome_mentioned"] = test_case["expected_syndrome"] in response_text
+                        
+                        if "expected_condition" in test_case:
+                            response_text = response_data.get("response", "").lower()
+                            differential_text = " ".join(response_data.get("differential_diagnoses", [])).lower()
+                            integration_results["condition_mentioned"] = (test_case["expected_condition"] in response_text or 
+                                                                        test_case["expected_condition"] in differential_text)
+                        
+                        success = all(integration_results.values())
+                        
+                        self.test_results.append({
+                            "test": f"Medical AI Integration - {test_case['name']}",
+                            "status": "PASS" if success else "FAIL",
+                            "details": integration_results
+                        })
+                        
+                        status = "✅ PASS" if success else "❌ FAIL"
+                        print(f"   {status} - Urgency: {response_data.get('urgency')}, Emergency: {response_data.get('emergency_detected')}")
+                        
+                    else:
+                        print(f"   ❌ FAIL - Message API error: {message_response.status_code}")
+                        self.test_results.append({
+                            "test": f"Medical AI Integration - {test_case['name']}",
+                            "status": "FAIL",
+                            "details": {"error": f"Message API error: {message_response.status_code}"}
+                        })
+                else:
+                    print(f"   ❌ FAIL - Init API error: {init_response.status_code}")
+                    self.test_results.append({
+                        "test": f"Medical AI Integration - {test_case['name']}",
+                        "status": "FAIL", 
+                        "details": {"error": f"Init API error: {init_response.status_code}"}
+                    })
+                    
+            except Exception as e:
+                print(f"   ❌ FAIL - Exception: {str(e)}")
+                self.test_results.append({
+                    "test": f"Medical AI Integration - {test_case['name']}",
+                    "status": "FAIL",
+                    "details": {"error": str(e)}
+                })
+    
+    async def test_syndrome_detection_engine(self):
+        """
+        🔬 SYNDROME DETECTION ENGINE TESTING
+        
+        Tests advanced syndrome recognition:
+        - Acute coronary syndrome detection
+        - Migraine syndrome identification  
+        - Acute abdomen pattern recognition
+        - Stroke syndrome analysis
+        - Probability scoring and urgency classification
+        """
+        
+        print("\n🔬 SYNDROME DETECTION ENGINE TESTING")
+        print("-" * 50)
+        
+        syndrome_test_cases = [
+            {
+                "name": "Acute Coronary Syndrome",
+                "input": "Crushing substernal chest pain radiating to left arm with shortness of breath, nausea, and diaphoresis",
+                "expected_syndrome": "acute_coronary_syndrome",
+                "min_confidence": 0.8,
+                "expected_urgency": "emergency"
+            },
+            {
+                "name": "Migraine Syndrome",
+                "input": "Severe unilateral throbbing headache with nausea, photophobia, phonophobia, and visual aura lasting 6 hours",
+                "expected_syndrome": "migraine_syndrome", 
+                "min_confidence": 0.85,
+                "expected_urgency": "urgent"
+            },
+            {
+                "name": "Acute Abdomen",
+                "input": "Severe constant right lower quadrant abdominal pain with fever, vomiting, and rebound tenderness",
+                "expected_syndrome": "acute_abdomen",
+                "min_confidence": 0.75,
+                "expected_urgency": "emergency"
+            },
+            {
+                "name": "Stroke Syndrome",
+                "input": "Sudden onset left-sided weakness with facial drooping and speech difficulty",
+                "expected_syndrome": "stroke_syndrome",
+                "min_confidence": 0.8,
+                "expected_urgency": "emergency"
+            }
+        ]
+        
+        for test_case in syndrome_test_cases:
+            print(f"🔬 {test_case['name']}: {test_case['input'][:60]}...")
+            
+            # Extract entities and analyze syndromes
+            extraction_result = self.symptom_recognizer.extract_medical_entities(test_case["input"])
+            
+            # Check syndrome detection
+            syndrome_detected = False
+            syndrome_confidence = 0.0
+            urgency_correct = False
+            
+            syndrome_probability = extraction_result.get("comprehensive_analysis", {}).get("syndrome_probability", {})
+            
+            # Look for expected syndrome
+            for syndrome, confidence in syndrome_probability.items():
+                if test_case["expected_syndrome"] in syndrome.lower() or any(word in syndrome.lower() for word in test_case["expected_syndrome"].split("_")):
+                    syndrome_detected = True
+                    syndrome_confidence = confidence
+                    break
+            
+            # Check urgency assessment
+            urgency_assessment = extraction_result.get("comprehensive_analysis", {}).get("urgency_assessment", {})
+            detected_urgency = urgency_assessment.get("level", "routine")
+            urgency_correct = detected_urgency == test_case["expected_urgency"]
+            
+            # Validate results
+            syndrome_results = {
+                "syndrome_detected": syndrome_detected,
+                "syndrome_confidence": syndrome_confidence,
+                "meets_confidence_threshold": syndrome_confidence >= test_case["min_confidence"],
+                "urgency_correct": urgency_correct,
+                "detected_urgency": detected_urgency,
+                "expected_urgency": test_case["expected_urgency"],
+                "all_syndromes_detected": list(syndrome_probability.keys()),
+                "success": syndrome_detected and syndrome_confidence >= test_case["min_confidence"] and urgency_correct
+            }
+            
+            self.test_results.append({
+                "test": f"Syndrome Detection - {test_case['name']}",
+                "status": "PASS" if syndrome_results["success"] else "FAIL",
+                "details": syndrome_results
+            })
+            
+            status = "✅ PASS" if syndrome_results["success"] else "❌ FAIL"
+            print(f"   {status} - Detected: {syndrome_detected}, Confidence: {syndrome_confidence:.3f}, Urgency: {detected_urgency}")
+    
+    def generate_comprehensive_report(self):
+        """Generate comprehensive test report with all results and metrics"""
+        
+        print("\n" + "=" * 80)
+        print("🏆 PHASE 4 COMPREHENSIVE MEDICAL PATTERN RECOGNITION ENGINE TEST REPORT")
+        print("=" * 80)
+        
+        # Calculate overall statistics
+        total_tests = len(self.test_results)
+        passed_tests = sum(1 for result in self.test_results if result["status"] == "PASS")
+        failed_tests = total_tests - passed_tests
+        success_rate = (passed_tests / total_tests) * 100 if total_tests > 0 else 0
+        
+        print(f"\n📊 OVERALL TEST RESULTS:")
+        print(f"   Total Tests: {total_tests}")
+        print(f"   Passed: {passed_tests}")
+        print(f"   Failed: {failed_tests}")
+        print(f"   Success Rate: {success_rate:.1f}%")
+        
+        # Categorize results
+        categories = {
+            "Ultra-Challenging Scenarios": [],
+            "Performance Requirements": [],
+            "Advanced Entity Classes": [],
+            "Medical AI Integration": [],
+            "Syndrome Detection": []
+        }
+        
+        for result in self.test_results:
+            test_name = result["test"]
+            if "Ultra-Challenging Scenario" in test_name:
+                categories["Ultra-Challenging Scenarios"].append(result)
+            elif "Performance Requirements" in test_name:
+                categories["Performance Requirements"].append(result)
+            elif any(entity in test_name for entity in ["AnatomicalEntity", "QualityEntity", "AssociatedSymptomEntity", "FrequencyEntity", "TriggerContextEntity"]):
+                categories["Advanced Entity Classes"].append(result)
+            elif "Medical AI Integration" in test_name:
+                categories["Medical AI Integration"].append(result)
+            elif "Syndrome Detection" in test_name:
+                categories["Syndrome Detection"].append(result)
+        
+        # Print detailed results by category
+        for category, results in categories.items():
+            if results:
+                print(f"\n🔍 {category.upper()}:")
+                category_passed = sum(1 for r in results if r["status"] == "PASS")
+                category_total = len(results)
+                category_rate = (category_passed / category_total) * 100 if category_total > 0 else 0
+                print(f"   Success Rate: {category_rate:.1f}% ({category_passed}/{category_total})")
+                
+                for result in results:
+                    status_icon = "✅" if result["status"] == "PASS" else "❌"
+                    print(f"   {status_icon} {result['test']}")
+                    
+                    # Print key details for failed tests
+                    if result["status"] == "FAIL" and "details" in result:
+                        details = result["details"]
+                        if isinstance(details, dict):
+                            if "missing_elements" in details and details["missing_elements"]:
+                                print(f"      Missing: {', '.join(details['missing_elements'][:3])}")
+                            if "error" in details:
+                                print(f"      Error: {details['error']}")
+        
+        # Performance summary
+        performance_tests = [r for r in self.test_results if "Performance" in r["test"]]
+        if performance_tests:
+            print(f"\n⚡ PERFORMANCE SUMMARY:")
+            for result in performance_tests:
+                if "details" in result and isinstance(result["details"], dict):
+                    details = result["details"]
+                    if "average_processing_time_ms" in details:
+                        print(f"   Average Processing Time: {details['average_processing_time_ms']:.1f}ms (Target: <40ms)")
+                    if "average_coherence_score" in details:
+                        print(f"   Average Coherence Score: {details['average_coherence_score']:.3f} (Target: >0.95)")
+                    if "performance_pass_rate" in details:
+                        print(f"   Performance Pass Rate: {details['performance_pass_rate']*100:.1f}% (Target: >98%)")
+        
+        # Critical findings
+        critical_failures = []
+        ultra_challenging_failed = any(r["status"] == "FAIL" for r in categories["Ultra-Challenging Scenarios"])
+        performance_failed = any(r["status"] == "FAIL" for r in categories["Performance Requirements"])
+        
+        if ultra_challenging_failed:
+            critical_failures.append("❌ CRITICAL: Ultra-challenging scenarios failed (100% success required)")
+        if performance_failed:
+            critical_failures.append("❌ CRITICAL: Performance requirements not met (<40ms, >0.95 coherence)")
+        
+        if critical_failures:
+            print(f"\n🚨 CRITICAL FAILURES:")
+            for failure in critical_failures:
+                print(f"   {failure}")
+        
+        # Final assessment
+        print(f"\n🏆 FINAL ASSESSMENT:")
+        if success_rate >= 90 and not critical_failures:
+            print("   ✅ PHASE 4 COMPREHENSIVE MEDICAL PATTERN RECOGNITION ENGINE: PRODUCTION READY")
+            print("   🎯 All critical requirements met with excellent performance")
+        elif success_rate >= 80:
+            print("   ⚠️  PHASE 4 SYSTEM: MOSTLY FUNCTIONAL with minor issues")
+            print("   🔧 Some improvements needed before full production deployment")
+        else:
+            print("   ❌ PHASE 4 SYSTEM: SIGNIFICANT ISSUES DETECTED")
+            print("   🚨 Major improvements required before production deployment")
+        
+        print("\n" + "=" * 80)
+        print("END OF PHASE 4 COMPREHENSIVE TESTING REPORT")
+        print("=" * 80)
+
+async def main():
+    """Main testing function"""
+    print("🚀 PHASE 4 COMPREHENSIVE MEDICAL PATTERN RECOGNITION ENGINE TESTING")
+    print("=" * 80)
+    print("Testing the most advanced medical AI system ever created...")
+    print("Algorithm Version: 4.0_revolutionary_comprehensive")
+    print("=" * 80)
+    
+    # Initialize and run comprehensive tests
+    tester = Phase4ComprehensiveTester()
+    await tester.run_comprehensive_tests()
+
+if __name__ == "__main__":
+    asyncio.run(main())
 
 import requests
 import sys
