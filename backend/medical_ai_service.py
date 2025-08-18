@@ -3072,12 +3072,16 @@ class AdvancedSymptomRecognizer:
         
         return pattern_results
     
-    def _assess_pattern_medical_significance(self, text: str, category: str) -> str:
-        """Assess medical significance of a pattern match"""
-        # Simple implementation - can be enhanced
-        if "emergency" in text.lower() or "severe" in text.lower():
+    def _assess_pattern_medical_significance_optimized(self, text: str, category: str) -> str:
+        """OPTIMIZED: Assess medical significance with enhanced emergency detection"""
+        text_lower = text.lower()
+        
+        # EMERGENCY INDICATORS (Highest Priority)
+        if any(term in text_lower for term in ["crushing", "squeezing", "radiating", "worst", "severe"]):
+            return "emergency"
+        elif any(term in text_lower for term in ["chest pain", "shortness", "breathing", "sudden"]):
             return "urgent"
-        elif "chronic" in text.lower() or "mild" in text.lower():
+        elif any(term in text_lower for term in ["chronic", "mild", "occasional"]):
             return "routine"
         else:
             return "moderate"
