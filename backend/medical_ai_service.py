@@ -5989,16 +5989,29 @@ class ContextAwareMedicalReasoner:
                 medical_mechanism = rel.get('medical_mechanism', '')
                 rel_type = rel.get('relationship_type', 'unknown')
             
-            # 🧠 EMERGENCY REFERRALS
+            # 🧠 ENHANCED EMERGENCY CARDIAC REFERRALS
             if clinical_sig == "emergency":
-                if "exertional myocardial ischemia" in medical_mechanism:
-                    return "IMMEDIATE emergency department evaluation - rule out STEMI/NSTEMI"
+                if "enhanced cardiac contextual analysis" in medical_mechanism:
+                    if "crushing" in medical_mechanism or "classic_crushing_angina" in rel_type:
+                        return "CRITICAL EMERGENCY: 911 transport with STEMI alert - crushing chest pain with exertional pattern requires immediate cardiac catheterization capability"
+                    elif "pressure_type_angina" in rel_type:
+                        return "EMERGENCY: Immediate cardiology consultation - pressure-type exertional angina requires urgent coronary evaluation"
+                    elif "substernal_exertional_pain" in rel_type:
+                        return "URGENT EMERGENCY: Emergency cardiology evaluation - substernal location with exertion strongly suggests coronary disease"
+                    elif "radiating_exertional_chest_pain" in rel_type:
+                        return "CRITICAL: STAT cardiology consultation - radiating exertional pattern indicates high-risk unstable angina"
+                    elif "angina_with_dyspnea" in rel_type:
+                        return "EMERGENCY: Cardiology + Heart Failure team activation - complex coronary syndrome with potential cardiogenic component"
+                elif "exertional myocardial ischemia" in medical_mechanism:
+                    return "IMMEDIATE emergency department evaluation with cardiology consultation - rule out STEMI/NSTEMI with urgent catheterization readiness"
                 elif "stable angina" in medical_mechanism:
-                    return "URGENT cardiology referral - possible unstable angina transformation"
+                    return "URGENT cardiology referral - possible unstable angina transformation requiring immediate assessment"
+                elif "enhanced" in rel_type and "cardiac" in rel_type:
+                    return "ENHANCED EMERGENCY: Comprehensive cardiology consultation with advanced cardiac life support readiness"
                 elif "cardiac" in medical_mechanism or "angina" in medical_mechanism:
-                    return "IMMEDIATE cardiology consultation - acute coronary syndrome evaluation"
+                    return "IMMEDIATE cardiology consultation - acute coronary syndrome evaluation with catheterization capability"
                 else:
-                    return "URGENT emergency department evaluation"
+                    return "URGENT emergency department evaluation with cardiac monitoring"
             
             # 🧠 URGENT REFERRALS
             elif clinical_sig == "urgent":
