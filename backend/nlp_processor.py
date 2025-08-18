@@ -485,16 +485,71 @@ class IntelligentTextNormalizer:
         return text, corrections
     
     def _convert_informal_to_formal(self, text: str) -> Tuple[str, List[str]]:
-        """Convert informal language to formal medical language"""
+        """
+        Convert informal language to formal medical language (Step 1.3 Enhancement)
+        Enhanced with robust phrase matching and context preservation
+        """
         corrections = []
+        original_text = text
         
-        for informal, formal in self.informal_to_formal_medical.items():
-            if informal.lower() in text.lower():
-                # Use word boundaries for better matching
-                pattern = r'\b' + re.escape(informal) + r'\b'
-                if re.search(pattern, text, re.IGNORECASE):
-                    text = re.sub(pattern, formal, text, flags=re.IGNORECASE)
-                    corrections.append(f"Formalized language: '{informal}' -> '{formal}'")
+        # Sort mappings by length (longest first) to handle overlapping phrases correctly
+        sorted_mappings = sorted(
+            self.informal_to_formal_medical.items(),
+            key=lambda x: len(x[0]),
+            reverse=True
+        )
+        
+        for informal, formal in sorted_mappings:
+            # Create multiple matching patterns for robustness
+            patterns_to_try = [
+                # Exact phrase match with word boundaries
+                r'\b' + re.escape(informal) + r'\b',
+                # Allow for slight variations in spacing
+                r'\b' + re.escape(informal.replace(" ", r"\s+")) + r'\b',
+                # Handle common contractions and variations
+                informal.replace("can't", r"can'?t").replace("don't", r"don'?t").replace("cant", r"can'?t"),
+            ]
+            
+            for pattern in patterns_to_try:
+                try:
+                    if re.search(pattern, text, re.IGNORECASE):
+                        # Apply the replacement
+                        new_text = re.sub(pattern, formal, text, flags=re.IGNORECASE)
+                        
+                        # Only apply if text actually changed
+                        if new_text != text:
+                            text = new_text
+                            corrections.append(f"Colloquial expression: '{informal}' -> '{formal}'")
+                            break  # Stop trying other patterns for this mapping
+                            
+                except re.error:
+                    # Skip patterns that cause regex errors
+                    continue
+        
+        # Handle compound informal expressions (multiple terms in one sentence)
+        # This addresses cases like "tummy hurt and throwing up" 
+        compound_patterns = [
+            {
+                'pattern': r'\b(tummy|belly|stomach)\s+(hurt|hurts|pain|ache)',
+                'replacement': 'abdominal pain',
+                'description': 'compound stomach pain expression'
+            },
+            {
+                'pattern': r'\b(throwing\s+up|puking)\s+(and|with|plus)\s+(feeling\s+sick|nausea)',
+                'replacement': 'vomiting with nausea',
+                'description': 'compound nausea/vomiting expression'
+            },
+            {
+                'pattern': r'\b(can\'?t|cannot)\s+(poop|go|use\s+bathroom)',
+                'replacement': 'experiencing constipation',
+                'description': 'compound constipation expression'
+            },
+        ]
+        
+        for compound in compound_patterns:
+            if re.search(compound['pattern'], text, re.IGNORECASE):
+                text = re.sub(compound['pattern'], compound['replacement'], text, flags=re.IGNORECASE)
+                corrections.append(f"Compound {compound['description']} converted to medical standard")
         
         return text, corrections
     
