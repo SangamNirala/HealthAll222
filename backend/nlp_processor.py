@@ -258,6 +258,7 @@ class IntelligentTextNormalizer:
             "can't breathe": "difficulty breathing",
             "cant breathe": "difficulty breathing",
             "cannot breathe": "difficulty breathing",
+            "can't breathe properly": "difficulty breathing",
             "short of breath": "experiencing shortness of breath",
             "out of breath": "experiencing breathlessness",
             "winded": "short of breath",
@@ -274,6 +275,7 @@ class IntelligentTextNormalizer:
             
             # FATIGUE & ENERGY
             "wiped out": "extremely fatigued",
+            "wiped": "extremely fatigued",  # Handle truncated version
             "exhausted": "severely fatigued",
             "drained": "feeling fatigued",
             "beat": "feeling tired",
