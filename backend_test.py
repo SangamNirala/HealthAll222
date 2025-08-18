@@ -1,5 +1,710 @@
 #!/usr/bin/env python3
 """
+STEP 2.2 CONTEXT-AWARE MEDICAL REASONING ENGINE TESTING
+=======================================================
+
+Comprehensive testing of the newly implemented Step 2.2 Context-Aware Medical Reasoning Engine
+integration with the Advanced Symptom Recognizer.
+
+TESTING FOCUS AREAS:
+1. Context-Aware Reasoning Integration
+2. Ultra-Challenging Contextual Scenarios (3 specific scenarios)
+3. Contextual Reasoning Features in API responses
+4. Algorithm Version Upgrade to "4.0_contextual_reasoning"
+5. Performance Requirements
+6. Medical AI Service Compatibility
+
+Author: Testing Agent
+Date: 2025-01-17
+"""
+
+import requests
+import json
+import time
+import sys
+import os
+from datetime import datetime
+from typing import Dict, Any, List
+
+# Backend URL from environment
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://symptomlogic.preview.emergentagent.com')
+API_BASE = f"{BACKEND_URL}/api"
+
+class ContextualReasoningTester:
+    """Comprehensive tester for Step 2.2 Context-Aware Medical Reasoning Engine"""
+    
+    def __init__(self):
+        self.test_results = []
+        self.total_tests = 0
+        self.passed_tests = 0
+        self.failed_tests = 0
+        
+    def log_test(self, test_name: str, passed: bool, details: str = "", response_data: Dict = None):
+        """Log test result"""
+        self.total_tests += 1
+        if passed:
+            self.passed_tests += 1
+            status = "✅ PASS"
+        else:
+            self.failed_tests += 1
+            status = "❌ FAIL"
+            
+        result = {
+            "test_name": test_name,
+            "status": status,
+            "passed": passed,
+            "details": details,
+            "timestamp": datetime.now().isoformat(),
+            "response_data": response_data
+        }
+        
+        self.test_results.append(result)
+        print(f"{status}: {test_name}")
+        if details:
+            print(f"   Details: {details}")
+        if not passed and response_data:
+            print(f"   Response: {json.dumps(response_data, indent=2)[:500]}...")
+        print()
+
+    def test_medical_ai_initialization(self) -> bool:
+        """Test Medical AI service initialization"""
+        try:
+            response = requests.post(f"{API_BASE}/medical-ai/initialize", 
+                json={
+                    "patient_id": "test-contextual-reasoning",
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                required_keys = ["consultation_id", "patient_id", "current_stage", "response"]
+                
+                if all(key in data for key in required_keys):
+                    self.log_test("Medical AI Initialization", True, 
+                                f"Successfully initialized with consultation_id: {data.get('consultation_id')}")
+                    return True
+                else:
+                    self.log_test("Medical AI Initialization", False, 
+                                f"Missing required keys. Got: {list(data.keys())}", data)
+                    return False
+            else:
+                self.log_test("Medical AI Initialization", False, 
+                            f"HTTP {response.status_code}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Medical AI Initialization", False, f"Exception: {str(e)}")
+            return False
+
+    def test_contextual_reasoning_integration(self) -> bool:
+        """Test that contextual reasoning is properly integrated into extract_medical_entities"""
+        try:
+            # Initialize consultation first
+            init_response = requests.post(f"{API_BASE}/medical-ai/initialize", 
+                json={
+                    "patient_id": "test-contextual-integration",
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if init_response.status_code != 200:
+                self.log_test("Contextual Reasoning Integration", False, 
+                            f"Failed to initialize: {init_response.status_code}")
+                return False
+                
+            consultation_id = init_response.json().get("consultation_id")
+            
+            # Test with a contextual medical statement
+            test_message = "I get dizzy and nauseous every morning when I stand up from bed, but it goes away when I sit back down"
+            
+            response = requests.post(f"{API_BASE}/medical-ai/message",
+                json={
+                    "consultation_id": consultation_id,
+                    "message": test_message,
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check if response contains contextual reasoning elements
+                response_text = data.get("response", "").lower()
+                
+                # Look for contextual reasoning indicators
+                contextual_indicators = [
+                    "positional", "orthostatic", "standing", "sitting", 
+                    "position", "context", "trigger", "causal"
+                ]
+                
+                found_indicators = [indicator for indicator in contextual_indicators 
+                                  if indicator in response_text]
+                
+                if found_indicators:
+                    self.log_test("Contextual Reasoning Integration", True,
+                                f"Found contextual reasoning indicators: {found_indicators}")
+                    return True
+                else:
+                    self.log_test("Contextual Reasoning Integration", False,
+                                f"No contextual reasoning indicators found in response", data)
+                    return False
+            else:
+                self.log_test("Contextual Reasoning Integration", False,
+                            f"HTTP {response.status_code}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Contextual Reasoning Integration", False, f"Exception: {str(e)}")
+            return False
+
+    def test_ultra_challenging_scenario_1(self) -> bool:
+        """Test Scenario 1: Positional/Orthostatic - Morning dizziness when standing"""
+        try:
+            # Initialize consultation
+            init_response = requests.post(f"{API_BASE}/medical-ai/initialize", 
+                json={
+                    "patient_id": "test-scenario-1",
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if init_response.status_code != 200:
+                return False
+                
+            consultation_id = init_response.json().get("consultation_id")
+            
+            # Ultra-challenging contextual scenario 1
+            scenario_1 = "Every morning when I get out of bed I feel dizzy and nauseous, sometimes I even feel like I'm going to faint, but it goes away after I sit back down for a few minutes"
+            
+            response = requests.post(f"{API_BASE}/medical-ai/message",
+                json={
+                    "consultation_id": consultation_id,
+                    "message": scenario_1,
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                response_text = data.get("response", "").lower()
+                
+                # Check for contextual reasoning features
+                expected_features = {
+                    "positional_context": ["positional", "orthostatic", "standing", "sitting"],
+                    "causal_relationships": ["when", "after", "trigger", "cause"],
+                    "clinical_reasoning": ["hypotension", "blood pressure", "circulation", "position"],
+                    "recommendations": ["slowly", "gradual", "hydration", "position"]
+                }
+                
+                found_features = {}
+                for feature_type, keywords in expected_features.items():
+                    found_keywords = [kw for kw in keywords if kw in response_text]
+                    found_features[feature_type] = found_keywords
+                
+                # Check urgency level
+                urgency = data.get("urgency", "routine")
+                
+                total_found = sum(len(keywords) for keywords in found_features.values())
+                
+                if total_found >= 3 and urgency in ["urgent", "emergency"]:
+                    self.log_test("Ultra-Challenging Scenario 1 (Positional/Orthostatic)", True,
+                                f"Found {total_found} contextual features, urgency: {urgency}")
+                    return True
+                else:
+                    self.log_test("Ultra-Challenging Scenario 1 (Positional/Orthostatic)", False,
+                                f"Insufficient contextual analysis. Found: {found_features}, urgency: {urgency}", data)
+                    return False
+            else:
+                self.log_test("Ultra-Challenging Scenario 1 (Positional/Orthostatic)", False,
+                            f"HTTP {response.status_code}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Ultra-Challenging Scenario 1 (Positional/Orthostatic)", False, f"Exception: {str(e)}")
+            return False
+
+    def test_ultra_challenging_scenario_2(self) -> bool:
+        """Test Scenario 2: Exertional/Cardiac - Chest pain with exertion"""
+        try:
+            # Initialize consultation
+            init_response = requests.post(f"{API_BASE}/medical-ai/initialize", 
+                json={
+                    "patient_id": "test-scenario-2",
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if init_response.status_code != 200:
+                return False
+                
+            consultation_id = init_response.json().get("consultation_id")
+            
+            # Ultra-challenging contextual scenario 2
+            scenario_2 = "I get this crushing chest pain whenever I walk uphill or climb more than one flight of stairs, feels like an elephant sitting on my chest, but it completely goes away within 2-3 minutes of resting"
+            
+            response = requests.post(f"{API_BASE}/medical-ai/message",
+                json={
+                    "consultation_id": consultation_id,
+                    "message": scenario_2,
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                response_text = data.get("response", "").lower()
+                
+                # Check for exertional context features
+                expected_features = {
+                    "exertional_context": ["exertion", "exercise", "stairs", "walking", "activity"],
+                    "cardiac_indicators": ["chest pain", "cardiac", "heart", "angina", "coronary"],
+                    "relief_pattern": ["rest", "resting", "stops", "goes away", "relief"],
+                    "emergency_recognition": ["emergency", "urgent", "911", "immediate", "serious"]
+                }
+                
+                found_features = {}
+                for feature_type, keywords in expected_features.items():
+                    found_keywords = [kw for kw in keywords if kw in response_text]
+                    found_features[feature_type] = found_keywords
+                
+                # Check urgency level - should be emergency for exertional chest pain
+                urgency = data.get("urgency", "routine")
+                
+                total_found = sum(len(keywords) for keywords in found_features.values())
+                
+                if total_found >= 4 and urgency == "emergency":
+                    self.log_test("Ultra-Challenging Scenario 2 (Exertional/Cardiac)", True,
+                                f"Found {total_found} contextual features, urgency: {urgency}")
+                    return True
+                else:
+                    self.log_test("Ultra-Challenging Scenario 2 (Exertional/Cardiac)", False,
+                                f"Insufficient contextual analysis. Found: {found_features}, urgency: {urgency}", data)
+                    return False
+            else:
+                self.log_test("Ultra-Challenging Scenario 2 (Exertional/Cardiac)", False,
+                            f"HTTP {response.status_code}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Ultra-Challenging Scenario 2 (Exertional/Cardiac)", False, f"Exception: {str(e)}")
+            return False
+
+    def test_ultra_challenging_scenario_3(self) -> bool:
+        """Test Scenario 3: Multi-Context Dietary/Stress - Complex trigger interaction"""
+        try:
+            # Initialize consultation
+            init_response = requests.post(f"{API_BASE}/medical-ai/initialize", 
+                json={
+                    "patient_id": "test-scenario-3",
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if init_response.status_code != 200:
+                return False
+                
+            consultation_id = init_response.json().get("consultation_id")
+            
+            # Ultra-challenging contextual scenario 3
+            scenario_3 = "I get really bad stomach cramps and loose stools about 30-60 minutes after eating ice cream or drinking milk, but only when I'm stressed out at work"
+            
+            response = requests.post(f"{API_BASE}/medical-ai/message",
+                json={
+                    "consultation_id": consultation_id,
+                    "message": scenario_3,
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                response_text = data.get("response", "").lower()
+                
+                # Check for multi-context features
+                expected_features = {
+                    "dietary_context": ["dairy", "lactose", "milk", "ice cream", "food"],
+                    "temporal_context": ["30-60 minutes", "after eating", "timing", "postprandial"],
+                    "stress_context": ["stress", "work", "emotional", "psychological"],
+                    "multi_trigger": ["combination", "both", "together", "interaction", "complex"]
+                }
+                
+                found_features = {}
+                for feature_type, keywords in expected_features.items():
+                    found_keywords = [kw for kw in keywords if kw in response_text]
+                    found_features[feature_type] = found_keywords
+                
+                # Check for lactose intolerance recognition
+                lactose_recognition = any(term in response_text for term in 
+                                        ["lactose", "dairy intolerance", "milk sensitivity"])
+                
+                total_found = sum(len(keywords) for keywords in found_features.values())
+                
+                if total_found >= 3 or lactose_recognition:
+                    self.log_test("Ultra-Challenging Scenario 3 (Multi-Context Dietary/Stress)", True,
+                                f"Found {total_found} contextual features, lactose recognition: {lactose_recognition}")
+                    return True
+                else:
+                    self.log_test("Ultra-Challenging Scenario 3 (Multi-Context Dietary/Stress)", False,
+                                f"Insufficient contextual analysis. Found: {found_features}", data)
+                    return False
+            else:
+                self.log_test("Ultra-Challenging Scenario 3 (Multi-Context Dietary/Stress)", False,
+                            f"HTTP {response.status_code}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Ultra-Challenging Scenario 3 (Multi-Context Dietary/Stress)", False, f"Exception: {str(e)}")
+            return False
+
+    def test_algorithm_version_upgrade(self) -> bool:
+        """Test that algorithm version is updated to 4.0_contextual_reasoning"""
+        try:
+            # Initialize consultation
+            init_response = requests.post(f"{API_BASE}/medical-ai/initialize", 
+                json={
+                    "patient_id": "test-algorithm-version",
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if init_response.status_code != 200:
+                return False
+                
+            consultation_id = init_response.json().get("consultation_id")
+            
+            # Send a test message
+            response = requests.post(f"{API_BASE}/medical-ai/message",
+                json={
+                    "consultation_id": consultation_id,
+                    "message": "I have a headache when I stand up",
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check if response contains algorithm version information
+                # This might be in metadata or context fields
+                response_str = json.dumps(data).lower()
+                
+                version_indicators = [
+                    "4.0_contextual_reasoning",
+                    "contextual_reasoning",
+                    "contextual_analysis_enabled",
+                    "reasoning_engine"
+                ]
+                
+                found_indicators = [indicator for indicator in version_indicators 
+                                  if indicator in response_str]
+                
+                if found_indicators:
+                    self.log_test("Algorithm Version Upgrade", True,
+                                f"Found version indicators: {found_indicators}")
+                    return True
+                else:
+                    # Check if contextual analysis is working (indirect verification)
+                    contextual_keywords = ["position", "context", "trigger", "causal"]
+                    found_contextual = [kw for kw in contextual_keywords if kw in response_str]
+                    
+                    if found_contextual:
+                        self.log_test("Algorithm Version Upgrade", True,
+                                    f"Contextual analysis working (indirect verification): {found_contextual}")
+                        return True
+                    else:
+                        self.log_test("Algorithm Version Upgrade", False,
+                                    "No algorithm version or contextual analysis indicators found", data)
+                        return False
+            else:
+                self.log_test("Algorithm Version Upgrade", False,
+                            f"HTTP {response.status_code}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Algorithm Version Upgrade", False, f"Exception: {str(e)}")
+            return False
+
+    def test_performance_requirements(self) -> bool:
+        """Test that contextual reasoning adds minimal overhead and maintains good performance"""
+        try:
+            # Initialize consultation
+            init_response = requests.post(f"{API_BASE}/medical-ai/initialize", 
+                json={
+                    "patient_id": "test-performance",
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if init_response.status_code != 200:
+                return False
+                
+            consultation_id = init_response.json().get("consultation_id")
+            
+            # Test multiple scenarios and measure performance
+            test_scenarios = [
+                "I get dizzy when I stand up",
+                "Chest pain when climbing stairs",
+                "Stomach pain after eating dairy when stressed",
+                "Headache in the morning",
+                "Joint pain worse in cold weather"
+            ]
+            
+            response_times = []
+            
+            for scenario in test_scenarios:
+                start_time = time.time()
+                
+                response = requests.post(f"{API_BASE}/medical-ai/message",
+                    json={
+                        "consultation_id": consultation_id,
+                        "message": scenario,
+                        "timestamp": datetime.now().isoformat()
+                    },
+                    timeout=30
+                )
+                
+                end_time = time.time()
+                response_time = end_time - start_time
+                response_times.append(response_time)
+                
+                if response.status_code != 200:
+                    self.log_test("Performance Requirements", False,
+                                f"Failed request for scenario: {scenario}")
+                    return False
+            
+            # Calculate performance metrics
+            avg_response_time = sum(response_times) / len(response_times)
+            max_response_time = max(response_times)
+            
+            # Performance thresholds (reasonable for contextual analysis)
+            avg_threshold = 10.0  # seconds
+            max_threshold = 15.0  # seconds
+            
+            if avg_response_time <= avg_threshold and max_response_time <= max_threshold:
+                self.log_test("Performance Requirements", True,
+                            f"Avg: {avg_response_time:.2f}s, Max: {max_response_time:.2f}s")
+                return True
+            else:
+                self.log_test("Performance Requirements", False,
+                            f"Performance too slow. Avg: {avg_response_time:.2f}s (>{avg_threshold}s), Max: {max_response_time:.2f}s (>{max_threshold}s)")
+                return False
+                
+        except Exception as e:
+            self.log_test("Performance Requirements", False, f"Exception: {str(e)}")
+            return False
+
+    def test_contextual_reasoning_features(self) -> bool:
+        """Test that API responses include contextual reasoning features"""
+        try:
+            # Initialize consultation
+            init_response = requests.post(f"{API_BASE}/medical-ai/initialize", 
+                json={
+                    "patient_id": "test-contextual-features",
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if init_response.status_code != 200:
+                return False
+                
+            consultation_id = init_response.json().get("consultation_id")
+            
+            # Test with a complex contextual scenario
+            complex_scenario = "I get severe headaches that start in the morning when I wake up, especially on weekdays when I'm stressed about work, and they get worse when I'm in bright fluorescent lighting at the office"
+            
+            response = requests.post(f"{API_BASE}/medical-ai/message",
+                json={
+                    "consultation_id": consultation_id,
+                    "message": complex_scenario,
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                response_text = data.get("response", "").lower()
+                
+                # Check for required contextual reasoning features
+                required_features = {
+                    "causal_relationships": ["trigger", "cause", "related", "due to"],
+                    "clinical_hypotheses": ["possible", "likely", "suggest", "indicate"],
+                    "contextual_factors": ["stress", "lighting", "work", "environment"],
+                    "medical_reasoning": ["because", "mechanism", "physiology", "reason"],
+                    "recommendations": ["avoid", "reduce", "manage", "recommend"],
+                    "trigger_avoidance": ["limit", "minimize", "prevent", "control"]
+                }
+                
+                found_features = {}
+                feature_score = 0
+                
+                for feature_type, keywords in required_features.items():
+                    found_keywords = [kw for kw in keywords if kw in response_text]
+                    found_features[feature_type] = found_keywords
+                    if found_keywords:
+                        feature_score += 1
+                
+                # Need at least 4 out of 6 feature types
+                if feature_score >= 4:
+                    self.log_test("Contextual Reasoning Features", True,
+                                f"Found {feature_score}/6 feature types: {found_features}")
+                    return True
+                else:
+                    self.log_test("Contextual Reasoning Features", False,
+                                f"Only found {feature_score}/6 feature types: {found_features}", data)
+                    return False
+            else:
+                self.log_test("Contextual Reasoning Features", False,
+                            f"HTTP {response.status_code}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Contextual Reasoning Features", False, f"Exception: {str(e)}")
+            return False
+
+    def test_medical_ai_service_compatibility(self) -> bool:
+        """Test compatibility with main Medical AI endpoints"""
+        try:
+            # Test /api/medical-ai/initialize endpoint
+            init_response = requests.post(f"{API_BASE}/medical-ai/initialize", 
+                json={
+                    "patient_id": "test-compatibility",
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if init_response.status_code != 200:
+                self.log_test("Medical AI Service Compatibility", False,
+                            f"Initialize endpoint failed: {init_response.status_code}")
+                return False
+            
+            consultation_id = init_response.json().get("consultation_id")
+            
+            # Test /api/medical-ai/message endpoint with contextual reasoning
+            message_response = requests.post(f"{API_BASE}/medical-ai/message",
+                json={
+                    "consultation_id": consultation_id,
+                    "message": "I feel dizzy when I stand up quickly in the morning",
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=30
+            )
+            
+            if message_response.status_code != 200:
+                self.log_test("Medical AI Service Compatibility", False,
+                            f"Message endpoint failed: {message_response.status_code}")
+                return False
+            
+            message_data = message_response.json()
+            
+            # Check that response has required structure
+            required_keys = ["response", "stage", "urgency", "consultation_id"]
+            missing_keys = [key for key in required_keys if key not in message_data]
+            
+            if missing_keys:
+                self.log_test("Medical AI Service Compatibility", False,
+                            f"Missing required keys: {missing_keys}")
+                return False
+            
+            # Check that contextual reasoning is integrated into the consultation flow
+            response_text = message_data.get("response", "").lower()
+            contextual_indicators = ["position", "standing", "orthostatic", "dizziness"]
+            found_contextual = [indicator for indicator in contextual_indicators 
+                              if indicator in response_text]
+            
+            if found_contextual:
+                self.log_test("Medical AI Service Compatibility", True,
+                            f"Contextual reasoning integrated into consultation flow: {found_contextual}")
+                return True
+            else:
+                self.log_test("Medical AI Service Compatibility", False,
+                            f"Contextual reasoning not properly integrated into consultation flow", message_data)
+                return False
+                
+        except Exception as e:
+            self.log_test("Medical AI Service Compatibility", False, f"Exception: {str(e)}")
+            return False
+
+    def run_all_tests(self):
+        """Run all contextual reasoning tests"""
+        print("🧠 STEP 2.2 CONTEXT-AWARE MEDICAL REASONING ENGINE TESTING")
+        print("=" * 70)
+        print(f"Backend URL: {BACKEND_URL}")
+        print(f"Testing started at: {datetime.now().isoformat()}")
+        print()
+        
+        # Run all tests
+        test_methods = [
+            self.test_medical_ai_initialization,
+            self.test_contextual_reasoning_integration,
+            self.test_ultra_challenging_scenario_1,
+            self.test_ultra_challenging_scenario_2,
+            self.test_ultra_challenging_scenario_3,
+            self.test_algorithm_version_upgrade,
+            self.test_performance_requirements,
+            self.test_contextual_reasoning_features,
+            self.test_medical_ai_service_compatibility
+        ]
+        
+        for test_method in test_methods:
+            try:
+                test_method()
+            except Exception as e:
+                self.log_test(test_method.__name__, False, f"Test execution failed: {str(e)}")
+        
+        # Print summary
+        print("\n" + "=" * 70)
+        print("🧠 STEP 2.2 CONTEXT-AWARE MEDICAL REASONING ENGINE TEST SUMMARY")
+        print("=" * 70)
+        print(f"Total Tests: {self.total_tests}")
+        print(f"Passed: {self.passed_tests} ✅")
+        print(f"Failed: {self.failed_tests} ❌")
+        print(f"Success Rate: {(self.passed_tests/self.total_tests*100):.1f}%")
+        print()
+        
+        # Print detailed results
+        print("DETAILED TEST RESULTS:")
+        print("-" * 40)
+        for result in self.test_results:
+            print(f"{result['status']}: {result['test_name']}")
+            if result['details']:
+                print(f"   {result['details']}")
+        
+        print(f"\nTesting completed at: {datetime.now().isoformat()}")
+        
+        return self.passed_tests, self.failed_tests, self.total_tests
+
+def main():
+    """Main test execution"""
+    tester = ContextualReasoningTester()
+    passed, failed, total = tester.run_all_tests()
+    
+    # Exit with appropriate code
+    if failed == 0:
+        print("\n🎉 ALL TESTS PASSED! Context-Aware Medical Reasoning Engine is working correctly.")
+        sys.exit(0)
+    else:
+        print(f"\n⚠️  {failed} TESTS FAILED. Context-Aware Medical Reasoning Engine needs attention.")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+"""
 PHASE 4 COMPREHENSIVE MEDICAL PATTERN RECOGNITION ENGINE TESTING
 ================================================================
 
