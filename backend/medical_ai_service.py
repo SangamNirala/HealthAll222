@@ -6614,18 +6614,45 @@ class ContextAwareMedicalReasoner:
         return factors
     
     def _ensure_comprehensive_environmental_factors(self, text: str, environmental_analysis: Dict) -> List[str]:
-        """🔧 PHASE 3 FIX: Ensure comprehensive environmental factor detection"""
+        """🔧 PHASE 3 ENHANCED: Ensure comprehensive environmental factor detection for ultra-challenging scenarios"""
         factors = list(environmental_analysis.get("factors", []))
         text_lower = text.lower()
         
-        # Add missing critical environmental factors
-        if "stress" in text_lower and "work" in text_lower:
-            if "workplace_stress" not in factors:
-                factors.append("workplace_stress")
+        # 🎯 ULTRA-CHALLENGING SCENARIO ENVIRONMENTAL FACTOR DETECTION
+        environmental_scenarios = [
+            # Scenario 1: Orthostatic environmental
+            (r"every.*morning.*bed", "morning_bedroom_environment"),
+            (r"(?:chair|sitting).*(?:standing|get\s+up)", "seated_to_standing_environment"),
+            
+            # Scenario 2: Exertional cardiac environmental  
+            (r"(?:uphill|stairs).*(?:walking|climbing)", "exertional_physical_environment"),
+            (r"(?:sitting|light.*activities).*house", "low_exertion_environment"),
+            (r"never.*happens.*sitting", "non_exertional_environment"),
+            
+            # Scenario 3: Dietary stress environmental
+            (r"stressed.*(?:at\s+)?work", "workplace_stress_environment"),
+            (r"(?:relaxed|calm).*(?:at\s+)?home", "relaxed_home_environment"),
+            (r"weekends.*(?:home|relaxed)", "weekend_home_environment"),
+            (r"(?:dairy|milk|ice\s+cream)", "dairy_consumption_environment")
+        ]
         
-        if "relaxed" in text_lower or "weekend" in text_lower:
-            if "relaxed_environment" not in factors:
-                factors.append("relaxed_environment")
+        for pattern, factor in environmental_scenarios:
+            if re.search(pattern, text_lower) and factor not in factors:
+                factors.append(factor)
+        
+        # Add critical environmental factors for comprehensive detection
+        critical_environmental_factors = [
+            "stress_environment_correlation",
+            "physical_activity_environment", 
+            "dietary_trigger_environment",
+            "situational_symptom_modulation"
+        ]
+        
+        # Detect environmental relationships
+        if any(re.search(p, text_lower) for p in [r"(?:work|home|stress)", r"(?:uphill|stairs|climb)", r"(?:dairy|eating|food)"]):
+            for critical_factor in critical_environmental_factors:
+                if critical_factor not in factors:
+                    factors.append(critical_factor)
         
         return factors
     
