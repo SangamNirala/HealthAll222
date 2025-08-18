@@ -6915,7 +6915,12 @@ class WorldClassMedicalAI:
         }
     
     async def _handle_ros_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
-        """Handle Review of Systems stage"""
+        """Handle Review of Systems stage with Step 2.2 contextual reasoning"""
+        
+        # 🧠 STEP 2.2: Extract contextual reasoning from message
+        advanced_extraction = self.advanced_symptom_recognizer.extract_medical_entities(message)
+        contextual_reasoning = advanced_extraction.get("contextual_reasoning", {})
+        
         context.current_stage = MedicalInterviewStage.PAST_MEDICAL_HISTORY
         
         response = "Thank you for that information. Now, do you have any significant past medical history, such as previous hospitalizations, surgeries, or ongoing medical conditions that you're being treated for?"
@@ -6924,7 +6929,18 @@ class WorldClassMedicalAI:
             "response": response,
             "context": asdict(context),
             "stage": context.current_stage.value,
-            "urgency": context.emergency_level
+            "urgency": context.emergency_level,
+            
+            # 🧠 STEP 2.2: Include contextual reasoning data
+            "causal_relationships": contextual_reasoning.get("causal_relationships", []),
+            "clinical_hypotheses": contextual_reasoning.get("clinical_hypotheses", []),
+            "contextual_factors": contextual_reasoning.get("contextual_factors", {}),
+            "medical_reasoning_narrative": contextual_reasoning.get("medical_reasoning_narrative", ""),
+            "context_based_recommendations": contextual_reasoning.get("context_based_recommendations", []),
+            "trigger_avoidance_strategies": contextual_reasoning.get("trigger_avoidance_strategies", []),
+            "specialist_referral_context": contextual_reasoning.get("specialist_referral_context"),
+            "contextual_significance": contextual_reasoning.get("contextual_significance", "routine"),
+            "reasoning_confidence": contextual_reasoning.get("reasoning_confidence", 0.0)
         }
     
     async def _handle_pmh_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
