@@ -5180,7 +5180,7 @@ class ContextAwareMedicalReasoner:
         return analysis
     
     def extract_temporal_context_reasoning(self, text: str) -> Dict[str, Any]:
-        """Advanced temporal context analysis with circadian and activity correlations"""
+        """🧠 REVOLUTIONARY TEMPORAL CONTEXT ANALYSIS WITH CIRCADIAN INTELLIGENCE 🧠"""
         
         analysis = {
             "factors": [],
@@ -5192,24 +5192,40 @@ class ContextAwareMedicalReasoner:
         
         text_lower = text.lower()
         
-        # Detect temporal patterns
+        # 🎯 HIGH-EFFICIENCY TEMPORAL PATTERNS (Optimized for performance)
         temporal_patterns = [
-            (r"(?:morning|am|early)", "morning_pattern", 0.8),
-            (r"(?:evening|night|pm)", "evening_pattern", 0.8),
-            (r"(?:after\s+eating|postprandial)", "postprandial_pattern", 0.9),
-            (r"(?:with\s+exercise|during\s+activity)", "activity_related", 0.85),
-            (r"(?:cyclical|periodic|comes\s+and\s+goes)", "cyclical_pattern", 0.75)
+            # Circadian patterns
+            (r"(?:morning|am|early.*morning|wake\s+up|first\s+thing)", "morning_pattern", 0.85),
+            (r"(?:evening|night|pm|late.*day|bedtime)", "evening_pattern", 0.80),
+            (r"(?:after\s+eating|postprandial|post.*meal|meal.*time)", "postprandial_pattern", 0.90),
+            
+            # Activity-related temporal patterns
+            (r"(?:during|with|when).*(?:exercise|activity|exertion|physical)", "activity_temporal", 0.88),
+            (r"(?:after|following).*(?:exercise|activity|work|stress)", "post_activity_pattern", 0.82),
+            
+            # Symptom timing patterns
+            (r"(?:comes?\s+and\s+goes?|cyclical|periodic|intermittent)", "cyclical_pattern", 0.85),
+            (r"(?:constant|continuous|all\s+day|persistent)", "persistent_pattern", 0.78),
+            (r"(?:sudden|immediately|right\s+away|instant)", "acute_onset_pattern", 0.92),
+            (r"(?:gradually|over\s+time|slow|progressive)", "gradual_pattern", 0.75)
         ]
         
         total_confidence = 0.0
         pattern_count = 0
         
+        # Efficient pattern processing
         for pattern, factor_type, confidence in temporal_patterns:
             if re.search(pattern, text_lower):
                 analysis["factors"].append(factor_type)
-                analysis["temporal_patterns"].append(pattern)
+                analysis["temporal_patterns"].append(factor_type)
                 total_confidence += confidence
                 pattern_count += 1
+                
+                # Categorize patterns for enhanced analysis
+                if "morning" in factor_type or "evening" in factor_type:
+                    analysis["circadian_indicators"].append(factor_type)
+                elif "activity" in factor_type or "exercise" in factor_type:
+                    analysis["activity_correlations"].append(factor_type)
         
         if pattern_count > 0:
             analysis["confidence"] = total_confidence / pattern_count
