@@ -371,8 +371,8 @@ class WorldClassMedicalIntentClassifier:
             "follow_up_scheduling": {
                 "description": "Scheduling follow-up appointments",
                 "patterns": [
-                    IntentPattern(r"\b(follow.?up|next appointment|schedule (next|follow.?up))\b", 0.9, ClinicalSignificance.LOW),
-                    IntentPattern(r"\b(check back|return visit|come back|see again)\b", 0.85, ClinicalSignificance.LOW),
+                    IntentPattern(r"\b(follow.?up|next appointment|schedule (next|follow.?up))\b", 0.9, ClinicalSignificance.ROUTINE),
+                    IntentPattern(r"\b(check back|return visit|come back|see again)\b", 0.85, ClinicalSignificance.ROUTINE),
                     IntentPattern(r"\b(monitoring|track progress|follow progress)\b", 0.8, ClinicalSignificance.MEDIUM),
                 ],
                 "clinical_significance": "low"
