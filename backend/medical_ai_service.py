@@ -6821,7 +6821,16 @@ class WorldClassMedicalAI:
             "response": response,
             "context": asdict(context),
             "stage": context.current_stage.value,
-            "urgency": context.emergency_level
+            "urgency": context.emergency_level,
+            # 🧠 STEP 2.2: ADD CONTEXTUAL REASONING TO API RESPONSE  
+            "contextual_reasoning": context.symptom_data.get("contextual_reasoning", {}),
+            "causal_relationships": context.symptom_data.get("causal_relationships", []),
+            "clinical_hypotheses": context.symptom_data.get("clinical_hypotheses", []),
+            "medical_reasoning_narrative": context.symptom_data.get("medical_reasoning_narrative", ""),
+            "context_based_recommendations": context.symptom_data.get("context_based_recommendations", []),
+            "trigger_avoidance_strategies": context.symptom_data.get("trigger_avoidance_strategies", []),
+            "specialist_referral_context": context.symptom_data.get("specialist_referral_context"),
+            "contextual_significance": context.symptom_data.get("contextual_significance", "routine")
         }
     
     async def _handle_ros_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
