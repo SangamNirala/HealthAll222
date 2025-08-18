@@ -416,7 +416,7 @@ class IntelligentTextNormalizer:
         return text, corrections
     
     def _correct_medical_spelling(self, text: str) -> Tuple[str, List[str]]:
-        """Advanced medical spelling correction using Step 1.2 enhancement"""
+        """Advanced medical spelling correction using Step 1.2 enhancement - Step 1.3 Compatible"""
         corrections = []
         
         # Step 1: Apply basic dictionary corrections first (for compatibility)
@@ -429,25 +429,33 @@ class IntelligentTextNormalizer:
                     corrections.append(f"Basic spelling correction: '{misspelled}' -> '{correct}'")
         
         # Step 2: Apply advanced spell checking to all words (Step 1.2 enhancement)
+        # BUT avoid correcting common colloquial terms that should be handled by Step 1.3
+        colloquial_terms_to_preserve = {
+            "gut", "belly", "tummy", "wiped", "out", "crappy", "poop", "dizzy",
+            "queasy", "woozy", "awful", "lousy", "sick", "breathe", "breath"
+        }
+        
         words = re.findall(r'\b[a-zA-Z]+\b', text)
         
         for word in words:
-            if len(word) > 2:  # Only check words longer than 2 characters
+            if len(word) > 2 and word.lower() not in colloquial_terms_to_preserve:  # Only check words longer than 2 characters AND not colloquial
                 spell_result = self.advanced_spell_checker.correct_medical_spelling(word)
                 
                 # Apply correction if confidence is high enough and word actually changed
-                if (spell_result.confidence_score >= 0.7 and 
+                if (spell_result.confidence_score >= 0.8 and  # Increased confidence threshold
                     spell_result.corrected_word.lower() != spell_result.original_word.lower()):
                     
-                    # Replace the word in text (case-preserving)
-                    pattern = r'\b' + re.escape(word) + r'\b'
-                    text = re.sub(pattern, spell_result.corrected_word, text, flags=re.IGNORECASE)
-                    
-                    corrections.append(
-                        f"Advanced spelling correction: '{spell_result.original_word}' -> "
-                        f"'{spell_result.corrected_word}' (confidence: {spell_result.confidence_score:.2f}, "
-                        f"method: {spell_result.correction_method})"
-                    )
+                    # Additional safety check - don't convert to medical terms if original was colloquial
+                    if spell_result.original_word.lower() not in colloquial_terms_to_preserve:
+                        # Replace the word in text (case-preserving)
+                        pattern = r'\b' + re.escape(word) + r'\b'
+                        text = re.sub(pattern, spell_result.corrected_word, text, flags=re.IGNORECASE)
+                        
+                        corrections.append(
+                            f"Advanced spelling correction: '{spell_result.original_word}' -> "
+                            f"'{spell_result.corrected_word}' (confidence: {spell_result.confidence_score:.2f}, "
+                            f"method: {spell_result.correction_method})"
+                        )
         
         return text, corrections
     
