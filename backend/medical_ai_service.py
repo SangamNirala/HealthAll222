@@ -4754,8 +4754,10 @@ class AdvancedSymptomRecognizer:
             if re.search(pattern, text_lower):
                 entities.append(QualityEntity(
                     quality_descriptor=quality,
+                    onset_pattern="sudden",  # Added required parameter
+                    progression="stable",    # Added required parameter
                     pain_mechanism=mechanism,
-                    medical_significance="significant",
+                    clinical_significance="significant",  # Fixed parameter name
                     confidence=confidence
                 ))
         
