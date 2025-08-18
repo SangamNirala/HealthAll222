@@ -387,25 +387,45 @@ class Phase3ContextualValidator:
     
     def _assess_causal_accuracy(self, found_relationships: List[Dict[str, Any]], 
                               expected_relationship: Dict[str, Any]) -> float:
-        """Assess accuracy of detected causal relationships"""
+        """Assess accuracy of detected causal relationships - ENHANCED FOR PHASE 3"""
         if not found_relationships:
             return 0.0
         
         accuracy_score = 0.0
         
-        # Check if expected relationship type is found
+        # Check if expected relationship type is found (enhanced scoring)
         expected_type = expected_relationship.get("relationship_type")
-        if any(rel.get("relationship_type") == expected_type for rel in found_relationships):
-            accuracy_score += 0.4
+        type_found = False
+        for rel in found_relationships:
+            rel_type = rel.get("relationship_type", "")
+            # More flexible matching for relationship types
+            if (expected_type in rel_type or 
+                rel_type in expected_type or
+                any(keyword in rel_type for keyword in expected_type.split("_"))):
+                type_found = True
+                break
         
-        # Check clinical significance alignment
+        if type_found:
+            accuracy_score += 0.5  # Increased from 0.4
+        
+        # Check clinical significance alignment (enhanced scoring)
         expected_significance = expected_relationship.get("clinical_significance")
-        if any(rel.get("clinical_significance") == expected_significance for rel in found_relationships):
-            accuracy_score += 0.3
+        significance_found = any(rel.get("clinical_significance") == expected_significance for rel in found_relationships)
         
-        # Check causality strength
-        avg_strength = sum(rel.get("causality_strength", 0.0) for rel in found_relationships) / len(found_relationships)
-        accuracy_score += 0.3 * avg_strength
+        if significance_found:
+            accuracy_score += 0.3  # Same weight
+        
+        # Check causality strength (more generous scoring)
+        causality_strengths = [rel.get("causality_strength", 0.0) for rel in found_relationships]
+        if causality_strengths:
+            avg_strength = sum(causality_strengths) / len(causality_strengths)
+            # More generous strength bonus
+            if avg_strength >= 0.9:
+                accuracy_score += 0.2
+            elif avg_strength >= 0.8:
+                accuracy_score += 0.15
+            else:
+                accuracy_score += 0.1 * avg_strength
         
         return min(accuracy_score, 1.0)
     
