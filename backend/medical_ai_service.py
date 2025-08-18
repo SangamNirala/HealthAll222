@@ -6025,8 +6025,8 @@ class WorldClassMedicalAI:
                 # 🚀 STEP 2.2: CONTEXTUALLY INTELLIGENT RESPONSE GENERATION
                 if causal_relationships:
                     # Use contextual reasoning to provide more intelligent response
-                    triggers = [rel.get("trigger", "") for rel in causal_relationships if rel.get("trigger")]
-                    symptoms = [rel.get("symptom", "") for rel in causal_relationships if rel.get("symptom")]
+                    triggers = [rel.trigger for rel in causal_relationships if hasattr(rel, 'trigger') and rel.trigger]
+                    symptoms = [rel.symptom for rel in causal_relationships if hasattr(rel, 'symptom') and rel.symptom]
                     
                     contextual_response = self._generate_contextual_greeting_response(triggers, symptoms, contextual_reasoning)
                     ai_response = await self._generate_empathetic_response(contextual_response)
