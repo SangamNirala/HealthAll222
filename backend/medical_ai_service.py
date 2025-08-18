@@ -658,24 +658,25 @@ class WorldClassMedicalAI:
         return "\n".join(assessment_parts)
     
     async def _assess_emergency_risk(self, message: str, context: MedicalContext) -> Dict[str, Any]:
-        """Assess emergency risk based on symptoms"""
+        """Assess emergency risk with proper medical triage approach"""
         
         message_lower = message.lower()
         emergency_detected = False
         emergency_level = "none"
         emergency_reasons = []
         
-        # Check for emergency keywords
+        # Only check for TRUE emergency keywords (not general symptoms)
         for keyword in self.emergency_keywords:
             if keyword in message_lower:
                 emergency_detected = True
                 emergency_reasons.append(f"Mentioned: {keyword}")
         
-        # Check for critical symptom combinations
+        # Check for very specific critical symptom combinations with qualifying language
         critical_combinations = [
-            ["chest pain", "shortness of breath"],
-            ["severe headache", "neck stiffness"],
-            ["abdominal pain", "vomiting blood"]
+            ["crushing chest pain", "can't breathe"],
+            ["worst headache ever", "neck stiffness"],
+            ["severe bleeding", "won't stop"],
+            ["passed out", "chest pain"]
         ]
         
         for combination in critical_combinations:
@@ -684,11 +685,14 @@ class WorldClassMedicalAI:
                 emergency_level = "critical"
                 emergency_reasons.append(f"Critical combination: {' + '.join(combination)}")
         
+        # Lower confidence to allow for follow-up questions unless very clear emergency
+        confidence = 0.95 if emergency_detected and len(emergency_reasons) > 0 else 0.05
+        
         return {
             "emergency_detected": emergency_detected,
             "emergency_level": emergency_level,
             "reasons": emergency_reasons,
-            "confidence": 0.95 if emergency_detected else 0.05
+            "confidence": confidence
         }
     
     async def _handle_emergency_response(self, emergency_assessment: Dict[str, Any], context: MedicalContext) -> Dict[str, Any]:
