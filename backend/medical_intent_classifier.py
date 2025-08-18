@@ -189,7 +189,7 @@ class WorldClassMedicalIntentClassifier:
                 "patterns": [
                     IntentPattern(r"\b(getting worse|worsening|deteriorating|progressing)\b", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.3),
                     IntentPattern(r"\b(getting better|improving|healing|recovering)\b", 0.85, ClinicalSignificance.MEDIUM),
-                    IntentPattern(r"\b(about the same|stable|unchanged|no change)\b", 0.8, ClinicalSignificance.LOW),
+                    IntentPattern(r"\b(about the same|stable|unchanged|no change)\b", 0.8, ClinicalSignificance.ROUTINE),
                     IntentPattern(r"\b(comes and goes|fluctuating|variable|up and down)\b", 0.8, ClinicalSignificance.MEDIUM),
                 ],
                 "clinical_significance": "high"
