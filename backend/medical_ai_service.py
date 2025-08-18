@@ -298,21 +298,21 @@ class WorldClassMedicalAI:
         # 3. Update conversation context
         updated_context = await self._update_medical_context(medical_entities, context, normalized_message)
         
-        # 4. Determine next action based on interview stage
+        # 4. Determine next action based on interview stage (use normalized message)
         if updated_context.current_stage == MedicalInterviewStage.GREETING:
-            return await self._handle_greeting_stage(message, updated_context)
+            return await self._handle_greeting_stage(normalized_message, updated_context)
         elif updated_context.current_stage == MedicalInterviewStage.CHIEF_COMPLAINT:
-            return await self._handle_chief_complaint_stage(message, updated_context)
+            return await self._handle_chief_complaint_stage(normalized_message, updated_context)
         elif updated_context.current_stage == MedicalInterviewStage.HISTORY_PRESENT_ILLNESS:
-            return await self._handle_hpi_stage(message, updated_context)
+            return await self._handle_hpi_stage(normalized_message, updated_context)
         elif updated_context.current_stage == MedicalInterviewStage.REVIEW_OF_SYSTEMS:
-            return await self._handle_ros_stage(message, updated_context)
+            return await self._handle_ros_stage(normalized_message, updated_context)
         elif updated_context.current_stage == MedicalInterviewStage.PAST_MEDICAL_HISTORY:
-            return await self._handle_pmh_stage(message, updated_context)
+            return await self._handle_pmh_stage(normalized_message, updated_context)
         elif updated_context.current_stage == MedicalInterviewStage.MEDICATIONS_ALLERGIES:
-            return await self._handle_medications_stage(message, updated_context)
+            return await self._handle_medications_stage(normalized_message, updated_context)
         elif updated_context.current_stage == MedicalInterviewStage.SOCIAL_FAMILY_HISTORY:
-            return await self._handle_social_history_stage(message, updated_context)
+            return await self._handle_social_history_stage(normalized_message, updated_context)
         else:
             return await self._generate_differential_diagnosis(updated_context)
     
