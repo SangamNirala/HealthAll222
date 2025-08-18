@@ -24,7 +24,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Backend URL from environment
-BACKEND_URL = "https://intent-genius.preview.emergentagent.com/api"
+BACKEND_URL = "https://medical-intents.preview.emergentagent.com/api"
 
 class Phase4CriticalTester:
     """

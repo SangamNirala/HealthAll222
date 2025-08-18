@@ -23,7 +23,7 @@ from datetime import datetime
 from typing import Dict, List, Any
 
 class TextNormalizationTester:
-    def __init__(self, base_url="https://intent-genius.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://medical-intents.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
