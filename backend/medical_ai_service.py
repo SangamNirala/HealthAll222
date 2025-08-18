@@ -5850,40 +5850,41 @@ class WorldClassMedicalAI:
             "reasoning_confidence": contextual_reasoning.get("reasoning_confidence", 0.0)
         }
     
-    async def _handle_hpi_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
-        """Handle History of Present Illness using OLDCARTS framework"""
+    def _generate_contextual_greeting_response(self, triggers: List[str], symptoms: List[str], contextual_reasoning: Dict[str, Any]) -> str:
+        """
+        🧠 STEP 2.2: Generate contextually intelligent greeting response based on causal relationships
+        """
+        clinical_hypotheses = contextual_reasoning.get("clinical_hypotheses", [])
+        contextual_significance = contextual_reasoning.get("contextual_significance", "routine")
         
-        # Extract HPI elements from patient response
-        hpi_elements = await self._extract_hpi_elements(message, context.symptom_data)
-        context.symptom_data.update(hpi_elements)
-        
-        # Determine next HPI question based on missing elements
-        missing_elements = self._get_missing_hpi_elements(context.symptom_data)
-        
-        if missing_elements:
-            next_element = missing_elements[0]
-            question = await self._generate_hpi_question(next_element, context)
+        # Build contextually aware response
+        if triggers and symptoms:
+            # Format triggers and symptoms nicely
+            triggers_text = " or ".join(triggers[:2])  # Use top 2 triggers
+            symptoms_text = " and ".join(symptoms[:2])  # Use top 2 symptoms
             
-            return {
-                "response": question,
-                "context": asdict(context),
-                "stage": context.current_stage.value,
-                "urgency": context.emergency_level,
-                "hpi_progress": f"{8 - len(missing_elements)}/8 complete"
-            }
+            base_response = f"I understand that you're experiencing {symptoms_text} related to {triggers_text}. "
+            
+            # Add clinical reasoning based on context
+            if contextual_significance == "emergency" or "emergency" in contextual_significance.lower():
+                urgency_note = "This pattern is concerning and requires immediate attention. "
+            elif contextual_significance == "urgent" or "urgent" in contextual_significance.lower():
+                urgency_note = "This type of symptom pattern is significant and needs prompt evaluation. "
+            else:
+                urgency_note = "This pattern provides important diagnostic clues. "
+            
+            # Add clinical hypothesis if available
+            if clinical_hypotheses:
+                hypothesis_note = f"Based on the pattern you're describing, I'm considering conditions like {clinical_hypotheses[0]}. "
+            else:
+                hypothesis_note = ""
+            
+            return (base_response + urgency_note + hypothesis_note + 
+                   "Let me gather more specific details to better understand the timeline and characteristics of your symptoms. "
+                   "When exactly did this pattern begin - was the onset sudden or gradual?")
         else:
-            # HPI complete, move to Review of Systems
-            context.current_stage = MedicalInterviewStage.REVIEW_OF_SYSTEMS
-            
-            ros_question = await self._generate_targeted_ros_question(context)
-            
-            return {
-                "response": ros_question,
-                "context": asdict(context),
-                "stage": context.current_stage.value,
-                "urgency": context.emergency_level,
-                "transition": "Moving to review of systems"
-            }
+            return ("Thank you for sharing your symptoms. I want to gather more specific details to better understand your condition. "
+                   "Let's start with when exactly these symptoms began - was the onset sudden or did it develop gradually over time?")
     
     async def _generate_hpi_question(self, element: str, context: MedicalContext) -> str:
         """Generate specific HPI questions using OLDCARTS framework"""
