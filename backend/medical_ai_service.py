@@ -882,6 +882,187 @@ class AdvancedSymptomRecognizer:
             }
         }
     
+    def _load_enhanced_symptom_patterns(self) -> Dict[str, List[str]]:
+        """
+        WORLD-CLASS MEDICAL ENTITY RECOGNITION PATTERNS
+        Comprehensive patterns for advanced symptom, temporal, and severity recognition
+        """
+        return {
+            # CORE PAIN & DISCOMFORT RECOGNITION - Extended beyond basic requirements
+            "pain_expressions": [
+                # Basic pain terms (provided)
+                r"\b(hurt|hurts|hurting|pain|painful|ache|aches|aching)\b",
+                r"\b(sore|tender|burning|stabbing|throbbing|cramping)\b",
+                
+                # CHALLENGE: Extended with advanced pain descriptors
+                r"\b(sharp|dull|shooting|radiating|constant|intermittent)\b",
+                r"\b(crushing|pressing|squeezing|tight|heavy|pressure)\b",
+                r"\b(electric|needle-like|knife-like|vice-like|pinching)\b",
+                r"\b(pulsating|pulsing|beating|pounding|hammering)\b",
+                r"\b(gnawing|boring|drilling|tearing|ripping)\b",
+                r"\b(tingling|numbness|pins and needles|weakness)\b",
+                r"\b(stiff|stiffness|locked|frozen|can't move)\b"
+            ],
+            
+            # TEMPORAL PATTERN INTELLIGENCE - Advanced time expressions  
+            "duration_patterns": [
+                # Basic duration (provided)
+                r"\b(\d+)\s*(day|days|week|weeks|month|months|hour|hours)\b",
+                r"\b(since|for|about|around)\s*(\d+|\w+)\b",
+                r"\b(yesterday|today|last night|this morning)\b",
+                
+                # CHALLENGE: Advanced temporal expressions
+                r"\b(started|began|first noticed)\s+(yesterday|today|last\s+\w+)\b",
+                r"\b(on and off|comes and goes|intermittent)\s+(for|since)\s+(\d+|\w+)\b",
+                r"\b(getting worse|better|same)\s+(over|for)\s+(\d+|\w+)\b",
+                r"\b(\d+)\s*(minute|minutes|second|seconds|year|years)\b",
+                r"\b(few|couple of|several|many)\s+(minutes|hours|days|weeks|months)\b",
+                r"\b(all day|all night|constantly|continuously|non-stop)\b",
+                r"\b(every\s+\d+|once\s+a|twice\s+a|multiple\s+times)\s*(minute|hour|day)\b"
+            ],
+            
+            # SEVERITY QUANTIFICATION SYSTEM - Comprehensive severity recognition
+            "severity_indicators": [
+                # Basic severity (provided)  
+                r"\b(really|very|extremely|severely|badly|terrible|horrible)\b",
+                r"\b(mild|moderate|severe|unbearable|excruciating)\b",
+                r"\b(\d+)/10|\d+\s*out\s*of\s*10\b",
+                
+                # CHALLENGE: Advanced severity recognition
+                r"\b(barely noticeable|slight|minor|little bit|tiny)\b",
+                r"\b(worst pain ever|can't function|debilitating|crippling)\b",
+                r"\b(tolerable|manageable|livable|bearable)\b",
+                r"\b(keeps me awake|wake me up|can't sleep|prevents sleep)\b",
+                r"\b(making me cry|brought tears|overwhelming)\b",
+                r"\b(getting\s+worse|worsening|intensifying|escalating)\b",
+                r"\b(getting\s+better|improving|subsiding|decreasing)\b"
+            ],
+            
+            # COMPREHENSIVE BODY LOCATION PATTERNS
+            "body_location_patterns": [
+                r"\b(head|skull|scalp|forehead|temple|back of head)\b",
+                r"\b(eye|eyes|eyelid|vision|sight)\b",
+                r"\b(ear|ears|hearing|eardrum)\b",
+                r"\b(nose|nostril|sinus|nasal)\b",
+                r"\b(mouth|lips|tongue|teeth|jaw|gums)\b",
+                r"\b(throat|neck|thyroid|lymph nodes)\b",
+                r"\b(chest|breast|ribs|sternum|breastbone)\b",
+                r"\b(heart|cardiac|pericardium)\b",
+                r"\b(lung|lungs|respiratory|breathing)\b",
+                r"\b(shoulder|shoulders|collar bone|clavicle)\b",
+                r"\b(arm|arms|upper arm|forearm|elbow|wrist)\b",
+                r"\b(hand|hands|finger|fingers|thumb|palm)\b",
+                r"\b(back|spine|vertebrae|lower back|upper back)\b",
+                r"\b(abdomen|stomach|belly|gut|intestine)\b",
+                r"\b(pelvis|hip|hips|groin|pelvic)\b",
+                r"\b(leg|legs|thigh|calf|shin|knee)\b",
+                r"\b(foot|feet|ankle|toe|toes|heel|sole)\b",
+                r"\b(left|right|both|bilateral|unilateral)\b",
+                r"\b(upper|lower|middle|center|side|front|back)\b"
+            ],
+            
+            # SYMPTOM QUALITY DESCRIPTORS
+            "symptom_quality_patterns": [
+                r"\b(sudden|sudden onset|came on suddenly|all at once)\b",
+                r"\b(gradual|gradually|slowly|progressive|over time)\b",
+                r"\b(constant|continuous|all the time|24/7|non-stop)\b",
+                r"\b(variable|changing|fluctuating|unpredictable)\b",
+                r"\b(worse with|triggered by|brought on by|caused by)\b",
+                r"\b(better with|relieved by|helped by|improves with)\b",
+                r"\b(movement|walking|exercise|activity|exertion)\b",
+                r"\b(rest|lying down|sitting|position|posture)\b",
+                r"\b(eating|food|drinking|meals|swallowing)\b",
+                r"\b(breathing|coughing|sneezing|talking)\b",
+                r"\b(stress|anxiety|emotions|worry|tension)\b",
+                r"\b(weather|cold|heat|humidity|pressure changes)\b"
+            ],
+            
+            # ASSOCIATED SYMPTOMS RECOGNITION
+            "associated_symptom_patterns": [
+                r"\b(with|along with|accompanied by|plus|and also|together with)\b",
+                r"\b(nausea|vomiting|throwing up|sick to stomach)\b",
+                r"\b(fever|chills|hot|cold|sweats|sweating)\b",
+                r"\b(dizziness|dizzy|lightheaded|vertigo|spinning)\b",
+                r"\b(fatigue|tired|exhausted|weak|weakness)\b",
+                r"\b(shortness of breath|trouble breathing|winded)\b",
+                r"\b(palpitations|racing heart|heart pounding)\b",
+                r"\b(confusion|disoriented|foggy|unclear thinking)\b",
+                r"\b(rash|skin changes|itching|swelling)\b"
+            ],
+            
+            # FREQUENCY & PATTERN RECOGNITION  
+            "frequency_patterns": [
+                r"\b(constant|continuous|all the time|24/7|never stops)\b",
+                r"\b(comes and goes|on and off|intermittent|episodic)\b",
+                r"\b(every \d+|once a|twice a|several times|multiple times)\b",
+                r"\b(daily|hourly|weekly|monthly)\b",
+                r"\b(morning|afternoon|evening|night|bedtime)\b",
+                r"\b(after meals|before meals|when hungry|when full)\b",
+                r"\b(during exercise|at rest|when stressed|when relaxed)\b"
+            ],
+            
+            # TRIGGER & CONTEXT PATTERNS
+            "trigger_context_patterns": [
+                r"\b(when I|after I|before I|during|while|as I)\b",
+                r"\b(eat|drink|walk|run|exercise|work|sleep|lie down)\b",
+                r"\b(certain foods|spicy food|dairy|alcohol|caffeine)\b",
+                r"\b(physical activity|stress|emotions|weather)\b",
+                r"\b(position|standing|sitting|bending|lifting)\b",
+                r"\b(medications|pills|treatment|therapy)\b"
+            ],
+            
+            # EMERGENCY RED FLAG PATTERNS
+            "emergency_patterns": [
+                r"\b(crushing chest pain|heart attack|can't breathe)\b",
+                r"\b(worst headache ever|thunderclap|sudden severe)\b",
+                r"\b(loss of consciousness|passed out|fainted)\b",
+                r"\b(severe bleeding|won't stop bleeding|blood everywhere)\b",
+                r"\b(difficulty swallowing|can't swallow|choking)\b",
+                r"\b(sudden weakness|can't move|paralysis)\b",
+                r"\b(facial drooping|slurred speech|stroke symptoms)\b",
+                r"\b(severe allergic reaction|anaphylaxis|can't breathe)\b"
+            ],
+            
+            # NEUROLOGICAL SYMPTOM PATTERNS
+            "neurological_patterns": [
+                r"\b(headache|migraine|head pain|skull pain)\b",
+                r"\b(dizziness|vertigo|spinning|balance problems)\b",
+                r"\b(confusion|memory loss|forgetful|disoriented)\b",
+                r"\b(seizure|convulsion|fit|episode)\b",
+                r"\b(numbness|tingling|pins and needles|weakness)\b",
+                r"\b(vision changes|blurry|double vision|blind spots)\b",
+                r"\b(hearing loss|ringing|tinnitus|ear problems)\b"
+            ],
+            
+            # GASTROINTESTINAL PATTERNS  
+            "gastrointestinal_patterns": [
+                r"\b(nausea|vomiting|throwing up|sick|queasy)\b",
+                r"\b(diarrhea|loose stools|frequent bowel movements)\b",
+                r"\b(constipation|can't poop|hard stools|straining)\b",
+                r"\b(abdominal pain|stomach pain|belly ache|gut pain)\b",
+                r"\b(bloating|gas|flatulence|distended)\b",
+                r"\b(heartburn|acid reflux|indigestion|burning)\b",
+                r"\b(loss of appetite|can't eat|no hunger|full quickly)\b"
+            ],
+            
+            # RESPIRATORY PATTERNS
+            "respiratory_patterns": [
+                r"\b(shortness of breath|trouble breathing|winded|breathless)\b",
+                r"\b(cough|coughing|hack|clearing throat)\b",
+                r"\b(wheezing|whistling|tight chest)\b",
+                r"\b(phlegm|sputum|mucus|congestion)\b",
+                r"\b(chest tightness|pressure|heavy|constricted)\b"
+            ],
+            
+            # CARDIOVASCULAR PATTERNS
+            "cardiovascular_patterns": [
+                r"\b(chest pain|heart pain|cardiac|angina)\b",
+                r"\b(palpitations|racing heart|irregular heartbeat)\b",
+                r"\b(swelling|edema|puffy|fluid retention)\b",
+                r"\b(fatigue|tired|exhausted|low energy)\b"
+            ]
+        }
+    
     def extract_medical_entities(self, text: str) -> Dict[str, Any]:
         """
         🚀 ⚡ PHASE 4: REVOLUTIONARY COMPREHENSIVE MEDICAL PATTERN RECOGNITION ⚡ 🚀
