@@ -1150,6 +1150,291 @@ class AdvancedSymptomRecognizer:
         
         return individual_symptoms
     
+    def _parse_temporal_expressions_advanced(self, text: str, context_analysis: Dict[str, Any]) -> List[TemporalEntity]:
+        """
+        ENHANCED TEMPORAL PROCESSING
+        Parse sophisticated time expressions with context awareness
+        """
+        temporal_entities = []
+        
+        # Enhanced temporal patterns with context
+        temporal_patterns = [
+            r"started\s+(yesterday\s+morning|last\s+night|this\s+morning|(\d+)\s+(hours?|days?|weeks?|months?)\s+ago)",
+            r"comes\s+and\s+goes\s+(every\s+(\d+)\s+(minutes?|hours?)|intermittently|periodically)",
+            r"(getting\s+worse|getting\s+better|worsening|improving|same|stable)\s+(since|over\s+time|gradually|rapidly)",
+            r"for\s+the\s+(past|last)\s+(\d+)\s+(minutes?|hours?|days?|weeks?|months?)",
+            r"(sudden\s+onset|gradual\s+onset|abrupt\s+start|slowly\s+developed|came\s+on\s+suddenly)",
+            r"(constant|continuous|intermittent|on\s+and\s+off|comes\s+in\s+waves)"
+        ]
+        
+        for pattern in temporal_patterns:
+            matches = re.finditer(pattern, text.lower())
+            for match in matches:
+                entity = TemporalEntity(
+                    raw_expression=match.group(),
+                    normalized_expression=match.group(),
+                    confidence=0.8
+                )
+                entity.onset_time = entity.calculate_onset_time()
+                entity.duration_hours = entity.calculate_duration_hours()
+                temporal_entities.append(entity)
+        
+        return temporal_entities
+    
+    def _advanced_confidence_uncertainty_analysis(self, text: str, extraction_result: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        CHALLENGE 4: ADVANCED CONFIDENCE & UNCERTAINTY MEASURES
+        
+        Multi-factor confidence calculation with sophisticated uncertainty quantification.
+        Implements Bayesian-inspired confidence modeling.
+        """
+        
+        # Uncertainty markers with severity weights
+        uncertainty_indicators = {
+            "high_uncertainty": {  # Weight: -0.4
+                "patterns": [r"\b(not\s+sure|don't\s+know|uncertain|unclear|confused|maybe\s+not)\b"],
+                "weight": -0.4
+            },
+            "moderate_uncertainty": {  # Weight: -0.25
+                "patterns": [r"\b(maybe|perhaps|possibly|might\s+be|could\s+be|seems\s+like|feels\s+like)\b"],
+                "weight": -0.25
+            },
+            "mild_uncertainty": {  # Weight: -0.15
+                "patterns": [r"\b(I\s+think|appears\s+to\s+be|kind\s+of|sort\s+of|somewhat|fairly)\b"],
+                "weight": -0.15
+            },
+            "hedging_language": {  # Weight: -0.1
+                "patterns": [r"\b(around|about|approximately|roughly|nearly|almost)\b"],
+                "weight": -0.1
+            }
+        }
+        
+        # Confidence boosters
+        confidence_boosters = {
+            "certainty_markers": {  # Weight: +0.3
+                "patterns": [r"\b(definitely|certainly|absolutely|clearly|obviously|without\s+doubt|for\s+sure)\b"],
+                "weight": 0.3
+            },
+            "specific_details": {  # Weight: +0.2
+                "patterns": [r"\b(\d+/10|\d+\s+out\s+of\s+10|exactly|precisely|sharp\s+pain|crushing\s+pain)\b"],
+                "weight": 0.2
+            },
+            "medical_terminology": {  # Weight: +0.15
+                "patterns": [r"\b(myocardial|angina|migraine|hypertension|tachycardia|bradycardia|dyspnea)\b"],
+                "weight": 0.15
+            }
+        }
+        
+        # Calculate base uncertainty score
+        uncertainty_factors = []
+        uncertainty_score = 0.0
+        
+        text_lower = text.lower()
+        
+        # Process uncertainty indicators
+        for category, data in uncertainty_indicators.items():
+            for pattern in data["patterns"]:
+                matches = re.findall(pattern, text_lower)
+                if matches:
+                    uncertainty_factors.extend([f"{category}:{match}" for match in matches])
+                    uncertainty_score += data["weight"] * len(matches)
+        
+        # Process confidence boosters
+        confidence_boost = 0.0
+        for category, data in confidence_boosters.items():
+            for pattern in data["patterns"]:
+                matches = re.findall(pattern, text_lower)
+                if matches:
+                    confidence_boost += data["weight"] * len(matches)
+        
+        # Pattern specificity analysis
+        pattern_specificity_score = 0.0
+        total_patterns = extraction_result.get("processing_metadata", {}).get("patterns_matched", 0)
+        
+        if total_patterns > 0:
+            # More specific patterns = higher confidence
+            emergency_patterns = len(extraction_result.get("clinical_insights", {}).get("urgency_indicators", []))
+            anatomical_patterns = len(extraction_result.get("entities", {}).get("anatomical", []))
+            
+            pattern_specificity_score = min(0.4, (emergency_patterns * 0.1 + anatomical_patterns * 0.05))
+        
+        # Medical plausibility score
+        medical_plausibility_score = self._calculate_medical_plausibility(extraction_result)
+        
+        # Linguistic certainty analysis
+        linguistic_certainty_score = self._analyze_linguistic_certainty(text)
+        
+        # Cross-validation score (consistency between different extraction methods)
+        cross_validation_score = self._calculate_cross_validation_score(extraction_result)
+        
+        # Multi-factor confidence calculation
+        base_confidence = 0.6  # Starting confidence
+        
+        # Weighted sum of confidence factors
+        confidence_factors = {
+            "pattern_specificity": pattern_specificity_score * 0.3,
+            "medical_plausibility": medical_plausibility_score * 0.25,
+            "linguistic_certainty": linguistic_certainty_score * 0.2,
+            "cross_validation": cross_validation_score * 0.15,
+            "confidence_boost": confidence_boost * 0.1
+        }
+        
+        # Calculate final confidence
+        final_confidence = base_confidence + sum(confidence_factors.values()) + uncertainty_score
+        final_confidence = max(0.05, min(0.98, final_confidence))  # Clamp between 5% and 98%
+        
+        # Entity-specific confidence scores
+        entity_confidence = {}
+        
+        # Symptoms confidence
+        symptoms = extraction_result.get("entities", {}).get("symptoms", [])
+        if symptoms:
+            symptom_confidences = [getattr(s, 'confidence', 0.5) for s in symptoms]
+            entity_confidence["symptoms"] = sum(symptom_confidences) / len(symptom_confidences)
+        
+        # Temporal confidence
+        temporal_entities = extraction_result.get("entities", {}).get("temporal", [])
+        if temporal_entities:
+            temporal_confidences = [getattr(t, 'confidence', 0.5) for t in temporal_entities]
+            entity_confidence["temporal"] = sum(temporal_confidences) / len(temporal_confidences)
+        
+        # Severity confidence
+        severity_entities = extraction_result.get("entities", {}).get("severity", [])
+        if severity_entities:
+            severity_confidences = [getattr(s, 'confidence', 0.5) for s in severity_entities]
+            entity_confidence["severity"] = sum(severity_confidences) / len(severity_confidences)
+        
+        # Confidence interval calculation
+        confidence_interval = self._calculate_confidence_interval(final_confidence, uncertainty_factors)
+        
+        return {
+            "overall_confidence": final_confidence,
+            "entity_confidence": entity_confidence,
+            "uncertainty_factors": uncertainty_factors,
+            "confidence_breakdown": {
+                "base_confidence": base_confidence,
+                "pattern_specificity": confidence_factors["pattern_specificity"],
+                "medical_plausibility": confidence_factors["medical_plausibility"],
+                "linguistic_certainty": confidence_factors["linguistic_certainty"],
+                "cross_validation": confidence_factors["cross_validation"],
+                "uncertainty_penalty": uncertainty_score,
+                "confidence_boost": confidence_boost
+            },
+            "confidence_interval": confidence_interval,
+            "reliability_indicators": {
+                "text_clarity": max(0, 1 + uncertainty_score),  # Higher uncertainty = lower clarity
+                "medical_coherence": medical_plausibility_score,
+                "pattern_consistency": cross_validation_score
+            }
+        }
+    
+    def _calculate_medical_plausibility(self, extraction_result: Dict[str, Any]) -> float:
+        """Calculate medical plausibility based on symptom combinations and medical knowledge"""
+        
+        # Get extracted symptoms and relationships
+        symptoms = extraction_result.get("entities", {}).get("symptoms", [])
+        relationships = extraction_result.get("relationships", {}).get("symptom_clusters", {})
+        
+        if not symptoms:
+            return 0.3  # Low plausibility if no symptoms detected
+        
+        plausibility_score = 0.5  # Base score
+        
+        # Check for known medical syndrome patterns
+        known_syndromes = {
+            "cardiac": ["chest pain", "shortness of breath", "nausea", "sweating"],
+            "migraine": ["headache", "nausea", "light sensitivity"],
+            "stroke": ["weakness", "speech difficulty", "facial drooping"],
+            "appendicitis": ["abdominal pain", "nausea", "fever", "right lower quadrant"]
+        }
+        
+        # Calculate syndrome match scores
+        for syndrome, syndrome_symptoms in known_syndromes.items():
+            symptom_texts = [getattr(s, 'symptom', str(s)).lower() for s in symptoms]
+            matches = sum(1 for syndrome_symptom in syndrome_symptoms 
+                         if any(syndrome_symptom in symptom_text for symptom_text in symptom_texts))
+            
+            if matches >= 2:  # At least 2 symptoms match
+                syndrome_completeness = matches / len(syndrome_symptoms)
+                plausibility_score += syndrome_completeness * 0.3
+        
+        # Check for contradictory combinations
+        contradictory_combinations = [
+            ("acute pain", "chronic duration"),
+            ("severe pain", "normal function"),
+            ("emergency symptoms", "mild presentation")
+        ]
+        
+        # Penalty for contradictions (simplified check)
+        for contradiction in contradictory_combinations:
+            # This would need more sophisticated implementation
+            pass
+        
+        return min(0.95, plausibility_score)
+    
+    def _analyze_linguistic_certainty(self, text: str) -> float:
+        """Analyze linguistic markers of certainty vs uncertainty in the text"""
+        
+        certainty_score = 0.5  # Base score
+        
+        # Positive certainty markers
+        certainty_patterns = [
+            r"\b(I\s+am\s+certain|I\s+know|definitely|absolutely|clearly|without\s+question)\b",
+            r"\b(exactly|precisely|specifically|the\s+pain\s+is|it\s+feels\s+like)\b"
+        ]
+        
+        # Uncertainty markers  
+        uncertainty_patterns = [
+            r"\b(I\s+guess|maybe|perhaps|possibly|not\s+sure|don't\s+know)\b",
+            r"\b(kind\s+of|sort\s+of|seems|feels\s+like\s+maybe|might\s+be)\b"
+        ]
+        
+        text_lower = text.lower()
+        
+        # Count certainty markers
+        certainty_count = sum(len(re.findall(pattern, text_lower)) for pattern in certainty_patterns)
+        uncertainty_count = sum(len(re.findall(pattern, text_lower)) for pattern in uncertainty_patterns)
+        
+        # Adjust score based on markers
+        certainty_score += certainty_count * 0.1
+        certainty_score -= uncertainty_count * 0.15
+        
+        return max(0.1, min(0.9, certainty_score))
+    
+    def _calculate_cross_validation_score(self, extraction_result: Dict[str, Any]) -> float:
+        """Calculate consistency score between different extraction methods"""
+        
+        # This would compare results from multiple extraction approaches
+        # For now, return a baseline score based on result completeness
+        
+        entities = extraction_result.get("entities", {})
+        has_symptoms = len(entities.get("symptoms", [])) > 0
+        has_temporal = len(entities.get("temporal", [])) > 0
+        has_severity = len(entities.get("severity", [])) > 0
+        
+        completeness = sum([has_symptoms, has_temporal, has_severity]) / 3.0
+        
+        return completeness * 0.8  # Max score of 0.8 for cross-validation
+    
+    def _calculate_confidence_interval(self, point_estimate: float, uncertainty_factors: List[str]) -> Dict[str, float]:
+        """Calculate confidence interval around the point estimate"""
+        
+        # Calculate margin of error based on uncertainty factors
+        base_margin = 0.1  # 10% base margin
+        uncertainty_penalty = len(uncertainty_factors) * 0.02  # 2% per uncertainty factor
+        
+        margin_of_error = base_margin + uncertainty_penalty
+        
+        lower_bound = max(0.0, point_estimate - margin_of_error)
+        upper_bound = min(1.0, point_estimate + margin_of_error)
+        
+        return {
+            "lower_bound": lower_bound,
+            "upper_bound": upper_bound,
+            "margin_of_error": margin_of_error,
+            "confidence_width": upper_bound - lower_bound
+        }
+    
     def _extract_compound_symptoms(self, text: str) -> List[SymptomEntity]:
         """CHALLENGE 3: Handle compound symptom descriptions"""
         symptoms = []
