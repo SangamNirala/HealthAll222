@@ -2847,6 +2847,135 @@ class AdvancedSymptomRecognizer:
         final_confidence = extraction_result["confidence_analysis"]["overall_confidence"]
         extraction_result["confidence_analysis"]["overall_confidence"] = max(0.05, min(0.95, final_confidence))
     
+    def _calibrate_final_confidence_scores_phase4(self, extraction_result: Dict[str, Any]) -> None:
+        """
+        🎯 PHASE 4: ENHANCED FINAL CONFIDENCE CALIBRATION WITH URGENCY MAPPING 🎯
+        
+        Calibrates confidence scores and ensures proper urgency classification for API responses
+        """
+        
+        # Calculate overall confidence from all entity types
+        total_entities = 0
+        total_confidence = 0.0
+        
+        # Count and sum confidence from all Phase 4 entity types
+        for entity_type in ["anatomical_advanced", "quality_descriptors", "associated_symptoms", 
+                           "frequency_patterns", "trigger_contexts"]:
+            entities = extraction_result["entities"].get(entity_type, [])
+            for entity in entities:
+                if hasattr(entity, 'confidence'):
+                    total_confidence += entity.confidence
+                    total_entities += 1
+        
+        # Calculate base confidence
+        if total_entities > 0:
+            base_confidence = total_confidence / total_entities
+        else:
+            base_confidence = 0.5
+        
+        # 🚨 PHASE 4: ENHANCED URGENCY CLASSIFICATION FOR API RESPONSES
+        medical_urgency = "routine"
+        urgency_confidence = base_confidence
+        
+        # Check Phase 4 entities for urgency indicators
+        high_urgency_detected = False
+        emergency_detected = False
+        
+        # Analyze anatomical entities
+        anatomical_entities = extraction_result["entities"].get("anatomical_advanced", [])
+        for entity in anatomical_entities:
+            if hasattr(entity, 'medical_significance'):
+                if entity.medical_significance == "emergency" and entity.confidence > 0.85:
+                    emergency_detected = True
+                    medical_urgency = "emergency"
+                    urgency_confidence = max(urgency_confidence, 0.95)
+                elif entity.medical_significance == "urgent" and entity.confidence > 0.80:
+                    if not emergency_detected:
+                        high_urgency_detected = True
+                        medical_urgency = "urgent"
+                        urgency_confidence = max(urgency_confidence, 0.88)
+        
+        # Analyze quality entities
+        quality_entities = extraction_result["entities"].get("quality_descriptors", [])
+        for entity in quality_entities:
+            if hasattr(entity, 'clinical_significance'):
+                if entity.clinical_significance == "urgent" and entity.confidence > 0.85:
+                    if not emergency_detected:
+                        high_urgency_detected = True
+                        medical_urgency = "urgent"
+                        urgency_confidence = max(urgency_confidence, 0.90)
+        
+        # Analyze associated symptom entities (most important for syndrome detection)
+        associated_entities = extraction_result["entities"].get("associated_symptoms", [])
+        for entity in associated_entities:
+            if hasattr(entity, 'medical_urgency'):
+                if entity.medical_urgency == "emergency" and entity.confidence > 0.85:
+                    emergency_detected = True
+                    medical_urgency = "emergency"
+                    urgency_confidence = max(urgency_confidence, 0.95)
+                    # Add to clinical insights for API response
+                    extraction_result["clinical_insights"]["urgency_indicators"].append("emergency_syndrome_detected")
+                elif entity.medical_urgency == "urgent" and entity.confidence > 0.80:
+                    if not emergency_detected:
+                        high_urgency_detected = True
+                        medical_urgency = "urgent"
+                        urgency_confidence = max(urgency_confidence, 0.88)
+                        extraction_result["clinical_insights"]["urgency_indicators"].append("urgent_syndrome_detected")
+        
+        # Check syndrome probabilities
+        syndrome_probs = extraction_result.get("comprehensive_analysis", {}).get("syndrome_probability", {})
+        for syndrome, prob in syndrome_probs.items():
+            if prob > 0.75:
+                if syndrome in ["acute_coronary_syndrome", "stroke_syndrome", "acute_abdomen"]:
+                    emergency_detected = True
+                    medical_urgency = "emergency"
+                    urgency_confidence = max(urgency_confidence, 0.95)
+                    extraction_result["clinical_insights"]["urgency_indicators"].append(f"{syndrome}_detected")
+                elif syndrome == "migraine_syndrome" and prob > 0.70:
+                    if not emergency_detected:
+                        high_urgency_detected = True
+                        medical_urgency = "urgent"
+                        urgency_confidence = max(urgency_confidence, 0.88)
+                        extraction_result["clinical_insights"]["urgency_indicators"].append(f"{syndrome}_detected")
+        
+        # Update clinical insights with final urgency determination
+        extraction_result["clinical_insights"]["medical_significance"] = medical_urgency
+        
+        # Store urgency mapping for API responses
+        extraction_result["comprehensive_analysis"]["urgency_assessment"] = {
+            "urgency_level": medical_urgency,
+            "confidence": urgency_confidence,
+            "emergency_detected": emergency_detected,
+            "high_urgency_detected": high_urgency_detected,
+            "reasoning": self._generate_urgency_reasoning(extraction_result, medical_urgency)
+        }
+        
+        # Update overall confidence with urgency-adjusted scoring
+        if emergency_detected:
+            extraction_result["confidence_analysis"]["overall_confidence"] = max(0.90, urgency_confidence)
+        elif high_urgency_detected:
+            extraction_result["confidence_analysis"]["overall_confidence"] = max(0.85, urgency_confidence)
+        else:
+            extraction_result["confidence_analysis"]["overall_confidence"] = base_confidence
+        
+        # Calibrate individual entity confidence scores
+        overall_confidence = extraction_result["confidence_analysis"]["overall_confidence"]
+        for entity_type in extraction_result["entities"]:
+            entities = extraction_result["entities"][entity_type]
+            for entity in entities:
+                if hasattr(entity, 'confidence'):
+                    # Calibrate individual confidence with overall confidence
+                    entity.confidence = (entity.confidence + overall_confidence) / 2.0
+    
+    def _generate_urgency_reasoning(self, extraction_result: Dict[str, Any], urgency_level: str) -> str:
+        """Generate reasoning for urgency classification"""
+        if urgency_level == "emergency":
+            return "Emergency patterns detected including syndrome indicators or high-risk symptom combinations"
+        elif urgency_level == "urgent":
+            return "Urgent medical patterns identified requiring prompt evaluation"
+        else:
+            return "Routine medical patterns identified for standard follow-up"
+    
     def _analyze_severity_advanced(self, text: str, context_analysis: Dict[str, Any]) -> List[SeverityEntity]:
         """
         ENHANCED SEVERITY ANALYSIS
