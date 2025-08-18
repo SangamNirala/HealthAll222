@@ -5914,8 +5914,22 @@ class ContextAwareMedicalReasoner:
         for hypothesis in hypotheses:
             hypothesis_lower = hypothesis.lower()
             
-            # 🧠 URGENT CARDIAC REFERRALS
-            if "exertional angina" in hypothesis_lower and "urgent" in hypothesis_lower:
+            # 🧠 ENHANCED URGENT CARDIAC REFERRALS
+            if "enhanced cardiac analysis" in hypothesis_lower and ("crushing" in hypothesis_lower or "classic exertional angina" in hypothesis_lower):
+                return "CRITICAL EMERGENCY: Immediate 911 transport to hospital with cardiac catheterization capability - STEMI alert consideration"
+            elif "pressure-type exertional angina" in hypothesis_lower:
+                return "URGENT cardiology referral within 6 hours - comprehensive cardiac evaluation with stress testing and possible catheterization"
+            elif "substernal exertional chest pain" in hypothesis_lower:
+                return "URGENT emergency cardiology consultation - typical angina location requiring immediate assessment"
+            elif "radiating exertional chest pain" in hypothesis_lower or "high-risk angina" in hypothesis_lower:
+                return "CRITICAL: STAT cardiology consultation - high-risk unstable angina pattern requiring immediate intervention"
+            elif "anginal equivalent with exertional dyspnea" in hypothesis_lower:
+                return "URGENT cardiology + pulmonology referral - complex coronary syndrome with heart failure evaluation"
+            elif "timed relief pattern" in hypothesis_lower or "pathognomonic" in hypothesis_lower:
+                return "EMERGENCY cardiology consultation - classic angina with pathognomonic features requires immediate cardiac catheterization consideration"
+            elif "nitrate-responsive pattern" in hypothesis_lower:
+                return "URGENT cardiology referral - confirmed coronary artery disease requiring revascularization evaluation"
+            elif "exertional angina" in hypothesis_lower and "urgent" in hypothesis_lower:
                 return "URGENT cardiology referral for suspected unstable angina - ECG and troponins STAT"
             elif "classic stable angina" in hypothesis_lower:
                 return "URGENT cardiology referral for coronary angiography consideration"
