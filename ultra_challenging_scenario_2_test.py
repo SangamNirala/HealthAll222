@@ -335,14 +335,13 @@ class UltraChallengingScenario2Tester:
                     return False
                 
                 # Check contextual reasoning fields
-                context = data.get('context', {})
                 contextual_fields = ['causal_relationships', 'clinical_hypotheses', 
                                    'contextual_factors', 'context_based_recommendations',
                                    'trigger_avoidance_strategies', 'specialist_referral_context']
                 
                 empty_fields = []
                 for field in contextual_fields:
-                    field_value = context.get(field)
+                    field_value = data.get(field)  # Check in main response data, not context
                     if not field_value or (isinstance(field_value, list) and len(field_value) == 0):
                         empty_fields.append(field)
                 
@@ -351,7 +350,7 @@ class UltraChallengingScenario2Tester:
                 urgency_appropriate = urgency in ['routine', 'urgent']
                 
                 # Check for dietary trigger detection
-                causal_relationships = context.get('causal_relationships', [])
+                causal_relationships = data.get('causal_relationships', [])
                 has_dietary_trigger = any('dairy' in str(rel).lower() or 'lactose' in str(rel).lower() 
                                         or 'milk' in str(rel).lower() or 'ice cream' in str(rel).lower()
                                         for rel in causal_relationships)
@@ -361,8 +360,8 @@ class UltraChallengingScenario2Tester:
                                       for rel in causal_relationships)
                 
                 # Check for temporal analysis (30-60 minutes)
-                contextual_factors = context.get('contextual_factors', {})
-                temporal_factors = contextual_factors.get('temporal_factors', [])
+                contextual_factors = data.get('contextual_factors', {})  # Check in main response data
+                temporal_factors = contextual_factors.get('temporal', [])
                 has_temporal_analysis = len(temporal_factors) > 0
                 
                 success_criteria = {
