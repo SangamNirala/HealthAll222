@@ -394,6 +394,187 @@ class WorldClassMedicalIntentClassifier:
                     IntentPattern(r"\b(abnormal|concerning|elevated|low|high)\b.*\b(results?|levels?|values?)\b", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.3),
                 ],
                 "clinical_significance": "medium"
+            },
+            
+            # ===== WEEK 1: SUBSPECIALTY-SPECIFIC INTENT CATEGORIES =====
+            
+            # CARDIOVASCULAR SUBSPECIALTY INTENTS
+            "cardiac_chest_pain_assessment": {
+                "description": "Specialized assessment of cardiac-related chest pain and symptoms",
+                "clinical_subspecialty": "cardiology",
+                "patterns": [
+                    IntentPattern(r"\b(crushing|pressure|squeezing|tight)\s+(chest|cardiac|heart)\s+(pain|discomfort|ache)", 0.95, ClinicalSignificance.CRITICAL, urgency_boost=0.8),
+                    IntentPattern(r"\b(radiating|shooting|spreading)\s+(to|toward|into)\s+(arm|jaw|neck|back|shoulder)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.7),
+                    IntentPattern(r"\b(exertional|exercise|activity)\s+(chest|heart)\s+(pain|symptoms|discomfort)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.6),
+                    IntentPattern(r"\b(substernal|retrosternal|precordial)\s+(pain|pressure|discomfort)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.5),
+                ],
+                "clinical_reasoning_engine": "CardiacReasoningEngine",
+                "decision_support_rules": ["troponin_recommendation", "ecg_indication", "cardiology_referral"],
+                "emergency_indicators": ["unstable_angina", "myocardial_infarction", "aortic_dissection"],
+                "clinical_significance": "critical"
+            },
+            
+            "cardiac_symptom_evaluation": {
+                "description": "Comprehensive evaluation of cardiovascular symptoms and risk factors",
+                "clinical_subspecialty": "cardiology", 
+                "patterns": [
+                    IntentPattern(r"\b(palpitations|irregular\s+heartbeat|heart\s+racing|arrhythmia)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                    IntentPattern(r"\b(shortness\s+of\s+breath|dyspnea|breathless).*\b(exertion|climbing|walking)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.3),
+                    IntentPattern(r"\b(ankle|leg|foot)\s+(swelling|edema|swollen)", 0.8, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
+                    IntentPattern(r"\b(syncope|fainting|dizzy|lightheaded).*\b(standing|exertion)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                ],
+                "clinical_reasoning_engine": "CardiovascularReasoningEngine",
+                "decision_support_rules": ["cardiac_workup", "echo_indication", "stress_test_recommendation"],
+                "clinical_significance": "high"
+            },
+            
+            "cardiovascular_risk_assessment": {
+                "description": "Assessment of cardiovascular risk factors and prevention needs",
+                "clinical_subspecialty": "cardiology",
+                "patterns": [
+                    IntentPattern(r"\b(family\s+history).*\b(heart\s+disease|cardiac|coronary|stroke)", 0.85, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(high\s+blood\s+pressure|hypertension|bp\s+elevated)", 0.8, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(cholesterol|lipids|triglycerides).*\b(high|elevated|abnormal)", 0.8, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(diabetes|diabetic).*\b(heart|cardiac|cardiovascular)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.2),
+                ],
+                "clinical_reasoning_engine": "CardiovascularRiskEngine",
+                "decision_support_rules": ["framingham_score", "prevention_counseling", "lipid_screening"],
+                "clinical_significance": "medium"
+            },
+            
+            # NEUROLOGICAL SUBSPECIALTY INTENTS
+            "neurological_symptom_assessment": {
+                "description": "Specialized assessment of neurological symptoms and deficits",
+                "clinical_subspecialty": "neurology",
+                "patterns": [
+                    IntentPattern(r"\b(weakness|numbness|tingling)\s+(in|on|of)\s+(face|arm|leg|hand|foot)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.6),
+                    IntentPattern(r"\b(vision|speech|balance)\s+(changes|problems|loss|difficulty)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.7),
+                    IntentPattern(r"\b(coordination|motor)\s+(problems|difficulties|loss)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.5),
+                    IntentPattern(r"\b(memory|cognitive|confusion|thinking)\s+(problems|issues|changes)", 0.8, ClinicalSignificance.MEDIUM, urgency_boost=0.3),
+                ],
+                "clinical_reasoning_engine": "NeurologicalReasoningEngine",
+                "decision_support_rules": ["stroke_alert", "neuro_imaging", "neurology_referral"],
+                "emergency_indicators": ["stroke", "tia", "seizure", "meningitis"],
+                "clinical_significance": "high"
+            },
+            
+            "headache_migraine_evaluation": {
+                "description": "Specialized evaluation of headaches, migraines, and cephalgia",
+                "clinical_subspecialty": "neurology",
+                "patterns": [
+                    IntentPattern(r"\b(worst\s+headache|thunderclap|sudden\s+severe)\s+(headache|head\s+pain)", 0.95, ClinicalSignificance.CRITICAL, urgency_boost=0.9),
+                    IntentPattern(r"\b(migraine|cluster\s+headache|tension\s+headache)", 0.9, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(headache).*\b(neck\s+stiffness|fever|photophobia|phonophobia)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.7),
+                    IntentPattern(r"\b(throbbing|pounding|pulsating)\s+(headache|head\s+pain)", 0.85, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
+                ],
+                "clinical_reasoning_engine": "HeadacheReasoningEngine",
+                "decision_support_rules": ["red_flag_screening", "imaging_indication", "headache_diary"],
+                "emergency_indicators": ["subarachnoid_hemorrhage", "meningitis", "increased_icp"],
+                "clinical_significance": "high"
+            },
+            
+            "neurological_emergency_detection": {
+                "description": "Detection of acute neurological emergencies requiring immediate intervention",
+                "clinical_subspecialty": "neurology",
+                "patterns": [
+                    IntentPattern(r"\b(stroke|tia|transient\s+ischemic\s+attack)", 0.95, ClinicalSignificance.CRITICAL, urgency_boost=1.0),
+                    IntentPattern(r"\b(seizure|convulsion|epileptic\s+fit)", 0.95, ClinicalSignificance.CRITICAL, urgency_boost=0.9),
+                    IntentPattern(r"\b(sudden\s+weakness|facial\s+drooping|slurred\s+speech)", 0.9, ClinicalSignificance.CRITICAL, urgency_boost=0.8),
+                    IntentPattern(r"\b(altered\s+consciousness|unresponsive|comatose)", 0.95, ClinicalSignificance.CRITICAL, urgency_boost=1.0),
+                ],
+                "clinical_reasoning_engine": "NeuroEmergencyEngine",
+                "decision_support_rules": ["stroke_protocol", "seizure_management", "911_activation"],
+                "immediate_action": True,
+                "clinical_significance": "critical"
+            },
+            
+            # GASTROINTESTINAL SUBSPECIALTY INTENTS
+            "gi_symptom_assessment": {
+                "description": "Specialized assessment of gastrointestinal symptoms and disorders",
+                "clinical_subspecialty": "gastroenterology",
+                "patterns": [
+                    IntentPattern(r"\b(abdominal|stomach|belly)\s+(pain|cramping|discomfort|ache)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                    IntentPattern(r"\b(blood|bleeding)\s+(in|with)\s+(stool|vomit|bowel\s+movement)", 0.95, ClinicalSignificance.CRITICAL, urgency_boost=0.8),
+                    IntentPattern(r"\b(difficulty|painful|trouble)\s+(swallowing|eating|dysphagia)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.5),
+                    IntentPattern(r"\b(nausea|vomiting|throwing\s+up).*\b(persistent|continuous|severe)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                ],
+                "clinical_reasoning_engine": "GastroenterologyReasoningEngine",
+                "decision_support_rules": ["gi_bleeding_protocol", "acute_abdomen", "endoscopy_referral"],
+                "emergency_indicators": ["gi_bleeding", "bowel_obstruction", "perforation"],
+                "clinical_significance": "high"
+            },
+            
+            "digestive_disorder_evaluation": {
+                "description": "Evaluation of chronic digestive disorders and functional GI conditions",
+                "clinical_subspecialty": "gastroenterology", 
+                "patterns": [
+                    IntentPattern(r"\b(ibs|irritable\s+bowel|inflammatory\s+bowel)", 0.9, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(crohn's|colitis|ulcerative)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.3),
+                    IntentPattern(r"\b(gerd|acid\s+reflux|heartburn).*\b(chronic|persistent)", 0.85, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(constipation|diarrhea).*\b(chronic|persistent|weeks|months)", 0.8, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
+                ],
+                "clinical_reasoning_engine": "DigestiveDisorderEngine",
+                "decision_support_rules": ["colonoscopy_screening", "dietary_counseling", "gi_specialist"],
+                "clinical_significance": "medium"
+            },
+            
+            # RESPIRATORY SUBSPECIALTY INTENTS
+            "respiratory_symptom_assessment": {
+                "description": "Specialized assessment of respiratory symptoms and lung conditions",
+                "clinical_subspecialty": "pulmonology",
+                "patterns": [
+                    IntentPattern(r"\b(shortness\s+of\s+breath|dyspnea|breathless|can't\s+breathe)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.6),
+                    IntentPattern(r"\b(cough).*\b(blood|bloody|hemoptysis)", 0.95, ClinicalSignificance.CRITICAL, urgency_boost=0.8),
+                    IntentPattern(r"\b(wheezing|stridor|noisy\s+breathing)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.5),
+                    IntentPattern(r"\b(chest\s+tightness|constriction).*\b(breathing|respiratory)", 0.8, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                ],
+                "clinical_reasoning_engine": "RespiratoryReasoningEngine",
+                "decision_support_rules": ["pulmonary_function", "chest_imaging", "pulmonology_referral"],
+                "emergency_indicators": ["respiratory_failure", "pneumothorax", "pulmonary_embolism"],
+                "clinical_significance": "high"
+            },
+            
+            "breathing_difficulty_evaluation": {
+                "description": "Evaluation of breathing difficulties and pulmonary conditions",
+                "clinical_subspecialty": "pulmonology",
+                "patterns": [
+                    IntentPattern(r"\b(asthma|copd|emphysema|chronic\s+bronchitis)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.3),
+                    IntentPattern(r"\b(pneumonia|lung\s+infection|respiratory\s+infection)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.5),
+                    IntentPattern(r"\b(sleep\s+apnea|snoring).*\b(breathing|respiratory)", 0.8, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(oxygen|o2).*\b(low|decreased|hypoxia)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.6),
+                ],
+                "clinical_reasoning_engine": "PulmonaryConditionEngine", 
+                "decision_support_rules": ["spirometry", "sleep_study", "oxygen_therapy"],
+                "clinical_significance": "high"
+            },
+            
+            # ENDOCRINE SUBSPECIALTY INTENTS  
+            "endocrine_symptom_assessment": {
+                "description": "Specialized assessment of endocrine and hormonal symptoms",
+                "clinical_subspecialty": "endocrinology",
+                "patterns": [
+                    IntentPattern(r"\b(diabetes|diabetic|blood\s+sugar|glucose).*\b(high|low|control)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                    IntentPattern(r"\b(thyroid|hyperthyroid|hypothyroid|goiter)", 0.85, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
+                    IntentPattern(r"\b(weight).*\b(gain|loss).*\b(unexplained|rapid|significant)", 0.8, ClinicalSignificance.MEDIUM, urgency_boost=0.3),
+                    IntentPattern(r"\b(fatigue|tired|exhausted).*\b(despite|adequate)\s+(sleep|rest)", 0.75, ClinicalSignificance.MEDIUM),
+                ],
+                "clinical_reasoning_engine": "EndocrinologyReasoningEngine",
+                "decision_support_rules": ["hba1c_monitoring", "thyroid_function", "endocrine_screening"],
+                "clinical_significance": "medium"
+            },
+            
+            "metabolic_disorder_evaluation": {
+                "description": "Evaluation of metabolic disorders and hormonal imbalances",
+                "clinical_subspecialty": "endocrinology",
+                "patterns": [
+                    IntentPattern(r"\b(pcos|polycystic\s+ovary|hormonal\s+imbalance)", 0.85, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(insulin\s+resistance|metabolic\s+syndrome|prediabetes)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.3),
+                    IntentPattern(r"\b(adrenal|cortisol|stress\s+hormones)", 0.8, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(menstrual|period|hormone).*\b(irregular|abnormal|missing)", 0.8, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
+                ],
+                "clinical_reasoning_engine": "MetabolicDisorderEngine",
+                "decision_support_rules": ["hormone_panel", "metabolic_screening", "endocrine_referral"],
+                "clinical_significance": "medium"
             }
         }
     
