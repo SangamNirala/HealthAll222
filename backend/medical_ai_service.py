@@ -845,16 +845,24 @@ class WorldClassMedicalAI:
         return f"{base_question}\n\nI'm asking this because {clinical_reasoning.lower()}"
     
     async def _generate_differential_diagnosis(self, context: MedicalContext) -> Dict[str, Any]:
-        """Generate evidence-based differential diagnosis with probabilities"""
+        """
+        ENHANCED with Phase 2: Generate evidence-based differential diagnosis with advanced entity extraction
+        Integrates comprehensive medical entity recognition for superior AI reasoning
+        """
         
-        # Pre-process clinical data for AI analysis
+        # PHASE 2: Pre-process clinical data with advanced entity extraction
         clinical_summary = self._prepare_clinical_summary(context)
         
-        # Generate advanced medical assessment with structured prompt
+        # PHASE 2: Extract advanced entity insights from symptom data
+        advanced_entity_data = context.symptom_data.get("medical_relationships", {})
+        clinical_insights = context.symptom_data.get("clinical_insights", {})
+        confidence_scores = context.symptom_data.get("confidence_scores", {})
+        
+        # PHASE 2: Enhanced medical assessment with structured prompt leveraging advanced entities
         prompt = f"""
         As a board-certified physician with expertise in internal medicine, emergency medicine, and differential diagnosis, 
         provide a comprehensive clinical assessment based on this patient presentation.
-
+        
         PATIENT PRESENTATION:
         Chief Complaint: {context.chief_complaint}
         
@@ -867,95 +875,110 @@ class WorldClassMedicalAI:
         Social History: {context.social_history}
         Family History: {context.family_history}
         
-        CLINICAL REASONING FRAMEWORK:
-        Use evidence-based medicine and apply the following systematic approach:
-        1. Analyze symptom patterns and clinical presentation
-        2. Consider epidemiological factors (age, sex, prevalence)
-        3. Apply Bayesian reasoning for probability estimates
-        4. Prioritize by clinical urgency and likelihood
+        PHASE 2 ADVANCED ENTITY ANALYSIS:
+        Medical Relationships Detected: {advanced_entity_data}
+        Clinical Insights: {clinical_insights}
+        Pattern Confidence Scores: {confidence_scores}
+        Overall Entity Extraction Confidence: {context.symptom_data.get("overall_confidence", "N/A")}
         
-        REQUIRED JSON RESPONSE FORMAT:
+        EMERGENCY FLAGS: {context.red_flags}
+        RISK FACTORS: {context.risk_factors}
+        
+        Please provide a detailed analysis in the following JSON format:
         {{
             "differential_diagnoses": [
                 {{
-                    "condition": "Most likely diagnosis name",
+                    "condition": "Primary diagnosis name",
                     "probability": 45,
-                    "reasoning": "Detailed clinical reasoning with evidence",
-                    "supporting_evidence": ["symptom 1", "risk factor 2"],
-                    "contradicting_evidence": ["absence of fever"],
-                    "urgency_level": "routine|urgent|critical"
+                    "reasoning": "Clinical reasoning based on symptoms and advanced entity relationships",
+                    "supporting_evidence": ["symptom1", "finding2"],
+                    "contradicting_evidence": ["finding1"],
+                    "urgency_level": "routine|urgent|critical",
+                    "entity_support": "How Phase 2 entity extraction supports this diagnosis"
                 }}
             ],
-            "clinical_reasoning": {{
-                "primary_concerns": ["most concerning possibilities"],
-                "diagnostic_approach": "systematic approach used",
-                "risk_stratification": "low|moderate|high risk assessment"
-            }},
             "recommendations": [
-                "Immediate: specific immediate actions",
-                "Short-term: follow-up within timeframe", 
-                "Long-term: ongoing management"
+                "Specific recommendation 1",
+                "Specific recommendation 2"
             ],
             "diagnostic_tests": [
-                {{
-                    "test": "ECG",
-                    "indication": "rule out cardiac etiology",
-                    "urgency": "immediate|urgent|routine",
-                    "expected_yield": "high|moderate|low"
-                }}
+                "Test 1 with rationale",
+                "Test 2 with rationale"
             ],
             "red_flags": [
-                "Seek emergency care if: specific concerning symptoms"
+                "Any concerning symptoms requiring immediate attention"
             ],
-            "follow_up_plan": {{
-                "timeframe": "specific timeframe for follow-up",
-                "provider_type": "primary care|specialist|emergency",
-                "monitoring_parameters": ["what to monitor"]
+            "clinical_reasoning": {{
+                "primary_concern": "Main clinical concern",
+                "key_findings": ["Finding 1", "Finding 2"],
+                "entity_analysis": "How advanced entity extraction influenced the diagnosis",
+                "pattern_significance": "Significance of detected patterns and relationships"
             }},
             "confidence_assessment": {{
                 "diagnostic_confidence": 0.85,
-                "factors_affecting_confidence": ["complete history", "typical presentation"],
-                "additional_information_needed": ["physical exam findings"]
+                "entity_confidence": {context.symptom_data.get("overall_confidence", 0.0)},
+                "urgency_confidence": 0.90,
+                "reasoning": "Rationale for confidence levels"
+            }},
+            "follow_up_plan": {{
+                "immediate_actions": ["Action 1", "Action 2"],
+                "monitoring": "What to monitor",
+                "when_to_return": "Return if symptoms worsen or specific timeframe"
             }}
         }}
         
-        Ensure probabilities sum to exactly 100% across all differential diagnoses.
-        Base all recommendations on current clinical guidelines and evidence-based medicine.
+        IMPORTANT: 
+        1. Use the advanced entity relationships to enhance diagnostic accuracy
+        2. Consider pattern confidence scores in your assessment
+        3. Integrate clinical insights with traditional medical reasoning
+        4. Ensure probabilities sum to 100%
+        5. Prioritize based on urgency and clinical significance
+        6. Leverage Phase 2 entity extraction to identify subtle patterns
         """
-        
+
         try:
+            # Generate AI response with enhanced prompt
             response = await self._generate_content_with_fallback(prompt)
             
-            # Extract and parse JSON from response
-            response_text = response.text.strip()
-            differential_data = self._parse_ai_response(response_text, context)
+            if not response or not response.text:
+                return await self._generate_fallback_assessment(context)
             
-            # Validate and enhance the response
-            differential_data = self._validate_differential_response(differential_data, context)
+            # Parse JSON response
+            differential_data = self._parse_differential_response(response.text, context)
             
-            # Update context with final assessment
-            context.current_stage = MedicalInterviewStage.COMPLETED
-            context.clinical_hypotheses = differential_data.get('differential_diagnoses', [])
+            # PHASE 2: Validate and enhance response with entity data
+            validated_data = self._validate_differential_response(differential_data, context)
             
-            # Calculate overall urgency
-            overall_urgency = self._calculate_overall_urgency(differential_data)
+            # PHASE 2: Add entity extraction metadata to response
+            validated_data["entity_extraction_metadata"] = {
+                "overall_confidence": context.symptom_data.get("overall_confidence", 0.0),
+                "pattern_matches": context.symptom_data.get("pattern_matches", {}),
+                "medical_relationships": advanced_entity_data,
+                "clinical_insights": clinical_insights
+            }
             
+            # Determine overall urgency level
+            overall_urgency = self._determine_overall_urgency(validated_data['differential_diagnoses'])
+            if context.emergency_level in ["urgent", "critical"]:
+                overall_urgency = context.emergency_level  # Preserve emergency detection
+
             return {
-                "response": self._format_final_assessment(differential_data),
+                "response": self._format_final_assessment(validated_data),
                 "context": asdict(context),
-                "stage": "assessment_complete",
-                "differential_diagnoses": differential_data.get('differential_diagnoses', []),
-                "recommendations": differential_data.get('recommendations', []),
-                "diagnostic_tests": differential_data.get('diagnostic_tests', []),
-                "red_flags": differential_data.get('red_flags', []),
-                "clinical_reasoning": differential_data.get('clinical_reasoning', {}),
-                "confidence_assessment": differential_data.get('confidence_assessment', {}),
+                "stage": "assessment_complete", 
+                "differential_diagnoses": validated_data.get('differential_diagnoses', []),
+                "recommendations": validated_data.get('recommendations', []),
+                "diagnostic_tests": validated_data.get('diagnostic_tests', []),
+                "red_flags": validated_data.get('red_flags', []),
+                "clinical_reasoning": validated_data.get('clinical_reasoning', {}),
+                "confidence_assessment": validated_data.get('confidence_assessment', {}),
                 "urgency": overall_urgency,
-                "follow_up_plan": differential_data.get('follow_up_plan', {})
+                "follow_up_plan": validated_data.get('follow_up_plan', {}),
+                "entity_extraction_metadata": validated_data.get("entity_extraction_metadata", {})
             }
             
         except Exception as e:
-            print(f"Error generating differential diagnosis: {e}")
+            print(f"Error generating enhanced differential diagnosis: {e}")
             return await self._generate_fallback_assessment(context)
     
     def _format_final_assessment(self, differential_data: Dict[str, Any]) -> str:
