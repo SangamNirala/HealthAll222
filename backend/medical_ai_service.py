@@ -74,6 +74,9 @@ class WorldClassMedicalAI:
         self.model = None
         self._initialize_gemini_model()
         
+        # Initialize intelligent text normalizer for processing patient input
+        self.text_normalizer = IntelligentTextNormalizer()
+        
         # Load medical knowledge base
         self.medical_knowledge = self._load_medical_knowledge()
         self.emergency_keywords = self._load_emergency_keywords()
