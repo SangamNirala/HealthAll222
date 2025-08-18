@@ -587,6 +587,305 @@ class WorldClassMedicalIntentClassifier:
                 "decision_support_rules": ["hormone_panel", "metabolic_screening", "endocrine_referral"],
                 "clinical_significance": "medium"
             },
+            
+            # ===== EXPANDED SUBSPECIALTY CATEGORIES - 20 NEW CATEGORIES =====
+            
+            # ORTHOPEDIC SUBSPECIALTY INTENTS
+            "orthopedic_injury_assessment": {
+                "description": "Assessment of musculoskeletal injuries and orthopedic conditions",
+                "clinical_subspecialty": "orthopedics",
+                "patterns": [
+                    IntentPattern(r"\b(bone|fracture|broken)\s+(bone|arm|leg|wrist|ankle)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.5),
+                    IntentPattern(r"\b(sprain|strain|torn)\s+(muscle|ligament|tendon)", 0.85, ClinicalSignificance.MEDIUM, urgency_boost=0.3),
+                    IntentPattern(r"\b(joint|knee|shoulder|hip)\s+(pain|injury|dislocation)", 0.8, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
+                    IntentPattern(r"\b(back|spine|neck)\s+(injury|pain|herniated)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                ],
+                "clinical_reasoning_engine": "OrthopedicReasoningEngine",
+                "decision_support_rules": ["xray_indication", "orthopedic_referral", "immobilization"],
+                "clinical_significance": "high"
+            },
+            
+            "sports_medicine_evaluation": {
+                "description": "Specialized evaluation of sports-related injuries and performance issues",
+                "clinical_subspecialty": "sports_medicine",
+                "patterns": [
+                    IntentPattern(r"\b(sports|athletic|exercise)\s+(injury|pain|performance)", 0.9, ClinicalSignificance.MEDIUM, urgency_boost=0.3),
+                    IntentPattern(r"\b(runner's|tennis|golfer's|swimmer's)\s+(knee|elbow|shoulder)", 0.85, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(overuse|repetitive)\s+(injury|strain|syndrome)", 0.8, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(concussion|head\s+trauma)\s+(from|during|while)\s+(sports|game)", 0.95, ClinicalSignificance.CRITICAL, urgency_boost=0.8),
+                ],
+                "clinical_reasoning_engine": "SportsMedicineEngine",
+                "decision_support_rules": ["return_to_play", "injury_prevention", "rehabilitation"],
+                "clinical_significance": "medium"
+            },
+            
+            # DERMATOLOGY SUBSPECIALTY INTENTS
+            "dermatological_assessment": {
+                "description": "Assessment of skin conditions and dermatological symptoms",
+                "clinical_subspecialty": "dermatology",
+                "patterns": [
+                    IntentPattern(r"\b(skin|rash|dermatitis|eczema|psoriasis)", 0.9, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(mole|lesion|spot|growth)\s+(changing|new|suspicious)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                    IntentPattern(r"\b(acne|pimples|breakout|blackheads)", 0.8, ClinicalSignificance.ROUTINE),
+                    IntentPattern(r"\b(itching|itchy|scratching|burning)\s+skin", 0.8, ClinicalSignificance.MEDIUM),
+                ],
+                "clinical_reasoning_engine": "DermatologyReasoningEngine",
+                "decision_support_rules": ["skin_biopsy", "dermatology_referral", "melanoma_screening"],
+                "clinical_significance": "medium"
+            },
+            
+            "allergic_reaction_assessment": {
+                "description": "Assessment of allergic reactions and hypersensitivity disorders",
+                "clinical_subspecialty": "allergy_immunology",
+                "patterns": [
+                    IntentPattern(r"\b(allergic\s+reaction|anaphylaxis|severe\s+allergy)", 0.95, ClinicalSignificance.CRITICAL, urgency_boost=0.9),
+                    IntentPattern(r"\b(hives|urticaria|swelling|angioedema)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.6),
+                    IntentPattern(r"\b(food\s+allergy|drug\s+allergy|environmental\s+allergy)", 0.85, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(asthma|wheezing)\s+(allergic|triggered\s+by)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                ],
+                "clinical_reasoning_engine": "AllergyReasoningEngine",
+                "decision_support_rules": ["epipen_prescription", "allergy_testing", "avoidance_counseling"],
+                "emergency_indicators": ["anaphylaxis", "angioedema", "severe_asthma"],
+                "clinical_significance": "high"
+            },
+            
+            # INFECTIOUS DISEASE SUBSPECIALTY INTENTS
+            "infectious_disease_assessment": {
+                "description": "Assessment of infectious diseases and systemic infections",
+                "clinical_subspecialty": "infectious_diseases",
+                "patterns": [
+                    IntentPattern(r"\b(infection|infectious|sepsis|bacteremia)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.6),
+                    IntentPattern(r"\b(fever|chills|night\s+sweats)\s+(persistent|recurring)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                    IntentPattern(r"\b(antibiotic|antimicrobial)\s+(resistance|failure|not\s+working)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.5),
+                    IntentPattern(r"\b(travel|tropical)\s+(illness|disease|infection)", 0.85, ClinicalSignificance.MEDIUM, urgency_boost=0.3),
+                ],
+                "clinical_reasoning_engine": "InfectiousDiseaseEngine",
+                "decision_support_rules": ["culture_testing", "isolation_precautions", "id_consultation"],
+                "emergency_indicators": ["sepsis", "meningitis", "necrotizing_fasciitis"],
+                "clinical_significance": "high"
+            },
+            
+            "immunodeficiency_evaluation": {
+                "description": "Evaluation of immune system deficiencies and disorders",
+                "clinical_subspecialty": "immunology",
+                "patterns": [
+                    IntentPattern(r"\b(frequent|recurrent|repeated)\s+(infections|illnesses)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                    IntentPattern(r"\b(immune\s+system|immunity)\s+(weak|compromised|deficiency)", 0.85, ClinicalSignificance.MEDIUM, urgency_boost=0.3),
+                    IntentPattern(r"\b(autoimmune|lupus|rheumatoid)\s+(disease|arthritis|condition)", 0.85, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(immunosuppressed|immunocompromised|transplant)\s+patient", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.5),
+                ],
+                "clinical_reasoning_engine": "ImmunologyReasoningEngine",
+                "decision_support_rules": ["immune_testing", "vaccination_review", "immunology_referral"],
+                "clinical_significance": "medium"
+            },
+            
+            # MENTAL HEALTH SUBSPECIALTY INTENTS
+            "psychiatric_assessment": {
+                "description": "Assessment of psychiatric conditions and mental health disorders",
+                "clinical_subspecialty": "psychiatry",
+                "patterns": [
+                    IntentPattern(r"\b(depression|depressed|sad|hopeless|suicidal)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.7),
+                    IntentPattern(r"\b(anxiety|anxious|panic|phobia|ocd)", 0.85, ClinicalSignificance.MEDIUM, urgency_boost=0.4),
+                    IntentPattern(r"\b(bipolar|manic|mood\s+swings|mania)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.5),
+                    IntentPattern(r"\b(psychosis|hallucinations|delusions|paranoid)", 0.95, ClinicalSignificance.CRITICAL, urgency_boost=0.8),
+                ],
+                "clinical_reasoning_engine": "PsychiatricReasoningEngine",
+                "decision_support_rules": ["suicide_assessment", "psychiatric_referral", "medication_management"],
+                "emergency_indicators": ["suicidal_ideation", "psychotic_episode", "severe_depression"],
+                "clinical_significance": "high"
+            },
+            
+            "substance_abuse_evaluation": {
+                "description": "Evaluation of substance use disorders and addiction",
+                "clinical_subspecialty": "addiction_medicine",
+                "patterns": [
+                    IntentPattern(r"\b(addiction|addicted|substance\s+abuse|drug\s+abuse)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                    IntentPattern(r"\b(withdrawal|detox|going\s+cold\s+turkey)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.6),
+                    IntentPattern(r"\b(alcohol|drinking)\s+(problem|abuse|dependency)", 0.85, ClinicalSignificance.MEDIUM, urgency_boost=0.3),
+                    IntentPattern(r"\b(overdose|od|too\s+much)\s+(drugs|medication|pills)", 0.95, ClinicalSignificance.CRITICAL, urgency_boost=0.9),
+                ],
+                "clinical_reasoning_engine": "AddictionMedicineEngine",
+                "decision_support_rules": ["addiction_screening", "rehab_referral", "withdrawal_management"],
+                "emergency_indicators": ["overdose", "severe_withdrawal", "delirium_tremens"],
+                "clinical_significance": "high"
+            },
+            
+            # PEDIATRIC SUBSPECIALTY INTENTS
+            "pediatric_assessment": {
+                "description": "Assessment of pediatric conditions and child health concerns",
+                "clinical_subspecialty": "pediatrics",
+                "patterns": [
+                    IntentPattern(r"\b(child|children|kid|baby|infant|toddler)\s+(symptoms|sick|illness)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                    IntentPattern(r"\b(developmental|growth|milestone)\s+(delay|concerns|problems)", 0.85, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
+                    IntentPattern(r"\b(vaccination|immunization|shots)\s+(schedule|concerns|reactions)", 0.8, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(fever|temperature)\s+(in|child|baby|infant)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.5),
+                ],
+                "clinical_reasoning_engine": "PediatricReasoningEngine",
+                "decision_support_rules": ["age_appropriate_assessment", "pediatric_dosing", "child_protection"],
+                "clinical_significance": "high"
+            },
+            
+            "adolescent_health_assessment": {
+                "description": "Assessment of adolescent and teenage health concerns",
+                "clinical_subspecialty": "adolescent_medicine",
+                "patterns": [
+                    IntentPattern(r"\b(teenager|teen|adolescent|puberty)\s+(health|problems|concerns)", 0.9, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(eating\s+disorder|anorexia|bulimia|body\s+image)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.6),
+                    IntentPattern(r"\b(acne|skin\s+problems)\s+(teenager|adolescent)", 0.8, ClinicalSignificance.ROUTINE),
+                    IntentPattern(r"\b(sexual\s+health|contraception|pregnancy)\s+(teen|adolescent)", 0.85, ClinicalSignificance.MEDIUM),
+                ],
+                "clinical_reasoning_engine": "AdolescentMedicineEngine", 
+                "decision_support_rules": ["confidentiality_guidelines", "adolescent_screening", "family_counseling"],
+                "clinical_significance": "medium"
+            },
+            
+            # GERIATRIC SUBSPECIALTY INTENTS
+            "geriatric_assessment": {
+                "description": "Assessment of geriatric conditions and elderly health concerns",
+                "clinical_subspecialty": "geriatrics",
+                "patterns": [
+                    IntentPattern(r"\b(elderly|senior|geriatric|aging)\s+(health|problems|concerns)", 0.9, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(falls|falling|balance)\s+(elderly|senior|older)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                    IntentPattern(r"\b(memory|dementia|alzheimer's|cognitive)\s+(decline|loss)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.3),
+                    IntentPattern(r"\b(medication|polypharmacy)\s+(elderly|multiple|many)", 0.8, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
+                ],
+                "clinical_reasoning_engine": "GeriatricReasoningEngine",
+                "decision_support_rules": ["fall_assessment", "cognitive_screening", "medication_review"],
+                "clinical_significance": "high"
+            },
+            
+            "dementia_evaluation": {
+                "description": "Specialized evaluation of dementia and cognitive disorders",
+                "clinical_subspecialty": "geriatric_psychiatry",
+                "patterns": [
+                    IntentPattern(r"\b(dementia|alzheimer's|cognitive\s+decline)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.3),
+                    IntentPattern(r"\b(memory\s+loss|forgetfulness|confusion)\s+(progressive|worsening)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                    IntentPattern(r"\b(behavioral|personality)\s+(changes|problems)\s+(elderly|dementia)", 0.8, ClinicalSignificance.MEDIUM, urgency_boost=0.3),
+                    IntentPattern(r"\b(wandering|agitation|sundowning)", 0.85, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
+                ],
+                "clinical_reasoning_engine": "DementiaReasoningEngine",
+                "decision_support_rules": ["cognitive_testing", "neuropsychiatry_referral", "caregiver_support"],
+                "clinical_significance": "high"
+            },
+            
+            # WOMEN'S HEALTH SUBSPECIALTY INTENTS  
+            "gynecological_assessment": {
+                "description": "Assessment of gynecological conditions and women's reproductive health",
+                "clinical_subspecialty": "gynecology",
+                "patterns": [
+                    IntentPattern(r"\b(gynecological|gynecologic|women's\s+health|reproductive)", 0.9, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(menstrual|period|pms|pmdd)\s+(problems|irregular|heavy)", 0.85, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
+                    IntentPattern(r"\b(pelvic\s+pain|ovarian|uterine|cervical)", 0.85, ClinicalSignificance.MEDIUM, urgency_boost=0.3),
+                    IntentPattern(r"\b(pregnancy|prenatal|fertility|infertility)", 0.8, ClinicalSignificance.MEDIUM),
+                ],
+                "clinical_reasoning_engine": "GynecologyReasoningEngine",
+                "decision_support_rules": ["pelvic_exam", "pregnancy_test", "gynecology_referral"],
+                "clinical_significance": "medium"
+            },
+            
+            "obstetric_assessment": {
+                "description": "Assessment of pregnancy-related conditions and obstetric concerns",
+                "clinical_subspecialty": "obstetrics",
+                "patterns": [
+                    IntentPattern(r"\b(pregnancy|pregnant|prenatal|obstetric)", 0.9, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
+                    IntentPattern(r"\b(morning\s+sickness|nausea)\s+(pregnancy|pregnant)", 0.8, ClinicalSignificance.ROUTINE),
+                    IntentPattern(r"\b(bleeding|spotting)\s+(pregnancy|pregnant)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.6),
+                    IntentPattern(r"\b(preeclampsia|gestational\s+diabetes|pregnancy\s+complications)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.5),
+                ],
+                "clinical_reasoning_engine": "ObstetricReasoningEngine",
+                "decision_support_rules": ["prenatal_care", "obstetric_emergency", "maternal_monitoring"],
+                "emergency_indicators": ["pregnancy_bleeding", "preeclampsia", "preterm_labor"],
+                "clinical_significance": "high"
+            },
+            
+            # UROLOGY SUBSPECIALTY INTENTS
+            "urological_assessment": {
+                "description": "Assessment of urological conditions and genitourinary symptoms",
+                "clinical_subspecialty": "urology",
+                "patterns": [
+                    IntentPattern(r"\b(urological|urology|urinary|bladder|kidney)", 0.9, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(uti|urinary\s+tract\s+infection|bladder\s+infection)", 0.9, ClinicalSignificance.MEDIUM, urgency_boost=0.3),
+                    IntentPattern(r"\b(kidney\s+stones|renal\s+colic|flank\s+pain)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.5),
+                    IntentPattern(r"\b(prostate|bph|enlarged\s+prostate)", 0.85, ClinicalSignificance.MEDIUM),
+                ],
+                "clinical_reasoning_engine": "UrologyReasoningEngine",
+                "decision_support_rules": ["urinalysis", "imaging_studies", "urology_referral"],
+                "clinical_significance": "medium"
+            },
+            
+            "male_reproductive_health": {
+                "description": "Assessment of male reproductive health and sexual dysfunction",
+                "clinical_subspecialty": "andrology",
+                "patterns": [
+                    IntentPattern(r"\b(erectile\s+dysfunction|ed|impotence|sexual\s+dysfunction)", 0.9, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(testosterone|low\s+t|hypogonadism)", 0.85, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(fertility|infertility|sperm)\s+(male|men)", 0.85, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(testicular|scrotal)\s+(pain|mass|swelling)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                ],
+                "clinical_reasoning_engine": "AndrologyReasoningEngine",
+                "decision_support_rules": ["hormone_testing", "sexual_health_counseling", "urology_referral"],
+                "clinical_significance": "medium"
+            },
+            
+            # ONCOLOGY SUBSPECIALTY INTENTS
+            "cancer_screening_assessment": {
+                "description": "Assessment for cancer screening and early detection",
+                "clinical_subspecialty": "oncology",
+                "patterns": [
+                    IntentPattern(r"\b(cancer\s+screening|mammogram|colonoscopy|pap\s+smear)", 0.9, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(suspicious\s+mass|lump|tumor|growth)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.5),
+                    IntentPattern(r"\b(family\s+history)\s+(cancer|malignancy)", 0.8, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
+                    IntentPattern(r"\b(genetic\s+testing|brca|hereditary\s+cancer)", 0.85, ClinicalSignificance.MEDIUM),
+                ],
+                "clinical_reasoning_engine": "OncologyScreeningEngine",
+                "decision_support_rules": ["screening_guidelines", "genetic_counseling", "oncology_referral"],
+                "clinical_significance": "high"
+            },
+            
+            "chemotherapy_monitoring": {
+                "description": "Monitoring and management of chemotherapy side effects",
+                "clinical_subspecialty": "medical_oncology",
+                "patterns": [
+                    IntentPattern(r"\b(chemotherapy|chemo|cancer\s+treatment)\s+(side\s+effects|toxicity)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                    IntentPattern(r"\b(neutropenia|low\s+white\s+count|immunosuppressed)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.5),
+                    IntentPattern(r"\b(nausea|vomiting)\s+(from|after)\s+(chemo|chemotherapy)", 0.8, ClinicalSignificance.MEDIUM),
+                    IntentPattern(r"\b(neuropathy|numbness|tingling)\s+(chemo|treatment)", 0.85, ClinicalSignificance.MEDIUM, urgency_boost=0.3),
+                ],
+                "clinical_reasoning_engine": "ChemotherapyMonitoringEngine",
+                "decision_support_rules": ["toxicity_management", "dose_modification", "supportive_care"],
+                "emergency_indicators": ["febrile_neutropenia", "severe_toxicity", "tumor_lysis"],
+                "clinical_significance": "high"
+            },
+            
+            # PAIN MANAGEMENT SUBSPECIALTY INTENTS
+            "chronic_pain_assessment": {
+                "description": "Assessment and management of chronic pain conditions",
+                "clinical_subspecialty": "pain_management",
+                "patterns": [
+                    IntentPattern(r"\b(chronic\s+pain|persistent\s+pain|long.term\s+pain)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.3),
+                    IntentPattern(r"\b(fibromyalgia|neuropathy|nerve\s+pain)", 0.85, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
+                    IntentPattern(r"\b(pain\s+management|pain\s+medication|opioid)", 0.8, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
+                    IntentPattern(r"\b(breakthrough\s+pain|uncontrolled\s+pain)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                ],
+                "clinical_reasoning_engine": "PainManagementEngine", 
+                "decision_support_rules": ["pain_assessment", "multimodal_therapy", "pain_clinic_referral"],
+                "clinical_significance": "high"
+            },
+            
+            "opioid_management": {
+                "description": "Management of opioid therapy and related concerns",
+                "clinical_subspecialty": "pain_medicine",
+                "patterns": [
+                    IntentPattern(r"\b(opioid|narcotic|pain\s+medication)\s+(management|therapy|treatment)", 0.9, ClinicalSignificance.MEDIUM, urgency_boost=0.3),
+                    IntentPattern(r"\b(tolerance|dependence|addiction)\s+(opioid|pain\s+medication)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                    IntentPattern(r"\b(withdrawal|tapering|reducing)\s+(opioid|pain\s+medication)", 0.85, ClinicalSignificance.MEDIUM, urgency_boost=0.3),
+                    IntentPattern(r"\b(overdose|too\s+much)\s+(opioid|pain\s+medication)", 0.95, ClinicalSignificance.CRITICAL, urgency_boost=0.9),
+                ],
+                "clinical_reasoning_engine": "OpioidManagementEngine",
+                "decision_support_rules": ["opioid_monitoring", "addiction_screening", "harm_reduction"],
+                "emergency_indicators": ["opioid_overdose", "respiratory_depression"],
+                "clinical_significance": "high"
+            },
         }
     
     def _initialize_clinical_reasoning(self) -> Dict[str, Any]:
