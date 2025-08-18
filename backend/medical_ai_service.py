@@ -478,6 +478,9 @@ class WorldClassMedicalAI:
         # Initialize intelligent text normalizer for processing patient input
         self.text_normalizer = IntelligentTextNormalizer()
         
+        # PHASE 2: Initialize Advanced Symptom Recognition System
+        self.advanced_symptom_recognizer = AdvancedSymptomRecognizer()
+        
         # Load medical knowledge base
         self.medical_knowledge = self._load_medical_knowledge()
         self.emergency_keywords = self._load_emergency_keywords()
