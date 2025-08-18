@@ -5773,8 +5773,11 @@ class WorldClassMedicalAI:
     async def _handle_greeting_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
         """Handle initial greeting and transition to chief complaint"""
         
-        # Extract medical entities first
-        medical_entities = await self._extract_medical_entities(message)
+        # Extract medical entities first using Advanced Symptom Recognizer
+        advanced_extraction = self.advanced_symptom_recognizer.extract_medical_entities(message)
+        
+        # Extract contextual reasoning data
+        contextual_reasoning = advanced_extraction.get("contextual_reasoning", {})
         
         # Check for common greetings first
         greetings = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'greetings']
@@ -5788,33 +5791,38 @@ class WorldClassMedicalAI:
                 "What brings you here today? Please describe any symptoms or health concerns you're experiencing."
             )
         else:
-            # Check if patient provided initial symptom
-            symptoms_detected = medical_entities.get("symptoms", [])
-            processed_message = medical_entities.get("processed_message", message)
+            # Check if patient provided initial symptom using advanced extraction
+            symptoms_detected = advanced_extraction.get("entities", {}).get("symptoms", [])
+            causal_relationships = contextual_reasoning.get("causal_relationships", [])
             
-            # Only treat as symptom if we actually detected medical symptoms
-            if symptoms_detected:
+            # Only treat as symptom if we actually detected medical symptoms or contextual patterns
+            if symptoms_detected or causal_relationships:
                 context.chief_complaint = message
                 context.current_stage = MedicalInterviewStage.HISTORY_PRESENT_ILLNESS
                 
-                # Create appropriate response based on detected symptoms
-                symptom_names = []
-                for symptom in symptoms_detected:
-                    if symptom == "fever":
-                        symptom_names.append("a fever")
-                    elif symptom == "headache":
-                        symptom_names.append("a headache")
-                    elif symptom == "pain":
-                        symptom_names.append("pain")
-                    else:
-                        symptom_names.append(symptom.replace("_", " "))
-                
-                symptoms_text = " and ".join(symptom_names) if len(symptom_names) > 1 else symptom_names[0]
-                
-                ai_response = await self._generate_empathetic_response(
-                    f"Thank you for sharing that you're experiencing {symptoms_text}. I want to gather more specific details to better understand your condition. "
-                    f"Let's start with when exactly these symptoms began - was the onset sudden or did it develop gradually over time?"
-                )
+                # Create contextually aware response based on detected patterns
+                if causal_relationships:
+                    # Use contextual reasoning to provide more intelligent response
+                    triggers = [rel.get("trigger", "") for rel in causal_relationships if rel.get("trigger")]
+                    symptoms = [rel.get("symptom", "") for rel in causal_relationships if rel.get("symptom")]
+                    
+                    contextual_response = self._generate_contextual_greeting_response(triggers, symptoms, contextual_reasoning)
+                    ai_response = await self._generate_empathetic_response(contextual_response)
+                else:
+                    # Fallback to basic symptom response
+                    symptom_names = []
+                    for symptom in symptoms_detected:
+                        if hasattr(symptom, 'symptom'):
+                            symptom_names.append(symptom.symptom.replace("_", " "))
+                        elif isinstance(symptom, str):
+                            symptom_names.append(symptom.replace("_", " "))
+                    
+                    symptoms_text = " and ".join(symptom_names) if len(symptom_names) > 1 else (symptom_names[0] if symptom_names else "symptoms")
+                    
+                    ai_response = await self._generate_empathetic_response(
+                        f"Thank you for sharing that you're experiencing {symptoms_text}. I want to gather more specific details to better understand your condition. "
+                        f"Let's start with when exactly these symptoms began - was the onset sudden or did it develop gradually over time?"
+                    )
             else:
                 # No symptoms detected - ask for more information
                 context.current_stage = MedicalInterviewStage.CHIEF_COMPLAINT
@@ -5828,7 +5836,18 @@ class WorldClassMedicalAI:
             "context": asdict(context),
             "stage": context.current_stage.value,
             "urgency": "routine",
-            "next_questions": self._get_stage_questions(context.current_stage)
+            "next_questions": self._get_stage_questions(context.current_stage),
+            
+            # 🧠 STEP 2.2: Include contextual reasoning data
+            "causal_relationships": contextual_reasoning.get("causal_relationships", []),
+            "clinical_hypotheses": contextual_reasoning.get("clinical_hypotheses", []),
+            "contextual_factors": contextual_reasoning.get("contextual_factors", {}),
+            "medical_reasoning_narrative": contextual_reasoning.get("medical_reasoning_narrative", ""),
+            "context_based_recommendations": contextual_reasoning.get("context_based_recommendations", []),
+            "trigger_avoidance_strategies": contextual_reasoning.get("trigger_avoidance_strategies", []),
+            "specialist_referral_context": contextual_reasoning.get("specialist_referral_context"),
+            "contextual_significance": contextual_reasoning.get("contextual_significance", "routine"),
+            "reasoning_confidence": contextual_reasoning.get("reasoning_confidence", 0.0)
         }
     
     async def _handle_hpi_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
