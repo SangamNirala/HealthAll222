@@ -5072,17 +5072,29 @@ class ContextAwareMedicalReasoner:
                     validation_evidence=[f"enhanced_{subtype}_pattern", "exertional_cardiac_trigger", "emergency_cardiac_assessment_required", "comprehensive_workup_indicated"]
                 ))
         
-        # Relief pattern for exertional symptoms
-        if re.search(r"(?:chest\s+pain|pressure).*(?:goes\s+away|resolves).*(?:rest|stopping)", text_lower):
-            causal_relationships.append(CausalRelationship(
-                trigger="cessation_of_exertion",
-                symptom="symptom_resolution",
-                relationship_type="exertional_relief",
-                causality_strength=0.92,
-                medical_mechanism="Restoration of myocardial oxygen supply-demand balance with cessation of physical stress",
-                clinical_significance="emergency",
-                validation_evidence=["rest_relief_pattern", "cardiac_ischemia_resolution", "angina_cycle_complete"]
-            ))
+        # Enhanced relief patterns for comprehensive cardiac analysis
+        cardiac_relief_patterns = [
+            # Classic rest relief patterns
+            (r"(?:chest\s+pain|pressure|discomfort).*(?:goes\s+away|resolves|improves|disappears).*(?:with|after|during).*(?:rest|stopping|sitting)", 0.95, "classic_rest_relief"),
+            # Time-specific relief patterns
+            (r"(?:chest.*pain|symptoms?).*(?:within|after).*(?:2-3|few).*minutes?.*(?:rest|stopping)", 0.97, "timed_angina_relief"),
+            # Position-related relief
+            (r"(?:chest.*pain|pressure).*(?:better|improves).*(?:when|after).*(?:sit|lie\s+down|stop\s+walking)", 0.93, "positional_cardiac_relief"),
+            # Medication relief (if mentioned)
+            (r"(?:chest.*pain|symptoms?).*(?:relieved\s+by|helped\s+by|goes\s+away\s+with).*(?:nitro|nitroglycerin|medication)", 0.98, "medication_responsive_angina")
+        ]
+        
+        for pattern, confidence, relief_type in cardiac_relief_patterns:
+            if re.search(pattern, text_lower):
+                causal_relationships.append(CausalRelationship(
+                    trigger="enhanced_exertional_relief",
+                    symptom=f"cardiac_symptom_resolution_{relief_type}",
+                    relationship_type="enhanced_exertional_relief",
+                    causality_strength=confidence,
+                    medical_mechanism=f"Enhanced cardiac relief analysis: {relief_type} - Restoration of myocardial oxygen supply-demand balance with cessation of physical stress. {relief_type} pattern strongly suggests coronary artery disease requiring urgent cardiology evaluation.",
+                    clinical_significance="emergency",
+                    validation_evidence=[f"enhanced_{relief_type}_pattern", "cardiac_ischemia_resolution", "coronary_disease_suspected", "urgent_cardiology_required"]
+                ))
         
         # 🎯 ULTRA-CHALLENGING SCENARIO 3: STRESS-MODULATED DIETARY INTOLERANCE (>92% precision)
         if re.search(r"(?:stomach\s+pain|cramps).*(?:after\s+eating).*(?:dairy|milk|ice\s+cream).*(?:when.*stressed|stressed\s+out)", text_lower):
