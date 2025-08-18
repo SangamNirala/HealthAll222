@@ -339,11 +339,198 @@ class AdvancedSymptomRecognizer:
         
         return extraction_result
     
-    def _handle_pattern_overlaps(self, text: str) -> Dict[str, Any]:
-        """CHALLENGE 1: Handle cases where patterns overlap or conflict"""
-        # Implementation for handling overlapping patterns
-        # Example: "severe stabbing chest pain for 2 hours getting worse"
-        return {"resolved_conflicts": [], "pattern_priorities": {}}
+    def _handle_overlapping_patterns_advanced(self, text: str) -> Dict[str, Any]:
+        """
+        CHALLENGE 1: INTELLIGENT OVERLAPPING PATTERN HANDLING
+        
+        Advanced pattern prioritization system with conflict resolution.
+        Uses weighted scoring and medical significance to resolve conflicts.
+        """
+        
+        # Enhanced pattern categories with priority weights
+        pattern_categories = {
+            # Emergency patterns (highest priority - weight 10)
+            "emergency_patterns": {
+                "weight": 10,
+                "patterns": [
+                    r"\b(crushing|squeezing|pressure)\s+(chest|heart)\s+(pain|ache|discomfort)",
+                    r"\b(can't\s+breathe|difficulty\s+breathing|shortness\s+of\s+breath|gasping)",
+                    r"\b(worst\s+headache\s+ever|thunderclap\s+headache|sudden\s+severe\s+headache)",
+                    r"\b(chest\s+pain)\s+.*\b(shortness\s+of\s+breath|nausea|sweating)",
+                    r"\b(loss\s+of\s+consciousness|passed\s+out|fainted|collapsed)",
+                    r"\b(severe\s+allergic\s+reaction|anaphylaxis|throat\s+swelling)"
+                ]
+            },
+            
+            # Specific anatomical patterns (high priority - weight 8)
+            "anatomical_specific": {
+                "weight": 8,
+                "patterns": [
+                    r"\b(left\s+chest|right\s+chest|center\s+chest|upper\s+chest|lower\s+chest)\s+(pain|ache|discomfort)",
+                    r"\b(lower\s+back|upper\s+back|middle\s+back|neck)\s+(pain|ache|stiffness)",
+                    r"\b(right\s+side|left\s+side|upper\s+abdomen|lower\s+abdomen)\s+(pain|ache|cramping)",
+                    r"\b(temporal|occipital|frontal|parietal)\s+(headache|pain|ache)",
+                    r"\b(radiating|shooting|spreading)\s+(to|down|up|into)\s+(arm|leg|back|neck|jaw)"
+                ]
+            },
+            
+            # Pain quality patterns (medium-high priority - weight 7)
+            "pain_quality": {
+                "weight": 7,
+                "patterns": [
+                    r"\b(stabbing|sharp|knife-like|piercing|jabbing)\s+(pain|sensation)",
+                    r"\b(throbbing|pulsating|pounding|beating)\s+(pain|headache)",
+                    r"\b(burning|searing|fire-like|scalding)\s+(pain|sensation)",
+                    r"\b(cramping|colicky|gripping|twisting)\s+(pain|sensation)",
+                    r"\b(dull|aching|gnawing|constant)\s+(pain|ache|discomfort)"
+                ]
+            },
+            
+            # Temporal patterns (medium priority - weight 6)
+            "temporal_specific": {
+                "weight": 6,
+                "patterns": [
+                    r"\bstarted\s+(yesterday\s+morning|last\s+night|this\s+morning|(\d+)\s+(hours?|days?)\s+ago)",
+                    r"\bcomes\s+and\s+goes\s+(every\s+(\d+)\s+(minutes?|hours?)|intermittently)",
+                    r"\b(getting\s+worse|worsening|progressing|escalating)\s+(since|over\s+time)",
+                    r"\bfor\s+the\s+(past|last)\s+(\d+)\s+(minutes?|hours?|days?|weeks?|months?)"
+                ]
+            },
+            
+            # Severity patterns (medium priority - weight 5) 
+            "severity_specific": {
+                "weight": 5,
+                "patterns": [
+                    r"\b(\d+)\s*(out\s+of\s+10|/10|\s+on\s+a\s+scale)",
+                    r"\b(excruciating|unbearable|worst\s+ever|debilitating|crippling)",
+                    r"\b(severe|really\s+bad|terrible|horrible|intense)",
+                    r"\b(moderate|tolerable|manageable|bearable)",
+                    r"\b(mild|slight|minor|barely\s+noticeable)"
+                ]
+            },
+            
+            # General symptom patterns (lower priority - weight 3)
+            "general_symptoms": {
+                "weight": 3,
+                "patterns": [
+                    r"\b(pain|ache|hurt|hurts|hurting|discomfort|soreness)",
+                    r"\b(nausea|vomiting|throwing\s+up|sick\s+to\s+stomach)",
+                    r"\b(dizziness|dizzy|lightheaded|vertigo|spinning)",
+                    r"\b(fatigue|tired|exhausted|weak|weakness)"
+                ]
+            }
+        }
+        
+        # Find all pattern matches with positions and priorities
+        pattern_matches = {}
+        overlapping_regions = []
+        
+        for category, category_data in pattern_categories.items():
+            weight = category_data["weight"]
+            patterns = category_data["patterns"]
+            category_matches = []
+            
+            for pattern in patterns:
+                try:
+                    for match in re.finditer(pattern, text.lower()):
+                        match_data = {
+                            "text": match.group(),
+                            "start": match.start(),
+                            "end": match.end(),
+                            "weight": weight,
+                            "category": category,
+                            "pattern": pattern,
+                            "specificity": len(match.group().split())  # More specific = more words
+                        }
+                        category_matches.append(match_data)
+                except re.error:
+                    continue
+            
+            pattern_matches[category] = category_matches
+        
+        # Detect overlapping patterns
+        all_matches = []
+        for category_matches in pattern_matches.values():
+            all_matches.extend(category_matches)
+        
+        # Sort by start position
+        all_matches.sort(key=lambda x: x["start"])
+        
+        # Resolve conflicts using intelligent priority system
+        resolved_matches = []
+        conflicts_resolved = []
+        
+        for i, current_match in enumerate(all_matches):
+            conflicting_matches = []
+            
+            # Find overlapping matches
+            for j, other_match in enumerate(all_matches):
+                if i != j:
+                    # Check for overlap
+                    if (current_match["start"] < other_match["end"] and 
+                        current_match["end"] > other_match["start"]):
+                        conflicting_matches.append(other_match)
+            
+            if conflicting_matches:
+                # Resolve conflict using priority scoring
+                all_conflicting = [current_match] + conflicting_matches
+                
+                # Calculate priority score (weight + specificity + medical significance)
+                for match in all_conflicting:
+                    medical_significance = 0
+                    if "chest" in match["text"] and "pain" in match["text"]:
+                        medical_significance = 5
+                    elif "severe" in match["text"] or "emergency" in match["category"]:
+                        medical_significance = 4
+                    elif "anatomical" in match["category"]:
+                        medical_significance = 3
+                    
+                    match["priority_score"] = (
+                        match["weight"] * 0.5 +
+                        match["specificity"] * 0.3 + 
+                        medical_significance * 0.2
+                    )
+                
+                # Select highest priority match
+                winner = max(all_conflicting, key=lambda x: x["priority_score"])
+                
+                # Track conflict resolution
+                conflicts_resolved.append({
+                    "conflict_region": f"{current_match['start']}-{current_match['end']}",
+                    "candidates": [m["text"] for m in all_conflicting],
+                    "winner": winner["text"],
+                    "reason": f"Higher priority (weight: {winner['weight']}, specificity: {winner['specificity']})"
+                })
+                
+                # Add winner if not already added
+                if winner not in resolved_matches:
+                    resolved_matches.append(winner)
+            else:
+                # No conflicts, add directly
+                resolved_matches.append(current_match)
+        
+        # Organize resolved patterns by category
+        resolved_patterns = {}
+        for category in pattern_categories.keys():
+            resolved_patterns[category] = []
+        
+        for match in resolved_matches:
+            resolved_patterns[match["category"]].append(match)
+        
+        # Calculate overlapping pattern analysis
+        overlapping_analysis = {}
+        for category, matches in resolved_patterns.items():
+            if matches:
+                overlapping_analysis[category] = [m["text"] for m in matches]
+        
+        return {
+            "resolved_patterns": resolved_patterns,
+            "resolution_data": {
+                "conflicts_resolved": [c["conflict_region"] for c in conflicts_resolved],
+                "overlapping_patterns": overlapping_analysis,
+                "resolution_reasoning": {conf["conflict_region"]: conf["reason"] for conf in conflicts_resolved}
+            }
+        }
     
     def _parse_temporal_expressions(self, text: str) -> List[TemporalEntity]:
         """CHALLENGE 2: Parse sophisticated time expressions"""
