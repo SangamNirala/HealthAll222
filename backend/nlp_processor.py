@@ -179,10 +179,15 @@ class IntelligentTextNormalizer:
             "belly hurt": "abdominal pain",
             "belly hurts": "abdominal pain",
             "belly ache": "abdominal pain",
+            "belly really hurts": "severe abdominal pain",  # Handle intensity
+            "belly really hurt": "severe abdominal pain",
+            "tummy really hurts": "severe abdominal pain", 
+            "tummy really hurt": "severe abdominal pain",
             "stomach hurt": "abdominal pain",
             "stomach hurts": "abdominal pain",
-            "gut pain": "abdominal pain",
+            "gut pain": "abdominal pain",  # Add explicit mapping
             "gut hurt": "abdominal pain",
+            "gut hurts": "abdominal pain",
             
             # BOWEL MOVEMENTS
             "can't poop": "experiencing constipation",
