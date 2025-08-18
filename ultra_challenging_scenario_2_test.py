@@ -427,7 +427,6 @@ class UltraChallengingScenario2Tester:
                 missing_response_fields = [field for field in required_response_fields if field not in data]
                 
                 # Check all required contextual fields
-                context = data.get('context', {})
                 required_contextual_fields = [
                     'causal_relationships', 'clinical_hypotheses', 'contextual_factors',
                     'context_based_recommendations', 'trigger_avoidance_strategies', 
@@ -438,15 +437,15 @@ class UltraChallengingScenario2Tester:
                 null_contextual_fields = []
                 
                 for field in required_contextual_fields:
-                    if field not in context:
+                    if field not in data:  # Check in main response data, not context
                         missing_contextual_fields.append(field)
-                    elif context[field] is None:
+                    elif data[field] is None:
                         null_contextual_fields.append(field)
                 
                 # Check contextual_factors sub-structure
-                contextual_factors = context.get('contextual_factors', {})
+                contextual_factors = data.get('contextual_factors', {})  # Check in main response data
                 required_contextual_sub_fields = [
-                    'positional_factors', 'temporal_factors', 'environmental_factors', 'activity_relationships'
+                    'positional', 'temporal', 'environmental', 'activity'
                 ]
                 
                 missing_sub_fields = [field for field in required_contextual_sub_fields 
