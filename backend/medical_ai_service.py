@@ -5634,29 +5634,37 @@ class ContextAwareMedicalReasoner:
             strategies.append("Identify and avoid specific symptom triggers")
         
         return strategies
-        
-        if not strategies:
-            strategies.append("Identify and avoid specific symptom triggers")
-        
-        return strategies
     
     def _determine_specialist_referral_context(self, hypotheses: List[str], causal_relationships: List[CausalRelationship]) -> Optional[str]:
         """Determine appropriate specialist referral based on context"""
         
+        # 🧠 ENHANCED SPECIALIST REFERRAL CONTEXT for Ultra-Challenging Scenarios
         for hypothesis in hypotheses:
-            if "cardiac" in hypothesis.lower() or "angina" in hypothesis.lower():
-                return "cardiology_referral_for_exertional_symptoms"
+            if "exertional angina" in hypothesis.lower() or "cardiac evaluation" in hypothesis.lower():
+                return "URGENT cardiology referral for suspected coronary artery disease"
+            elif "cardiac" in hypothesis.lower() or "angina" in hypothesis.lower():
+                return "Cardiology referral for exertional chest pain evaluation"
+            elif "morning orthostatic" in hypothesis.lower():
+                return "Cardiology consultation for orthostatic hypotension with fall risk"
             elif "orthostatic" in hypothesis.lower():
-                return "cardiology_or_neurology_referral_for_orthostatic_evaluation"
+                return "Cardiology or autonomic neurology referral for orthostatic evaluation"
+            elif "stress-modulated" in hypothesis.lower():
+                return "Integrated gastroenterology and behavioral health referral"
             elif "stress" in hypothesis.lower():
-                return "psychology_or_psychiatry_referral_for_stress_management"
+                return "Psychology or psychiatry referral for stress management"
         
-        # Check causal relationships
+        # Check causal relationships for urgency
         for rel in causal_relationships:
             if rel.clinical_significance == "emergency":
-                return "emergency_department_evaluation"
+                if "cardiac" in rel.medical_mechanism or "angina" in rel.medical_mechanism:
+                    return "IMMEDIATE emergency department evaluation - rule out acute coronary syndrome"
+                else:
+                    return "Emergency department evaluation"
             elif rel.clinical_significance == "urgent":
-                return "urgent_specialist_consultation"
+                if "orthostatic" in rel.medical_mechanism:
+                    return "Urgent cardiology consultation for orthostatic hypotension"
+                else:
+                    return "Urgent specialist consultation"
         
         return None
     
