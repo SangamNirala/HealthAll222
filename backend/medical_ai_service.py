@@ -1129,8 +1129,6 @@ class AdvancedSymptomRecognizer:
             "coherence_achievement": "EXCELLENT" if medical_coherence > 0.95 else "GOOD" if medical_coherence > 0.85 else "FAIR"
         }
         
-        return extraction_result
-        
         # CHALLENGE 3: COMPOUND SYMPTOM DESCRIPTION EXTRACTION  
         # Complex relationship mapping between symptoms
         compound_extraction = self._extract_compound_symptom_descriptions(text, context_analysis)
