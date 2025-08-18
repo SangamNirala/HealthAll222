@@ -5886,6 +5886,67 @@ class WorldClassMedicalAI:
             return ("Thank you for sharing your symptoms. I want to gather more specific details to better understand your condition. "
                    "Let's start with when exactly these symptoms began - was the onset sudden or did it develop gradually over time?")
     
+    async def _handle_hpi_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
+        """Handle History of Present Illness using OLDCARTS framework with Step 2.2 contextual reasoning"""
+        
+        # 🧠 STEP 2.2: Extract contextual reasoning from message
+        advanced_extraction = self.advanced_symptom_recognizer.extract_medical_entities(message)
+        contextual_reasoning = advanced_extraction.get("contextual_reasoning", {})
+        
+        # Extract HPI elements from patient response
+        hpi_elements = await self._extract_hpi_elements(message, context.symptom_data)
+        context.symptom_data.update(hpi_elements)
+        
+        # Determine next HPI question based on missing elements
+        missing_elements = self._get_missing_hpi_elements(context.symptom_data)
+        
+        if missing_elements:
+            next_element = missing_elements[0]
+            question = await self._generate_hpi_question(next_element, context)
+            
+            return {
+                "response": question,
+                "context": asdict(context),
+                "stage": context.current_stage.value,
+                "urgency": context.emergency_level,
+                "hpi_progress": f"{8 - len(missing_elements)}/8 complete",
+                
+                # 🧠 STEP 2.2: Include contextual reasoning data
+                "causal_relationships": contextual_reasoning.get("causal_relationships", []),
+                "clinical_hypotheses": contextual_reasoning.get("clinical_hypotheses", []),
+                "contextual_factors": contextual_reasoning.get("contextual_factors", {}),
+                "medical_reasoning_narrative": contextual_reasoning.get("medical_reasoning_narrative", ""),
+                "context_based_recommendations": contextual_reasoning.get("context_based_recommendations", []),
+                "trigger_avoidance_strategies": contextual_reasoning.get("trigger_avoidance_strategies", []),
+                "specialist_referral_context": contextual_reasoning.get("specialist_referral_context"),
+                "contextual_significance": contextual_reasoning.get("contextual_significance", "routine"),
+                "reasoning_confidence": contextual_reasoning.get("reasoning_confidence", 0.0)
+            }
+        else:
+            # HPI complete, move to Review of Systems
+            context.current_stage = MedicalInterviewStage.REVIEW_OF_SYSTEMS
+            
+            ros_question = await self._generate_targeted_ros_question(context)
+            
+            return {
+                "response": ros_question,
+                "context": asdict(context),
+                "stage": context.current_stage.value,
+                "urgency": context.emergency_level,
+                "transition": "Moving to review of systems",
+                
+                # 🧠 STEP 2.2: Include contextual reasoning data
+                "causal_relationships": contextual_reasoning.get("causal_relationships", []),
+                "clinical_hypotheses": contextual_reasoning.get("clinical_hypotheses", []),
+                "contextual_factors": contextual_reasoning.get("contextual_factors", {}),
+                "medical_reasoning_narrative": contextual_reasoning.get("medical_reasoning_narrative", ""),
+                "context_based_recommendations": contextual_reasoning.get("context_based_recommendations", []),
+                "trigger_avoidance_strategies": contextual_reasoning.get("trigger_avoidance_strategies", []),
+                "specialist_referral_context": contextual_reasoning.get("specialist_referral_context"),
+                "contextual_significance": contextual_reasoning.get("contextual_significance", "routine"),
+                "reasoning_confidence": contextual_reasoning.get("reasoning_confidence", 0.0)
+            }
+    
     async def _generate_hpi_question(self, element: str, context: MedicalContext) -> str:
         """Generate specific HPI questions using OLDCARTS framework"""
         
