@@ -482,6 +482,10 @@ class UltraChallengingScenario2Tester:
     def test_algorithm_version_upgrade(self) -> bool:
         """Test that algorithm version has been upgraded to include enhancements"""
         
+        # Initialize fresh consultation for this test
+        if not self.initialize_medical_ai():
+            return False
+        
         # Test with a cardiac scenario to check for enhanced features
         test_message = "I have chest pain when I exercise."
         
