@@ -96,12 +96,22 @@ class IntelligentTextNormalizer:
         # Calculate confidence score based on corrections applied
         confidence_score = self._calculate_confidence_score(original_text, normalized, corrections)
         
+        # Collect spell correction details for analysis
+        spell_correction_details = []
+        words = re.findall(r'\b[a-zA-Z]+\b', original_text)
+        for word in words:
+            if len(word) > 2:
+                spell_result = self.advanced_spell_checker.correct_medical_spelling(word)
+                if spell_result.corrected_word.lower() != spell_result.original_word.lower():
+                    spell_correction_details.append(spell_result)
+        
         return NormalizationResult(
             original_text=original_text,
             normalized_text=normalized,
             corrections_applied=corrections,
             confidence_score=confidence_score,
-            medical_entities_preserved=medical_entities
+            medical_entities_preserved=medical_entities,
+            spell_corrections=spell_correction_details
         )
     
     def _load_grammar_patterns(self) -> List[Dict[str, str]]:
