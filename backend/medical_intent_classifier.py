@@ -151,12 +151,12 @@ class WorldClassMedicalIntentClassifier:
     
     def _load_comprehensive_medical_intent_taxonomy(self) -> Dict[str, Dict[str, Any]]:
         """
-        🎯 WEEK 1: EXPANDED MEDICAL INTENT TAXONOMY - 30+ SUBSPECIALTY CATEGORIES
+        🎯 EXPANDED MEDICAL INTENT TAXONOMY - 50+ SUBSPECIALTY CATEGORIES
         
-        Revolutionary expansion from 20+ to 30+ sophisticated medical intent categories
-        with subspecialty-specific clinical reasoning and decision support systems.
+        Comprehensive expansion to 50+ sophisticated medical intent categories
+        with enhanced subspecialty-specific clinical reasoning and decision support systems.
         
-        Algorithm Version: 3.1_intelligence_amplification
+        Algorithm Version: 3.2_comprehensive_subspecialty_expansion
         """
         
         return {
