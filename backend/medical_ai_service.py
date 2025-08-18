@@ -5674,51 +5674,120 @@ class ContextAwareMedicalReasoner:
         return recommendations
     
     def _generate_trigger_avoidance_strategies(self, causal_relationships: List[CausalRelationship], environmental_analysis: Dict) -> List[str]:
-        """Generate trigger avoidance strategies based on context"""
+        """🧠 REVOLUTIONARY TRIGGER AVOIDANCE STRATEGIES WITH CLINICAL PRECISION 🧠"""
         
         strategies = []
         
-        # 🧠 ENHANCED TRIGGER AVOIDANCE STRATEGIES for Ultra-Challenging Scenarios
+        # 🎯 ULTRA-CHALLENGING SCENARIO AVOIDANCE STRATEGIES
         for rel in causal_relationships:
-            if "morning" in rel.trigger or "position" in rel.trigger:
-                strategies.append("Rise slowly from bed - sit for 2-3 minutes before standing")
-                strategies.append("Keep water bedside for morning hydration before rising")
-                strategies.append("Avoid rapid position changes, especially in morning")
-            elif "standing" in rel.trigger or "positional" in rel.trigger:
-                strategies.append("Rise slowly from sitting/lying positions")
-                strategies.append("Use compression stockings if recommended")
-            elif "exertional" in rel.trigger or "exercise" in rel.trigger:
-                if rel.clinical_significance == "emergency":
-                    strategies.append("AVOID strenuous activity until cardiac clearance obtained")
-                    strategies.append("Use sublingual nitroglycerin as prescribed for chest pain")
+            # Handle both object and dictionary formats
+            if hasattr(rel, 'relationship_type'):
+                rel_type = rel.relationship_type
+                clinical_sig = rel.clinical_significance
+                trigger = rel.trigger
+                symptom = rel.symptom
+            else:
+                rel_type = rel.get('relationship_type', 'unknown')
+                clinical_sig = rel.get('clinical_significance', 'routine')
+                trigger = rel.get('trigger', 'unknown')
+                symptom = rel.get('symptom', 'unknown')
+            
+            # 🧠 POSITIONAL/ORTHOSTATIC AVOIDANCE STRATEGIES
+            if rel_type == "positional":
+                if "morning" in trigger.lower():
+                    strategies.append("Rise slowly from bed - sit on edge for 2-3 minutes before standing")
+                    strategies.append("Keep 16oz water at bedside - hydrate before getting up")
+                    strategies.append("Perform ankle pumps and leg exercises before rising")
+                    strategies.append("Consider compression stockings before getting out of bed")
+                elif clinical_sig == "urgent":
+                    strategies.append("NEVER stand up quickly - always use 3-step process (sit, pause, stand)")
+                    strategies.append("Hold onto stable surfaces when changing positions")
+                    strategies.append("Avoid prolonged standing - sit or move regularly")
                 else:
-                    strategies.append("Gradual activity progression with symptom monitoring")
-            elif "dairy" in rel.trigger and "stress" in rel.trigger:
-                strategies.append("Avoid dairy products during high-stress periods")
-                strategies.append("Practice stress reduction before meals")
-                strategies.append("Consider lactase enzyme supplements during stressful times")
-            elif "dairy" in rel.trigger:
-                strategies.append("Lactose-free diet trial")
-                strategies.append("Consider lactase enzyme supplementation")
+                    strategies.append("Rise slowly from sitting or lying positions")
+                    strategies.append("Stay well hydrated throughout the day")
+            
+            # 🧠 EXERTIONAL/CARDIAC AVOIDANCE STRATEGIES
+            elif rel_type == "exertional" and clinical_sig == "emergency":
+                if "crushing" in symptom.lower() or "classic_angina" in symptom.lower():
+                    strategies.append("AVOID ALL strenuous activity until cardiac clearance")
+                    strategies.append("Do NOT climb stairs or walk uphill without medical approval")
+                    strategies.append("Stop activity immediately if chest pain occurs")
+                    strategies.append("Keep sublingual nitroglycerin readily available")
+                elif "cardiac_stress" in trigger.lower():
+                    strategies.append("Limit physical exertion to activities of daily living only")
+                    strategies.append("Monitor heart rate - stay below 100 BPM until cleared")
+                    strategies.append("Avoid emotional stress and extreme temperatures")
+                else:
+                    strategies.append("Gradual activity progression only with medical supervision")
+            
+            elif rel_type == "exertional_relief":
+                strategies.append("Recognize early warning signs - stop activity before severe symptoms")
+                strategies.append("Plan rest breaks during any physical activity")
+            
+            # 🧠 DIETARY-STRESS INTERACTION AVOIDANCE STRATEGIES  
+            elif rel_type == "dietary_stress_interaction":
+                if "stress_modulated" in trigger.lower():
+                    strategies.append("Avoid dairy products during high-stress periods (work deadlines, conflicts)")
+                    strategies.append("Practice 5-minute relaxation before meals during stressful times")
+                    strategies.append("Consider lactase supplements only during stress-free periods")
+                    strategies.append("Identify personal stress triggers and plan dietary modifications accordingly")
+                elif "conditional" in symptom.lower():
+                    strategies.append("Keep food-mood-stress diary to identify trigger combinations")
+                    strategies.append("Create calm eating environments whenever possible")
+                    strategies.append("Use stress reduction apps before meals during work days")
+            
+            # 🧠 ENVIRONMENTAL MODULATION AVOIDANCE STRATEGIES
+            elif rel_type == "environmental_modulation":
+                strategies.append("Modify home and work environments to reduce stress triggers")
+                strategies.append("Use relaxation techniques in stressful environments")
+                strategies.append("Plan dietary choices based on anticipated stress levels")
+            
+            # 🧠 ACTIVITY LIMITATION AVOIDANCE STRATEGIES
+            elif rel_type == "activity_limitation":
+                strategies.append("Pace activities and avoid overexertion")
+                strategies.append("Monitor symptoms during activity - stop if worsening")
+                strategies.append("Plan rest periods between activities")
         
-        # Environmental factor strategies
+        # 🎯 ENVIRONMENTAL FACTOR STRATEGIES
         env_factors = environmental_analysis.get("factors", [])
         behavioral_insights = environmental_analysis.get("behavioral_insights", [])
         
         if "stress_trigger" in env_factors or "workplace_stress" in env_factors:
-            strategies.append("Implement workplace stress management techniques")
-            strategies.append("Schedule relaxation breaks during workday")
+            strategies.append("Implement structured stress breaks every 2 hours at work")
+            strategies.append("Practice deep breathing exercises during stressful meetings")
+            strategies.append("Use time management techniques to reduce work pressure")
         
         if "stress_modulated_symptoms" in behavioral_insights:
-            strategies.append("Practice mindfulness and stress reduction techniques before meals")
-            strategies.append("Create calm eating environments when possible")
+            strategies.append("Practice mindfulness meditation 10 minutes before meals")
+            strategies.append("Create 'stress-free eating zones' at home and work")
+            strategies.append("Avoid eating dairy when feeling overwhelmed or anxious")
         
         if "multi_context_trigger_interaction" in behavioral_insights:
-            strategies.append("Keep symptom diary tracking food, stress levels, and symptoms")
-            strategies.append("Identify and modify multiple trigger combinations")
+            strategies.append("Keep comprehensive symptom diary: food + stress level + location + symptoms")
+            strategies.append("Identify and plan for high-risk combinations (stressful day + dairy craving)")
+            strategies.append("Develop backup plans for managing multiple triggers simultaneously")
         
+        # 🎯 ACTIVITY AND TEMPORAL STRATEGIES
+        activity_relationships = environmental_analysis.get("activity_relationships", [])
+        if activity_relationships:
+            for activity in activity_relationships:
+                if "stair_climbing" in activity:
+                    strategies.append("Use elevators when available - avoid stairs until cardiac clearance")
+                elif "walking" in activity:
+                    strategies.append("Walk on flat surfaces only - avoid inclines and hills")
+                elif "sedentary" in activity:
+                    strategies.append("Gradually increase activity level with medical supervision")
+        
+        # 🧠 ENSURE ACTIONABLE STRATEGIES
         if not strategies:
-            strategies.append("Identify and avoid specific symptom triggers")
+            if causal_relationships:
+                strategies.append("Work with healthcare provider to identify and avoid specific symptom triggers")
+                strategies.append("Keep detailed symptom diary to track trigger patterns")
+            else:
+                strategies.append("Identify and avoid specific symptom triggers through systematic observation")
+        
+        return strategies
         
         return strategies
     
