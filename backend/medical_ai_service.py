@@ -6618,6 +6618,9 @@ class WorldClassMedicalAI:
         # PHASE 2: Use Advanced Symptom Recognizer for comprehensive entity extraction
         advanced_extraction = self.advanced_symptom_recognizer.extract_medical_entities(message)
         
+        # 🧠 STEP 2.2: EXTRACT CONTEXTUAL REASONING RESULTS
+        contextual_reasoning_data = advanced_extraction.get("contextual_reasoning", {})
+        
         # Update symptom data with advanced entities
         context.symptom_data.update({
             "symptoms": entities.get("symptoms", []),
@@ -6635,7 +6638,18 @@ class WorldClassMedicalAI:
             "medical_relationships": advanced_extraction.get("medical_relationships", {}),
             "clinical_insights": advanced_extraction.get("clinical_insights", {}),
             "confidence_scores": entities.get("confidence_scores", {}),
-            "overall_confidence": entities.get("overall_confidence", 0.0)
+            "overall_confidence": entities.get("overall_confidence", 0.0),
+            
+            # 🧠 STEP 2.2: CONTEXTUAL REASONING DATA
+            "contextual_reasoning": contextual_reasoning_data,
+            "causal_relationships": contextual_reasoning_data.get("causal_relationships", []),
+            "clinical_hypotheses": contextual_reasoning_data.get("clinical_hypotheses", []),
+            "contextual_factors": contextual_reasoning_data.get("contextual_factors", {}),
+            "medical_reasoning_narrative": contextual_reasoning_data.get("medical_reasoning_narrative", ""),
+            "context_based_recommendations": contextual_reasoning_data.get("context_based_recommendations", []),
+            "trigger_avoidance_strategies": contextual_reasoning_data.get("trigger_avoidance_strategies", []),
+            "specialist_referral_context": contextual_reasoning_data.get("specialist_referral_context"),
+            "contextual_significance": contextual_reasoning_data.get("contextual_significance", "routine")
         })
         
         # 🚀 PHASE 4: ENHANCED EMERGENCY ASSESSMENT WITH COMPREHENSIVE ANALYSIS
