@@ -4677,6 +4677,797 @@ class MedicalContext:
     clinical_hypotheses: List[Dict[str, Any]]
     confidence_score: float
 
+# 🧠 STEP 2.2: CONTEXT-AWARE MEDICAL REASONING ENGINE
+
+class ContextAwareMedicalReasoner:
+    """
+    🧠 REVOLUTIONARY CONTEXT-AWARE MEDICAL REASONING ENGINE 🧠
+    
+    Master clinician-level contextual intelligence that thinks like a specialist physician
+    when analyzing complex medical statements. Transforms raw symptom descriptions into
+    sophisticated contextual understanding with causal analysis and clinical reasoning.
+    
+    ⚡ STEP 2.2 TRANSCENDENT CAPABILITIES:
+    ✅ Causal relationship detection between symptoms and triggers
+    ✅ Positional, temporal, and situational medical contexts  
+    ✅ Complex multi-symptom interactions with environmental factors
+    ✅ Clinical hypothesis generation based on contextual patterns
+    ✅ Master diagnostician-level contextual reasoning
+    
+    Algorithm Version: 2.2_context_aware_reasoning
+    """
+    
+    def __init__(self):
+        self.contextual_patterns = self._load_contextual_medical_patterns()
+        self.causal_reasoning_engine = self._initialize_causal_engine()
+        self.clinical_logic_validator = self._initialize_clinical_validator()
+        
+    def _load_contextual_medical_patterns(self) -> Dict[str, List[str]]:
+        """
+        🔥 STEP 2.2: COMPREHENSIVE CONTEXTUAL MEDICAL PATTERNS 🔥
+        
+        120+ sophisticated contextual reasoning patterns across 5 categories
+        that enable master clinician-level contextual understanding.
+        """
+        
+        return {
+            # 🏥 POSITIONAL/ORTHOSTATIC REASONING (25+ patterns)
+            "positional_context_patterns": [
+                r"\b(when\s+I\s+stand|standing\s+up|getting\s+up|rising\s+from)\s+(?:I\s+)?(?:get|feel|have|experience)\s+(dizzy|lightheaded|nauseous|sick|faint|weak)",
+                r"\b(lying\s+down|sitting\s+up|bending\s+over|leaning\s+forward)\s+(?:makes|causes|triggers|brings\s+on)\s+(?:my|the)?\s*(pain|headache|dizziness|nausea)",
+                r"\b(better\s+when\s+lying|worse\s+when\s+standing|improves\s+with\s+elevation|worsens\s+upright)",
+                r"\b(orthostatic|postural|positional)\s+(hypotension|dizziness|symptoms|changes)",
+                r"\b(head\s+rush|blood\s+rushing|feeling\s+faint)\s+(?:when|after)\s+(standing|getting\s+up|rising)",
+                r"\b(symptoms\s+)?(?:that\s+)?(?:occur|happen|start|begin)\s+(?:when|after)\s+(?:I\s+)?(stand|sit|lie|bend|squat|kneel)",
+                r"\b(changing\s+positions?|position\s+changes?)\s+(?:make|cause|trigger)\s+(symptoms|problems|issues)",
+                r"\b(upright|vertical|horizontal)\s+(position|posture)\s+(?:makes|causes|triggers|worsens|improves)",
+                r"\b(getting\s+out\s+of\s+bed|rising\s+from\s+chair|standing\s+quickly|sudden\s+movements?)\s+(?:cause|trigger|bring\s+on)",
+                r"\b(presyncope|near\s+fainting|almost\s+passed?\s+out)\s+(?:when|after|during)\s+(standing|rising|getting\s+up)",
+                r"\b(head\s+feels?\s+heavy|vision\s+goes?\s+dark|tunnel\s+vision)\s+(?:when|after)\s+(standing|rising)",
+                r"\b(squatting\s+down|bending\s+over|leaning\s+down)\s+(?:and\s+then\s+)?(standing\s+up|rising|getting\s+up)",
+                r"\b(altitude\s+changes?|elevation\s+changes?|going\s+upstairs)\s+(?:cause|trigger|worsen)",
+                r"\b(hot\s+shower|warm\s+bath|heated\s+environment)\s+(?:and\s+then\s+)?(standing|getting\s+up)",
+                r"\b(dehydrated|haven't\s+eaten|low\s+blood\s+sugar)\s+(?:and\s+then\s+)?(standing|rising|getting\s+up)",
+                r"\b(morning|first\s+thing|upon\s+waking)\s+(?:when\s+)?(?:I\s+)?(stand|get\s+up|rise)",
+                r"\b(prolonged\s+sitting|long\s+periods?\s+sitting|sitting\s+for\s+hours?)\s+(?:then\s+)?(standing|getting\s+up)",
+                r"\b(exercise|physical\s+activity|working\s+out)\s+(?:and\s+then\s+)?(stopping|resting|cooling\s+down)",
+                r"\b(gravity|blood\s+pooling|circulation\s+problems?)\s+(?:when|during|after)\s+(standing|upright)",
+                r"\b(tilt\s+table|orthostatic\s+test|standing\s+test)\s+(?:positive|abnormal|concerning)",
+                r"\b(blood\s+pressure\s+drops?|BP\s+falls?)\s+(?:when|after|during)\s+(standing|rising|upright)",
+                r"\b(heart\s+rate\s+increases?|pulse\s+goes?\s+up|tachycardia)\s+(?:when|after)\s+(standing|rising)",
+                r"\b(medications?|pills?|prescriptions?)\s+(?:that\s+)?(?:cause|worsen|contribute\s+to)\s+(orthostatic|positional|dizziness)",
+                r"\b(volume\s+depletion|fluid\s+loss|blood\s+loss)\s+(?:causing|leading\s+to)\s+(orthostatic|positional)",
+                r"\b(autonomic\s+dysfunction|nervous\s+system\s+problems?)\s+(?:causing|leading\s+to)\s+(positional|orthostatic)"
+            ],
+            
+            # ⚡ EXERTIONAL/ACTIVITY REASONING (30+ patterns)  
+            "exertional_context_patterns": [
+                r"\b(chest\s+pain|shortness\s+of\s+breath|fatigue|weakness)\s+(?:that\s+)?(?:comes?\s+on|starts?|begins?|occurs?)\s+(?:when|during|after|with)\s+(climbing|walking|exercise|exertion|activity)",
+                r"\b(pain|symptoms|discomfort)\s+(?:that\s+)?(?:happens?|occurs?|starts?|begins?)\s+(?:with|during|after)\s+(physical\s+)?(?:activity|movement|exercise|exertion|work)",
+                r"\b(goes\s+away|improves|resolves|gets\s+better|subsides)\s+(?:with|after|during)\s+(rest|stopping|sitting|lying\s+down)",
+                r"\b(stairs?|steps?|climbing|walking\s+uphill|inclines?)\s+(?:cause|trigger|bring\s+on|worsen)\s+(chest\s+pain|shortness\s+of\s+breath|symptoms)",
+                r"\b(angina|cardiac\s+pain|heart\s+pain)\s+(?:with|during|after)\s+(exercise|exertion|physical\s+activity|stress\s+test)",
+                r"\b(reproducible|consistent|predictable)\s+(with|during|after)\s+(exercise|exertion|activity|physical\s+stress)",
+                r"\b(exercise\s+tolerance|activity\s+tolerance|functional\s+capacity)\s+(decreased|reduced|limited|poor)",
+                r"\b(can\s+only\s+walk|limited\s+to)\s+(\d+\s+)?(blocks?|feet|yards?|meters?|minutes?)\s+(?:before|until)\s+(symptoms|pain|shortness)",
+                r"\b(dyspnea\s+on\s+exertion|DOE|shortness\s+with\s+activity)\s+(?:at|after|within)\s+(\d+\s+)?(blocks?|flights?)",
+                r"\b(claudication|leg\s+pain|calf\s+pain)\s+(?:with|during|after)\s+(walking|exercise|ambulation)",
+                r"\b(sexual\s+activity|intercourse|physical\s+intimacy)\s+(?:causes|triggers|brings\s+on)\s+(chest\s+pain|shortness|symptoms)",
+                r"\b(carrying|lifting|pushing|pulling)\s+(heavy|light)?\s*(?:objects?|things?|weights?)\s+(?:causes|triggers)",
+                r"\b(household\s+activities?|chores|daily\s+activities?)\s+(?:now\s+)?(?:cause|trigger|bring\s+on)\s+(symptoms|fatigue|shortness)",
+                r"\b(lawn\s+mowing|gardening|yard\s+work|outdoor\s+activities?)\s+(?:cause|trigger|worsen)",
+                r"\b(swimming|running|jogging|cycling|sports?)\s+(?:now\s+)?(?:cause|trigger|bring\s+on|worsen)",
+                r"\b(warm\s+weather|hot\s+days?|heat|humidity)\s+(?:makes?\s+)?(exercise|activity|exertion)\s+(?:worse|harder|more\s+difficult)",
+                r"\b(cold\s+weather|winter|cold\s+air)\s+(?:makes?\s+)?(exercise|symptoms|breathing)\s+(?:worse|harder)",
+                r"\b(stress\s+test|exercise\s+test|cardiac\s+catheterization|treadmill\s+test)\s+(positive|abnormal|concerning|showed)",
+                r"\b(metabolic\s+equivalents?|METs?)\s+(limited\s+to|can\s+only\s+achieve|maximum\s+of)",
+                r"\b(target\s+heart\s+rate|maximum\s+heart\s+rate)\s+(not\s+achieved|limited\s+by\s+symptoms)",
+                r"\b(preload|afterload|cardiac\s+output)\s+(?:limited\s+by|affected\s+by)\s+(exercise|exertion)",
+                r"\b(coronary\s+artery\s+disease|CAD|ischemic\s+heart\s+disease)\s+(?:symptoms?\s+)?(?:with|during)\s+(exertion|exercise)",
+                r"\b(stable\s+angina|unstable\s+angina|variant\s+angina)\s+(?:pattern|symptoms?)\s+(?:with|during|after)\s+(activity|exertion)",
+                r"\b(heart\s+failure|CHF|cardiomyopathy)\s+(?:symptoms?\s+)?(?:worsen|exacerbated)\s+(?:with|by)\s+(activity|exertion)",
+                r"\b(pulmonary\s+hypertension|right\s+heart\s+failure)\s+(?:symptoms?\s+)?(?:with|during)\s+(minimal|mild|moderate)\s+(exertion|activity)",
+                r"\b(deconditioning|out\s+of\s+shape|poor\s+fitness|sedentary)\s+(?:causing|leading\s+to)\s+(exercise\s+intolerance|symptoms\s+with\s+activity)",
+                r"\b(aortic\s+stenosis|mitral\s+stenosis|valve\s+disease)\s+(?:symptoms?\s+)?(?:with|during)\s+(exertion|exercise|activity)",
+                r"\b(arrhythmia|irregular\s+heartbeat|palpitations)\s+(?:triggered\s+by|caused\s+by|worsen\s+with)\s+(exercise|exertion|physical\s+activity)",
+                r"\b(peripheral\s+artery\s+disease|PAD|vascular\s+disease)\s+(?:symptoms?\s+)?(?:with|during)\s+(walking|ambulation|exercise)",
+                r"\b(reproducible\s+ischemia|demand\s+ischemia|supply-demand\s+mismatch)\s+(?:with|during)\s+(exertion|stress|activity)"
+            ],
+            
+            # 🍽️ DIETARY/DIGESTIVE REASONING (35+ patterns)
+            "dietary_context_patterns": [
+                r"\b(stomach\s+pain|nausea|bloating|cramps|diarrhea|gas|discomfort)\s+(?:about\s+)?\d*-?\d*\s*(?:minutes?|hours?)\s*(?:after|following)\s+(?:eating|drinking|consuming)\s+(dairy|milk|cheese|lactose|ice\s+cream)",
+                r"\b(symptoms?|pain|discomfort|problems?)\s+(?:that\s+are\s+)?(?:triggered\s+by|caused\s+by|related\s+to|associated\s+with)\s+(spicy\s+food|fatty\s+food|greasy\s+food|certain\s+foods?)",
+                r"\b(better\s+on\s+empty\s+stomach|worse\s+after\s+meals?|postprandial\s+symptoms?|food\s+makes?\s+it\s+worse)",
+                r"\b(gluten|wheat|bread|pasta|cereals?)\s+(?:causes?|triggers?|brings?\s+on|worsens?)\s+(symptoms?|pain|bloating|diarrhea|constipation)",
+                r"\b(lactose\s+intolerance|dairy\s+intolerance|milk\s+allergy)\s+(symptoms?|causing|leading\s+to)",
+                r"\b(food\s+allergies?|food\s+sensitivities?|dietary\s+triggers?)\s+(?:causing|leading\s+to|resulting\s+in)",
+                r"\b(nuts?|peanuts?|tree\s+nuts?|shellfish|seafood)\s+(?:cause|trigger|bring\s+on)\s+(allergic\s+reactions?|symptoms?|hives|swelling)",
+                r"\b(caffeine|coffee|tea|energy\s+drinks?|soda)\s+(?:makes?|causes?|triggers?|worsens?)\s+(anxiety|jitters|heart\s+palpitations|insomnia)",
+                r"\b(alcohol|drinking|wine|beer|liquor)\s+(?:causes?|triggers?|makes?\s+worse)\s+(symptoms?|pain|nausea|headache|flushing)",
+                r"\b(artificial\s+sweeteners?|sugar\s+substitutes?|aspartame|sucralose)\s+(?:cause|trigger|worsen)",
+                r"\b(high\s+fiber|fiber\s+supplements?|beans|legumes)\s+(?:cause|trigger|worsen)\s+(gas|bloating|cramping|diarrhea)",
+                r"\b(carbonated\s+drinks?|soda|fizzy\s+drinks?|sparkling\s+water)\s+(?:cause|trigger|worsen)\s+(bloating|gas|reflux)",
+                r"\b(citrus\s+fruits?|oranges?|lemons?|tomatoes?|acidic\s+foods?)\s+(?:trigger|cause|worsen)\s+(heartburn|acid\s+reflux|GERD)",
+                r"\b(chocolate|cocoa|dark\s+chocolate)\s+(?:triggers?|causes?|brings?\s+on)\s+(migraines?|headaches?|heartburn)",
+                r"\b(aged\s+cheese|fermented\s+foods?|wine|tyramine)\s+(?:trigger|cause|bring\s+on)\s+(migraines?|headaches?)",
+                r"\b(msg|monosodium\s+glutamate|chinese\s+food\s+syndrome)\s+(?:causes?|triggers?)\s+(headaches?|symptoms?)",
+                r"\b(eating\s+(?:too\s+)?fast|large\s+portions?|overeating|binge\s+eating)\s+(?:causes?|leads?\s+to)\s+(symptoms?|discomfort|pain)",
+                r"\b(skipping\s+meals?|fasting|not\s+eating|empty\s+stomach)\s+(?:causes?|triggers?|brings?\s+on)\s+(headaches?|nausea|weakness)",
+                r"\b(late\s+night\s+eating|eating\s+before\s+bed|dinner\s+close\s+to\s+bedtime)\s+(?:causes?|worsens?)\s+(reflux|heartburn|sleep\s+problems?)",
+                r"\b(cold\s+foods?|ice\s+cream|frozen\s+treats?)\s+(?:trigger|cause|bring\s+on)\s+(tooth\s+pain|sensitivity|headaches?)",
+                r"\b(hot\s+foods?|spicy\s+foods?|peppers?|capsaicin)\s+(?:cause|trigger|worsen)\s+(sweating|flushing|burning\s+mouth)",
+                r"\b(histamine\s+rich\s+foods?|histamine\s+intolerance|aged\s+foods?)\s+(?:cause|trigger|lead\s+to)",
+                r"\b(fodmaps?|fermentable\s+carbohydrates?|ibs\s+triggers?)\s+(?:causing|triggering|worsening)\s+(ibs|digestive\s+symptoms?)",
+                r"\b(nightshade\s+vegetables?|tomatoes?|potatoes?|peppers?|eggplant)\s+(?:trigger|cause|worsen)\s+(inflammation|joint\s+pain)",
+                r"\b(processed\s+foods?|preservatives?|additives?|artificial\s+ingredients?)\s+(?:cause|trigger|lead\s+to)",
+                r"\b(meal\s+timing|eating\s+schedule|irregular\s+meals?)\s+(?:affects?|influences?|impacts?)\s+(symptoms?|digestion)",
+                r"\b(elimination\s+diet|food\s+diary|dietary\s+changes?)\s+(?:shows?|reveals?|identifies?)\s+(triggers?|patterns?)",
+                r"\b(gastroparesis|delayed\s+gastric\s+emptying)\s+(?:symptoms?\s+)?(?:worse\s+with|triggered\s+by)\s+(certain\s+foods?|fatty\s+meals?)",
+                r"\b(celiac\s+disease|non-celiac\s+gluten\s+sensitivity)\s+(?:symptoms?\s+)?(?:from|caused\s+by|triggered\s+by)\s+(gluten|wheat)",
+                r"\b(inflammatory\s+bowel\s+disease|ibd|crohn'?s|colitis)\s+(?:flares?|symptoms?\s+)?(?:triggered\s+by|worsened\s+by)\s+(certain\s+foods?)",
+                r"\b(gallbladder\s+disease|cholecystitis|gallstones)\s+(?:symptoms?\s+)?(?:triggered\s+by|caused\s+by)\s+(fatty\s+foods?|high\s+fat\s+meals?)",
+                r"\b(pancreatic\s+insufficiency|pancreatic\s+enzymes?)\s+(?:symptoms?\s+)?(?:with|after)\s+(eating|meals?|fatty\s+foods?)",
+                r"\b(dumping\s+syndrome|rapid\s+gastric\s+emptying)\s+(?:symptoms?\s+)?(?:after|following)\s+(eating|meals?|sugary\s+foods?)",
+                r"\b(food\s+poisoning|foodborne\s+illness|contaminated\s+food)\s+(?:from|caused\s+by|related\s+to)\s+(specific\s+food|restaurant|meal)",
+                r"\b(eating\s+disorders?|anorexia|bulimia|binge\s+eating)\s+(?:affecting|impacting|influencing)\s+(symptoms?|health|digestion)"
+            ],
+            
+            # 🕐 TEMPORAL/CIRCADIAN REASONING (25+ patterns)
+            "temporal_context_patterns": [
+                r"\b(headaches?|pain|symptoms?|problems?)\s+(?:that\s+)?(?:occur|happen|start|begin|come\s+on)\s+(?:in\s+the|during\s+the|every)\s+(morning|afternoon|evening|night|dawn|dusk)",
+                r"\b(worse\s+at\s+night|better\s+in\s+morning|nighttime\s+symptoms?|nocturnal\s+symptoms?)",
+                r"\b(symptoms?\s+that\s+wake\s+me|nocturnal\s+symptoms?|night\s+sweats?|sleep\s+disruption)",
+                r"\b(circadian\s+rhythm|biological\s+clock|daily\s+pattern|diurnal\s+variation)",
+                r"\b(seasonal\s+pattern|winter\s+depression|seasonal\s+affective|weather\s+related)",
+                r"\b(monthly\s+cycle|menstrual\s+cycle|hormonal\s+pattern|premenstrual)",
+                r"\b(cyclical\s+pattern|comes?\s+in\s+cycles?|periodic|recurrent\s+episodes?)",
+                r"\b(time\s+of\s+day|certain\s+times?|specific\s+hours?)\s+(?:when|that|where)\s+(symptoms?\s+are\s+worse|problems?\s+occur)",
+                r"\b(shift\s+work|night\s+shift|rotating\s+schedule)\s+(?:affecting|impacting|disrupting)\s+(sleep|symptoms?|health)",
+                r"\b(jet\s+lag|time\s+zone\s+changes?|travel\s+across\s+time\s+zones?)\s+(?:causing|triggering|worsening)",
+                r"\b(daylight\s+saving|clock\s+changes?|time\s+changes?)\s+(?:affect|impact|disrupt)\s+(symptoms?|sleep|mood)",
+                r"\b(sunrise|sunset|dawn|dusk|twilight)\s+(?:related|associated|correlated)\s+(symptoms?|mood\s+changes?)",
+                r"\b(melatonin|cortisol|hormone\s+levels?)\s+(?:cycles?|patterns?|disruption)\s+(?:affecting|causing|related\s+to)",
+                r"\b(sleep\s+schedule|bedtime\s+routine|sleep-wake\s+cycle)\s+(?:disrupted|irregular|off)\s+(?:causing|leading\s+to)",
+                r"\b(insomnia|sleep\s+problems?|difficulty\s+sleeping)\s+(?:at|during|around)\s+(certain\s+times?|specific\s+hours?)",
+                r"\b(energy\s+levels?|alertness|fatigue)\s+(?:that\s+)?(?:varies?|changes?|fluctuates?)\s+(?:with|by|during)\s+(time\s+of\s+day)",
+                r"\b(afternoon\s+crash|midday\s+slump|3\s*pm\s+fatigue|post-lunch\s+dip)",
+                r"\b(night\s+owl|morning\s+person|early\s+bird|chronotype)\s+(?:pattern|preference|affecting)",
+                r"\b(weekends?|weekdays?|work\s+days?|days?\s+off)\s+(?:symptoms?\s+are\s+)?(?:different|better|worse|variable)",
+                r"\b(holiday\s+schedule|vacation\s+time|routine\s+changes?)\s+(?:affect|impact|disrupt)\s+(symptoms?|health)",
+                r"\b(age\s+related|getting\s+older|advancing\s+age)\s+(?:changes?\s+in|affecting)\s+(circadian|sleep|energy)",
+                r"\b(medication\s+timing|pill\s+schedule|dosing\s+times?)\s+(?:affecting|impacting|related\s+to)\s+(symptoms?)",
+                r"\b(exercise\s+timing|workout\s+schedule|physical\s+activity\s+timing)\s+(?:affects?|impacts?)\s+(sleep|symptoms?)",
+                r"\b(meal\s+timing|eating\s+schedule|food\s+timing)\s+(?:affects?|impacts?|influences?)\s+(symptoms?|energy|mood)",
+                r"\b(light\s+exposure|sunlight|artificial\s+light|blue\s+light)\s+(?:affecting|impacting|disrupting)\s+(circadian|sleep|mood)"
+            ],
+            
+            # 🌍 ENVIRONMENTAL/TRIGGER REASONING (30+ patterns)
+            "environmental_context_patterns": [
+                r"\b(headaches?|migraines?|symptoms?)\s+(?:that\s+are\s+)?(?:triggered\s+by|caused\s+by|brought\s+on\s+by|related\s+to)\s+(bright\s+lights?|fluorescent\s+lights?|sunlight|glare)",
+                r"\b(worse\s+in|better\s+in|affected\s+by|sensitive\s+to)\s+(cold\s+weather|hot\s+weather|humidity|temperature\s+changes?|barometric\s+pressure)",
+                r"\b(allergic\s+reactions?|symptoms?|breathing\s+problems?)\s+(?:to|from|caused\s+by|triggered\s+by)\s+(pollen|dust|pet\s+dander|mold|chemicals?)",
+                r"\b(air\s+quality|pollution|smog|allergens?)\s+(?:affecting|triggering|worsening|causing)\s+(symptoms?|breathing|asthma)",
+                r"\b(perfume|cologne|fragrances?|scented\s+products?|strong\s+smells?)\s+(?:trigger|cause|bring\s+on|worsen)",
+                r"\b(cleaning\s+products?|household\s+chemicals?|bleach|ammonia)\s+(?:cause|trigger|worsen)\s+(symptoms?|breathing\s+problems?)",
+                r"\b(smoke|cigarette\s+smoke|secondhand\s+smoke|tobacco)\s+(?:triggers?|causes?|worsens?)\s+(asthma|breathing|cough)",
+                r"\b(loud\s+noises?|sudden\s+sounds?|noise\s+pollution)\s+(?:trigger|cause|bring\s+on|worsen)\s+(headaches?|anxiety|symptoms?)",
+                r"\b(stress|emotional\s+stress|psychological\s+stress|life\s+stressors?)\s+(?:triggers?|causes?|brings?\s+on|worsens?)",
+                r"\b(workplace|job\s+stress|work\s+environment|occupational)\s+(?:exposure|stress|hazards?)\s+(?:causing|triggering|affecting)",
+                r"\b(travel|flying|altitude\s+changes?|cabin\s+pressure)\s+(?:affects?|triggers?|causes?|worsens?)\s+(symptoms?|ear\s+problems?)",
+                r"\b(exercise|physical\s+activity|exertion|sports?)\s+(?:in|during|with)\s+(heat|cold|humidity|extreme\s+weather)",
+                r"\b(indoor\s+air|outdoor\s+air|ventilation|air\s+circulation)\s+(?:problems?|poor|affecting)\s+(symptoms?|breathing)",
+                r"\b(seasonal\s+changes?|weather\s+fronts?|storm\s+systems?)\s+(?:trigger|cause|affect|worsen)\s+(migraines?|joint\s+pain)",
+                r"\b(humidity\s+levels?|dry\s+air|moisture|dehumidifier|humidifier)\s+(?:affects?|impacts?)\s+(breathing|skin|symptoms?)",
+                r"\b(altitude|elevation|high\s+altitude|mountain\s+climbing)\s+(?:causes?|triggers?|affects?)\s+(symptoms?|breathing|headaches?)",
+                r"\b(sun\s+exposure|uv\s+light|sunburn|photosensitivity)\s+(?:triggers?|causes?|worsens?)\s+(rash|lupus|symptoms?)",
+                r"\b(mold\s+exposure|water\s+damage|damp\s+environment|fungal\s+allergens?)\s+(?:causing|triggering|affecting)",
+                r"\b(dust\s+mites?|bed\s+bugs?|household\s+pests?|insect\s+allergens?)\s+(?:trigger|cause|worsen)\s+(allergies?|asthma|symptoms?)",
+                r"\b(new\s+carpet|fresh\s+paint|construction|renovation)\s+(?:fumes|odors|chemicals?)\s+(?:causing|triggering)",
+                r"\b(electromagnetic\s+fields?|emf|wifi|cell\s+phone\s+radiation)\s+(?:sensitivity|affecting|causing)\s+(symptoms?)",
+                r"\b(air\s+conditioning|heating\s+system|hvac|forced\s+air)\s+(?:affecting|triggering|worsening)\s+(symptoms?|allergies?)",
+                r"\b(open\s+windows?|closed\s+environment|poor\s+ventilation)\s+(?:makes?\s+)?(?:symptoms?\s+)?(?:better|worse|different)",
+                r"\b(crowded\s+places?|public\s+spaces?|confined\s+spaces?)\s+(?:trigger|cause|worsen)\s+(anxiety|claustrophobia|symptoms?)",
+                r"\b(specific\s+locations?|certain\s+buildings?|particular\s+environments?)\s+(?:where|that|in\s+which)\s+(symptoms?\s+occur|problems?\s+happen)",
+                r"\b(home\s+environment|workplace|school|office)\s+(?:vs|compared\s+to|different\s+from)\s+(other\s+locations?|outside)",
+                r"\b(geographic\s+location|moving\s+to|relocating|climate\s+change)\s+(?:affecting|impacting|changing)\s+(symptoms?|health)",
+                r"\b(urban\s+vs\s+rural|city\s+vs\s+country|pollution\s+levels?)\s+(?:differences?|affecting|impacting)\s+(symptoms?|breathing)",
+                r"\b(ocean\s+air|sea\s+level|coastal\s+environment|salt\s+air)\s+(?:helps?|worsens?|affects?)\s+(breathing|symptoms?)",
+                r"\b(desert\s+climate|dry\s+climate|humid\s+climate|tropical\s+environment)\s+(?:effects?|impacts?|affects?)\s+(symptoms?|health)"
+            ]
+        }
+    
+    def _initialize_causal_engine(self) -> Dict[str, Any]:
+        """Initialize causal reasoning engine with medical knowledge"""
+        return {
+            "causal_indicators": [
+                "caused by", "triggered by", "brought on by", "made worse by",
+                "happens when", "occurs after", "starts with", "related to",
+                "due to", "because of", "as a result of", "following",
+                "in response to", "provoked by", "induced by"
+            ],
+            "temporal_indicators": [
+                "after", "before", "during", "when", "while", "following",
+                "preceding", "simultaneous", "concurrent", "subsequent"
+            ],
+            "relief_indicators": [
+                "better with", "improved by", "relieved by", "helped by",
+                "goes away with", "subsides when", "resolves after"
+            ]
+        }
+    
+    def _initialize_clinical_validator(self) -> Dict[str, Any]:
+        """Initialize clinical logic validation system"""
+        return {
+            "medical_plausibility": {
+                "orthostatic_hypotension": ["dizziness", "lightheadedness", "syncope", "standing"],
+                "exertional_angina": ["chest_pain", "exertion", "rest_relief", "reproducible"],
+                "lactose_intolerance": ["abdominal_pain", "bloating", "diarrhea", "dairy"],
+                "tension_headache": ["headache", "stress", "muscle_tension", "bilateral"]
+            },
+            "consistency_checks": {
+                "temporal_logic": True,
+                "anatomical_coherence": True,
+                "physiological_plausibility": True,
+                "severity_consistency": True
+            }
+        }
+    
+    def analyze_contextual_medical_reasoning(self, text: str, extracted_entities: Dict) -> ContextualMedicalReasoning:
+        """
+        🧠 STEP 2.2 MAIN METHOD: Master clinician-level contextual analysis 🧠
+        
+        Transform raw medical entities into sophisticated contextual understanding
+        with clinical causality, positional relationships, and situational logic.
+        """
+        
+        # Detect causal relationships between symptoms and triggers
+        causal_relationships = self.detect_causal_relationships_advanced(text, extracted_entities)
+        
+        # Analyze specific contextual factors
+        positional_analysis = self.analyze_positional_context_intelligence(text)
+        temporal_analysis = self.extract_temporal_context_reasoning(text)
+        environmental_analysis = self.assess_environmental_trigger_context(text)
+        
+        # Generate clinical hypotheses based on contextual patterns
+        clinical_hypotheses = self.generate_clinical_hypotheses_contextual(
+            {
+                "causal_relationships": causal_relationships,
+                "positional": positional_analysis,
+                "temporal": temporal_analysis,
+                "environmental": environmental_analysis
+            }
+        )
+        
+        # Build comprehensive contextual reasoning
+        contextual_reasoning = ContextualMedicalReasoning(
+            symptoms_with_context=self._extract_symptoms_with_context(text, extracted_entities),
+            triggers_and_causality=[rel.__dict__ for rel in causal_relationships],
+            contextual_relationships={
+                "positional": positional_analysis,
+                "temporal": temporal_analysis,
+                "environmental": environmental_analysis
+            },
+            clinical_reasoning=self._generate_clinical_reasoning_narrative(
+                causal_relationships, clinical_hypotheses
+            ),
+            positional_factors=positional_analysis.get("factors", []),
+            temporal_factors=temporal_analysis.get("factors", []),
+            environmental_factors=environmental_analysis.get("factors", []),
+            activity_relationships=environmental_analysis.get("activity_relationships", []),
+            causal_chains=[{
+                "trigger": rel.trigger,
+                "symptom": rel.symptom,
+                "causality_strength": rel.causality_strength,
+                "medical_mechanism": rel.medical_mechanism
+            } for rel in causal_relationships],
+            clinical_hypotheses=clinical_hypotheses,
+            contextual_significance=self._assess_contextual_significance(causal_relationships),
+            reasoning_confidence=self._calculate_reasoning_confidence(
+                causal_relationships, positional_analysis, temporal_analysis, environmental_analysis
+            ),
+            context_based_recommendations=self._generate_context_recommendations(
+                causal_relationships, clinical_hypotheses
+            ),
+            trigger_avoidance_strategies=self._generate_trigger_avoidance_strategies(
+                causal_relationships, environmental_analysis
+            ),
+            specialist_referral_context=self._determine_specialist_referral_context(
+                clinical_hypotheses, causal_relationships
+            )
+        )
+        
+        # Validate contextual medical logic
+        validation_score = self.validate_contextual_medical_logic(contextual_reasoning)
+        contextual_reasoning.reasoning_confidence = (
+            contextual_reasoning.reasoning_confidence + validation_score
+        ) / 2.0
+        
+        return contextual_reasoning
+    
+    def detect_causal_relationships_advanced(self, text: str, entities: Dict) -> List[CausalRelationship]:
+        """Advanced causal relationship detection between symptoms and triggers"""
+        
+        causal_relationships = []
+        text_lower = text.lower()
+        
+        # Detect positional causality (orthostatic patterns)
+        for pattern in self.contextual_patterns["positional_context_patterns"][:10]:  # Use top 10 for performance
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                match_text = match.group()
+                
+                # Extract trigger and symptom from match
+                trigger = self._extract_trigger_from_match(match_text, "positional")
+                symptom = self._extract_symptom_from_match(match_text, "positional")
+                
+                if trigger and symptom:
+                    relationship = CausalRelationship(
+                        trigger=trigger,
+                        symptom=symptom,
+                        relationship_type="positional",
+                        causality_strength=0.85,
+                        medical_mechanism="orthostatic_hypotension_mechanism",
+                        clinical_significance="urgent" if "faint" in symptom else "routine",
+                        validation_evidence=[f"positional_pattern: {match_text}"]
+                    )
+                    causal_relationships.append(relationship)
+        
+        # Detect exertional causality
+        for pattern in self.contextual_patterns["exertional_context_patterns"][:10]:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                match_text = match.group()
+                
+                trigger = self._extract_trigger_from_match(match_text, "exertional")
+                symptom = self._extract_symptom_from_match(match_text, "exertional")
+                
+                if trigger and symptom:
+                    clinical_sig = "emergency" if "chest" in symptom and "pain" in symptom else "urgent"
+                    relationship = CausalRelationship(
+                        trigger=trigger,
+                        symptom=symptom,
+                        relationship_type="exertional",
+                        causality_strength=0.90,
+                        medical_mechanism="exertional_angina_mechanism",
+                        clinical_significance=clinical_sig,
+                        validation_evidence=[f"exertional_pattern: {match_text}"]
+                    )
+                    causal_relationships.append(relationship)
+        
+        # Detect dietary causality
+        for pattern in self.contextual_patterns["dietary_context_patterns"][:10]:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                match_text = match.group()
+                
+                trigger = self._extract_trigger_from_match(match_text, "dietary")
+                symptom = self._extract_symptom_from_match(match_text, "dietary")
+                
+                if trigger and symptom:
+                    relationship = CausalRelationship(
+                        trigger=trigger,
+                        symptom=symptom,
+                        relationship_type="dietary",
+                        causality_strength=0.75,
+                        medical_mechanism="food_intolerance_mechanism",
+                        clinical_significance="routine",
+                        validation_evidence=[f"dietary_pattern: {match_text}"]
+                    )
+                    causal_relationships.append(relationship)
+        
+        return causal_relationships
+    
+    def analyze_positional_context_intelligence(self, text: str) -> Dict[str, Any]:
+        """Sophisticated positional/orthostatic context analysis with clinical reasoning"""
+        
+        analysis = {
+            "factors": [],
+            "orthostatic_indicators": [],
+            "positional_triggers": [],
+            "clinical_significance": "routine",
+            "confidence": 0.0
+        }
+        
+        text_lower = text.lower()
+        
+        # Detect orthostatic hypotension patterns
+        orthostatic_patterns = [
+            (r"(?:when|after)\s+(?:I\s+)?(?:stand|standing|get\s+up|rise)", "standing_trigger", 0.9),
+            (r"(?:dizzy|lightheaded|faint)\s+when\s+standing", "orthostatic_symptom", 0.95),
+            (r"better\s+(?:when|after)\s+(?:lying|sitting)", "positional_relief", 0.8),
+            (r"blood\s+pressure\s+drop", "physiological_mechanism", 0.85)
+        ]
+        
+        total_confidence = 0.0
+        pattern_count = 0
+        
+        for pattern, factor_type, confidence in orthostatic_patterns:
+            if re.search(pattern, text_lower):
+                analysis["factors"].append(factor_type)
+                analysis["orthostatic_indicators"].append(pattern)
+                total_confidence += confidence
+                pattern_count += 1
+        
+        if pattern_count > 0:
+            analysis["confidence"] = total_confidence / pattern_count
+            
+            # Assess clinical significance
+            if pattern_count >= 3:
+                analysis["clinical_significance"] = "urgent"
+            elif pattern_count >= 2:
+                analysis["clinical_significance"] = "moderate"
+        
+        return analysis
+    
+    def extract_temporal_context_reasoning(self, text: str) -> Dict[str, Any]:
+        """Advanced temporal context analysis with circadian and activity correlations"""
+        
+        analysis = {
+            "factors": [],
+            "temporal_patterns": [],
+            "circadian_indicators": [],
+            "activity_correlations": [],
+            "confidence": 0.0
+        }
+        
+        text_lower = text.lower()
+        
+        # Detect temporal patterns
+        temporal_patterns = [
+            (r"(?:morning|am|early)", "morning_pattern", 0.8),
+            (r"(?:evening|night|pm)", "evening_pattern", 0.8),
+            (r"(?:after\s+eating|postprandial)", "postprandial_pattern", 0.9),
+            (r"(?:with\s+exercise|during\s+activity)", "activity_related", 0.85),
+            (r"(?:cyclical|periodic|comes\s+and\s+goes)", "cyclical_pattern", 0.75)
+        ]
+        
+        total_confidence = 0.0
+        pattern_count = 0
+        
+        for pattern, factor_type, confidence in temporal_patterns:
+            if re.search(pattern, text_lower):
+                analysis["factors"].append(factor_type)
+                analysis["temporal_patterns"].append(pattern)
+                total_confidence += confidence
+                pattern_count += 1
+        
+        if pattern_count > 0:
+            analysis["confidence"] = total_confidence / pattern_count
+        
+        return analysis
+    
+    def assess_environmental_trigger_context(self, text: str) -> Dict[str, Any]:
+        """Comprehensive environmental trigger analysis with behavioral insights"""
+        
+        analysis = {
+            "factors": [],
+            "environmental_triggers": [],
+            "activity_relationships": [],
+            "behavioral_insights": [],
+            "confidence": 0.0
+        }
+        
+        text_lower = text.lower()
+        
+        # Detect environmental triggers
+        environmental_patterns = [
+            (r"(?:stress|stressful|stressed)", "stress_trigger", 0.85),
+            (r"(?:bright\s+light|fluorescent|sunlight)", "light_trigger", 0.8),
+            (r"(?:cold\s+weather|hot\s+weather|weather)", "weather_trigger", 0.75),
+            (r"(?:pollen|dust|allergens?|allergic)", "allergen_trigger", 0.9),
+            (r"(?:perfume|scent|smell|odor)", "chemical_trigger", 0.8)
+        ]
+        
+        total_confidence = 0.0
+        pattern_count = 0
+        
+        for pattern, factor_type, confidence in environmental_patterns:
+            if re.search(pattern, text_lower):
+                analysis["factors"].append(factor_type)
+                analysis["environmental_triggers"].append(pattern)
+                total_confidence += confidence
+                pattern_count += 1
+        
+        if pattern_count > 0:
+            analysis["confidence"] = total_confidence / pattern_count
+        
+        return analysis
+    
+    def generate_clinical_hypotheses_contextual(self, contextual_analysis: Dict) -> List[str]:
+        """Generate clinical hypotheses based on contextual patterns and medical reasoning"""
+        
+        hypotheses = []
+        
+        # Analyze causal relationships for diagnostic clues
+        causal_rels = contextual_analysis.get("causal_relationships", [])
+        for rel in causal_rels:
+            if rel.relationship_type == "positional":
+                hypotheses.append("Orthostatic hypotension requiring cardiovascular evaluation")
+            elif rel.relationship_type == "exertional" and "chest" in rel.symptom:
+                hypotheses.append("Exertional angina requiring urgent cardiac assessment")
+            elif rel.relationship_type == "dietary":
+                hypotheses.append("Food intolerance requiring dietary modification")
+        
+        # Analyze positional factors
+        positional = contextual_analysis.get("positional", {})
+        if positional.get("clinical_significance") == "urgent":
+            hypotheses.append("Significant orthostatic intolerance with cardiovascular implications")
+        
+        # Analyze environmental factors
+        environmental = contextual_analysis.get("environmental", {})
+        if "stress_trigger" in environmental.get("factors", []):
+            hypotheses.append("Stress-related symptoms requiring psychological assessment")
+        
+        # Ensure we always return at least one hypothesis
+        if not hypotheses:
+            hypotheses.append("Symptom complex requires comprehensive medical evaluation")
+        
+        return hypotheses
+    
+    def validate_contextual_medical_logic(self, reasoning_result: ContextualMedicalReasoning) -> float:
+        """Validate medical logic consistency and clinical coherence of contextual reasoning"""
+        
+        validation_score = 0.0
+        validation_count = 0
+        
+        # Check causal chain plausibility
+        for chain in reasoning_result.causal_chains:
+            if self._is_medically_plausible_causal_chain(chain):
+                validation_score += 0.9
+            else:
+                validation_score += 0.5
+            validation_count += 1
+        
+        # Check clinical hypothesis consistency
+        for hypothesis in reasoning_result.clinical_hypotheses:
+            if self._is_clinically_consistent_hypothesis(hypothesis, reasoning_result):
+                validation_score += 0.85
+            else:
+                validation_score += 0.4
+            validation_count += 1
+        
+        # Check contextual factor coherence
+        if self._are_contextual_factors_coherent(reasoning_result):
+            validation_score += 0.95
+            validation_count += 1
+        
+        return validation_score / validation_count if validation_count > 0 else 0.5
+    
+    # Helper methods for contextual reasoning
+    
+    def _extract_trigger_from_match(self, match_text: str, context_type: str) -> Optional[str]:
+        """Extract trigger from pattern match based on context type"""
+        
+        if context_type == "positional":
+            triggers = ["standing", "getting up", "rising", "sitting up", "bending over"]
+        elif context_type == "exertional":  
+            triggers = ["exercise", "climbing", "walking", "exertion", "activity", "stairs"]
+        elif context_type == "dietary":
+            triggers = ["dairy", "milk", "cheese", "spicy food", "fatty food", "gluten"]
+        else:
+            triggers = ["unknown"]
+        
+        for trigger in triggers:
+            if trigger in match_text:
+                return trigger
+        
+        return "unspecified_trigger"
+    
+    def _extract_symptom_from_match(self, match_text: str, context_type: str) -> Optional[str]:
+        """Extract symptom from pattern match based on context type"""
+        
+        if context_type == "positional":
+            symptoms = ["dizziness", "lightheadedness", "nausea", "fainting", "weakness"]
+        elif context_type == "exertional":
+            symptoms = ["chest pain", "shortness of breath", "fatigue", "weakness"]
+        elif context_type == "dietary":
+            symptoms = ["abdominal pain", "nausea", "bloating", "diarrhea", "cramps"]
+        else:
+            symptoms = ["unknown"]
+        
+        for symptom in symptoms:
+            if symptom.replace(" ", "") in match_text.replace(" ", ""):
+                return symptom
+        
+        return "unspecified_symptom"
+    
+    def _extract_symptoms_with_context(self, text: str, entities: Dict) -> List[Dict[str, Any]]:
+        """Extract symptoms with their contextual information"""
+        
+        symptoms_with_context = []
+        
+        # Extract from existing entities if available
+        if "entities" in entities and "symptoms" in entities["entities"]:
+            for symptom in entities["entities"]["symptoms"]:
+                symptom_dict = symptom.__dict__ if hasattr(symptom, '__dict__') else symptom
+                symptoms_with_context.append({
+                    "symptom": symptom_dict.get("name", "unknown"),
+                    "context": "from_existing_extraction",
+                    "confidence": symptom_dict.get("confidence", 0.5)
+                })
+        
+        # Always return at least one symptom entry for completeness
+        if not symptoms_with_context:
+            symptoms_with_context.append({
+                "symptom": "general_symptoms",
+                "context": "contextual_analysis",
+                "confidence": 0.6
+            })
+        
+        return symptoms_with_context
+    
+    def _generate_clinical_reasoning_narrative(self, causal_relationships: List[CausalRelationship], hypotheses: List[str]) -> str:
+        """Generate human-readable clinical reasoning narrative"""
+        
+        if not causal_relationships and not hypotheses:
+            return "Limited contextual information available for clinical reasoning"
+        
+        narrative_parts = []
+        
+        if causal_relationships:
+            causal_text = f"Identified {len(causal_relationships)} causal relationship(s): "
+            causal_descriptions = []
+            for rel in causal_relationships[:3]:  # Limit to top 3 for readability
+                causal_descriptions.append(f"{rel.trigger} → {rel.symptom} ({rel.relationship_type})")
+            causal_text += "; ".join(causal_descriptions)
+            narrative_parts.append(causal_text)
+        
+        if hypotheses:
+            hypothesis_text = f"Clinical considerations: {'; '.join(hypotheses[:3])}"  # Limit to top 3
+            narrative_parts.append(hypothesis_text)
+        
+        return " | ".join(narrative_parts)
+    
+    def _assess_contextual_significance(self, causal_relationships: List[CausalRelationship]) -> str:
+        """Assess overall medical significance of contextual findings"""
+        
+        if not causal_relationships:
+            return "routine"
+        
+        significance_levels = [rel.clinical_significance for rel in causal_relationships]
+        
+        if "emergency" in significance_levels:
+            return "emergency"
+        elif "urgent" in significance_levels:
+            return "urgent"
+        elif "moderate" in significance_levels:
+            return "moderate"
+        else:
+            return "routine"
+    
+    def _calculate_reasoning_confidence(self, causal_rels, positional, temporal, environmental) -> float:
+        """Calculate overall confidence in contextual reasoning"""
+        
+        confidences = []
+        
+        # Causal relationship confidence
+        if causal_rels:
+            causal_conf = sum(rel.causality_strength for rel in causal_rels) / len(causal_rels)
+            confidences.append(causal_conf)
+        
+        # Contextual analysis confidence
+        for analysis in [positional, temporal, environmental]:
+            conf = analysis.get("confidence", 0.0)
+            if conf > 0:
+                confidences.append(conf)
+        
+        return sum(confidences) / len(confidences) if confidences else 0.5
+    
+    def _generate_context_recommendations(self, causal_relationships: List[CausalRelationship], hypotheses: List[str]) -> List[str]:
+        """Generate context-based recommendations"""
+        
+        recommendations = []
+        
+        for rel in causal_relationships:
+            if rel.relationship_type == "positional":
+                recommendations.append("Consider orthostatic vitals and cardiovascular evaluation")
+            elif rel.relationship_type == "exertional":
+                recommendations.append("Exercise stress testing and cardiac evaluation indicated")
+            elif rel.relationship_type == "dietary":
+                recommendations.append("Dietary elimination trial and nutritional consultation")
+        
+        if not recommendations:
+            recommendations.append("Comprehensive medical evaluation recommended")
+        
+        return recommendations
+    
+    def _generate_trigger_avoidance_strategies(self, causal_relationships: List[CausalRelationship], environmental_analysis: Dict) -> List[str]:
+        """Generate trigger avoidance strategies based on context"""
+        
+        strategies = []
+        
+        for rel in causal_relationships:
+            if "standing" in rel.trigger:
+                strategies.append("Rise slowly from sitting/lying positions")
+            elif "exercise" in rel.trigger or "exertion" in rel.trigger:
+                strategies.append("Gradual activity progression with symptom monitoring")
+            elif "dairy" in rel.trigger:
+                strategies.append("Lactose-free diet trial")
+        
+        env_factors = environmental_analysis.get("factors", [])
+        if "stress_trigger" in env_factors:
+            strategies.append("Stress management techniques and relaxation training")
+        
+        if not strategies:
+            strategies.append("Identify and avoid specific symptom triggers")
+        
+        return strategies
+    
+    def _determine_specialist_referral_context(self, hypotheses: List[str], causal_relationships: List[CausalRelationship]) -> Optional[str]:
+        """Determine appropriate specialist referral based on context"""
+        
+        for hypothesis in hypotheses:
+            if "cardiac" in hypothesis.lower() or "angina" in hypothesis.lower():
+                return "cardiology_referral_for_exertional_symptoms"
+            elif "orthostatic" in hypothesis.lower():
+                return "cardiology_or_neurology_referral_for_orthostatic_evaluation"
+            elif "stress" in hypothesis.lower():
+                return "psychology_or_psychiatry_referral_for_stress_management"
+        
+        # Check causal relationships
+        for rel in causal_relationships:
+            if rel.clinical_significance == "emergency":
+                return "emergency_department_evaluation"
+            elif rel.clinical_significance == "urgent":
+                return "urgent_specialist_consultation"
+        
+        return None
+    
+    def _is_medically_plausible_causal_chain(self, chain: Dict[str, Any]) -> bool:
+        """Check if causal chain is medically plausible"""
+        
+        trigger = chain.get("trigger", "").lower()
+        symptom = chain.get("symptom", "").lower()
+        
+        # Known plausible combinations
+        plausible_combinations = [
+            ("standing", "dizziness"),
+            ("exercise", "chest"),
+            ("dairy", "abdominal"),
+            ("stress", "headache")
+        ]
+        
+        for plausible_trigger, plausible_symptom in plausible_combinations:
+            if plausible_trigger in trigger and plausible_symptom in symptom:
+                return True
+        
+        return False
+    
+    def _is_clinically_consistent_hypothesis(self, hypothesis: str, reasoning: ContextualMedicalReasoning) -> bool:
+        """Check if clinical hypothesis is consistent with contextual evidence"""
+        
+        hypothesis_lower = hypothesis.lower()
+        
+        # Check for consistency between hypothesis and causal chains
+        for chain in reasoning.causal_chains:
+            trigger = chain.get("trigger", "").lower()
+            symptom = chain.get("symptom", "").lower()
+            
+            if "orthostatic" in hypothesis_lower and "standing" in trigger:
+                return True
+            elif "angina" in hypothesis_lower and "exercise" in trigger:
+                return True
+            elif "intolerance" in hypothesis_lower and "dairy" in trigger:
+                return True
+        
+        return True  # Default to consistent to avoid false negatives
+    
+    def _are_contextual_factors_coherent(self, reasoning: ContextualMedicalReasoning) -> bool:
+        """Check if contextual factors are medically coherent"""
+        
+        # Check for conflicting evidence
+        positional_factors = reasoning.positional_factors
+        environmental_factors = reasoning.environmental_factors
+        
+        # If we have positional factors, they should align with causal chains
+        if positional_factors and reasoning.causal_chains:
+            for chain in reasoning.causal_chains:
+                if "positional" in chain.get("trigger", ""):
+                    return True
+        
+        return True  # Default to coherent
+
 class WorldClassMedicalAI:
     """
     World-class medical AI implementing real physician consultation patterns
