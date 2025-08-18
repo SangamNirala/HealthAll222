@@ -398,6 +398,10 @@ class UltraChallengingScenario2Tester:
     def test_response_structure_consistency(self) -> bool:
         """Test response structure consistency across all scenarios"""
         
+        # Initialize fresh consultation for this test
+        if not self.initialize_medical_ai():
+            return False
+        
         # Test with a simple scenario to check structure
         test_message = "I have a headache that started this morning."
         
