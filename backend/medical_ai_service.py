@@ -4985,9 +4985,9 @@ class ContextAwareMedicalReasoner:
             }
         )
         
-        # Build comprehensive contextual reasoning
+        # 🧠 PHASE 3 ENHANCED: Build comprehensive contextual reasoning with optimized factor population
         contextual_reasoning = ContextualMedicalReasoning(
-            symptoms_with_context=self._extract_symptoms_with_context(text, extracted_entities),
+            symptoms_with_context=self._extract_symptoms_with_context_optimized(text, extracted_entities),
             triggers_and_causality=[{
                 "trigger": rel.trigger,
                 "symptom": rel.symptom,
@@ -5005,10 +5005,11 @@ class ContextAwareMedicalReasoner:
             clinical_reasoning=self._generate_clinical_reasoning_narrative(
                 causal_relationships, clinical_hypotheses
             ),
-            positional_factors=positional_analysis.get("factors", []),
-            temporal_factors=temporal_analysis.get("factors", []),
-            environmental_factors=environmental_analysis.get("factors", []),
-            activity_relationships=environmental_analysis.get("activity_relationships", []),
+            # 🔧 PHASE 3 FIX: Enhanced factor population with comprehensive detection
+            positional_factors=self._ensure_comprehensive_positional_factors(text, positional_analysis),
+            temporal_factors=self._ensure_comprehensive_temporal_factors(text, temporal_analysis),
+            environmental_factors=self._ensure_comprehensive_environmental_factors(text, environmental_analysis),
+            activity_relationships=self._ensure_comprehensive_activity_relationships(text, environmental_analysis, causal_relationships),
             causal_chains=[{
                 "trigger": rel.trigger,
                 "symptom": rel.symptom,
