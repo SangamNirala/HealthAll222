@@ -137,14 +137,13 @@ class UltraChallengingScenario2Tester:
                     return False
                 
                 # Check contextual reasoning fields
-                context = data.get('context', {})
                 contextual_fields = ['causal_relationships', 'clinical_hypotheses', 
                                    'contextual_factors', 'context_based_recommendations',
                                    'trigger_avoidance_strategies', 'specialist_referral_context']
                 
                 empty_fields = []
                 for field in contextual_fields:
-                    field_value = context.get(field)
+                    field_value = data.get(field)  # Check in main response data, not context
                     if not field_value or (isinstance(field_value, list) and len(field_value) == 0):
                         empty_fields.append(field)
                 
@@ -153,8 +152,8 @@ class UltraChallengingScenario2Tester:
                 urgency_appropriate = urgency in ['urgent', 'routine']
                 
                 # Check for positional factors in contextual analysis
-                contextual_factors = context.get('contextual_factors', {})
-                positional_factors = contextual_factors.get('positional_factors', [])
+                contextual_factors = data.get('contextual_factors', {})  # Check in main response data
+                positional_factors = contextual_factors.get('positional', [])
                 has_positional_analysis = len(positional_factors) > 0
                 
                 success_criteria = {
