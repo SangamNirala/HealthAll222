@@ -48,6 +48,120 @@ class AnatomicalEntity:
         if self.referral_pattern is None:
             self.referral_pattern = []
 
+# 🧠 STEP 2.2: REVOLUTIONARY CONTEXT-AWARE MEDICAL REASONING ENTITY CLASSES
+
+@dataclass
+class ContextualMedicalReasoning:
+    """
+    🧠 REVOLUTIONARY CONTEXTUAL MEDICAL REASONING RESULT WITH CLINICAL INTELLIGENCE 🧠
+    
+    Master clinician-level contextual analysis that transforms raw medical statements
+    into sophisticated understanding with causal relationships and clinical reasoning.
+    """
+    
+    # Core contextual analysis
+    symptoms_with_context: List[Dict[str, Any]]
+    triggers_and_causality: List[Dict[str, Any]]  
+    contextual_relationships: Dict[str, Any]
+    clinical_reasoning: str
+    
+    # Advanced contextual intelligence
+    positional_factors: List[str]
+    temporal_factors: List[str]  
+    environmental_factors: List[str]
+    activity_relationships: List[str]
+    
+    # Medical logic and significance
+    causal_chains: List[Dict[str, Any]]          # symptom → trigger causality
+    clinical_hypotheses: List[str]                # diagnostic reasoning
+    contextual_significance: str                  # medical importance
+    reasoning_confidence: float                   # confidence in logic
+    
+    # Treatment implications  
+    context_based_recommendations: List[str]      # contextual treatment advice
+    trigger_avoidance_strategies: List[str]       # prevention based on context
+    specialist_referral_context: Optional[str]   # context-specific referrals
+    
+    def __post_init__(self):
+        # Initialize empty lists if None
+        if self.symptoms_with_context is None:
+            self.symptoms_with_context = []
+        if self.triggers_and_causality is None:
+            self.triggers_and_causality = []
+        if self.positional_factors is None:
+            self.positional_factors = []
+        if self.temporal_factors is None:
+            self.temporal_factors = []
+        if self.environmental_factors is None:
+            self.environmental_factors = []
+        if self.activity_relationships is None:
+            self.activity_relationships = []
+        if self.causal_chains is None:
+            self.causal_chains = []
+        if self.clinical_hypotheses is None:
+            self.clinical_hypotheses = []
+        if self.context_based_recommendations is None:
+            self.context_based_recommendations = []
+        if self.trigger_avoidance_strategies is None:
+            self.trigger_avoidance_strategies = []
+    
+    def generate_clinical_reasoning_narrative(self) -> str:
+        """Generate human-readable clinical reasoning explanation"""
+        narrative_parts = []
+        
+        if self.clinical_reasoning:
+            narrative_parts.append(f"Clinical Reasoning: {self.clinical_reasoning}")
+            
+        if self.causal_chains:
+            causal_explanations = []
+            for chain in self.causal_chains:
+                trigger = chain.get('trigger', 'Unknown')
+                symptom = chain.get('symptom', 'Unknown')
+                strength = chain.get('causality_strength', 0.0)
+                causal_explanations.append(f"{trigger} → {symptom} (strength: {strength:.2f})")
+            narrative_parts.append(f"Causal Relationships: {'; '.join(causal_explanations)}")
+            
+        if self.clinical_hypotheses:
+            narrative_parts.append(f"Clinical Hypotheses: {'; '.join(self.clinical_hypotheses)}")
+            
+        if self.contextual_significance:
+            narrative_parts.append(f"Medical Significance: {self.contextual_significance}")
+            
+        return " | ".join(narrative_parts) if narrative_parts else "No clinical reasoning available"
+
+@dataclass
+class CausalRelationship:
+    """
+    🔗 SOPHISTICATED CAUSAL RELATIONSHIP BETWEEN SYMPTOMS AND TRIGGERS 🔗
+    
+    Advanced causality analysis with medical mechanism understanding and
+    clinical significance assessment for diagnostic reasoning.
+    """
+    
+    trigger: str                    # What causes the symptom
+    symptom: str                   # What is caused  
+    relationship_type: str         # direct, indirect, positional, temporal
+    causality_strength: float     # 0-1 confidence in causal relationship
+    medical_mechanism: str        # physiological explanation
+    clinical_significance: str    # emergency, urgent, routine
+    validation_evidence: List[str] # supporting contextual evidence
+    
+    def __post_init__(self):
+        if self.validation_evidence is None:
+            self.validation_evidence = []
+    
+    def assess_causal_strength(self, context_evidence: List[str]) -> float:
+        """Calculate causality strength based on contextual evidence"""
+        base_strength = self.causality_strength
+        
+        # Boost confidence based on evidence quality
+        evidence_boost = len(context_evidence) * 0.1
+        temporal_boost = 0.2 if any("temporal" in ev.lower() for ev in context_evidence) else 0
+        positional_boost = 0.15 if any("positional" in ev.lower() for ev in context_evidence) else 0
+        
+        final_strength = min(1.0, base_strength + evidence_boost + temporal_boost + positional_boost)
+        return final_strength
+
 @dataclass  
 class QualityEntity:
     """
