@@ -931,6 +931,33 @@ class WorldClassMedicalIntentClassifier:
         clinical_sig = primary_config.get("clinical_significance", "medium")
         reasoning_parts.append(f"Clinical significance assessed as {clinical_sig}.")
         
+        # Subspecialty-specific reasoning
+        subspecialty = primary_config.get("clinical_subspecialty")
+        if subspecialty:
+            reasoning_parts.append(f"Subspecialty domain: {subspecialty} - specialized clinical assessment applied.")
+            
+            # Add subspecialty-specific clinical insights
+            if subspecialty == "cardiology":
+                reasoning_parts.append("Cardiovascular assessment protocols activated for cardiac symptom evaluation.")
+            elif subspecialty == "neurology":
+                reasoning_parts.append("Neurological screening protocols activated for central nervous system evaluation.")
+            elif subspecialty == "gastroenterology":
+                reasoning_parts.append("Gastrointestinal assessment protocols activated for digestive system evaluation.")
+            elif subspecialty == "pulmonology":
+                reasoning_parts.append("Respiratory assessment protocols activated for pulmonary function evaluation.")
+            elif subspecialty == "endocrinology":
+                reasoning_parts.append("Endocrine assessment protocols activated for hormonal and metabolic evaluation.")
+        
+        # Emergency indicators assessment
+        emergency_indicators = primary_config.get("emergency_indicators", [])
+        if emergency_indicators:
+            reasoning_parts.append(f"Emergency screening: potential indicators include {', '.join(emergency_indicators[:2])}.")
+        
+        # Decision support recommendations
+        decision_rules = primary_config.get("decision_support_rules", [])
+        if decision_rules:
+            reasoning_parts.append(f"Clinical decision support: {', '.join(decision_rules[:2])} protocols recommended.")
+        
         # Contextual factors
         if contextual_analysis["temporal_markers"]:
             reasoning_parts.append(f"Temporal context provided: {', '.join(contextual_analysis['temporal_markers'][:2])}.")
