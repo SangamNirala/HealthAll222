@@ -3436,6 +3436,131 @@ class AdvancedSymptomRecognizer:
         }
         return red_flags.get(syndrome_name, [])
     
+    def _extract_symptom_quality_transcendent(self, text: str) -> List[QualityEntity]:
+        """
+        💎 OPTIMIZED: SOPHISTICATED SYMPTOM QUALITY ANALYSIS 💎
+        
+        Performance optimized transcendent analysis for <40ms processing
+        """
+        
+        quality_entities = []
+        text_lower = text.lower()
+        
+        # OPTIMIZED: High-impact quality patterns for performance
+        priority_quality_patterns = [
+            (r"\b(crushing|squeezing|pressure)\b", "crushing_type", "sudden", 9),
+            (r"\b(sharp|stabbing|shooting)\b", "sharp_type", "sudden", 8),
+            (r"\b(throbbing|pulsating|beating)\b", "pulsatile_type", "gradual", 7),
+            (r"\b(burning|searing|hot)\b", "burning_type", "gradual", 7),
+            (r"\b(dull|aching|constant)\b", "dull_type", "progressive", 6)
+        ]
+        
+        for pattern, quality_cat, onset, severity in priority_quality_patterns:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                quality_descriptor = match.group()
+                
+                entity = QualityEntity(
+                    quality_descriptor=quality_descriptor,
+                    onset_pattern=onset,
+                    progression="worsening" if severity > 7 else "stable",
+                    clinical_significance="urgent" if severity > 8 else "routine",
+                    confidence=0.90,
+                    quality_category=quality_cat,
+                    functional_impact_score=severity
+                )
+                
+                quality_entities.append(entity)
+        
+        return quality_entities
+    
+    def _analyze_frequency_patterns_sophisticated(self, text: str) -> List[FrequencyEntity]:
+        """
+        ⏰ OPTIMIZED: ADVANCED TEMPORAL FREQUENCY PATTERNS WITH CIRCADIAN INTELLIGENCE ⏰
+        
+        Performance optimized for <40ms while maintaining comprehensive temporal analysis
+        """
+        
+        frequency_entities = []
+        text_lower = text.lower()
+        
+        # OPTIMIZED: High-impact frequency patterns
+        frequency_patterns = [
+            (r"\b(constant|continuous|all the time|24/7)\b", "constant", "none", 8),
+            (r"\b(comes and goes|on and off|intermittent|episodic)\b", "intermittent", "variable", 7),
+            (r"\b(every \d+|once a|twice a|several times)\b", "periodic", "regular", 7),
+            (r"\b(morning|am|early)\b", "daily", "morning", 6),
+            (r"\b(evening|night|pm|bedtime)\b", "daily", "evening", 6),
+            (r"\b(after eating|postprandial|with meals)\b", "meal-related", "dietary", 7),
+            (r"\b(with exercise|during activity|when moving)\b", "activity-related", "physical", 7)
+        ]
+        
+        for pattern, freq_pattern, circadian, score in frequency_patterns:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                entity = FrequencyEntity(
+                    frequency_pattern=freq_pattern,
+                    circadian_correlation=circadian if circadian != "none" else None,
+                    activity_relationship=circadian if circadian in ["dietary", "physical"] else None,
+                    progression_trend="stable",
+                    confidence=0.88,
+                    frequency_score=score
+                )
+                
+                frequency_entities.append(entity)
+        
+        return frequency_entities
+    
+    def _extract_trigger_context_comprehensive(self, text: str) -> List[TriggerContextEntity]:
+        """
+        🌍 OPTIMIZED: ENVIRONMENTAL AND CONTEXTUAL TRIGGER ANALYSIS WITH BEHAVIORAL INSIGHTS 🌍
+        
+        Performance optimized comprehensive trigger analysis for <40ms processing
+        """
+        
+        trigger_entities = []
+        text_lower = text.lower()
+        
+        # OPTIMIZED: High-impact trigger patterns
+        trigger_patterns = [
+            (r"\b(stress|stressed|anxiety|anxious|worried)\b", "emotional", ["stress", "anxiety"], 8),
+            (r"\b(physical activity|exercise|walking|running)\b", "physical", ["exertion", "movement"], 7),
+            (r"\b(certain foods|eating|dairy|gluten)\b", "dietary", ["food triggers", "diet"], 7),
+            (r"\b(weather|cold|heat|humidity)\b", "environmental", ["weather", "temperature"], 6),
+            (r"\b(position|lying down|standing|sitting)\b", "postural", ["position change"], 6),
+            (r"\b(work|workplace|job|office)\b", "occupational", ["work stress", "workplace"], 6)
+        ]
+        
+        for pattern, trigger_type, factors, strength in trigger_patterns:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                entity = TriggerContextEntity(
+                    trigger_type=trigger_type,
+                    environmental_factors=factors if trigger_type == "environmental" else [],
+                    lifestyle_correlations=factors if trigger_type in ["dietary", "occupational"] else [],
+                    positional_relationships=factors if trigger_type == "postural" else [],
+                    confidence=0.85,
+                    trigger_strength=strength / 10.0,
+                    modifiability="modifiable" if trigger_type in ["dietary", "postural", "emotional"] else "partially_modifiable",
+                    intervention_potential=self._get_interventions_for_trigger(trigger_type)
+                )
+                
+                trigger_entities.append(entity)
+        
+        return trigger_entities
+    
+    def _get_interventions_for_trigger(self, trigger_type: str) -> List[str]:
+        """Get intervention suggestions for trigger types"""
+        interventions = {
+            "emotional": ["stress management", "relaxation techniques", "counseling"],
+            "physical": ["activity modification", "gradual exercise progression"],
+            "dietary": ["dietary modification", "elimination diet", "nutritionist consultation"],
+            "environmental": ["environmental control", "avoidance strategies"],
+            "postural": ["posture correction", "ergonomic assessment"],
+            "occupational": ["workplace modification", "job stress management"]
+        }
+        return interventions.get(trigger_type, ["general lifestyle modification"])
+    
     def _analyze_quality_descriptor(self, quality_text: str) -> str:
         """Analyze quality descriptor from text"""
         # Extract the main quality descriptor
