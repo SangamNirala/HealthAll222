@@ -696,19 +696,52 @@ class WorldClassMedicalAI:
     
     # Helper methods
     async def _extract_medical_entities(self, message: str) -> Dict[str, Any]:
-        """Extract medical entities from patient message"""
-        # Simplified entity extraction - in production would use NLP models
+        """Extract medical entities from patient message with improved symptom recognition"""
         entities = {
             "symptoms": [],
             "duration": None,
             "severity": None,
-            "location": None
+            "location": None,
+            "processed_message": ""
         }
         
-        # Extract basic patterns
+        # Common symptom keywords with variations
+        symptom_mapping = {
+            "fever": ["fever", "febrile", "temperature", "hot", "chills"],
+            "headache": ["headache", "head pain", "migraine", "head hurt"],
+            "cough": ["cough", "coughing", "hack"],
+            "pain": ["pain", "hurt", "ache", "aching", "sore"],
+            "nausea": ["nausea", "nauseous", "sick", "queasy"],
+            "fatigue": ["tired", "fatigue", "exhausted", "weakness", "weak"],
+            "dizziness": ["dizzy", "dizziness", "lightheaded", "vertigo"],
+            "chest_pain": ["chest pain", "chest hurt", "chest pressure"],
+            "shortness_of_breath": ["shortness of breath", "short of breath", "breathless", "breathing problem"],
+            "abdominal_pain": ["stomach pain", "belly pain", "abdominal pain", "stomach hurt"]
+        }
+        
+        message_lower = message.lower()
+        
+        # Extract symptoms
+        for symptom_type, variations in symptom_mapping.items():
+            for variation in variations:
+                if variation in message_lower:
+                    entities["symptoms"].append(symptom_type)
+                    break
+        
+        # Process common grammar patterns and create a cleaner message
+        processed = message_lower
+        # Handle common informal patterns
+        processed = re.sub(r'\bi\s+having\b', 'having a', processed)
+        processed = re.sub(r'\bi\s+have\b', 'having a', processed)
+        processed = re.sub(r'\bi\s+am\s+having\b', 'having a', processed)
+        processed = re.sub(r'\bi\s+got\b', 'having a', processed)
+        
+        entities["processed_message"] = processed.strip()
+        
+        # Extract duration patterns
         duration_patterns = [r'\d+\s*(day|days|week|weeks|month|months|hour|hours)', r'since\s+\w+', r'for\s+\d+']
         for pattern in duration_patterns:
-            match = re.search(pattern, message.lower())
+            match = re.search(pattern, message_lower)
             if match:
                 entities["duration"] = match.group()
                 break
@@ -716,7 +749,7 @@ class WorldClassMedicalAI:
         # Extract severity indicators
         severity_patterns = [r'(\d+)(?:/10|out of 10)', r'(mild|moderate|severe|excruciating|unbearable)']
         for pattern in severity_patterns:
-            match = re.search(pattern, message.lower())
+            match = re.search(pattern, message_lower)
             if match:
                 entities["severity"] = match.group()
                 break
