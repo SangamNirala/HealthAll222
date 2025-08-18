@@ -6757,7 +6757,13 @@ class WorldClassMedicalAI:
                 "response": response,
                 "context": asdict(context),
                 "stage": context.current_stage.value,
-                "urgency": context.emergency_level
+                "urgency": context.emergency_level,
+                # 🧠 STEP 2.2: ADD CONTEXTUAL REASONING TO API RESPONSE
+                "contextual_reasoning": context.symptom_data.get("contextual_reasoning", {}),
+                "causal_relationships": context.symptom_data.get("causal_relationships", []),
+                "clinical_hypotheses": context.symptom_data.get("clinical_hypotheses", []),
+                "medical_reasoning_narrative": context.symptom_data.get("medical_reasoning_narrative", ""),
+                "context_based_recommendations": context.symptom_data.get("context_based_recommendations", [])
             }
         
         # If medical symptoms are detected, process normally
