@@ -295,16 +295,42 @@ class WorldClassMedicalAI:
     async def _handle_greeting_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
         """Handle initial greeting and transition to chief complaint"""
         
+        # Extract medical entities first
+        medical_entities = await self._extract_medical_entities(message)
+        
         # Check if patient provided initial symptom
-        if any(symptom_word in message.lower() for symptom_word in ['pain', 'hurt', 'ache', 'sick', 'feel', 'symptom']):
+        symptoms_detected = medical_entities.get("symptoms", [])
+        processed_message = medical_entities.get("processed_message", message)
+        
+        if symptoms_detected or any(symptom_word in message.lower() for symptom_word in ['pain', 'hurt', 'ache', 'sick', 'feel', 'symptom', 'fever', 'headache', 'cough']):
             context.chief_complaint = message
             context.current_stage = MedicalInterviewStage.HISTORY_PRESENT_ILLNESS
             
-            ai_response = await self._generate_empathetic_response(
-                f"I understand you're experiencing {message}. I'm here to help you understand what might be going on. "
-                f"To provide you with the most accurate assessment, I'd like to ask you some specific questions about your symptoms. "
-                f"First, can you tell me exactly when these symptoms started?"
-            )
+            # Create appropriate response based on detected symptoms
+            if symptoms_detected:
+                symptom_names = []
+                for symptom in symptoms_detected:
+                    if symptom == "fever":
+                        symptom_names.append("a fever")
+                    elif symptom == "headache":
+                        symptom_names.append("a headache")
+                    elif symptom == "pain":
+                        symptom_names.append("pain")
+                    else:
+                        symptom_names.append(symptom.replace("_", " "))
+                
+                symptoms_text = " and ".join(symptom_names) if len(symptom_names) > 1 else symptom_names[0]
+                
+                ai_response = await self._generate_empathetic_response(
+                    f"Thank you for sharing that you're experiencing {symptoms_text}. I want to gather more specific details to better understand your condition. "
+                    f"Let's start with when exactly these symptoms began - was the onset sudden or did it develop gradually over time?"
+                )
+            else:
+                ai_response = await self._generate_empathetic_response(
+                    f"I understand you're experiencing {processed_message}. I'm here to help you understand what might be going on. "
+                    f"To provide you with the most accurate assessment, I'd like to ask you some specific questions about your symptoms. "
+                    f"First, can you tell me exactly when these symptoms started?"
+                )
         else:
             context.current_stage = MedicalInterviewStage.CHIEF_COMPLAINT
             ai_response = await self._generate_empathetic_response(
