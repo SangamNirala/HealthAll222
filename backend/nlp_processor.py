@@ -643,17 +643,71 @@ def test_normalization_examples():
     
     normalizer = IntelligentTextNormalizer()
     
-    test_cases = [
+    # Original Step 1.1 and 1.2 test cases
+    step_1_2_test_cases = [
         ("i having fever 2 days", "I have been having a fever for 2 days"),
         ("me chest hurt when breath", "My chest hurts when I breathe"),
         ("haedache really bad", "Headache really bad"),
         ("stomach ache n vomiting", "Stomach ache and vomiting"),
     ]
     
-    print("Testing Text Normalization Examples:")
-    print("=" * 50)
+    # NEW Step 1.3 test cases - Colloquial medical expressions  
+    step_1_3_test_cases = [
+        # Core required examples
+        ("tummy hurt", "abdominal pain"),
+        ("feeling crappy", "feeling unwell"),
+        ("can't poop", "experiencing constipation"),
+        ("throwing up", "vomiting"),
+        ("dizzy spells", "episodes of dizziness"),
+        
+        # Extended robust examples - digestive system
+        ("belly pain real bad", "abdominal pain severe"),
+        ("stomach hurts when i eat", "abdominal pain when I eat"),
+        ("gut hurt after meal", "abdominal pain after meal"),
+        
+        # Bowel movements variations
+        ("cant poop for 3 days", "experiencing constipation for 3 days"),
+        ("trouble pooping", "difficulty with bowel movements"),
+        ("blocked up", "experiencing constipation"),
+        ("the runs", "experiencing diarrhea"),
+        
+        # Nausea and vomiting variations
+        ("puking all morning", "vomiting all morning"),
+        ("feeling sick", "experiencing nausea"),
+        ("queasy", "nauseous"),
+        ("gonna throw up", "feeling nauseous"),
+        
+        # General feeling unwell variations
+        ("feel awful", "feel unwell"),
+        ("feeling lousy", "feeling unwell"),
+        ("under the weather", "feeling unwell"),
+        ("feeling off", "feeling unwell"),
+        
+        # Pain descriptors
+        ("terrible pain", "severe pain"),
+        ("killing me", "severe pain"),
+        ("throbbing", "pulsating pain"),
+        
+        # Breathing issues
+        ("can't breathe", "difficulty breathing"),
+        ("short of breath", "experiencing shortness of breath"),
+        ("wheezing", "experiencing wheezing"),
+        
+        # Fatigue expressions  
+        ("wiped out", "extremely fatigued"),
+        ("dead tired", "extremely fatigued"),
+        ("no energy", "experiencing fatigue"),
+        
+        # Complex compound expressions
+        ("tummy hurt and throwing up", "abdominal pain and vomiting"),
+        ("feeling crappy with dizzy spells", "feeling unwell with episodes of dizziness"),
+        ("can't poop and belly ache", "experiencing constipation and abdominal pain"),
+    ]
     
-    for original, expected in test_cases:
+    print("Testing Step 1.1 & 1.2 Text Normalization Examples:")
+    print("=" * 60)
+    
+    for original, expected in step_1_2_test_cases:
         result = normalizer.normalize_medical_text(original)
         print(f"Original: '{original}'")
         print(f"Expected: '{expected}'")
@@ -662,6 +716,49 @@ def test_normalization_examples():
         print(f"Corrections: {result.corrections_applied}")
         print(f"Confidence: {result.confidence_score:.2f}")
         print("-" * 40)
+    
+    print("\n" + "="*60)
+    print("Testing Step 1.3 Colloquial Medical Expression Conversion:")
+    print("=" * 60)
+    
+    successful_conversions = 0
+    total_tests = len(step_1_3_test_cases)
+    
+    for original, expected_contains in step_1_3_test_cases:
+        result = normalizer.normalize_medical_text(original)
+        
+        # Check if the expected conversion is present in the result
+        contains_expected = expected_contains.lower() in result.normalized_text.lower()
+        
+        print(f"Original: '{original}'")
+        print(f"Expected to contain: '{expected_contains}'")
+        print(f"Actual:   '{result.normalized_text}'")
+        print(f"✅ Conversion Success: {contains_expected}")
+        
+        # Show colloquial corrections specifically
+        colloquial_corrections = [c for c in result.corrections_applied if 'Colloquial' in c or 'Compound' in c]
+        if colloquial_corrections:
+            print(f"Colloquial Corrections: {colloquial_corrections}")
+        
+        print(f"All Corrections: {result.corrections_applied}")
+        print(f"Confidence: {result.confidence_score:.2f}")
+        
+        if contains_expected:
+            successful_conversions += 1
+        
+        print("-" * 40)
+    
+    # Summary
+    success_rate = (successful_conversions / total_tests) * 100
+    print(f"\n🎯 STEP 1.3 IMPLEMENTATION SUMMARY:")
+    print(f"Successful Conversions: {successful_conversions}/{total_tests} ({success_rate:.1f}%)")
+    
+    if success_rate >= 85:
+        print("✅ TASK 1.3 IMPLEMENTATION: SUCCESS! Robust colloquial expression handling achieved.")
+    else:
+        print("⚠️  TASK 1.3 IMPLEMENTATION: Needs improvement. Some expressions not converted correctly.")
+    
+    return success_rate >= 85
 
 
 if __name__ == "__main__":
