@@ -5365,17 +5365,32 @@ class ContextAwareMedicalReasoner:
                 else:
                     hypotheses.append("Positional blood pressure dysregulation - orthostatic assessment recommended")
             
-            # 🧠 EXERTIONAL/CARDIAC HYPOTHESES (Ultra-challenging scenario 2)  
-            elif rel_type == "exertional" and clinical_sig == "emergency":
+            # 🧠 ENHANCED EXERTIONAL/CARDIAC HYPOTHESES (Ultra-challenging scenario 2)  
+            elif rel_type in ["exertional", "enhanced_exertional_cardiac"] and clinical_sig == "emergency":
                 if "crushing" in symptom.lower() or "classic_angina" in symptom.lower():
-                    hypotheses.append("Exertional angina - classic stable angina pattern requires URGENT cardiac evaluation with ECG and troponins")
+                    hypotheses.append("Enhanced Cardiac Analysis: Classic exertional angina with crushing chest pain - EMERGENCY coronary artery disease requiring immediate ECG, serial troponins, and urgent cardiology consultation")
+                elif "pressure_type_angina" in symptom.lower():
+                    hypotheses.append("Enhanced Cardiac Analysis: Pressure-type exertional angina - stable angina pattern requiring urgent cardiac catheterization consideration and stress testing")
+                elif "substernal" in symptom.lower():
+                    hypotheses.append("Enhanced Cardiac Analysis: Substernal exertional chest pain - typical angina location requiring emergency cardiac evaluation with comprehensive workup")
+                elif "radiating" in symptom.lower():
+                    hypotheses.append("Enhanced Cardiac Analysis: Exertional chest pain with radiation pattern - high-risk angina requiring STAT cardiology evaluation and possible catheterization")
+                elif "dyspnea" in symptom.lower():
+                    hypotheses.append("Enhanced Cardiac Analysis: Anginal equivalent with exertional dyspnea - complex coronary syndrome requiring immediate multi-modal cardiac assessment")
                 elif "cardiac_stress" in trigger.lower():
-                    hypotheses.append("Exercise-induced myocardial ischemia - coronary artery disease suspected, catheterization may be indicated")
+                    hypotheses.append("Enhanced Cardiac Analysis: Exercise-induced myocardial ischemia with enhanced contextual patterns - coronary artery disease with high pretest probability")
                 else:
-                    hypotheses.append("Exertional chest pain of cardiac origin - stress testing and cardiology referral needed")
+                    hypotheses.append("Enhanced Cardiac Analysis: Exertional chest pain syndrome requiring comprehensive cardiac evaluation including ECG, biomarkers, echo, and stress testing")
             
-            elif rel_type == "exertional_relief":
-                hypotheses.append("Classic angina pattern with rest relief - confirms cardiac ischemia, requires immediate cardiac assessment")
+            elif rel_type in ["exertional_relief", "enhanced_exertional_relief"]:
+                if "timed_angina_relief" in symptom.lower():
+                    hypotheses.append("Enhanced Cardiac Analysis: Classic angina with timed relief pattern (2-3 minutes) - pathognomonic for coronary ischemia, requires EMERGENCY intervention")
+                elif "medication_responsive" in symptom.lower():
+                    hypotheses.append("Enhanced Cardiac Analysis: Nitrate-responsive angina pattern - confirmed coronary insufficiency requiring immediate cardiac catheterization")
+                elif "positional_cardiac_relief" in symptom.lower():
+                    hypotheses.append("Enhanced Cardiac Analysis: Position-modified cardiac symptoms with rest relief - complex angina pattern requiring urgent evaluation")
+                else:
+                    hypotheses.append("Enhanced Cardiac Analysis: Classic angina pattern with rest relief - definitive cardiac ischemia requiring immediate comprehensive cardiac assessment")
             
             # 🧠 DIETARY-STRESS INTERACTION HYPOTHESES (Ultra-challenging scenario 3)
             elif rel_type == "dietary_stress_interaction":
