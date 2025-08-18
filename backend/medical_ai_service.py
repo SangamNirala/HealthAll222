@@ -6645,9 +6645,11 @@ class WorldClassMedicalAI:
                     urgency_level = "urgent"
                 emergency_reasons.append(f"Pattern detected: {description}")
         
-        # Set emergency detection flag
-        if urgency_level in ["urgent", "emergency"]:
+        # Set emergency detection flag - only for actual emergencies, not urgent cases
+        if urgency_level == "emergency":
             emergency_detected = True
+        elif urgency_level == "urgent":
+            emergency_detected = False  # Urgent is not an emergency
         
         # Enhanced confidence calculation based on Phase 4 analysis
         confidence = 0.95 if emergency_detected and len(emergency_reasons) > 0 else 0.05
