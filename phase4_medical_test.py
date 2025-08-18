@@ -23,7 +23,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Backend URL from environment
-BACKEND_URL = "https://symptomlogic.preview.emergentagent.com/api"
+BACKEND_URL = "https://symptom-context.preview.emergentagent.com/api"
 
 class Phase4MedicalAPITester:
     """
