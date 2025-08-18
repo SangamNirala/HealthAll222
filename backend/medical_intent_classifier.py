@@ -1307,16 +1307,25 @@ class WorldClassMedicalIntentClassifier:
         # Check for emergency/critical intents including new subspecialty emergencies
         emergency_intents = [
             "emergency_concern", "crisis_intervention", "allergy_reporting",
-            # Subspecialty emergency intents
+            # Original subspecialty emergency intents
             "cardiac_chest_pain_assessment", "neurological_emergency_detection",
-            "gi_symptom_assessment", "respiratory_symptom_assessment"
+            "gi_symptom_assessment", "respiratory_symptom_assessment",
+            # New subspecialty emergency intents
+            "allergic_reaction_assessment", "infectious_disease_assessment", 
+            "psychiatric_assessment", "substance_abuse_evaluation", "obstetric_assessment",
+            "cancer_screening_assessment", "chemotherapy_monitoring", "opioid_management"
         ]
         urgent_intents = [
             "urgent_scheduling", "severity_assessment", "functional_impact",
-            # Subspecialty urgent intents  
+            # Original subspecialty urgent intents  
             "cardiac_symptom_evaluation", "neurological_symptom_assessment",
             "headache_migraine_evaluation", "breathing_difficulty_evaluation",
-            "endocrine_symptom_assessment"
+            "endocrine_symptom_assessment",
+            # New subspecialty urgent intents
+            "orthopedic_injury_assessment", "sports_medicine_evaluation", "dermatological_assessment",
+            "immunodeficiency_evaluation", "pediatric_assessment", "geriatric_assessment",
+            "dementia_evaluation", "gynecological_assessment", "urological_assessment",
+            "male_reproductive_health", "chronic_pain_assessment"
         ]
         
         max_urgency = UrgencyLevel.LOW
