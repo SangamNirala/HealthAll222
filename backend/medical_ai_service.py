@@ -5330,18 +5330,37 @@ class WorldClassMedicalAI:
             "overall_confidence": entities.get("overall_confidence", 0.0)
         })
         
-        # Update emergency flags and urgency based on advanced analysis
+        # 🚀 PHASE 4: ENHANCED EMERGENCY ASSESSMENT WITH COMPREHENSIVE ANALYSIS
+        emergency_assessment = await self._assess_emergency_risk(message, context)
+        
+        # Update context with Phase 4 enhanced urgency determination
+        if "urgency_level" in emergency_assessment:
+            urgency = emergency_assessment["urgency_level"]
+            if urgency == "emergency":
+                context.emergency_level = "critical"
+            elif urgency == "urgent":
+                context.emergency_level = "urgent"
+            else:
+                context.emergency_level = "none"
+        
+        # Add Phase 4 analysis reasons to context
+        if emergency_assessment.get("reasons"):
+            context.red_flags.extend(emergency_assessment["reasons"])
+        
+        # Store Phase 4 syndrome detection results in context for API responses
+        phase4_analysis = emergency_assessment.get("phase4_analysis", {})
+        if phase4_analysis.get("syndromes_detected"):
+            # Store syndrome information in context for later use
+            if not hasattr(context, 'detected_syndromes'):
+                context.detected_syndromes = phase4_analysis["syndromes_detected"]
+                context.syndrome_probabilities = phase4_analysis.get("syndrome_probabilities", {})
+        
+        # FALLBACK: Update emergency flags and urgency based on advanced analysis
         emergency_flags = entities.get("emergency_flags", [])
         if emergency_flags:
             context.red_flags.extend(emergency_flags)
-            context.emergency_level = "urgent"
-        
-        # PHASE 2: Update clinical insights and urgency assessment
-        clinical_insights = advanced_extraction.get("clinical_insights", {})
-        if clinical_insights.get("urgency_assessment") == "urgent":
-            context.emergency_level = "urgent"
-        elif clinical_insights.get("urgency_assessment") == "emergency":
-            context.emergency_level = "critical"
+            if context.emergency_level == "none":
+                context.emergency_level = "urgent"
         
         # Update medical relationships for better AI reasoning
         medical_relationships = advanced_extraction.get("medical_relationships", {})
