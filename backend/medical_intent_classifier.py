@@ -199,7 +199,7 @@ class WorldClassMedicalIntentClassifier:
                 "description": "Assessing how often symptoms occur",
                 "patterns": [
                     IntentPattern(r"\b(how often|frequency|every (day|hour|few)|constantly)\b", 0.9, ClinicalSignificance.MEDIUM),
-                    IntentPattern(r"\b(occasionally|sometimes|rarely|once in a while)\b", 0.8, ClinicalSignificance.LOW), 
+                    IntentPattern(r"\b(occasionally|sometimes|rarely|once in a while)\b", 0.8, ClinicalSignificance.ROUTINE), 
                     IntentPattern(r"\b(all the time|continuous|constant|never stops)\b", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.2),
                     IntentPattern(r"\b(episodes|attacks|spells|flare.?ups)\b", 0.85, ClinicalSignificance.MEDIUM),
                 ],
