@@ -164,11 +164,6 @@ class IntelligentTextNormalizer:
             "puking": "vomiting",
             "dizzy spells": "episodes of dizziness",
             "head spinning": "experiencing dizziness",
-            "really bad": "severe",
-            "super bad": "severe",
-            "terrible": "severe",
-            "awful": "severe",
-            "horrible": "severe",
         }
     
     def _load_abbreviation_expansions(self) -> Dict[str, str]:
