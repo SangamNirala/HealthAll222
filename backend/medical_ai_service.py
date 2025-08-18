@@ -1417,6 +1417,12 @@ class AdvancedSymptomRecognizer:
         # 🎯 PHASE 4: FINAL CONFIDENCE CALIBRATION WITH MEDICAL COHERENCE
         self._calibrate_final_confidence_scores_phase4(extraction_result)
         
+        # 🧠 STEP 2.2: CONTEXT-AWARE MEDICAL REASONING LAYER
+        # Add revolutionary contextual reasoning on top of Phase 4 extraction
+        contextual_reasoning = self.context_aware_reasoner.analyze_contextual_medical_reasoning(
+            text, extraction_result
+        )
+        
         # 📊 PHASE 4: PERFORMANCE & METADATA FINALIZATION
         processing_time = time.time() - start_time
         extraction_result["processing_metadata"]["processing_time"] = round(processing_time, 4)
