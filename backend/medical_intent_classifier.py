@@ -452,14 +452,17 @@ class WorldClassMedicalIntentClassifier:
                 "description": "Specialized assessment of neurological symptoms and deficits",
                 "clinical_subspecialty": "neurology",
                 "patterns": [
+                    IntentPattern(r"\b(neurological|neuro|nervous\s+system)\s+(symptoms|problems|issues|concerns)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.5),
                     IntentPattern(r"\b(weakness|numbness|tingling)\s+(in|on|of)\s+(face|arm|leg|hand|foot)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.6),
                     IntentPattern(r"\b(vision|speech|balance)\s+(changes|problems|loss|difficulty)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.7),
                     IntentPattern(r"\b(coordination|motor)\s+(problems|difficulties|loss)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.5),
                     IntentPattern(r"\b(memory|cognitive|confusion|thinking)\s+(problems|issues|changes)", 0.8, ClinicalSignificance.MEDIUM, urgency_boost=0.3),
+                    IntentPattern(r"\b(nerve|neural)\s+(pain|damage|symptoms|problems)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                    IntentPattern(r"\b(movement|muscle)\s+(disorders|problems|weakness)", 0.8, ClinicalSignificance.HIGH, urgency_boost=0.4),
                 ],
                 "clinical_reasoning_engine": "NeurologicalReasoningEngine",
-                "decision_support_rules": ["stroke_alert", "neuro_imaging", "neurology_referral"],
-                "emergency_indicators": ["stroke", "tia", "seizure", "meningitis"],
+                "decision_support_rules": ["neuro_assessment", "neuro_imaging", "neurology_referral"],
+                "emergency_indicators": ["focal_deficits", "cognitive_impairment", "motor_weakness"],
                 "clinical_significance": "high"
             },
             
