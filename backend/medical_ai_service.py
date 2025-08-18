@@ -267,18 +267,36 @@ class WorldClassMedicalAI:
         return context
     
     async def process_patient_message(self, message: str, context: MedicalContext) -> Dict[str, Any]:
-        """Process patient message and generate appropriate medical response"""
+        """Process patient message and generate appropriate medical response with intelligent text normalization"""
         
-        # 1. Emergency Detection (highest priority)
-        emergency_assessment = await self._assess_emergency_risk(message, context)
+        # 0. Apply intelligent text normalization to patient input
+        normalization_result = self.text_normalizer.normalize_medical_text(message)
+        normalized_message = normalization_result.normalized_text
+        
+        # Log normalization for debugging (in production, this could be stored for analytics)
+        if normalization_result.corrections_applied:
+            print(f"Text normalized: '{message}' -> '{normalized_message}'")
+            print(f"Corrections applied: {normalization_result.corrections_applied}")
+            print(f"Confidence: {normalization_result.confidence_score:.2f}")
+        
+        # 1. Emergency Detection (highest priority) - use normalized text
+        emergency_assessment = await self._assess_emergency_risk(normalized_message, context)
         if emergency_assessment['emergency_detected']:
             return await self._handle_emergency_response(emergency_assessment, context)
         
-        # 2. Extract medical entities from patient input
-        medical_entities = await self._extract_medical_entities(message)
+        # 2. Extract medical entities from normalized patient input
+        medical_entities = await self._extract_medical_entities(normalized_message)
+        
+        # Store normalization metadata in medical entities for context
+        medical_entities['normalization'] = {
+            'original_message': message,
+            'normalized_message': normalized_message,
+            'corrections_applied': normalization_result.corrections_applied,
+            'confidence_score': normalization_result.confidence_score
+        }
         
         # 3. Update conversation context
-        updated_context = await self._update_medical_context(medical_entities, context, message)
+        updated_context = await self._update_medical_context(medical_entities, context, normalized_message)
         
         # 4. Determine next action based on interview stage
         if updated_context.current_stage == MedicalInterviewStage.GREETING:
