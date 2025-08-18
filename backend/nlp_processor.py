@@ -21,6 +21,7 @@ class NormalizationResult:
     corrections_applied: List[str]
     confidence_score: float
     medical_entities_preserved: List[str]
+    spell_corrections: List[SpellCorrectionResult] = None  # Step 1.2 enhancement
 
 
 class IntelligentTextNormalizer:
