@@ -11080,6 +11080,42 @@ async def process_medical_message(request: MedicalConsultationRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to process message: {str(e)}")
 
+# 🧠 PHASE 3: CONTEXTUAL ANALYSIS ENDPOINT FOR VALIDATION 🧠
+
+class ContextualAnalysisRequest(BaseModel):
+    """Request model for contextual analysis"""
+    text: str = Field(..., description="Medical text to analyze for contextual reasoning")
+    analysis_type: str = Field(default="comprehensive_contextual", description="Type of contextual analysis")
+
+class ContextualAnalysisResponse(BaseModel):
+    """Response model for contextual analysis with Step 2.2 enhancements"""
+    entities: Dict[str, Any] = Field(..., description="Extracted medical entities")
+    contextual_reasoning: Dict[str, Any] = Field(..., description="Step 2.2 contextual reasoning results")
+    processing_metadata: Dict[str, Any] = Field(..., description="Processing performance and metadata")
+
+@api_router.post("/medical-ai/contextual-analysis", response_model=ContextualAnalysisResponse)
+async def analyze_contextual_medical_reasoning(request: ContextualAnalysisRequest):
+    """
+    🧠 PHASE 3: CONTEXTUAL ANALYSIS ENDPOINT FOR STEP 2.2 VALIDATION 🧠
+    
+    Dedicated endpoint for testing Step 2.2 Context-Aware Medical Reasoning
+    against ultra-challenging contextual scenarios with performance validation.
+    """
+    try:
+        medical_ai_service = get_medical_ai()
+        
+        # Extract medical entities with Step 2.2 contextual reasoning
+        result = medical_ai_service.symptom_recognizer.extract_medical_entities(request.text)
+        
+        return ContextualAnalysisResponse(
+            entities=result.get("entities", {}),
+            contextual_reasoning=result.get("contextual_reasoning", {}),
+            processing_metadata=result.get("processing_metadata", {})
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Contextual analysis failed: {str(e)}")
+
 @api_router.post("/medical-ai/report", response_model=MedicalReportResponse)
 async def generate_medical_report(request: MedicalReportRequest):
     """Generate professional medical report with PDF generation"""
