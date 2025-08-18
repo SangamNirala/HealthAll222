@@ -4727,6 +4727,7 @@ class AdvancedSymptomRecognizer:
             if re.search(pattern, text_lower):
                 entities.append(AnatomicalEntity(
                     location=location,
+                    specificity_level=7,  # Added required parameter
                     anatomical_system=system,
                     laterality="bilateral",
                     confidence=confidence,
