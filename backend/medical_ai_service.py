@@ -7752,9 +7752,46 @@ class WorldClassMedicalAI:
     async def _assess_emergency_risk(self, message: str, context: MedicalContext) -> Dict[str, Any]:
         """
         🚀 PHASE 4 ENHANCED: COMPREHENSIVE EMERGENCY RISK ASSESSMENT WITH SYNDROME DETECTION 🚀
+        🎯 STEP 3.1 INTEGRATION: Enhanced with Medical Intent Classification
         
         Integrates Phase 4 comprehensive pattern analysis with emergency detection
+        and Step 3.1 medical intent classification for superior clinical accuracy.
         """
+        
+        # 🎯 STEP 3.1: USE INTENT ANALYSIS FOR ENHANCED EMERGENCY DETECTION
+        intent_analysis = getattr(context, 'intent_analysis', {})
+        intent_urgency = intent_analysis.get('urgency_level', 'low')
+        intent_significance = intent_analysis.get('clinical_significance', 'routine')
+        primary_intent = intent_analysis.get('primary_intent', 'unknown')
+        red_flags = intent_analysis.get('red_flag_indicators', [])
+        
+        # Initialize emergency assessment with intent-informed baseline
+        emergency_detected = False
+        emergency_level = "none"
+        emergency_reasons = []
+        
+        # Start with intent-based urgency assessment
+        if intent_urgency in ["critical", "emergency"]:
+            urgency_level = "emergency"
+            emergency_detected = True
+            emergency_level = "critical"
+            emergency_reasons.append(f"Critical intent detected: {primary_intent}")
+        elif intent_urgency == "urgent":
+            urgency_level = "urgent"
+            emergency_reasons.append(f"Urgent intent detected: {primary_intent}")
+        elif intent_urgency == "high":
+            urgency_level = "urgent" if intent_significance == "critical" else "high"
+            emergency_reasons.append(f"High-priority intent: {primary_intent}")
+        else:
+            urgency_level = "routine"
+        
+        # Add red flag indicators from intent analysis
+        if red_flags:
+            emergency_reasons.extend([f"Intent red flag: {flag}" for flag in red_flags])
+            if any("critical" in flag for flag in red_flags):
+                emergency_detected = True
+                emergency_level = "critical"
+                urgency_level = "emergency"
         
         # 🔥 PHASE 4: USE COMPREHENSIVE MEDICAL PATTERN ANALYSIS
         phase4_results = self.advanced_symptom_recognizer.extract_medical_entities(message)
