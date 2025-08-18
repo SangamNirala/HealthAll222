@@ -2925,29 +2925,108 @@ class AdvancedSymptomRecognizer:
     
     def _generate_clinical_insights_advanced(self, extraction_result: Dict[str, Any], context_analysis: Dict[str, Any]) -> Dict[str, Any]:
         """
-        ENHANCED CLINICAL INSIGHTS GENERATION
-        Generate clinical insights with advanced analysis
+        ENHANCED CLINICAL INSIGHTS GENERATION - OPTIMIZED FOR PHASE 4
+        Generate clinical insights with advanced emergency detection and syndrome recognition
         """
         insights = {
             "urgency_indicators": [],
             "red_flag_combinations": [],
             "medical_significance": "routine",
-            "differential_clues": []
+            "differential_clues": [],
+            "syndrome_detection": {},
+            "emergency_assessment": {}
         }
         
-        # Check for emergency patterns
-        symptoms = extraction_result.get("entities", {}).get("symptoms", [])
-        if symptoms:
-            symptom_texts = [getattr(s, 'symptom', str(s)).lower() for s in symptoms]
+        # CRITICAL: Extract all entity text for comprehensive analysis
+        all_text_elements = []
+        
+        # Collect from all entity types
+        entities = extraction_result.get("entities", {})
+        for entity_type, entity_list in entities.items():
+            for entity in entity_list:
+                if hasattr(entity, 'symptom'):
+                    all_text_elements.append(entity.symptom.lower())
+                elif hasattr(entity, 'location'):
+                    all_text_elements.append(entity.location.lower())
+                elif hasattr(entity, 'quality_descriptor'):
+                    all_text_elements.append(entity.quality_descriptor.lower())
+                elif isinstance(entity, dict):
+                    all_text_elements.append(str(entity.get('text', '')).lower())
+                else:
+                    all_text_elements.append(str(entity).lower())
+        
+        # PHASE 4: Enhanced comprehensive pattern analysis
+        comprehensive_analysis = extraction_result.get("comprehensive_analysis", {})
+        emergency_indicators = []
+        
+        # Check for Phase 4 emergency patterns
+        if "emergency_indicators" in comprehensive_analysis:
+            emergency_indicators = comprehensive_analysis["emergency_indicators"]
             
-            # Emergency indicators
-            if any("chest" in text and "pain" in text for text in symptom_texts):
-                insights["urgency_indicators"].append("chest_pain")
-                insights["medical_significance"] = "urgent"
+        # If no Phase 4 data, fall back to entity analysis
+        if not emergency_indicators:
+            combined_text = " ".join(all_text_elements)
             
-            if any("shortness" in text and "breath" in text for text in symptom_texts):
-                insights["urgency_indicators"].append("dyspnea")
-                insights["medical_significance"] = "urgent"
+            # CRITICAL EMERGENCY PATTERNS
+            emergency_patterns = [
+                (r"crushing.*chest.*pain", "acute_coronary_syndrome", "emergency"),
+                (r"chest.*pain.*radiating", "acute_coronary_syndrome", "emergency"), 
+                (r"worst.*headache.*ever", "stroke_syndrome", "emergency"),
+                (r"sudden.*severe.*headache", "stroke_syndrome", "emergency"),
+                (r"chest.*pain.*shortness.*breath", "acute_coronary_syndrome", "emergency"),
+                (r"facial.*drooping|speech.*difficulty", "stroke_syndrome", "emergency"),
+                (r"severe.*allergic.*reaction|anaphylaxis", "anaphylaxis", "emergency")
+            ]
+            
+            for pattern, syndrome, urgency in emergency_patterns:
+                if re.search(pattern, combined_text):
+                    insights["urgency_indicators"].append(syndrome)
+                    insights["medical_significance"] = urgency
+                    insights["syndrome_detection"][syndrome] = {
+                        "probability": 0.85,
+                        "evidence": pattern,
+                        "urgency": urgency
+                    }
+        else:
+            # Use Phase 4 emergency detection results
+            for indicator in emergency_indicators:
+                urgency = indicator.get("urgency", "routine")
+                if urgency in ["emergency", "urgent"]:
+                    insights["medical_significance"] = urgency
+                    insights["urgency_indicators"].append(urgency + "_detected")
+        
+        # SYNDROME DETECTION: Enhanced pattern recognition
+        if all_text_elements:
+            combined_text = " ".join(all_text_elements)
+            
+            # Comprehensive syndrome patterns
+            syndrome_patterns = {
+                "migraine_syndrome": {
+                    "patterns": [r"headache.*nausea", r"throbbing.*head", r"light.*sensitive"],
+                    "urgency": "urgent"
+                },
+                "acute_abdomen": {
+                    "patterns": [r"severe.*abdominal.*pain", r"stomach.*pain.*vomiting"],
+                    "urgency": "emergency"
+                }
+            }
+            
+            for syndrome, data in syndrome_patterns.items():
+                syndrome_score = 0
+                for pattern in data["patterns"]:
+                    if re.search(pattern, combined_text):
+                        syndrome_score += 1
+                
+                if syndrome_score > 0:
+                    probability = min(0.95, syndrome_score / len(data["patterns"]))
+                    insights["syndrome_detection"][syndrome] = {
+                        "probability": probability,
+                        "evidence_count": syndrome_score,
+                        "urgency": data["urgency"]
+                    }
+                    
+                    if probability > 0.7 and data["urgency"] in ["emergency", "urgent"]:
+                        insights["medical_significance"] = data["urgency"]
         
         return insights
     
