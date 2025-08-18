@@ -305,6 +305,10 @@ class UltraChallengingScenario2Tester:
         """Test Scenario 3: Stress-Dietary symptoms"""
         scenario_text = "I've noticed that I get really bad stomach cramps and loose stools about 30-60 minutes after eating ice cream or drinking milk, but only when I'm stressed out at work."
         
+        # Initialize fresh consultation for this scenario
+        if not self.initialize_medical_ai():
+            return False
+        
         try:
             start_time = time.time()
             response = requests.post(f"{API_BASE}/medical-ai/message", 
