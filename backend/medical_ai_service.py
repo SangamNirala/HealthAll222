@@ -532,7 +532,211 @@ class AdvancedSymptomRecognizer:
             }
         }
     
-    def _parse_temporal_expressions(self, text: str) -> List[TemporalEntity]:
+    def _resolve_medical_context_ambiguity(self, text: str, resolved_patterns: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        CHALLENGE 2: MEDICAL CONTEXT AMBIGUITY RESOLUTION
+        
+        Context-aware disambiguation using medical knowledge and surrounding context.
+        Resolves ambiguous terms based on medical probability and context clues.
+        """
+        
+        # Medical context disambiguation rules
+        ambiguity_rules = {
+            "chest_pain": {
+                "cardiac_indicators": [
+                    "shortness of breath", "nausea", "sweating", "radiating", "left arm", 
+                    "jaw", "crushing", "pressure", "squeezing", "exertion", "stress"
+                ],
+                "pulmonary_indicators": [
+                    "cough", "breathing", "lung", "pneumonia", "infection", "fever", 
+                    "productive cough", "wheezing", "oxygen"
+                ],
+                "musculoskeletal_indicators": [
+                    "movement", "lifting", "injury", "muscle", "posture", "exercise", 
+                    "sharp", "stabbing", "worse with movement", "better with rest"
+                ],
+                "gi_indicators": [
+                    "eating", "meal", "acid", "reflux", "heartburn", "stomach", 
+                    "spicy food", "antacid", "better after eating", "worse when hungry"
+                ]
+            },
+            
+            "abdominal_pain": {
+                "gi_indicators": [
+                    "eating", "meal", "nausea", "vomiting", "diarrhea", "constipation",
+                    "bloating", "gas", "heartburn", "acid", "spicy", "fatty food"
+                ],
+                "urological_indicators": [
+                    "urination", "kidney", "bladder", "frequent urination", "burning",
+                    "blood in urine", "flank", "back pain", "stone"
+                ],
+                "gynecological_indicators": [
+                    "menstrual", "period", "ovarian", "pelvic", "female", "pregnancy",
+                    "missed period", "cramping", "ovulation"
+                ],
+                "appendicitis_indicators": [
+                    "right lower", "mcburney", "rebound", "fever", "vomiting",
+                    "started around navel", "moved to right side"
+                ]
+            },
+            
+            "headache": {
+                "tension_indicators": [
+                    "stress", "tight", "band", "pressure", "work", "computer",
+                    "neck", "shoulders", "bilateral", "gradual"
+                ],
+                "migraine_indicators": [
+                    "throbbing", "pulsing", "one side", "light sensitivity", "sound sensitivity",
+                    "nausea", "vomiting", "aura", "visual", "family history"
+                ],
+                "sinus_indicators": [
+                    "congestion", "runny nose", "facial", "pressure", "cold",
+                    "infection", "seasonal", "allergies", "forehead", "cheeks"
+                ],
+                "secondary_indicators": [
+                    "fever", "neck stiffness", "confusion", "worst ever", "sudden onset",
+                    "recent trauma", "neurological", "weakness", "vision changes"
+                ]
+            },
+            
+            "back_pain": {
+                "mechanical_indicators": [
+                    "lifting", "movement", "posture", "sitting", "standing", "exercise",
+                    "muscle", "strain", "injury", "better with rest", "worse with activity"
+                ],
+                "radicular_indicators": [
+                    "radiating", "shooting", "leg", "numbness", "tingling", "sciatica",
+                    "nerve", "down the leg", "foot", "weakness"
+                ],
+                "inflammatory_indicators": [
+                    "morning stiffness", "better with movement", "worse at night",
+                    "inflammatory", "arthritis", "autoimmune", "family history"
+                ]
+            }
+        }
+        
+        # Context window analysis (words before and after key terms)
+        context_window = 10  # words on each side
+        text_words = text.lower().split()
+        
+        disambiguation_results = {}
+        context_analysis = {}
+        
+        # Analyze each ambiguous term
+        for symptom_type, indicators in ambiguity_rules.items():
+            # Find if this symptom type appears in text
+            symptom_matches = []
+            for i, word in enumerate(text_words):
+                # Check for symptom keywords
+                if (symptom_type.replace("_", " ") in " ".join(text_words[max(0, i-2):i+3]) or
+                    any(key_word in word for key_word in symptom_type.split("_"))):
+                    symptom_matches.append(i)
+            
+            if symptom_matches:
+                # Analyze context around each match
+                for match_pos in symptom_matches:
+                    # Extract context window
+                    start_pos = max(0, match_pos - context_window)
+                    end_pos = min(len(text_words), match_pos + context_window)
+                    context_text = " ".join(text_words[start_pos:end_pos])
+                    
+                    # Score each category based on indicator presence
+                    category_scores = {}
+                    for category, category_indicators in indicators.items():
+                        score = 0
+                        matched_indicators = []
+                        
+                        for indicator in category_indicators:
+                            if indicator in context_text:
+                                # Weight scoring based on indicator strength
+                                if indicator in ["crushing", "worst ever", "sudden onset", "radiating"]:
+                                    score += 3  # Strong indicators
+                                elif indicator in ["severe", "shortness of breath", "nausea"]:
+                                    score += 2  # Moderate indicators  
+                                else:
+                                    score += 1  # Weak indicators
+                                matched_indicators.append(indicator)
+                        
+                        if matched_indicators:
+                            category_scores[category] = {
+                                "score": score,
+                                "indicators": matched_indicators,
+                                "confidence": min(0.95, score * 0.15 + 0.3)
+                            }
+                    
+                    # Determine most likely interpretation
+                    if category_scores:
+                        best_category = max(category_scores.items(), key=lambda x: x[1]["score"])
+                        
+                        disambiguation_results[symptom_type] = {
+                            "most_likely": best_category[0],
+                            "confidence": best_category[1]["confidence"],
+                            "supporting_evidence": best_category[1]["indicators"],
+                            "all_scores": category_scores,
+                            "context_text": context_text
+                        }
+                    
+                    # Store context analysis
+                    context_analysis[symptom_type] = {
+                        "context_window": context_text,
+                        "position": match_pos,
+                        "surrounding_symptoms": [],
+                        "temporal_clues": [],
+                        "severity_clues": []
+                    }
+                    
+                    # Look for surrounding symptoms
+                    symptom_keywords = ["pain", "ache", "nausea", "vomiting", "dizziness", "weakness"]
+                    for keyword in symptom_keywords:
+                        if keyword in context_text and keyword != symptom_type:
+                            context_analysis[symptom_type]["surrounding_symptoms"].append(keyword)
+                    
+                    # Look for temporal clues
+                    temporal_keywords = ["started", "began", "since", "for", "hours", "days", "weeks"]
+                    for keyword in temporal_keywords:
+                        if keyword in context_text:
+                            context_analysis[symptom_type]["temporal_clues"].append(keyword)
+                    
+                    # Look for severity clues
+                    severity_keywords = ["severe", "mild", "moderate", "worst", "terrible", "unbearable"]
+                    for keyword in severity_keywords:
+                        if keyword in context_text:
+                            context_analysis[symptom_type]["severity_clues"].append(keyword)
+        
+        # Apply Bayesian-like reasoning for final disambiguation
+        final_disambiguation = {}
+        for symptom, results in disambiguation_results.items():
+            if results:
+                # Apply prior probabilities based on medical knowledge
+                priors = {
+                    "cardiac_indicators": 0.25,    # Chest pain cardiac likelihood
+                    "gi_indicators": 0.30,         # GI causes common
+                    "musculoskeletal_indicators": 0.35,  # Most common cause
+                    "tension_indicators": 0.45,    # Most common headache
+                    "migraine_indicators": 0.25,   # Common headache type
+                    "mechanical_indicators": 0.50, # Most common back pain
+                }
+                
+                # Adjust confidence based on prior probability
+                most_likely = results["most_likely"]
+                prior = priors.get(most_likely, 0.20)
+                
+                # Bayesian update: posterior = likelihood * prior / evidence
+                likelihood = results["confidence"]
+                posterior_confidence = min(0.95, (likelihood * prior) / 0.25)
+                
+                final_disambiguation[symptom] = {
+                    "interpretation": most_likely,
+                    "confidence": posterior_confidence,
+                    "evidence": results["supporting_evidence"],
+                    "reasoning": f"Based on context clues: {', '.join(results['supporting_evidence'][:3])}"
+                }
+        
+        return {
+            "disambiguations": final_disambiguation,
+            "context_analysis": context_analysis,
+            "ambiguity_resolution_confidence": sum(d["confidence"] for d in final_disambiguation.values()) / max(len(final_disambiguation), 1)
+        }
         """CHALLENGE 2: Parse sophisticated time expressions"""
         temporal_entities = []
         
