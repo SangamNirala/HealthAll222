@@ -5025,6 +5025,11 @@ class ContextAwareMedicalReasoner:
             contextual_reasoning.reasoning_confidence + validation_score
         ) / 2.0
         
+        # 🔧 CRITICAL FIX: Ensure consistent contextual field population
+        contextual_reasoning = self._ensure_consistent_contextual_field_population(
+            contextual_reasoning, text, causal_relationships
+        )
+        
         return contextual_reasoning
     
     def detect_causal_relationships_advanced(self, text: str, entities: Dict) -> List[CausalRelationship]:
