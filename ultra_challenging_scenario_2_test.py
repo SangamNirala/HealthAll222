@@ -187,6 +187,10 @@ class UltraChallengingScenario2Tester:
         """Test Scenario 2: ENHANCED Cardiac - Exertional Angina Pattern"""
         scenario_text = "I get this crushing chest pain whenever I walk uphill or climb more than one flight of stairs, feels like an elephant sitting on my chest, but it completely goes away within 2-3 minutes of resting."
         
+        # Initialize fresh consultation for this scenario
+        if not self.initialize_medical_ai():
+            return False
+        
         try:
             start_time = time.time()
             response = requests.post(f"{API_BASE}/medical-ai/message", 
