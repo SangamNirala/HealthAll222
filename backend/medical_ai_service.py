@@ -6417,6 +6417,101 @@ class ContextAwareMedicalReasoner:
             })
         
         return symptoms
+    
+    # 🚀 ULTRA-FAST PROCESSING METHODS FOR <25MS TARGET 🚀
+    
+    def _generate_clinical_hypotheses_fast(self, causal_relationships: List[CausalRelationship]) -> List[str]:
+        """⚡ Ultra-fast clinical hypothesis generation"""
+        hypotheses = []
+        
+        for rel in causal_relationships[:3]:  # Limit for speed
+            sig = rel.clinical_significance
+            if sig == "emergency":
+                hypotheses.append(f"EMERGENCY: {rel.relationship_type} requiring immediate evaluation")
+            elif sig == "urgent":
+                hypotheses.append(f"URGENT: {rel.relationship_type} requiring prompt assessment")
+            else:
+                hypotheses.append(f"Moderate: {rel.relationship_type} for evaluation")
+        
+        return hypotheses if hypotheses else ["Contextual medical evaluation recommended"]
+    
+    def _generate_clinical_reasoning_narrative_fast(self, causal_relationships: List[CausalRelationship], clinical_hypotheses: List[str]) -> str:
+        """⚡ Ultra-fast clinical reasoning narrative"""
+        if causal_relationships:
+            primary_rel = causal_relationships[0]
+            return f"Clinical Reasoning: {primary_rel.relationship_type} pattern with {primary_rel.clinical_significance} significance"
+        return "Clinical Reasoning: Contextual pattern detected requiring systematic evaluation"
+    
+    def _assess_contextual_significance_fast(self, causal_relationships: List[CausalRelationship]) -> str:
+        """⚡ Ultra-fast contextual significance assessment"""
+        if not causal_relationships:
+            return "routine"
+        
+        max_sig = "routine"
+        for rel in causal_relationships:
+            if rel.clinical_significance == "emergency":
+                return "emergency"
+            elif rel.clinical_significance == "urgent" and max_sig == "routine":
+                max_sig = "urgent"
+        
+        return max_sig
+    
+    def _calculate_reasoning_confidence_fast(self, causal_relationships: List[CausalRelationship], 
+                                           positional_analysis: Dict, temporal_analysis: Dict, environmental_analysis: Dict) -> float:
+        """⚡ Ultra-fast confidence calculation"""
+        if not causal_relationships:
+            return 0.3
+        
+        avg_causality = sum(rel.causality_strength for rel in causal_relationships) / len(causal_relationships)
+        context_bonus = 0.1 if (positional_analysis.get("factors") or temporal_analysis.get("factors") or environmental_analysis.get("factors")) else 0.0
+        
+        return min(0.95, avg_causality + context_bonus)
+    
+    def _generate_context_recommendations_fast(self, causal_relationships: List[CausalRelationship], clinical_hypotheses: List[str]) -> List[str]:
+        """⚡ Ultra-fast context recommendations"""
+        if not causal_relationships:
+            return ["Comprehensive medical evaluation recommended"]
+        
+        recommendations = []
+        for rel in causal_relationships[:2]:  # Limit for speed
+            if rel.clinical_significance == "emergency":
+                recommendations.append("IMMEDIATE emergency medical evaluation required")
+            elif rel.clinical_significance == "urgent":
+                recommendations.append("Urgent medical assessment within 24 hours")
+            else:
+                recommendations.append("Routine medical evaluation recommended")
+        
+        return recommendations
+    
+    def _generate_trigger_avoidance_strategies_fast(self, causal_relationships: List[CausalRelationship]) -> List[str]:
+        """⚡ Ultra-fast trigger avoidance strategies"""
+        strategies = []
+        
+        for rel in causal_relationships[:2]:  # Limit for speed
+            if "positional" in rel.relationship_type:
+                strategies.append("Avoid rapid position changes, rise slowly from sitting/lying")
+            elif "exertional" in rel.relationship_type:
+                strategies.append("Modify activity levels, avoid excessive exertion")
+            elif "stress" in rel.trigger or "dietary" in rel.relationship_type:
+                strategies.append("Identify and modify dietary/stress triggers")
+        
+        return strategies if strategies else ["Monitor and document symptom triggers"]
+    
+    def _determine_specialist_referral_context_fast(self, clinical_hypotheses: List[str], causal_relationships: List[CausalRelationship]) -> Optional[str]:
+        """⚡ Ultra-fast specialist referral determination"""
+        if not causal_relationships:
+            return None
+        
+        for rel in causal_relationships:
+            if rel.clinical_significance == "emergency":
+                if "cardiac" in rel.relationship_type or "chest" in rel.symptom:
+                    return "EMERGENCY cardiology consultation"
+                else:
+                    return "EMERGENCY department evaluation"
+            elif rel.clinical_significance == "urgent":
+                return "Urgent specialist consultation recommended"
+        
+        return "Routine specialist evaluation may be beneficial"
 
 class WorldClassMedicalAI:
     """
