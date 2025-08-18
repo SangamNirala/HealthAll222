@@ -107,6 +107,10 @@ class UltraChallengingScenario2Tester:
         """Test Scenario 1: Orthostatic symptoms"""
         scenario_text = "Every morning when I get out of bed I feel dizzy and nauseous, sometimes I even feel like I'm going to faint, but it goes away after I sit back down for a few minutes."
         
+        # Initialize fresh consultation for this scenario
+        if not self.initialize_medical_ai():
+            return False
+        
         try:
             start_time = time.time()
             response = requests.post(f"{API_BASE}/medical-ai/message", 
