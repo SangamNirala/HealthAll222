@@ -4975,7 +4975,15 @@ class ContextAwareMedicalReasoner:
         # Build comprehensive contextual reasoning
         contextual_reasoning = ContextualMedicalReasoning(
             symptoms_with_context=self._extract_symptoms_with_context(text, extracted_entities),
-            triggers_and_causality=[rel.__dict__ for rel in causal_relationships],
+            triggers_and_causality=[{
+                "trigger": rel.trigger,
+                "symptom": rel.symptom,
+                "relationship_type": rel.relationship_type,
+                "causality_strength": rel.causality_strength,
+                "medical_mechanism": rel.medical_mechanism,
+                "clinical_significance": rel.clinical_significance,
+                "validation_evidence": rel.validation_evidence
+            } for rel in causal_relationships],
             contextual_relationships={
                 "positional": positional_analysis,
                 "temporal": temporal_analysis,
@@ -4992,7 +5000,8 @@ class ContextAwareMedicalReasoner:
                 "trigger": rel.trigger,
                 "symptom": rel.symptom,
                 "causality_strength": rel.causality_strength,
-                "medical_mechanism": rel.medical_mechanism
+                "medical_mechanism": rel.medical_mechanism,
+                "clinical_significance": rel.clinical_significance
             } for rel in causal_relationships],
             clinical_hypotheses=clinical_hypotheses,
             contextual_significance=self._assess_contextual_significance(causal_relationships),
