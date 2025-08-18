@@ -11063,7 +11063,18 @@ async def process_medical_message(request: MedicalConsultationRequest):
             emergency_detected=response.get("urgency") == "emergency",
             next_questions=response.get("next_questions", []),
             differential_diagnoses=response.get("differential_diagnoses", []),
-            recommendations=response.get("recommendations", [])
+            recommendations=response.get("recommendations", []),
+            
+            # 🧠 STEP 2.2: Extract contextual reasoning fields from response
+            causal_relationships=response.get("causal_relationships", []),
+            clinical_hypotheses=response.get("clinical_hypotheses", []),
+            contextual_factors=response.get("contextual_factors", {}),
+            medical_reasoning_narrative=response.get("medical_reasoning_narrative", ""),
+            context_based_recommendations=response.get("context_based_recommendations", []),
+            trigger_avoidance_strategies=response.get("trigger_avoidance_strategies", []),
+            specialist_referral_context=response.get("specialist_referral_context"),
+            contextual_significance=response.get("contextual_significance", "routine"),
+            reasoning_confidence=response.get("reasoning_confidence", 0.0)
         )
         
     except Exception as e:
