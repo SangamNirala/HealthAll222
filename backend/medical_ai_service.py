@@ -298,16 +298,28 @@ class WorldClassMedicalAI:
         # Extract medical entities first
         medical_entities = await self._extract_medical_entities(message)
         
-        # Check if patient provided initial symptom
-        symptoms_detected = medical_entities.get("symptoms", [])
-        processed_message = medical_entities.get("processed_message", message)
+        # Check for common greetings first
+        greetings = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'greetings']
+        message_lower = message.lower().strip()
         
-        if symptoms_detected or any(symptom_word in message.lower() for symptom_word in ['pain', 'hurt', 'ache', 'sick', 'feel', 'symptom', 'fever', 'headache', 'cough']):
-            context.chief_complaint = message
-            context.current_stage = MedicalInterviewStage.HISTORY_PRESENT_ILLNESS
+        # If it's just a greeting, ask for symptoms
+        if message_lower in greetings or len(message.strip()) < 3:
+            context.current_stage = MedicalInterviewStage.CHIEF_COMPLAINT
+            ai_response = await self._generate_empathetic_response(
+                "Hello! Thank you for reaching out. I'm here to help with your health concerns. "
+                "What brings you here today? Please describe any symptoms or health concerns you're experiencing."
+            )
+        else:
+            # Check if patient provided initial symptom
+            symptoms_detected = medical_entities.get("symptoms", [])
+            processed_message = medical_entities.get("processed_message", message)
             
-            # Create appropriate response based on detected symptoms
+            # Only treat as symptom if we actually detected medical symptoms
             if symptoms_detected:
+                context.chief_complaint = message
+                context.current_stage = MedicalInterviewStage.HISTORY_PRESENT_ILLNESS
+                
+                # Create appropriate response based on detected symptoms
                 symptom_names = []
                 for symptom in symptoms_detected:
                     if symptom == "fever":
@@ -326,18 +338,12 @@ class WorldClassMedicalAI:
                     f"Let's start with when exactly these symptoms began - was the onset sudden or did it develop gradually over time?"
                 )
             else:
+                # No symptoms detected - ask for more information
+                context.current_stage = MedicalInterviewStage.CHIEF_COMPLAINT
                 ai_response = await self._generate_empathetic_response(
-                    f"I understand you're experiencing {processed_message}. I'm here to help you understand what might be going on. "
-                    f"To provide you with the most accurate assessment, I'd like to ask you some specific questions about your symptoms. "
-                    f"First, can you tell me exactly when these symptoms started?"
+                    "I understand you'd like to discuss something. Could you please describe any specific symptoms or health concerns you're experiencing? "
+                    "This will help me provide you with the most accurate medical guidance."
                 )
-        else:
-            context.current_stage = MedicalInterviewStage.CHIEF_COMPLAINT
-            ai_response = await self._generate_empathetic_response(
-                "Hello! I'm Dr. AI, your personal medical assistant. I'm here to help you understand your health concerns "
-                "and provide professional medical guidance. What brings you here today? Please describe any symptoms "
-                "or health concerns you're experiencing."
-            )
         
         return {
             "response": ai_response,
