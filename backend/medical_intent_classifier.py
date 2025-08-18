@@ -420,10 +420,13 @@ class WorldClassMedicalIntentClassifier:
                 "description": "Comprehensive evaluation of cardiovascular symptoms and risk factors",
                 "clinical_subspecialty": "cardiology", 
                 "patterns": [
+                    IntentPattern(r"\b(heart|cardiac|cardiovascular)\s+(symptoms|problems|issues|concerns)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.4),
                     IntentPattern(r"\b(palpitations|irregular\s+heartbeat|heart\s+racing|arrhythmia)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.4),
                     IntentPattern(r"\b(shortness\s+of\s+breath|dyspnea|breathless).*\b(exertion|climbing|walking)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.3),
                     IntentPattern(r"\b(ankle|leg|foot)\s+(swelling|edema|swollen)", 0.8, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
                     IntentPattern(r"\b(syncope|fainting|dizzy|lightheaded).*\b(standing|exertion)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.4),
+                    IntentPattern(r"\b(my\s+heart|heart\s+feels|heart\s+is)", 0.85, ClinicalSignificance.HIGH, urgency_boost=0.3),
+                    IntentPattern(r"\b(blood\s+pressure|bp|hypertension)\s+(high|elevated|low)", 0.8, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
                 ],
                 "clinical_reasoning_engine": "CardiovascularReasoningEngine",
                 "decision_support_rules": ["cardiac_workup", "echo_indication", "stress_test_recommendation"],
