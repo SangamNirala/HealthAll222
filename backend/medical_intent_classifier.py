@@ -283,7 +283,7 @@ class WorldClassMedicalIntentClassifier:
                     IntentPattern(r"\b(treatment options?|what are my options|alternatives?|choices?)\b", 0.9, ClinicalSignificance.MEDIUM),
                     IntentPattern(r"\b(other treatments?|different approach|alternative medicine)\b", 0.85, ClinicalSignificance.MEDIUM),
                     IntentPattern(r"\b(surgery|operation|procedure|intervention)\b", 0.8, ClinicalSignificance.HIGH),
-                    IntentPattern(r"\b(natural remedies|home remedies|holistic|non-pharmaceutical)\b", 0.75, ClinicalSignificance.LOW),
+                    IntentPattern(r"\b(natural remedies|home remedies|holistic|non-pharmaceutical)\b", 0.75, ClinicalSignificance.ROUTINE),
                 ],
                 "clinical_significance": "medium"
             },
