@@ -6456,7 +6456,7 @@ class WorldClassMedicalAI:
         # 1. Emergency Detection (highest priority) - use normalized text
         emergency_assessment = await self._assess_emergency_risk(normalized_message, context)
         if emergency_assessment['emergency_detected']:
-            return await self._handle_emergency_response(emergency_assessment, context)
+            return await self._handle_emergency_response(emergency_assessment, context, normalized_message)
         
         # 2. Extract medical entities from normalized patient input
         medical_entities = await self._extract_medical_entities(normalized_message)
