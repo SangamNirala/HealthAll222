@@ -4953,37 +4953,17 @@ class ContextAwareMedicalReasoner:
         Transform raw medical entities into sophisticated contextual understanding
         with clinical causality, positional relationships, and situational logic.
         
-        ⚡ PHASE 3 OPTIMIZATION: Performance-optimized for <25ms processing target
+        ⚡ PHASE 3 OPTIMIZATION: Ultra-fast processing for <25ms target
         """
         
-        # 🚀 PHASE 3 PERFORMANCE OPTIMIZATION: Parallel analysis for speed
-        import concurrent.futures
-        from functools import partial
-        
-        # Detect causal relationships between symptoms and triggers (OPTIMIZED)
+        # 🚀 PHASE 3 ULTRA-PERFORMANCE: Sequential optimized analysis (no threading overhead)
         causal_relationships = self.detect_causal_relationships_advanced_optimized(text, extracted_entities)
+        positional_analysis = self.analyze_positional_context_intelligence_optimized(text)
+        temporal_analysis = self.extract_temporal_context_reasoning_optimized(text)
+        environmental_analysis = self.assess_environmental_trigger_context_optimized(text)
         
-        # 🚀 PARALLEL CONTEXTUAL ANALYSIS for performance optimization
-        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-            # Submit all analysis tasks in parallel
-            positional_future = executor.submit(self.analyze_positional_context_intelligence_optimized, text)
-            temporal_future = executor.submit(self.extract_temporal_context_reasoning_optimized, text)
-            environmental_future = executor.submit(self.assess_environmental_trigger_context_optimized, text)
-            
-            # Collect results
-            positional_analysis = positional_future.result()
-            temporal_analysis = temporal_future.result()
-            environmental_analysis = environmental_future.result()
-        
-        # Generate clinical hypotheses based on contextual patterns
-        clinical_hypotheses = self.generate_clinical_hypotheses_contextual(
-            {
-                "causal_relationships": causal_relationships,
-                "positional": positional_analysis,
-                "temporal": temporal_analysis,
-                "environmental": environmental_analysis
-            }
-        )
+        # 🚀 SIMPLIFIED: Fast hypothesis generation
+        clinical_hypotheses = self._generate_clinical_hypotheses_fast(causal_relationships)
         
         # 🧠 PHASE 3 ENHANCED: Build comprehensive contextual reasoning with optimized factor population
         contextual_reasoning = ContextualMedicalReasoning(
@@ -5002,9 +4982,7 @@ class ContextAwareMedicalReasoner:
                 "temporal": temporal_analysis,
                 "environmental": environmental_analysis
             },
-            clinical_reasoning=self._generate_clinical_reasoning_narrative(
-                causal_relationships, clinical_hypotheses
-            ),
+            clinical_reasoning=self._generate_clinical_reasoning_narrative_fast(causal_relationships, clinical_hypotheses),
             # 🔧 PHASE 3 FIX: Enhanced factor population with comprehensive detection
             positional_factors=self._ensure_comprehensive_positional_factors(text, positional_analysis),
             temporal_factors=self._ensure_comprehensive_temporal_factors(text, temporal_analysis),
@@ -5018,19 +4996,11 @@ class ContextAwareMedicalReasoner:
                 "clinical_significance": rel.clinical_significance
             } for rel in causal_relationships],
             clinical_hypotheses=clinical_hypotheses,
-            contextual_significance=self._assess_contextual_significance(causal_relationships),
-            reasoning_confidence=self._calculate_reasoning_confidence(
-                causal_relationships, positional_analysis, temporal_analysis, environmental_analysis
-            ),
-            context_based_recommendations=self._generate_context_recommendations(
-                causal_relationships, clinical_hypotheses
-            ),
-            trigger_avoidance_strategies=self._generate_trigger_avoidance_strategies(
-                causal_relationships, environmental_analysis
-            ),
-            specialist_referral_context=self._determine_specialist_referral_context(
-                clinical_hypotheses, causal_relationships
-            )
+            contextual_significance=self._assess_contextual_significance_fast(causal_relationships),
+            reasoning_confidence=self._calculate_reasoning_confidence_fast(causal_relationships, positional_analysis, temporal_analysis, environmental_analysis),
+            context_based_recommendations=self._generate_context_recommendations_fast(causal_relationships, clinical_hypotheses),
+            trigger_avoidance_strategies=self._generate_trigger_avoidance_strategies_fast(causal_relationships),
+            specialist_referral_context=self._determine_specialist_referral_context_fast(clinical_hypotheses, causal_relationships)
         )
         
         # Validate contextual medical logic
