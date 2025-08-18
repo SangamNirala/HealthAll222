@@ -167,21 +167,171 @@ class IntelligentTextNormalizer:
         }
     
     def _load_informal_to_formal_medical(self) -> Dict[str, str]:
-        """Load informal to formal medical language mappings"""
+        """Load comprehensive informal to formal medical language mappings - Step 1.3 Enhancement"""
         return {
-            # Colloquial to medical standard
+            # DIGESTIVE SYSTEM - Colloquial to medical standard
             "tummy hurt": "abdominal pain",
-            "tummy pain": "abdominal pain", 
+            "tummy hurts": "abdominal pain", 
+            "tummy pain": "abdominal pain",
+            "tummy ache": "abdominal pain",
             "belly pain": "abdominal pain",
             "belly hurt": "abdominal pain",
-            "feeling crappy": "feeling unwell",
-            "feel crappy": "feel unwell",
+            "belly hurts": "abdominal pain",
+            "belly ache": "abdominal pain",
+            "stomach hurt": "abdominal pain",
+            "stomach hurts": "abdominal pain",
+            "gut pain": "abdominal pain",
+            "gut hurt": "abdominal pain",
+            
+            # BOWEL MOVEMENTS
             "can't poop": "experiencing constipation",
             "cant poop": "experiencing constipation",
+            "cannot poop": "experiencing constipation",
+            "trouble pooping": "difficulty with bowel movements",
+            "hard to poop": "difficulty with bowel movements",
+            "blocked up": "experiencing constipation",
+            "backed up": "experiencing constipation",
+            "the runs": "experiencing diarrhea",
+            "loose stools": "loose bowel movements",
+            "runny poop": "loose bowel movements",
+            
+            # NAUSEA & VOMITING
             "throwing up": "vomiting",
             "puking": "vomiting",
+            "barfing": "vomiting",
+            "upchucking": "vomiting",
+            "feeling sick": "experiencing nausea",
+            "queasy": "nauseous",
+            "gonna be sick": "feeling nauseous",
+            "gonna throw up": "feeling nauseous",
+            
+            # GENERAL FEELING UNWELL
+            "feeling crappy": "feeling unwell",
+            "feel crappy": "feel unwell",
+            "feeling awful": "feeling unwell",
+            "feel awful": "feel unwell",
+            "feeling lousy": "feeling unwell",
+            "feel lousy": "feel unwell",
+            "feeling rough": "feeling unwell",
+            "feel rough": "feel unwell",
+            "feeling terrible": "feeling very unwell",
+            "feel terrible": "feel very unwell",
+            "feeling like crap": "feeling unwell",
+            "feel like crap": "feel unwell",
+            "under the weather": "feeling unwell",
+            "not feeling good": "feeling unwell",
+            "don't feel good": "not feeling well",
+            "dont feel good": "not feeling well",
+            "feeling off": "feeling unwell",
+            "feel off": "feel unwell",
+            
+            # DIZZINESS & BALANCE
             "dizzy spells": "episodes of dizziness",
             "head spinning": "experiencing dizziness",
+            "lightheaded": "experiencing lightheadedness",
+            "woozy": "dizzy",
+            "feeling faint": "experiencing lightheadedness",
+            "about to pass out": "feeling faint",
+            "gonna faint": "feeling faint",
+            "room spinning": "experiencing vertigo",
+            
+            # PAIN DESCRIPTORS
+            "really bad": "severe",
+            "super bad": "severe", 
+            "awful pain": "severe pain",
+            "terrible pain": "severe pain",
+            "killing me": "severe pain",
+            "excruciating": "extremely severe",
+            "unbearable": "extremely severe",
+            "sharp pain": "acute pain",
+            "stabbing pain": "sharp stabbing pain",
+            "throbbing": "pulsating pain",
+            "pounding": "throbbing pain",
+            
+            # BREATHING ISSUES
+            "can't breathe": "difficulty breathing",
+            "cant breathe": "difficulty breathing",
+            "cannot breathe": "difficulty breathing",
+            "short of breath": "experiencing shortness of breath",
+            "out of breath": "experiencing breathlessness",
+            "winded": "short of breath",
+            "gasping": "having difficulty breathing",
+            "wheezing": "experiencing wheezing",
+            
+            # SLEEP ISSUES
+            "can't sleep": "experiencing insomnia",
+            "cant sleep": "experiencing insomnia",
+            "cannot sleep": "experiencing insomnia",
+            "trouble sleeping": "difficulty sleeping",
+            "tossing and turning": "restless sleep",
+            "wide awake": "experiencing insomnia",
+            
+            # FATIGUE & ENERGY
+            "wiped out": "extremely fatigued",
+            "exhausted": "severely fatigued",
+            "drained": "feeling fatigued",
+            "beat": "feeling tired",
+            "pooped": "feeling tired",
+            "worn out": "feeling fatigued",
+            "dead tired": "extremely fatigued",
+            "no energy": "experiencing fatigue",
+            
+            # HEADACHES
+            "head hurts": "experiencing headache",
+            "head is pounding": "experiencing severe headache",
+            "splitting headache": "severe headache",
+            "migraine": "severe headache",
+            "head is killing me": "severe headache",
+            
+            # FEVER & TEMPERATURE
+            "burning up": "experiencing fever",
+            "running a fever": "having a fever",
+            "feverish": "feeling feverish",
+            "hot and cold": "experiencing chills and fever",
+            "the chills": "experiencing chills",
+            "shivering": "experiencing chills",
+            
+            # CHEST & HEART
+            "chest tight": "chest tightness",
+            "chest heavy": "chest pressure",
+            "heart racing": "experiencing rapid heartbeat",
+            "heart pounding": "experiencing palpitations",
+            "fluttering heart": "experiencing palpitations",
+            
+            # THROAT ISSUES  
+            "sore throat": "throat pain",
+            "scratchy throat": "throat irritation",
+            "throat hurts": "throat pain",
+            "can't swallow": "difficulty swallowing",
+            "cant swallow": "difficulty swallowing",
+            
+            # SKIN CONDITIONS
+            "itchy": "experiencing itching",
+            "scratchy": "experiencing itching",
+            "breaking out": "developing a rash",
+            "bumps": "skin lesions",
+            "spots": "skin lesions",
+            
+            # MUSCLE & JOINT
+            "achy": "experiencing aches",
+            "stiff": "experiencing stiffness",
+            "creaky joints": "joint stiffness",
+            "sore muscles": "muscle pain",
+            "muscle cramps": "muscle spasms",
+            
+            # MENTAL HEALTH
+            "stressed out": "experiencing stress",
+            "anxious": "feeling anxious",
+            "worried sick": "extremely anxious",
+            "freaking out": "experiencing anxiety",
+            "bummed out": "feeling depressed",
+            "down in the dumps": "feeling depressed",
+            
+            # URGENCY EXPRESSIONS
+            "really urgent": "urgent medical concern",
+            "emergency": "urgent medical situation",
+            "need help now": "urgent medical attention needed",
+            "something's wrong": "experiencing concerning symptoms",
         }
     
     def _load_abbreviation_expansions(self) -> Dict[str, str]:
