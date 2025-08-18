@@ -155,14 +155,13 @@ class WorldClassMedicalAI:
         }
     
     def _load_emergency_keywords(self) -> List[str]:
-        """Load emergency symptom keywords for immediate detection"""
+        """Load emergency symptom keywords for immediate detection - only true emergencies"""
         return [
-            "chest pain", "shortness of breath", "difficulty breathing", "crushing pain",
-            "heart attack", "stroke", "sudden weakness", "facial drooping",
-            "severe headache", "worst headache ever", "loss of consciousness",
-            "severe bleeding", "vomiting blood", "severe abdominal pain",
-            "difficulty swallowing", "allergic reaction", "swelling throat",
-            "seizure", "overdose", "suicide", "self harm"
+            "crushing chest pain", "crushing pain", "heart attack", "stroke", 
+            "sudden weakness", "facial drooping", "can't breathe", "can't catch my breath",
+            "worst headache ever", "thunderclap headache", "loss of consciousness", "passed out",
+            "severe bleeding", "vomiting blood", "coughing up blood", "severe abdominal pain with vomiting",
+            "difficulty swallowing", "severe allergic reaction", "anaphylaxis", "call 911", "emergency"
         ]
     
     def _load_differential_database(self) -> Dict[str, Any]:
