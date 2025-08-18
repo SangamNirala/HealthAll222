@@ -5790,35 +5790,109 @@ class ContextAwareMedicalReasoner:
         return strategies
     
     def _determine_specialist_referral_context(self, hypotheses: List[str], causal_relationships: List[CausalRelationship]) -> Optional[str]:
-        """Determine appropriate specialist referral based on context"""
+        """🧠 REVOLUTIONARY SPECIALIST REFERRAL CONTEXT WITH CLINICAL PRECISION 🧠"""
         
-        # 🧠 ENHANCED SPECIALIST REFERRAL CONTEXT for Ultra-Challenging Scenarios
+        # 🎯 ULTRA-CHALLENGING SCENARIO SPECIALIST REFERRALS WITH URGENCY STRATIFICATION
+        
+        # Process hypotheses for specific specialist recommendations
         for hypothesis in hypotheses:
-            if "exertional angina" in hypothesis.lower() or "cardiac evaluation" in hypothesis.lower():
-                return "URGENT cardiology referral for suspected coronary artery disease"
-            elif "cardiac" in hypothesis.lower() or "angina" in hypothesis.lower():
-                return "Cardiology referral for exertional chest pain evaluation"
-            elif "morning orthostatic" in hypothesis.lower():
-                return "Cardiology consultation for orthostatic hypotension with fall risk"
-            elif "orthostatic" in hypothesis.lower():
-                return "Cardiology or autonomic neurology referral for orthostatic evaluation"
-            elif "stress-modulated" in hypothesis.lower():
-                return "Integrated gastroenterology and behavioral health referral"
-            elif "stress" in hypothesis.lower():
-                return "Psychology or psychiatry referral for stress management"
+            hypothesis_lower = hypothesis.lower()
+            
+            # 🧠 URGENT CARDIAC REFERRALS
+            if "exertional angina" in hypothesis_lower and "urgent" in hypothesis_lower:
+                return "URGENT cardiology referral for suspected unstable angina - ECG and troponins STAT"
+            elif "classic stable angina" in hypothesis_lower:
+                return "URGENT cardiology referral for coronary angiography consideration"
+            elif "exercise-induced myocardial ischemia" in hypothesis_lower:
+                return "URGENT cardiology referral with stress testing and catheterization readiness"
+            elif "cardiac ischemia" in hypothesis_lower:
+                return "URGENT cardiology consultation for acute coronary evaluation"
+            
+            # 🧠 CARDIOVASCULAR ORTHOSTATIC REFERRALS
+            elif "orthostatic hypotension with morning predominance" in hypothesis_lower:
+                return "URGENT cardiology + autonomic neurology referral for comprehensive orthostatic evaluation"
+            elif "morning orthostatic syndrome" in hypothesis_lower:
+                return "Cardiology referral for autonomic dysfunction assessment with tilt table testing"
+            elif "orthostatic hypotension" in hypothesis_lower and "fall risk" in hypothesis_lower:
+                return "URGENT cardiology referral for orthostatic hypotension with fall prevention program"
+            elif "significant orthostatic intolerance" in hypothesis_lower:
+                return "Cardiology consultation for orthostatic evaluation and medication optimization"
+            
+            # 🧠 INTEGRATED MULTI-DISCIPLINARY REFERRALS
+            elif "stress-modulated lactose intolerance" in hypothesis_lower:
+                return "Integrated referral: Gastroenterology + Behavioral Health for gut-brain axis evaluation"
+            elif "psychosomatic component" in hypothesis_lower:
+                return "Gastroenterology + Psychology referral for integrated mind-body approach"
+            elif "gut-brain axis dysfunction" in hypothesis_lower:
+                return "Gastroenterology + Neurology + Psychology multidisciplinary consultation"
+            
+            # 🧠 AUTONOMIC AND NEUROLOGIC REFERRALS
+            elif "autonomic dysfunction" in hypothesis_lower:
+                return "Neurology referral for comprehensive autonomic function testing"
+            elif "circadian-orthostatic interaction" in hypothesis_lower:
+                return "Neurology + Cardiology referral for circadian rhythm and autonomic evaluation"
+            
+            # 🧠 COMPREHENSIVE MULTI-SYSTEM REFERRALS
+            elif "complex multi-factorial" in hypothesis_lower:
+                return "Case management coordination with multidisciplinary team approach"
+            elif "biopsychosocial assessment" in hypothesis_lower:
+                return "Comprehensive multidisciplinary evaluation: Internal Medicine + Psychology + Social Work"
+            
+            # 🧠 STRESS-RELATED REFERRALS
+            elif "stress-somatization pattern" in hypothesis_lower:
+                return "Psychology + Internal Medicine referral for somatoform disorder evaluation"
+            
+            # 🧠 EXERCISE INTOLERANCE REFERRALS
+            elif "exercise intolerance pattern" in hypothesis_lower:
+                return "Cardiology + Pulmonology referral for cardiopulmonary assessment"
         
-        # Check causal relationships for urgency
+        # 🎯 CAUSAL RELATIONSHIP-BASED REFERRALS
+        
         for rel in causal_relationships:
-            if rel.clinical_significance == "emergency":
-                if "cardiac" in rel.medical_mechanism or "angina" in rel.medical_mechanism:
-                    return "IMMEDIATE emergency department evaluation - rule out acute coronary syndrome"
+            # Handle both object and dictionary formats
+            if hasattr(rel, 'clinical_significance'):
+                clinical_sig = rel.clinical_significance
+                medical_mechanism = rel.medical_mechanism
+                rel_type = rel.relationship_type
+            else:
+                clinical_sig = rel.get('clinical_significance', 'routine')
+                medical_mechanism = rel.get('medical_mechanism', '')
+                rel_type = rel.get('relationship_type', 'unknown')
+            
+            # 🧠 EMERGENCY REFERRALS
+            if clinical_sig == "emergency":
+                if "exertional myocardial ischemia" in medical_mechanism:
+                    return "IMMEDIATE emergency department evaluation - rule out STEMI/NSTEMI"
+                elif "stable angina" in medical_mechanism:
+                    return "URGENT cardiology referral - possible unstable angina transformation"
+                elif "cardiac" in medical_mechanism or "angina" in medical_mechanism:
+                    return "IMMEDIATE cardiology consultation - acute coronary syndrome evaluation"
                 else:
-                    return "Emergency department evaluation"
-            elif rel.clinical_significance == "urgent":
-                if "orthostatic" in rel.medical_mechanism:
-                    return "Urgent cardiology consultation for orthostatic hypotension"
+                    return "URGENT emergency department evaluation"
+            
+            # 🧠 URGENT REFERRALS
+            elif clinical_sig == "urgent":
+                if "orthostatic hypotension" in medical_mechanism:
+                    return "URGENT cardiology consultation for orthostatic hypotension with fall risk"
+                elif "autonomic dysfunction" in medical_mechanism:
+                    return "URGENT neurology referral for autonomic function testing"
+                elif rel_type == "positional":
+                    return "URGENT cardiology consultation for orthostatic evaluation"
                 else:
-                    return "Urgent specialist consultation"
+                    return "URGENT specialist consultation indicated"
+            
+            # 🧠 MODERATE REFERRALS
+            elif clinical_sig == "moderate":
+                if "stress-induced alteration" in medical_mechanism:
+                    return "Gastroenterology + Behavioral Health referral for stress-GI interaction"
+                elif "psychosomatic modulation" in medical_mechanism:
+                    return "Psychology referral with medical coordination"
+                elif rel_type == "dietary_stress_interaction":
+                    return "Integrated GI + Psychology referral for complex symptom management"
+        
+        # 🧠 DEFAULT REFERRAL LOGIC
+        if causal_relationships or hypotheses:
+            return "Internal Medicine referral for comprehensive contextual symptom evaluation"
         
         return None
     
