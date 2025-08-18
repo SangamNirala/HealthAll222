@@ -2175,6 +2175,17 @@ class MedicalConsultationResponse(BaseModel):
     next_questions: Optional[List[str]] = None
     differential_diagnoses: Optional[List[Dict[str, Any]]] = None
     recommendations: Optional[List[str]] = None
+    
+    # 🧠 STEP 2.2: CONTEXTUAL REASONING FIELDS
+    causal_relationships: Optional[List[Dict[str, Any]]] = None
+    clinical_hypotheses: Optional[List[str]] = None
+    contextual_factors: Optional[Dict[str, Any]] = None
+    medical_reasoning_narrative: Optional[str] = None
+    context_based_recommendations: Optional[List[str]] = None
+    trigger_avoidance_strategies: Optional[List[str]] = None
+    specialist_referral_context: Optional[str] = None
+    contextual_significance: Optional[str] = None
+    reasoning_confidence: Optional[float] = None
 
 class MedicalConsultationInit(BaseModel):
     patient_id: Optional[str] = "anonymous"
