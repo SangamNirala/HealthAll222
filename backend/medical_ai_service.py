@@ -1348,7 +1348,7 @@ class AdvancedSymptomRecognizer:
         extraction_result["clinical_insights"] = clinical_insights
         
         # FINAL CONFIDENCE CALIBRATION
-        self._calibrate_final_confidence_scores(extraction_result)
+        self._calibrate_final_confidence_scores_phase4(extraction_result)
         
         # Processing metadata
         processing_time = time.time() - start_time
