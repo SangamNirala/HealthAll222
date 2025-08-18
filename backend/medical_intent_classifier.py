@@ -575,15 +575,18 @@ class WorldClassMedicalIntentClassifier:
                 "description": "Evaluation of metabolic disorders and hormonal imbalances",
                 "clinical_subspecialty": "endocrinology",
                 "patterns": [
+                    IntentPattern(r"\b(metabolic|metabolism)\s+(disorder|syndrome|problems|issues)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.3),
                     IntentPattern(r"\b(pcos|polycystic\s+ovary|hormonal\s+imbalance)", 0.85, ClinicalSignificance.MEDIUM),
                     IntentPattern(r"\b(insulin\s+resistance|metabolic\s+syndrome|prediabetes)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.3),
                     IntentPattern(r"\b(adrenal|cortisol|stress\s+hormones)", 0.8, ClinicalSignificance.MEDIUM),
                     IntentPattern(r"\b(menstrual|period|hormone).*\b(irregular|abnormal|missing)", 0.8, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
+                    IntentPattern(r"\b(hormone|hormonal)\s+(levels|imbalance|problems|testing)", 0.85, ClinicalSignificance.MEDIUM, urgency_boost=0.2),
+                    IntentPattern(r"\b(endocrine|glandular)\s+(problems|disorders|dysfunction)", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.3),
                 ],
                 "clinical_reasoning_engine": "MetabolicDisorderEngine",
                 "decision_support_rules": ["hormone_panel", "metabolic_screening", "endocrine_referral"],
                 "clinical_significance": "medium"
-            }
+            },
         }
     
     def _initialize_clinical_reasoning(self) -> Dict[str, Any]:
