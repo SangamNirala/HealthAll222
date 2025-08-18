@@ -5284,7 +5284,7 @@ class ContextAwareMedicalReasoner:
         return analysis
     
     def generate_clinical_hypotheses_contextual(self, contextual_analysis: Dict) -> List[str]:
-        """Generate clinical hypotheses based on contextual patterns and medical reasoning"""
+        """🧠 REVOLUTIONARY CLINICAL HYPOTHESIS GENERATION WITH MASTER DIAGNOSTICIAN INTELLIGENCE 🧠"""
         
         hypotheses = []
         
@@ -5294,92 +5294,118 @@ class ContextAwareMedicalReasoner:
         temporal_analysis = contextual_analysis.get("temporal", {})
         environmental_analysis = contextual_analysis.get("environmental", {})
         
-        # 🧠 ENHANCED CLINICAL HYPOTHESES for Ultra-Challenging Scenarios
+        # 🎯 ULTRA-CHALLENGING SCENARIO HYPOTHESES WITH CLINICAL PRECISION
         
-        # Orthostatic/Positional Hypotheses (Ultra-challenging scenario 1)
-        positional_factors = positional_analysis.get("factors", [])
-        orthostatic_indicators = positional_analysis.get("orthostatic_indicators", [])
-        
-        if any("morning" in factor for factor in positional_factors):
-            if len(orthostatic_indicators) >= 2:
-                hypotheses.append("Orthostatic hypotension with morning predominance - requires cardiovascular evaluation")
-            else:
-                hypotheses.append("Morning orthostatic intolerance - consider blood pressure monitoring")
-        elif len(orthostatic_indicators) >= 2:
-            hypotheses.append("Orthostatic hypotension - positional blood pressure changes likely")
-        
-        # Exertional/Cardiac Hypotheses (Ultra-challenging scenario 2)
+        # Process causal relationships for diagnostic insights
         for relationship in causal_relationships:
-            if hasattr(relationship, 'clinical_significance'):
-                clinical_sig = relationship.clinical_significance
-            else:
-                clinical_sig = relationship.get('clinical_significance', 'routine')
-                
+            # Handle both CausalRelationship objects and dictionary formats
             if hasattr(relationship, 'relationship_type'):
                 rel_type = relationship.relationship_type
+                clinical_sig = relationship.clinical_significance
+                trigger = relationship.trigger
+                symptom = relationship.symptom
             else:
                 rel_type = relationship.get('relationship_type', 'unknown')
+                clinical_sig = relationship.get('clinical_significance', 'routine') 
+                trigger = relationship.get('trigger', 'unknown')
+                symptom = relationship.get('symptom', 'unknown')
             
-            if rel_type == "exertional" and clinical_sig == "emergency":
-                if hasattr(relationship, 'trigger'):
-                    trigger = relationship.trigger
+            # 🧠 POSITIONAL/ORTHOSTATIC HYPOTHESES (Ultra-challenging scenario 1)
+            if rel_type == "positional":
+                if "morning" in trigger.lower():
+                    hypotheses.append("Orthostatic hypotension with morning predominance - requires cardiovascular evaluation and tilt table testing")
+                elif clinical_sig == "urgent":
+                    hypotheses.append("Significant orthostatic intolerance with fall risk - immediate orthostatic vital signs and cardiac evaluation needed")
                 else:
-                    trigger = relationship.get('trigger', 'unknown')
-                    
-                if "crushing" in trigger or "exertional" in trigger:
-                    hypotheses.append("Exertional angina - classic stable angina pattern requires urgent cardiac evaluation")
+                    hypotheses.append("Positional blood pressure dysregulation - orthostatic assessment recommended")
+            
+            # 🧠 EXERTIONAL/CARDIAC HYPOTHESES (Ultra-challenging scenario 2)  
+            elif rel_type == "exertional" and clinical_sig == "emergency":
+                if "crushing" in symptom.lower() or "classic_angina" in symptom.lower():
+                    hypotheses.append("Exertional angina - classic stable angina pattern requires URGENT cardiac evaluation with ECG and troponins")
+                elif "cardiac_stress" in trigger.lower():
+                    hypotheses.append("Exercise-induced myocardial ischemia - coronary artery disease suspected, catheterization may be indicated")
                 else:
-                    hypotheses.append("Exertional chest pain - cardiac ischemia possible")
+                    hypotheses.append("Exertional chest pain of cardiac origin - stress testing and cardiology referral needed")
+            
+            elif rel_type == "exertional_relief":
+                hypotheses.append("Classic angina pattern with rest relief - confirms cardiac ischemia, requires immediate cardiac assessment")
+            
+            # 🧠 DIETARY-STRESS INTERACTION HYPOTHESES (Ultra-challenging scenario 3)
+            elif rel_type == "dietary_stress_interaction":
+                if "stress_modulated" in trigger.lower():
+                    hypotheses.append("Stress-modulated lactose intolerance with psychosomatic component - requires integrated gastroenterology and stress management approach")
+                elif "conditional" in symptom.lower():
+                    hypotheses.append("Conditional food intolerance with stress dependency - suggests gut-brain axis dysfunction")
+                else:
+                    hypotheses.append("Complex stress-dietary interaction affecting GI tolerance - multidisciplinary assessment recommended")
+            
+            # 🧠 ENVIRONMENTAL MODULATION HYPOTHESES
+            elif rel_type == "environmental_modulation":
+                hypotheses.append("Environmentally-modulated symptom expression - stress management and environmental modification indicated")
+                
+            # 🧠 ACTIVITY LIMITATION HYPOTHESES
+            elif rel_type == "activity_limitation":
+                hypotheses.append("Exercise intolerance pattern - cardiopulmonary assessment with stress testing recommended")
         
-        # Dietary-Stress Interaction Hypotheses (Ultra-challenging scenario 3)
+        # 🧠 CONTEXTUAL FACTOR ANALYSIS FOR ADDITIONAL HYPOTHESES
+        
+        # Positional factors analysis
+        positional_factors = positional_analysis.get("factors", [])
+        if positional_factors:
+            orthostatic_count = len([f for f in positional_factors if "orthostatic" in f.lower()])
+            morning_count = len([f for f in positional_factors if "morning" in f.lower()])
+            
+            if orthostatic_count >= 2 and morning_count >= 1:
+                hypotheses.append("Morning orthostatic syndrome with autonomic dysfunction - comprehensive cardiovascular and neurologic evaluation needed")
+            elif orthostatic_count >= 2:
+                hypotheses.append("Orthostatic hypotension requiring blood pressure monitoring and medication review")
+        
+        # Environmental stress factors
         environmental_factors = environmental_analysis.get("factors", [])
         behavioral_insights = environmental_analysis.get("behavioral_insights", [])
         
         if "stress_modulated_symptoms" in behavioral_insights:
-            for relationship in causal_relationships:
-                rel_type = getattr(relationship, 'relationship_type', relationship.get('relationship_type', 'unknown'))
-                if rel_type == "dietary_stress_interaction":
-                    hypotheses.append("Stress-modulated lactose intolerance - psychosomatic component affecting GI tolerance")
-                    break
+            hypotheses.append("Stress-somatization pattern with physiological symptom expression - psychological assessment recommended")
         
-        if "stress_trigger" in environmental_factors or "workplace_stress" in environmental_factors:
-            if "multi_context_trigger_interaction" in behavioral_insights:
-                hypotheses.append("Complex stress-dietary interaction - multifactorial symptom triggers")
+        if "multi_context_trigger_interaction" in behavioral_insights:
+            hypotheses.append("Complex multi-factorial symptom triggers requiring comprehensive biopsychosocial assessment")
         
-        # Temporal Pattern Hypotheses
+        # Temporal pattern analysis
         temporal_factors = temporal_analysis.get("factors", [])
         if "morning_pattern" in temporal_factors and positional_factors:
-            hypotheses.append("Morning orthostatic syndrome - circadian blood pressure regulation issues")
+            hypotheses.append("Circadian-orthostatic interaction syndrome - morning blood pressure regulation dysfunction")
         
-        # Default hypothesis if none generated
+        # 🧠 SYNDROME-SPECIFIC HYPOTHESES BASED ON PATTERN COMBINATIONS
+        
+        # Check for syndrome combinations
+        has_positional = any(rel.get('relationship_type') == 'positional' for rel in causal_relationships if isinstance(rel, dict))
+        has_exertional = any(rel.get('relationship_type') == 'exertional' for rel in causal_relationships if isinstance(rel, dict))
+        has_stress_dietary = any(rel.get('relationship_type') == 'dietary_stress_interaction' for rel in causal_relationships if isinstance(rel, dict))
+        
+        # Handle CausalRelationship objects
+        if not has_positional:
+            has_positional = any(getattr(rel, 'relationship_type', '') == 'positional' for rel in causal_relationships if hasattr(rel, 'relationship_type'))
+        if not has_exertional:
+            has_exertional = any(getattr(rel, 'relationship_type', '') == 'exertional' for rel in causal_relationships if hasattr(rel, 'relationship_type'))
+        if not has_stress_dietary:
+            has_stress_dietary = any(getattr(rel, 'relationship_type', '') == 'dietary_stress_interaction' for rel in causal_relationships if hasattr(rel, 'relationship_type'))
+        
+        if has_positional and has_exertional:
+            hypotheses.append("Combined cardiovascular syndrome - both orthostatic and exertional components suggest comprehensive cardiac pathology")
+        
+        if has_stress_dietary and (has_positional or has_exertional):
+            hypotheses.append("Multi-system stress-related syndrome with autonomic and gastrointestinal involvement")
+        
+        # 🧠 ENSURE MEANINGFUL CLINICAL HYPOTHESES
         if not hypotheses:
-            hypotheses.append("Contextual symptom analysis - pattern-based evaluation needed")
-        
-        return hypotheses
-        
-        # Analyze causal relationships for diagnostic clues
-        causal_rels = contextual_analysis.get("causal_relationships", [])
-        for rel in causal_rels:
-            if rel.relationship_type == "positional":
-                hypotheses.append("Orthostatic hypotension requiring cardiovascular evaluation")
-            elif rel.relationship_type == "exertional" and "chest" in rel.symptom:
-                hypotheses.append("Exertional angina requiring urgent cardiac assessment")
-            elif rel.relationship_type == "dietary":
-                hypotheses.append("Food intolerance requiring dietary modification")
-        
-        # Analyze positional factors
-        positional = contextual_analysis.get("positional", {})
-        if positional.get("clinical_significance") == "urgent":
-            hypotheses.append("Significant orthostatic intolerance with cardiovascular implications")
-        
-        # Analyze environmental factors
-        environmental = contextual_analysis.get("environmental", {})
-        if "stress_trigger" in environmental.get("factors", []):
-            hypotheses.append("Stress-related symptoms requiring psychological assessment")
-        
-        # Ensure we always return at least one hypothesis
-        if not hypotheses:
-            hypotheses.append("Symptom complex requires comprehensive medical evaluation")
+            # Generate context-aware default hypotheses
+            if causal_relationships:
+                hypotheses.append("Complex symptom-trigger relationship identified - comprehensive medical evaluation recommended with attention to contextual factors")
+            elif positional_factors or environmental_factors:
+                hypotheses.append("Contextual symptom pattern detected - systematic evaluation of trigger-symptom relationships indicated")
+            else:
+                hypotheses.append("Multi-factorial symptom presentation requiring comprehensive diagnostic workup")
         
         return hypotheses
     
