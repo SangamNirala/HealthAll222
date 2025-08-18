@@ -31,7 +31,7 @@ sys.path.append('/app/backend')
 from medical_ai_service import WorldClassMedicalAI, AdvancedSymptomRecognizer
 
 # Backend URL from environment
-BACKEND_URL = "https://medtest-tracker.preview.emergentagent.com/api"
+BACKEND_URL = "https://symptomlogic.preview.emergentagent.com/api"
 
 class Phase4ComprehensiveTester:
     """
@@ -1016,7 +1016,7 @@ from datetime import datetime, timedelta
 import uuid
 
 class HealthPlatformAPITester:
-    def __init__(self, base_url="https://medtest-tracker.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://symptomlogic.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0

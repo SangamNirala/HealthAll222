@@ -18,7 +18,7 @@ from datetime import datetime
 from typing import Dict, List, Any, Tuple
 
 # Backend configuration
-BACKEND_URL = "https://medtest-tracker.preview.emergentagent.com"
+BACKEND_URL = "https://symptomlogic.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 class Step13BackendTester:
