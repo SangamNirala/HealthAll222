@@ -737,30 +737,418 @@ class AdvancedSymptomRecognizer:
             "context_analysis": context_analysis,
             "ambiguity_resolution_confidence": sum(d["confidence"] for d in final_disambiguation.values()) / max(len(final_disambiguation), 1)
         }
-        """CHALLENGE 2: Parse sophisticated time expressions"""
-        temporal_entities = []
+    
+    def _extract_compound_symptom_descriptions(self, text: str, context_analysis: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        CHALLENGE 3: COMPOUND SYMPTOM DESCRIPTION EXTRACTION
         
-        # Complex temporal patterns
-        temporal_patterns = [
-            r"started\s+(yesterday\s+morning|last\s+night|this\s+morning)",
-            r"comes\s+and\s+goes\s+every\s+(\d+)\s*(minutes?|hours?)",
-            r"(getting\s+worse|getting\s+better|same)\s+since\s+(\w+)",
-            r"for\s+the\s+past\s+(\d+)\s*(days?|weeks?|months?)"
+        Extract multiple related symptoms with shared timeline and context.
+        Handle complex relationship mapping between symptoms.
+        """
+        
+        # Advanced compound symptom patterns
+        compound_patterns = {
+            # Primary symptom + associated symptoms
+            "primary_with_associated": [
+                r"([^,.]+(?:chest|abdominal|head|back|joint)\s+pain[^,.]*)\s+(?:with|and|plus|accompanied\s+by|along\s+with)\s+([^,.]+(?:nausea|vomiting|dizziness|sweating|shortness\s+of\s+breath|numbness|tingling)[^,.]*)",
+                r"([^,.]+(?:pain|ache|discomfort)[^,.]*)\s+(?:with|and|plus)\s+([^,.]+(?:fever|chills|weakness|fatigue)[^,.]*)",
+                r"([^,.]+(?:burning|stabbing|throbbing)\s+(?:pain|sensation)[^,.]*)\s+(?:with|and)\s+([^,.]+(?:radiating|shooting|spreading)[^,.]*)"
+            ],
+            
+            # Multi-symptom clusters
+            "symptom_clusters": [
+                r"([^,.]+(?:pain|ache)[^,.]*)\s+(?:and|with|plus)\s+([^,.]+(?:nausea|vomiting)[^,.]*)\s+(?:and|with|plus)\s+([^,.]+(?:dizziness|weakness|fatigue)[^,.]*)",
+                r"([^,.]+(?:headache|head\s+pain)[^,.]*)\s+(?:and|with)\s+([^,.]+(?:nausea|light\s+sensitivity|sound\s+sensitivity)[^,.]*)",
+                r"([^,.]+(?:chest\s+pain|chest\s+discomfort)[^,.]*)\s+(?:and|with)\s+([^,.]+(?:shortness\s+of\s+breath|breathing\s+difficulty)[^,.]*)\s*(?:and|with)?\s*([^,.]*(?:sweating|nausea|arm\s+pain)?[^,.]*)"
+            ],
+            
+            # Sequential symptoms
+            "sequential_patterns": [
+                r"([^,.]+)\s+(?:started|began)\s+(?:with|as)\s+([^,.]+)\s+(?:then|and\s+then|followed\s+by)\s+([^,.]+)",
+                r"([^,.]+)\s+(?:first|initially)\s*,?\s*(?:then|and\s+then|followed\s+by|now)\s+([^,.]+)",
+                r"([^,.]+)\s+(?:led\s+to|caused|resulted\s+in)\s+([^,.]+)"
+            ],
+            
+            # Temporal compound symptoms
+            "temporal_compound": [
+                r"([^,.]+(?:pain|ache|discomfort)[^,.]*)\s+(?:for|over|during)\s+([^,.]+(?:minutes?|hours?|days?|weeks?)[^,.]*)\s+(?:with|and|accompanied\s+by)\s+([^,.]+)",
+                r"([^,.]+)\s+(?:since|starting)\s+([^,.]+(?:yesterday|today|last\s+week|hours?\s+ago|days?\s+ago)[^,.]*)\s+(?:and|with|plus)\s+([^,.]+)"
+            ]
+        }
+        
+        extracted_compounds = {
+            "primary_symptoms": [],
+            "associated_symptoms": [],
+            "symptom_relationships": [],
+            "temporal_relationships": [],
+            "cluster_analysis": {}
+        }
+        
+        # Extract compound symptom descriptions
+        for pattern_type, patterns in compound_patterns.items():
+            for pattern in patterns:
+                try:
+                    matches = re.finditer(pattern, text, re.IGNORECASE)
+                    
+                    for match in matches:
+                        groups = match.groups()
+                        if len(groups) >= 2:
+                            # Create compound symptom structure
+                            compound_symptom = {
+                                "raw_text": match.group(0),
+                                "pattern_type": pattern_type,
+                                "components": [],
+                                "relationships": [],
+                                "confidence": 0.0,
+                                "medical_significance": "routine"
+                            }
+                            
+                            # Process each component
+                            for i, component in enumerate(groups):
+                                if component and component.strip():
+                                    component_entity = self._analyze_symptom_component(component.strip(), i, pattern_type)
+                                    compound_symptom["components"].append(component_entity)
+                            
+                            # Analyze relationships between components
+                            if len(compound_symptom["components"]) >= 2:
+                                relationships = self._analyze_component_relationships(compound_symptom["components"], pattern_type)
+                                compound_symptom["relationships"] = relationships
+                                
+                                # Calculate compound confidence
+                                component_confidences = [c.get("confidence", 0.5) for c in compound_symptom["components"]]
+                                compound_symptom["confidence"] = sum(component_confidences) / len(component_confidences)
+                                
+                                # Determine medical significance
+                                compound_symptom["medical_significance"] = self._assess_compound_medical_significance(compound_symptom)
+                                
+                                # Categorize the compound
+                                primary_component = compound_symptom["components"][0]
+                                if self._is_primary_symptom(primary_component):
+                                    extracted_compounds["primary_symptoms"].append(compound_symptom)
+                                else:
+                                    extracted_compounds["associated_symptoms"].append(compound_symptom)
+                                
+                                # Store relationship data
+                                extracted_compounds["symptom_relationships"].extend(relationships)
+                    
+                except re.error:
+                    continue
+        
+        # Analyze symptom clusters using medical knowledge
+        cluster_analysis = self._perform_cluster_analysis(extracted_compounds)
+        extracted_compounds["cluster_analysis"] = cluster_analysis
+        
+        # Extract individual symptoms from compound descriptions
+        individual_symptoms = self._extract_individual_symptoms_from_compounds(extracted_compounds)
+        
+        return {
+            "symptoms": individual_symptoms,
+            "clusters": extracted_compounds["cluster_analysis"],
+            "compound_relationships": extracted_compounds["symptom_relationships"],
+            "compound_extraction_metadata": {
+                "total_compounds": len(extracted_compounds["primary_symptoms"]) + len(extracted_compounds["associated_symptoms"]),
+                "primary_symptoms_found": len(extracted_compounds["primary_symptoms"]),
+                "associated_symptoms_found": len(extracted_compounds["associated_symptoms"]),
+                "relationship_count": len(extracted_compounds["symptom_relationships"])
+            }
+        }
+    
+    def _analyze_symptom_component(self, component_text: str, position: int, pattern_type: str) -> Dict[str, Any]:
+        """Analyze individual symptom component within compound description"""
+        
+        component = {
+            "text": component_text,
+            "position": position,
+            "symptom_type": "unknown",
+            "location": None,
+            "quality": None,
+            "severity": None,
+            "temporal": None,
+            "confidence": 0.5
+        }
+        
+        # Analyze component type
+        component_lower = component_text.lower()
+        
+        # Symptom type detection
+        if re.search(r"\b(pain|ache|hurt|discomfort|soreness)\b", component_lower):
+            component["symptom_type"] = "pain"
+            component["confidence"] += 0.2
+        elif re.search(r"\b(nausea|vomiting|throwing\s+up|sick)\b", component_lower):
+            component["symptom_type"] = "gastrointestinal"
+            component["confidence"] += 0.2
+        elif re.search(r"\b(dizziness|dizzy|lightheaded|vertigo)\b", component_lower):
+            component["symptom_type"] = "neurological"
+            component["confidence"] += 0.2
+        elif re.search(r"\b(shortness\s+of\s+breath|breathing|breath)\b", component_lower):
+            component["symptom_type"] = "respiratory"
+            component["confidence"] += 0.2
+        elif re.search(r"\b(weakness|fatigue|tired|exhaustion)\b", component_lower):
+            component["symptom_type"] = "systemic"
+            component["confidence"] += 0.2
+        
+        # Location detection
+        location_patterns = {
+            "chest": r"\b(chest|heart|cardiac|thoracic)\b",
+            "abdomen": r"\b(abdomen|stomach|belly|abdominal)\b",
+            "head": r"\b(head|headache|cranial|temporal|occipital)\b",
+            "back": r"\b(back|spine|spinal|lumbar|thoracic)\b",
+            "extremity": r"\b(arm|leg|hand|foot|shoulder|knee|elbow|wrist|ankle)\b"
+        }
+        
+        for location, pattern in location_patterns.items():
+            if re.search(pattern, component_lower):
+                component["location"] = location
+                component["confidence"] += 0.1
+                break
+        
+        # Quality detection
+        quality_patterns = {
+            "sharp": r"\b(sharp|stabbing|knife-like|piercing|jabbing)\b",
+            "dull": r"\b(dull|aching|gnawing|constant|persistent)\b",
+            "throbbing": r"\b(throbbing|pulsating|pounding|beating)\b",
+            "burning": r"\b(burning|searing|fire-like|scalding)\b",
+            "cramping": r"\b(cramping|colicky|gripping|twisting)\b"
+        }
+        
+        for quality, pattern in quality_patterns.items():
+            if re.search(pattern, component_lower):
+                component["quality"] = quality
+                component["confidence"] += 0.1
+                break
+        
+        # Severity detection
+        severity_patterns = {
+            "mild": r"\b(mild|slight|minor|barely)\b",
+            "moderate": r"\b(moderate|tolerable|manageable)\b", 
+            "severe": r"\b(severe|really\s+bad|terrible|horrible|intense|excruciating)\b"
+        }
+        
+        for severity, pattern in severity_patterns.items():
+            if re.search(pattern, component_lower):
+                component["severity"] = severity
+                component["confidence"] += 0.1
+                break
+        
+        # Temporal detection
+        temporal_patterns = {
+            "acute": r"\b(sudden|sudden\s+onset|started\s+suddenly|came\s+on\s+suddenly)\b",
+            "chronic": r"\b(chronic|long-term|persistent|ongoing|for\s+months|for\s+years)\b",
+            "intermittent": r"\b(comes\s+and\s+goes|intermittent|on\s+and\s+off|periodic)\b"
+        }
+        
+        for temporal, pattern in temporal_patterns.items():
+            if re.search(pattern, component_lower):
+                component["temporal"] = temporal
+                component["confidence"] += 0.1
+                break
+        
+        return component
+    
+    def _analyze_component_relationships(self, components: List[Dict], pattern_type: str) -> List[Dict]:
+        """Analyze relationships between symptom components"""
+        
+        relationships = []
+        
+        for i in range(len(components)):
+            for j in range(i + 1, len(components)):
+                comp1 = components[i]
+                comp2 = components[j]
+                
+                relationship = {
+                    "component1": comp1["text"],
+                    "component2": comp2["text"],
+                    "relationship_type": "associated",
+                    "strength": 0.5,
+                    "medical_rationale": "",
+                    "temporal_relationship": "concurrent"
+                }
+                
+                # Determine relationship strength based on medical knowledge
+                if comp1["symptom_type"] == "pain" and comp2["symptom_type"] == "gastrointestinal":
+                    if comp1.get("location") == "chest":
+                        relationship["strength"] = 0.8
+                        relationship["medical_rationale"] = "Chest pain with GI symptoms may indicate cardiac event"
+                    elif comp1.get("location") == "abdomen":
+                        relationship["strength"] = 0.7
+                        relationship["medical_rationale"] = "Abdominal pain with GI symptoms suggests GI etiology"
+                
+                elif comp1["symptom_type"] == "pain" and comp2["symptom_type"] == "respiratory":
+                    relationship["strength"] = 0.85
+                    relationship["medical_rationale"] = "Pain with respiratory symptoms suggests cardiopulmonary concern"
+                
+                elif comp1["symptom_type"] == "neurological" and comp2["symptom_type"] == "gastrointestinal":
+                    relationship["strength"] = 0.6
+                    relationship["medical_rationale"] = "Neurological and GI symptoms may share common pathway"
+                
+                # Pattern-based relationship typing
+                if pattern_type == "sequential_patterns":
+                    relationship["temporal_relationship"] = "sequential"
+                elif pattern_type == "temporal_compound":
+                    relationship["temporal_relationship"] = "temporal_association"
+                
+                relationships.append(relationship)
+        
+        return relationships
+    
+    def _assess_compound_medical_significance(self, compound_symptom: Dict) -> str:
+        """Assess the medical significance of compound symptom presentation"""
+        
+        components = compound_symptom.get("components", [])
+        
+        # Emergency combinations
+        emergency_combinations = [
+            ("chest", "pain", "respiratory"),
+            ("chest", "pain", "gastrointestinal"), 
+            ("pain", "severe", "neurological"),
+            ("head", "pain", "neurological")
         ]
         
-        for pattern in temporal_patterns:
-            matches = re.finditer(pattern, text.lower())
-            for match in matches:
-                entity = TemporalEntity(
-                    raw_expression=match.group(),
-                    normalized_expression=match.group(),
-                    confidence=0.8
-                )
-                entity.onset_time = entity.calculate_onset_time()
-                entity.duration_hours = entity.calculate_duration_hours()
-                temporal_entities.append(entity)
+        # Check for emergency patterns
+        for comp1 in components:
+            for comp2 in components:
+                for emergency_combo in emergency_combinations:
+                    if (any(term in str(comp1.values()).lower() for term in emergency_combo[:2]) and
+                        any(term in str(comp2.values()).lower() for term in [emergency_combo[2]])):
+                        return "emergency"
         
-        return temporal_entities
+        # High priority combinations  
+        high_priority_combinations = [
+            ("severe", "pain"),
+            ("chest", "pain"),
+            ("head", "severe"),
+            ("neurological", "pain")
+        ]
+        
+        for combo in high_priority_combinations:
+            if any(all(term in str(comp.values()).lower() for term in combo) for comp in components):
+                return "high_priority"
+        
+        # Medium priority combinations
+        medium_priority_combinations = [
+            ("moderate", "pain"),
+            ("gastrointestinal", "pain"),
+            ("systemic", "symptoms")
+        ]
+        
+        for combo in medium_priority_combinations:
+            if any(all(term in str(comp.values()).lower() for term in combo) for comp in components):
+                return "medium_priority"
+        
+        return "routine"
+    
+    def _is_primary_symptom(self, component: Dict) -> bool:
+        """Determine if a component represents a primary symptom"""
+        return (component.get("symptom_type") == "pain" or 
+                component.get("position") == 0 or
+                component.get("confidence", 0) > 0.7)
+    
+    def _perform_cluster_analysis(self, extracted_compounds: Dict) -> Dict[str, Any]:
+        """Perform medical symptom cluster analysis"""
+        
+        clusters = {}
+        
+        # Known medical symptom clusters
+        known_clusters = {
+            "cardiac_concern": ["chest", "pain", "shortness of breath", "nausea", "sweating", "arm pain"],
+            "migraine_cluster": ["headache", "nausea", "light sensitivity", "sound sensitivity"],
+            "stroke_symptoms": ["weakness", "facial drooping", "speech difficulty", "confusion"],
+            "gi_cluster": ["abdominal pain", "nausea", "vomiting", "diarrhea", "bloating"],
+            "respiratory_distress": ["shortness of breath", "chest pain", "cough", "wheezing"]
+        }
+        
+        # Analyze all symptoms for cluster matches
+        all_symptoms = extracted_compounds["primary_symptoms"] + extracted_compounds["associated_symptoms"]
+        
+        for cluster_name, cluster_symptoms in known_clusters.items():
+            matching_components = []
+            cluster_confidence = 0.0
+            
+            for compound in all_symptoms:
+                components = compound.get("components", [])
+                for component in components:
+                    component_text = component.get("text", "").lower()
+                    
+                    # Check if component matches cluster symptoms
+                    matches_in_cluster = sum(1 for cluster_symptom in cluster_symptoms 
+                                           if cluster_symptom in component_text)
+                    
+                    if matches_in_cluster > 0:
+                        matching_components.append(component)
+                        cluster_confidence += matches_in_cluster / len(cluster_symptoms)
+            
+            if matching_components:
+                clusters[cluster_name] = {
+                    "components": matching_components,
+                    "confidence": min(cluster_confidence, 1.0),
+                    "cluster_completeness": len(matching_components) / len(cluster_symptoms),
+                    "medical_significance": self._assess_cluster_significance(cluster_name, matching_components)
+                }
+        
+        return clusters
+    
+    def _assess_cluster_significance(self, cluster_name: str, components: List[Dict]) -> str:
+        """Assess the medical significance of detected symptom clusters"""
+        
+        significance_map = {
+            "cardiac_concern": "emergency",
+            "stroke_symptoms": "emergency", 
+            "respiratory_distress": "urgent",
+            "migraine_cluster": "urgent",
+            "gi_cluster": "moderate"
+        }
+        
+        base_significance = significance_map.get(cluster_name, "routine")
+        
+        # Upgrade significance based on component severity
+        severe_components = sum(1 for comp in components 
+                              if comp.get("severity") in ["severe", "excruciating"])
+        
+        if severe_components > 0 and base_significance != "emergency":
+            if base_significance == "routine":
+                return "moderate"
+            elif base_significance == "moderate":
+                return "urgent"
+        
+        return base_significance
+    
+    def _extract_individual_symptoms_from_compounds(self, extracted_compounds: Dict) -> List[SymptomEntity]:
+        """Convert compound symptom analysis into individual SymptomEntity objects"""
+        
+        individual_symptoms = []
+        
+        # Process primary symptoms
+        for compound in extracted_compounds["primary_symptoms"]:
+            for component in compound.get("components", []):
+                symptom_entity = SymptomEntity(
+                    symptom=component.get("text", ""),
+                    location=component.get("location"),
+                    quality=component.get("quality"),
+                    severity=component.get("severity"),
+                    confidence=component.get("confidence", 0.5),
+                    raw_text=compound.get("raw_text", "")
+                )
+                
+                # Add associated symptoms from the same compound
+                other_components = [c.get("text", "") for c in compound.get("components", []) if c != component]
+                symptom_entity.associated_symptoms = other_components
+                
+                individual_symptoms.append(symptom_entity)
+        
+        # Process associated symptoms
+        for compound in extracted_compounds["associated_symptoms"]:
+            for component in compound.get("components", []):
+                symptom_entity = SymptomEntity(
+                    symptom=component.get("text", ""),
+                    location=component.get("location"),
+                    quality=component.get("quality"),
+                    severity=component.get("severity"),
+                    confidence=component.get("confidence", 0.5),
+                    raw_text=compound.get("raw_text", "")
+                )
+                individual_symptoms.append(symptom_entity)
+        
+        return individual_symptoms
     
     def _extract_compound_symptoms(self, text: str) -> List[SymptomEntity]:
         """CHALLENGE 3: Handle compound symptom descriptions"""
