@@ -1136,7 +1136,7 @@ class AdvancedSymptomRecognizer:
             "emergency_patterns": [
                 r"\b(crushing chest pain|heart attack|can't breathe)\b",
                 r"\b(worst headache ever|thunderclap|sudden severe)\b",
-                r"\b(loss of consciousness|passed out|fainted)\b",
+                r"\b(loss of consciousness|passed out|fainted|lost consciousness)\b",
                 r"\b(severe bleeding|won't stop bleeding|blood everywhere)\b",
                 r"\b(difficulty swallowing|can't swallow|choking)\b",
                 r"\b(sudden weakness|can't move|paralysis)\b",
@@ -6841,7 +6841,7 @@ class WorldClassMedicalAI:
             "emergency_patterns": [
                 r"\b(crushing chest pain|heart attack|can't breathe)\b",
                 r"\b(worst headache ever|thunderclap|sudden severe)\b",
-                r"\b(loss of consciousness|passed out|fainted)\b",
+                r"\b(loss of consciousness|passed out|fainted|lost consciousness)\b",
                 r"\b(severe bleeding|won't stop bleeding|blood everywhere)\b",
                 r"\b(difficulty swallowing|can't swallow|choking)\b",
                 r"\b(sudden weakness|can't move|paralysis)\b",
