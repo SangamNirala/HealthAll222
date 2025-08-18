@@ -37,6 +37,9 @@ class IntelligentTextNormalizer:
         self.pronoun_corrections = self._load_pronoun_corrections()
         self.verb_tense_patterns = self._load_verb_tense_patterns()
         
+        # Initialize advanced medical spell checker (Step 1.2)
+        self.advanced_spell_checker = AdvancedMedicalSpellChecker()
+        
     def normalize_medical_text(self, text: str) -> NormalizationResult:
         """
         Main normalization function that applies all text processing steps
