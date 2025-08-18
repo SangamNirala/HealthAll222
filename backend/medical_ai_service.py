@@ -1,6 +1,7 @@
 """
 World-Class Medical AI Service for Professional Medical Consultations
 Implements advanced medical conversation engine with emergency detection and SOAP note generation
+Enhanced with intelligent text normalization for handling poor grammar and informal language
 """
 
 import os
@@ -12,6 +13,9 @@ from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 import google.generativeai as genai
+
+# Import the new intelligent text normalizer
+from nlp_processor import IntelligentTextNormalizer, NormalizationResult
 
 class MedicalInterviewStage(Enum):
     GREETING = "greeting"
