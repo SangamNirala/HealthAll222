@@ -5788,8 +5788,6 @@ class ContextAwareMedicalReasoner:
                 strategies.append("Identify and avoid specific symptom triggers through systematic observation")
         
         return strategies
-        
-        return strategies
     
     def _determine_specialist_referral_context(self, hypotheses: List[str], causal_relationships: List[CausalRelationship]) -> Optional[str]:
         """Determine appropriate specialist referral based on context"""
