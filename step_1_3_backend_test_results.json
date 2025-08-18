@@ -1,0 +1,300 @@
+{
+  "test_summary": {
+    "total_tests": 24,
+    "total_passed": 0,
+    "total_failed": 24,
+    "overall_success_rate": 0.0,
+    "timestamp": "2025-08-18T02:27:13.120856"
+  },
+  "core_requirements": {
+    "success_rate": 0.0,
+    "status": "FAIL",
+    "details": {
+      "total_tests": 5,
+      "passed": 0,
+      "failed": 5,
+      "examples": [
+        {
+          "original": "tummy hurt",
+          "expected_terms": [
+            "abdominal pain",
+            "stomach pain",
+            "belly pain"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        },
+        {
+          "original": "feeling crappy",
+          "expected_terms": [
+            "feeling unwell",
+            "feel unwell",
+            "not feeling well",
+            "unwell"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        },
+        {
+          "original": "can't poop",
+          "expected_terms": [
+            "experiencing constipation",
+            "constipation",
+            "bowel movement"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        },
+        {
+          "original": "throwing up",
+          "expected_terms": [
+            "vomiting",
+            "nausea",
+            "sick"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        },
+        {
+          "original": "dizzy spells",
+          "expected_terms": [
+            "episodes of dizziness",
+            "dizziness",
+            "dizzy"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        }
+      ]
+    }
+  },
+  "extended_robustness": {
+    "success_rate": 0.0,
+    "status": "FAIL",
+    "details": {
+      "total_tests": 11,
+      "passed": 0,
+      "failed": 11,
+      "examples": [
+        {
+          "original": "belly ache",
+          "expected_terms": [
+            "abdominal pain",
+            "stomach pain",
+            "belly pain"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        },
+        {
+          "original": "gut pain really bad",
+          "expected_terms": [
+            "severe abdominal pain",
+            "abdominal pain",
+            "gut pain"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        },
+        {
+          "original": "cant poop for days",
+          "expected_terms": [
+            "experiencing constipation",
+            "constipation"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        },
+        {
+          "original": "backed up",
+          "expected_terms": [
+            "experiencing constipation",
+            "constipation"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        },
+        {
+          "original": "feel awful",
+          "expected_terms": [
+            "feel unwell",
+            "feeling unwell",
+            "awful"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        },
+        {
+          "original": "under the weather",
+          "expected_terms": [
+            "feeling unwell",
+            "feel unwell",
+            "weather"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        },
+        {
+          "original": "can't breathe",
+          "expected_terms": [
+            "difficulty breathing",
+            "breathing",
+            "shortness of breath"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        },
+        {
+          "original": "short of breath",
+          "expected_terms": [
+            "experiencing shortness of breath",
+            "shortness of breath",
+            "breathing"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        },
+        {
+          "original": "wiped out",
+          "expected_terms": [
+            "extremely fatigued",
+            "fatigue",
+            "tired",
+            "exhausted"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        },
+        {
+          "original": "dead tired",
+          "expected_terms": [
+            "extremely fatigued",
+            "fatigue",
+            "tired"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        },
+        {
+          "original": "tummy hurt and throwing up",
+          "expected_terms": [
+            "abdominal pain",
+            "vomiting",
+            "nausea"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        }
+      ]
+    }
+  },
+  "integration_testing": {
+    "success_rate": 0.0,
+    "status": "FAIL",
+    "details": {
+      "total_tests": 3,
+      "passed": 0,
+      "failed": 3,
+      "examples": [
+        {
+          "original": "i having tummy hurt 2 days",
+          "expected_elements": [
+            "I have been having",
+            "abdominal pain",
+            "2 days",
+            "fever"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        },
+        {
+          "original": "haedache and dizzy spells",
+          "expected_elements": [
+            "headache",
+            "episodes of dizziness",
+            "dizziness"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        },
+        {
+          "original": "me belly really hurt when breath",
+          "expected_elements": [
+            "my",
+            "abdominal pain",
+            "when I breathe",
+            "breathing"
+          ],
+          "success": false,
+          "details": {
+            "error": "Initialization failed: 502"
+          }
+        }
+      ]
+    }
+  },
+  "performance_reliability": {
+    "success_rate": 0.0,
+    "average_response_time": 0.059690237045288086,
+    "error_rate": 100.0,
+    "status": "FAIL",
+    "details": {
+      "total_tests": 5,
+      "passed": 0,
+      "failed": 5,
+      "performance_metrics": {
+        "response_times": [
+          0.09696507453918457,
+          0.10266470909118652,
+          0.017415761947631836,
+          0.013962030410766602,
+          0.0674436092376709
+        ],
+        "average_response_time": 0.059690237045288086,
+        "max_response_time": 0.10266470909118652,
+        "min_response_time": 0.013962030410766602
+      },
+      "reliability_metrics": {
+        "successful_requests": 0,
+        "failed_requests": 5,
+        "error_rate": 100.0
+      }
+    }
+  }
+}
