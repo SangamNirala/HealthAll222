@@ -1437,6 +1437,30 @@ class AdvancedSymptomRecognizer:
             "coherence_achievement": "EXCELLENT" if medical_coherence > 0.95 else "GOOD" if medical_coherence > 0.85 else "FAIR"
         }
         
+        # 🧠 STEP 2.2: ENHANCED RETURN STRUCTURE WITH CONTEXTUAL REASONING
+        # Add contextual reasoning to the return structure
+        extraction_result["contextual_reasoning"] = {
+            "causal_relationships": contextual_reasoning.causal_chains,
+            "clinical_hypotheses": contextual_reasoning.clinical_hypotheses,
+            "contextual_factors": {
+                "positional": contextual_reasoning.positional_factors,
+                "temporal": contextual_reasoning.temporal_factors,
+                "environmental": contextual_reasoning.environmental_factors,
+                "activity": contextual_reasoning.activity_relationships
+            },
+            "medical_reasoning_narrative": contextual_reasoning.generate_clinical_reasoning_narrative(),
+            "reasoning_confidence": contextual_reasoning.reasoning_confidence,
+            "context_based_recommendations": contextual_reasoning.context_based_recommendations,
+            "trigger_avoidance_strategies": contextual_reasoning.trigger_avoidance_strategies,
+            "specialist_referral_context": contextual_reasoning.specialist_referral_context,
+            "contextual_significance": contextual_reasoning.contextual_significance
+        }
+        
+        # UPGRADE metadata to include Step 2.2  
+        extraction_result["processing_metadata"]["algorithm_version"] = "4.0_contextual_reasoning"  # UPGRADED
+        extraction_result["processing_metadata"]["contextual_analysis_enabled"] = True
+        extraction_result["processing_metadata"]["reasoning_engine_version"] = "2.2_context_aware"
+        
         # CHALLENGE 3: COMPOUND SYMPTOM DESCRIPTION EXTRACTION  
         # Complex relationship mapping between symptoms
         compound_extraction = self._extract_compound_symptom_descriptions(text, context_analysis)
