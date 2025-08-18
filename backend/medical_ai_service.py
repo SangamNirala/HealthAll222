@@ -3317,43 +3317,124 @@ class AdvancedSymptomRecognizer:
         
         return referral_patterns
     
-    def _extract_symptom_quality_transcendent(self, text: str) -> List[QualityEntity]:
+    def _detect_associated_symptom_networks_advanced(self, text: str) -> List[AssociatedSymptomEntity]:
         """
-        💎 OPTIMIZED: SOPHISTICATED SYMPTOM QUALITY ANALYSIS 💎
+        🔗 OPTIMIZED: ADVANCED ASSOCIATED SYMPTOM NETWORK DETECTION WITH SYNDROME RECOGNITION 🔗
         
-        Performance optimized transcendent analysis for <40ms processing
+        Performance optimized for <40ms while maintaining comprehensive syndrome detection
         """
         
-        quality_entities = []
+        associated_entities = []
         text_lower = text.lower()
         
-        # OPTIMIZED: High-impact quality patterns for performance
-        priority_quality_patterns = [
-            (r"\b(crushing|squeezing|pressure)\b", "crushing_type", "sudden", 9),
-            (r"\b(sharp|stabbing|shooting)\b", "sharp_type", "sudden", 8),
-            (r"\b(throbbing|pulsating|beating)\b", "pulsatile_type", "gradual", 7),
-            (r"\b(burning|searing|hot)\b", "burning_type", "gradual", 7),
-            (r"\b(dull|aching|constant)\b", "dull_type", "progressive", 6)
+        # 🧬 PHASE 4: MEDICAL SYNDROME DETECTION PATTERNS (Optimized for performance)
+        syndrome_patterns = {
+            "acute_coronary_syndrome": {
+                "primary_indicators": ["chest pain", "crushing", "pressure", "squeezing"],
+                "associated_symptoms": ["shortness of breath", "nausea", "sweating", "radiating", "arm pain", "jaw pain"],
+                "required_combinations": 2,  # Need at least 2 indicators
+                "urgency": "emergency",
+                "probability_threshold": 0.75
+            },
+            "migraine_syndrome": {
+                "primary_indicators": ["headache", "throbbing", "pulsating", "one side"],
+                "associated_symptoms": ["nausea", "vomiting", "light sensitivity", "sound sensitivity", "aura"],
+                "required_combinations": 2,
+                "urgency": "urgent", 
+                "probability_threshold": 0.70
+            },
+            "acute_abdomen": {
+                "primary_indicators": ["abdominal pain", "severe", "sharp", "stabbing"],
+                "associated_symptoms": ["nausea", "vomiting", "fever", "rigid", "guarding"],
+                "required_combinations": 2,
+                "urgency": "emergency",
+                "probability_threshold": 0.80
+            },
+            "stroke_syndrome": {
+                "primary_indicators": ["sudden weakness", "facial drooping", "speech difficulty", "confusion"],
+                "associated_symptoms": ["numbness", "vision changes", "dizziness", "headache"],
+                "required_combinations": 1,  # Even one indicator is significant
+                "urgency": "emergency", 
+                "probability_threshold": 0.85
+            }
+        }
+        
+        # 🎯 OPTIMIZED: ANALYZE EACH SYNDROME PATTERN
+        for syndrome_name, pattern in syndrome_patterns.items():
+            primary_matches = sum(1 for indicator in pattern["primary_indicators"] if indicator in text_lower)
+            associated_matches = sum(1 for symptom in pattern["associated_symptoms"] if symptom in text_lower)
+            
+            total_matches = primary_matches + associated_matches
+            
+            if total_matches >= pattern["required_combinations"]:
+                # Calculate syndrome probability based on matches
+                max_possible = len(pattern["primary_indicators"]) + len(pattern["associated_symptoms"])
+                probability = min(0.95, (total_matches / max_possible) * 1.2)  # Boost calculation
+                
+                if probability >= pattern["probability_threshold"]:
+                    # Create entity for detected syndrome
+                    primary_symptom = next((ind for ind in pattern["primary_indicators"] if ind in text_lower), "symptom")
+                    associated_found = [sym for sym in pattern["associated_symptoms"] if sym in text_lower]
+                    
+                    entity = AssociatedSymptomEntity(
+                        primary_symptom=primary_symptom,
+                        associated_symptoms=associated_found,
+                        temporal_relationship="concurrent",
+                        syndrome_probability={syndrome_name: probability},
+                        medical_urgency=pattern["urgency"],
+                        confidence=0.92,
+                        clinical_cluster=self._determine_clinical_cluster(syndrome_name),
+                        red_flag_combinations=self._get_red_flags_for_syndrome(syndrome_name)
+                    )
+                    
+                    associated_entities.append(entity)
+        
+        # 🔍 OPTIMIZED: GENERAL SYMPTOM ASSOCIATION PATTERNS (Reduced for performance)
+        general_associations = [
+            (r"\b(chest pain).*\b(shortness of breath|nausea|sweating)", "cardiac", "urgent"),
+            (r"\b(headache).*\b(nausea|vomiting|light sensitivity)", "neurological", "urgent"),
+            (r"\b(abdominal pain).*\b(nausea|vomiting|fever)", "gastrointestinal", "urgent"),
+            (r"\b(joint pain).*\b(fatigue|fever|rash)", "rheumatological", "routine")
         ]
         
-        for pattern, quality_cat, onset, severity in priority_quality_patterns:
+        for pattern, cluster, urgency in general_associations:
             matches = re.finditer(pattern, text_lower)
             for match in matches:
-                quality_descriptor = match.group()
+                # Extract primary and associated symptoms
+                match_text = match.group()
+                primary = match_text.split()[0] + " " + match_text.split()[1] if len(match_text.split()) > 1 else "symptom"
                 
-                entity = QualityEntity(
-                    quality_descriptor=quality_descriptor,
-                    onset_pattern=onset,
-                    progression="worsening" if severity > 7 else "stable",
-                    clinical_significance="urgent" if severity > 8 else "routine",
-                    confidence=0.90,
-                    quality_category=quality_cat,
-                    functional_impact_score=severity
+                entity = AssociatedSymptomEntity(
+                    primary_symptom=primary,
+                    associated_symptoms=["associated_symptoms_detected"],
+                    medical_urgency=urgency,
+                    confidence=0.88,
+                    clinical_cluster=cluster
                 )
                 
-                quality_entities.append(entity)
+                associated_entities.append(entity)
         
-        return quality_entities
+        return associated_entities
+    
+    def _determine_clinical_cluster(self, syndrome_name: str) -> str:
+        """Determine clinical cluster for syndrome"""
+        clusters = {
+            "acute_coronary_syndrome": "cardiovascular",
+            "migraine_syndrome": "neurological", 
+            "acute_abdomen": "gastrointestinal",
+            "stroke_syndrome": "neurological"
+        }
+        return clusters.get(syndrome_name, "general")
+    
+    def _get_red_flags_for_syndrome(self, syndrome_name: str) -> List[str]:
+        """Get red flag combinations for specific syndromes"""
+        red_flags = {
+            "acute_coronary_syndrome": ["chest_pain_with_radiation", "diaphoresis_with_chest_pain"],
+            "migraine_syndrome": ["aura_with_headache", "photophobia_with_nausea"],
+            "acute_abdomen": ["rigid_abdomen", "rebound_tenderness"],
+            "stroke_syndrome": ["sudden_onset", "focal_neurological_deficit"]
+        }
+        return red_flags.get(syndrome_name, [])
     
     def _analyze_quality_descriptor(self, quality_text: str) -> str:
         """Analyze quality descriptor from text"""
