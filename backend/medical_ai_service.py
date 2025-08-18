@@ -4952,15 +4952,28 @@ class ContextAwareMedicalReasoner:
         
         Transform raw medical entities into sophisticated contextual understanding
         with clinical causality, positional relationships, and situational logic.
+        
+        ⚡ PHASE 3 OPTIMIZATION: Performance-optimized for <25ms processing target
         """
         
-        # Detect causal relationships between symptoms and triggers
-        causal_relationships = self.detect_causal_relationships_advanced(text, extracted_entities)
+        # 🚀 PHASE 3 PERFORMANCE OPTIMIZATION: Parallel analysis for speed
+        import concurrent.futures
+        from functools import partial
         
-        # Analyze specific contextual factors
-        positional_analysis = self.analyze_positional_context_intelligence(text)
-        temporal_analysis = self.extract_temporal_context_reasoning(text)
-        environmental_analysis = self.assess_environmental_trigger_context(text)
+        # Detect causal relationships between symptoms and triggers (OPTIMIZED)
+        causal_relationships = self.detect_causal_relationships_advanced_optimized(text, extracted_entities)
+        
+        # 🚀 PARALLEL CONTEXTUAL ANALYSIS for performance optimization
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+            # Submit all analysis tasks in parallel
+            positional_future = executor.submit(self.analyze_positional_context_intelligence_optimized, text)
+            temporal_future = executor.submit(self.extract_temporal_context_reasoning_optimized, text)
+            environmental_future = executor.submit(self.assess_environmental_trigger_context_optimized, text)
+            
+            # Collect results
+            positional_analysis = positional_future.result()
+            temporal_analysis = temporal_future.result()
+            environmental_analysis = environmental_future.result()
         
         # Generate clinical hypotheses based on contextual patterns
         clinical_hypotheses = self.generate_clinical_hypotheses_contextual(
