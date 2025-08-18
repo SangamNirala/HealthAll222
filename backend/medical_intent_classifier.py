@@ -120,7 +120,7 @@ class WorldClassMedicalIntentClassifier:
     
     def __init__(self):
         """Initialize the world-class medical intent classification system"""
-        self.algorithm_version = "3.1_foundation_excellence"
+        self.algorithm_version = "3.1_intelligence_amplification"
         
         # Load comprehensive medical intent taxonomy
         self.medical_intent_taxonomy = self._load_comprehensive_medical_intent_taxonomy()
