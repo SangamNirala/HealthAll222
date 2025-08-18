@@ -140,10 +140,14 @@ backend:
   - task: "Medical AI Service Implementation"
     implemented: true
     working: true
-    file: "/app/backend/medical_ai_service.py, /app/backend/server.py"
+    file: "/app/backend/medical_ai_service.py, /app/backend/server.py, /app/backend/medical_intent_classifier.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "COMPREHENSIVE SUBSPECIALTY EXPANSION COMPLETE: ✅ Successfully implemented fixes for 3 problematic subspecialty categories and expanded intent taxonomy to 50+ categories as requested. FIXES IMPLEMENTED: (1) Enhanced cardiac_symptom_evaluation patterns with broader matching including 'heart|cardiac|cardiovascular symptoms', 'my heart|heart feels', and 'blood pressure' patterns for improved recognition. (2) Enhanced neurological_symptom_assessment patterns with 'neurological|neuro|nervous system symptoms' and additional 'nerve pain', 'movement disorders' patterns to prevent misclassification as neurological_emergency_detection. (3) Enhanced metabolic_disorder_evaluation patterns with 'metabolic|metabolism disorder', 'hormone|hormonal levels', and 'endocrine|glandular problems' for better detection. SUBSPECIALTY EXPANSION: Added 20 new subspecialty categories across diverse medical domains - Orthopedics (orthopedic_injury_assessment, sports_medicine_evaluation), Dermatology (dermatological_assessment), Allergy/Immunology (allergic_reaction_assessment, immunodeficiency_evaluation), Infectious Disease (infectious_disease_assessment), Mental Health (psychiatric_assessment, substance_abuse_evaluation), Pediatrics (pediatric_assessment, adolescent_health_assessment), Geriatrics (geriatric_assessment, dementia_evaluation), Women's Health (gynecological_assessment, obstetric_assessment), Urology (urological_assessment, male_reproductive_health), Oncology (cancer_screening_assessment, chemotherapy_monitoring), Pain Management (chronic_pain_assessment, opioid_management). TECHNICAL ENHANCEMENTS: Updated algorithm version to 3.2_comprehensive_subspecialty_expansion, enhanced urgency assessment to include new emergency and urgent subspecialty categories, comprehensive clinical reasoning engines for each new subspecialty, decision support rules and emergency indicators where appropriate. TOTAL CATEGORIES: Now 50+ sophisticated medical intent categories with subspecialty-level clinical reasoning and enhanced pattern recognition for improved accuracy. Ready for comprehensive backend testing to validate all fixes and new subspecialty categories."
   - task: "Phase 4 Comprehensive Medical Pattern Recognition Engine"
     implemented: true
     working: true
