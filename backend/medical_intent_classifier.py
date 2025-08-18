@@ -313,8 +313,8 @@ class WorldClassMedicalIntentClassifier:
                 "description": "Seeking reassurance about condition",
                 "patterns": [
                     IntentPattern(r"\b(is this normal|should i be worried|am i (okay|fine))\b", 0.9, ClinicalSignificance.MEDIUM),
-                    IntentPattern(r"\b(nothing serious|just minor|tell me it's (okay|fine))\b", 0.85, ClinicalSignificance.LOW),
-                    IntentPattern(r"\b(reassure me|comfort|peace of mind|make me feel better)\b", 0.8, ClinicalSignificance.LOW),
+                    IntentPattern(r"\b(nothing serious|just minor|tell me it's (okay|fine))\b", 0.85, ClinicalSignificance.ROUTINE),
+                    IntentPattern(r"\b(reassure me|comfort|peace of mind|make me feel better)\b", 0.8, ClinicalSignificance.ROUTINE),
                 ],
                 "clinical_significance": "low"
             },
