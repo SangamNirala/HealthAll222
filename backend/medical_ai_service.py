@@ -5654,21 +5654,49 @@ class ContextAwareMedicalReasoner:
                     recommendations.append("Home blood pressure monitoring in different positions")
                     recommendations.append("Increase fluid and salt intake unless contraindicated")
             
-            # 🧠 EXERTIONAL/CARDIAC RECOMMENDATIONS
-            elif rel_type == "exertional" and clinical_sig == "emergency":
+            # 🧠 ENHANCED EXERTIONAL/CARDIAC RECOMMENDATIONS
+            elif rel_type in ["exertional", "enhanced_exertional_cardiac"] and clinical_sig == "emergency":
                 if "crushing" in symptom.lower() or "classic_angina" in symptom.lower():
-                    recommendations.append("URGENT: Immediate cardiac evaluation with ECG and troponins")
-                    recommendations.append("Cardiology referral for stress testing and possible catheterization")
-                    recommendations.append("Sublingual nitroglycerin prescription for chest pain episodes")
-                    recommendations.append("Strict activity restriction pending cardiac clearance")
-                elif "cardiac_stress" in trigger.lower():
-                    recommendations.append("URGENT: Exercise stress test or cardiac imaging")
-                    recommendations.append("Risk factor modification - lipid panel, diabetes screening")
-                    recommendations.append("Dual antiplatelet therapy consideration if no contraindications")
+                    recommendations.append("CRITICAL EMERGENCY: Immediate 911 activation for crushing chest pain with exertional pattern")
+                    recommendations.append("STAT Emergency Department evaluation with continuous cardiac monitoring")
+                    recommendations.append("Immediate 12-lead ECG and serial troponins q6h x 3")
+                    recommendations.append("URGENT cardiology consultation - do not delay")
+                    recommendations.append("Consider cardiac catheterization within 24-48 hours if ACS ruled out")
+                elif "pressure_type_angina" in symptom.lower():
+                    recommendations.append("URGENT: Emergency cardiac evaluation for pressure-type exertional angina")
+                    recommendations.append("Comprehensive cardiac workup: ECG, troponins, echocardiogram, stress testing")
+                    recommendations.append("Cardiology consultation within 6-12 hours")
+                elif "substernal" in symptom.lower():
+                    recommendations.append("URGENT: Substernal exertional pain requires immediate cardiac assessment")
+                    recommendations.append("Emergency department evaluation with cardiac monitoring")
+                    recommendations.append("Serial cardiac biomarkers and ECG monitoring")
+                elif "radiating" in symptom.lower():
+                    recommendations.append("CRITICAL: Radiating exertional chest pain - HIGH-RISK presentation")
+                    recommendations.append("Immediate emergency department evaluation")
+                    recommendations.append("Consider STEMI/NSTEMI protocol activation")
+                    recommendations.append("STAT cardiology consultation")
+                elif "dyspnea" in symptom.lower():
+                    recommendations.append("URGENT: Anginal equivalent with dyspnea requires immediate evaluation")
+                    recommendations.append("Comprehensive cardiopulmonary assessment")
+                    recommendations.append("Consider heart failure evaluation alongside coronary assessment")
+                else:
+                    recommendations.append("URGENT: Enhanced cardiac evaluation for exertional syndrome")
+                    recommendations.append("Comprehensive cardiac workup including functional assessment")
+                    recommendations.append("AVOID ALL strenuous activity until cardiac clearance")
             
-            elif rel_type == "exertional_relief":
-                recommendations.append("Document chest pain characteristics and relief patterns for cardiology")
-                recommendations.append("Avoid exertional triggers until cardiac evaluation complete")
+            elif rel_type in ["exertional_relief", "enhanced_exertional_relief"]:
+                if "timed_angina_relief" in symptom.lower():
+                    recommendations.append("EMERGENCY: Classic timed angina relief pattern - requires immediate cardiac intervention")
+                    recommendations.append("Document exact timing of relief for cardiology (pathognomonic sign)")
+                    recommendations.append("Consider cardiac catheterization urgency")
+                elif "medication_responsive" in symptom.lower():
+                    recommendations.append("CRITICAL: Nitrate-responsive pattern confirms coronary disease")
+                    recommendations.append("Immediate cardiology consultation for confirmed CAD")
+                    recommendations.append("Consider urgent revascularization evaluation")
+                else:
+                    recommendations.append("Document enhanced relief patterns for comprehensive cardiac assessment")
+                    recommendations.append("AVOID ALL exertional triggers until complete cardiac evaluation")
+                    recommendations.append("Serial symptom monitoring with detailed pattern documentation")
             
             # 🧠 DIETARY-STRESS INTERACTION RECOMMENDATIONS
             elif rel_type == "dietary_stress_interaction":
