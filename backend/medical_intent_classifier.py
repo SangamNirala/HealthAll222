@@ -963,9 +963,20 @@ class WorldClassMedicalIntentClassifier:
         if not pattern_matches:
             return UrgencyLevel.LOW
         
-        # Check for emergency/critical intents
-        emergency_intents = ["emergency_concern", "crisis_intervention", "allergy_reporting"]
-        urgent_intents = ["urgent_scheduling", "severity_assessment", "functional_impact"]
+        # Check for emergency/critical intents including new subspecialty emergencies
+        emergency_intents = [
+            "emergency_concern", "crisis_intervention", "allergy_reporting",
+            # Subspecialty emergency intents
+            "cardiac_chest_pain_assessment", "neurological_emergency_detection",
+            "gi_symptom_assessment", "respiratory_symptom_assessment"
+        ]
+        urgent_intents = [
+            "urgent_scheduling", "severity_assessment", "functional_impact",
+            # Subspecialty urgent intents  
+            "cardiac_symptom_evaluation", "neurological_symptom_assessment",
+            "headache_migraine_evaluation", "breathing_difficulty_evaluation",
+            "endocrine_symptom_assessment"
+        ]
         
         max_urgency = UrgencyLevel.LOW
         urgency_score = 0.0
