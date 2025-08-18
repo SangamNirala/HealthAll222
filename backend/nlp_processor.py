@@ -79,8 +79,9 @@ class IntelligentTextNormalizer:
         normalized, grammar_corrections = self._apply_grammar_corrections(normalized)
         corrections.extend(grammar_corrections)
         
-        # Step 7: Convert informal to formal medical language (but keep it minimal for these examples)
-        # Skip this step for the core examples as they should remain "really bad" etc
+        # Step 7: Convert informal to formal medical language (Step 1.3 Enhancement)
+        normalized, informal_corrections = self._convert_informal_to_formal(normalized)
+        corrections.extend(informal_corrections)
         
         # Step 8: Fix verb tenses for medical context
         normalized, tense_corrections = self._fix_verb_tenses(normalized)
