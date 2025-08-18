@@ -27,7 +27,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://clinical-context.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://medreasoning.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class ContextualReasoningTester:
@@ -736,7 +736,7 @@ sys.path.append('/app/backend')
 from medical_ai_service import WorldClassMedicalAI, AdvancedSymptomRecognizer
 
 # Backend URL from environment
-BACKEND_URL = "https://clinical-context.preview.emergentagent.com/api"
+BACKEND_URL = "https://medreasoning.preview.emergentagent.com/api"
 
 class Phase4ComprehensiveTester:
     """
@@ -1721,7 +1721,7 @@ from datetime import datetime, timedelta
 import uuid
 
 class HealthPlatformAPITester:
-    def __init__(self, base_url="https://clinical-context.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://medreasoning.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
