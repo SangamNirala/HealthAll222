@@ -552,6 +552,21 @@ class IntelligentTextNormalizer:
                 'replacement': 'experiencing constipation',
                 'description': 'compound constipation expression'
             },
+            {
+                'pattern': r'\b(can\'?t|cannot)\s+(breathe|breath)',
+                'replacement': 'difficulty breathing',
+                'description': 'compound breathing difficulty expression'
+            },
+            {
+                'pattern': r'\b(belly|tummy)\s+(ache|pain)',
+                'replacement': 'abdominal pain',
+                'description': 'compound abdominal pain expression'
+            },
+            {
+                'pattern': r'\bwiped\s+out\b',
+                'replacement': 'extremely fatigued',
+                'description': 'compound fatigue expression'
+            },
         ]
         
         for compound in compound_patterns:
