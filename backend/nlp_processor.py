@@ -246,16 +246,38 @@ class IntelligentTextNormalizer:
         return text, corrections
     
     def _correct_medical_spelling(self, text: str) -> Tuple[str, List[str]]:
-        """Correct medical spelling mistakes"""
+        """Advanced medical spelling correction using Step 1.2 enhancement"""
         corrections = []
         
+        # Step 1: Apply basic dictionary corrections first (for compatibility)
         for misspelled, correct in self.medical_spell_corrections.items():
             if misspelled.lower() in text.lower():
                 # Use word boundaries to avoid partial matches
                 pattern = r'\b' + re.escape(misspelled) + r'\b'
                 if re.search(pattern, text, re.IGNORECASE):
                     text = re.sub(pattern, correct, text, flags=re.IGNORECASE)
-                    corrections.append(f"Corrected spelling: '{misspelled}' -> '{correct}'")
+                    corrections.append(f"Basic spelling correction: '{misspelled}' -> '{correct}'")
+        
+        # Step 2: Apply advanced spell checking to all words (Step 1.2 enhancement)
+        words = re.findall(r'\b[a-zA-Z]+\b', text)
+        
+        for word in words:
+            if len(word) > 2:  # Only check words longer than 2 characters
+                spell_result = self.advanced_spell_checker.correct_medical_spelling(word)
+                
+                # Apply correction if confidence is high enough and word actually changed
+                if (spell_result.confidence_score >= 0.7 and 
+                    spell_result.corrected_word.lower() != spell_result.original_word.lower()):
+                    
+                    # Replace the word in text (case-preserving)
+                    pattern = r'\b' + re.escape(word) + r'\b'
+                    text = re.sub(pattern, spell_result.corrected_word, text, flags=re.IGNORECASE)
+                    
+                    corrections.append(
+                        f"Advanced spelling correction: '{spell_result.original_word}' -> "
+                        f"'{spell_result.corrected_word}' (confidence: {spell_result.confidence_score:.2f}, "
+                        f"method: {spell_result.correction_method})"
+                    )
         
         return text, corrections
     
