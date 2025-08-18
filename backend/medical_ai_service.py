@@ -1429,15 +1429,60 @@ class WorldClassMedicalAI:
         return entities
     
     async def _update_medical_context(self, entities: Dict[str, Any], context: MedicalContext, message: str) -> MedicalContext:
-        """Update medical context with extracted entities"""
+        """
+        PHASE 2: Enhanced medical context update using advanced entity extraction
+        Integrates with AdvancedSymptomRecognizer for comprehensive medical understanding
+        """
         
-        # Update symptom data
-        if entities.get("duration"):
-            context.symptom_data["duration"] = entities["duration"]
-        if entities.get("severity"):
-            context.symptom_data["severity"] = entities["severity"]
-        if entities.get("location"):
-            context.symptom_data["location"] = entities["location"]
+        # PHASE 2: Use Advanced Symptom Recognizer for comprehensive entity extraction
+        advanced_extraction = self.advanced_symptom_recognizer.extract_medical_entities(message)
+        
+        # Update symptom data with advanced entities
+        context.symptom_data.update({
+            "symptoms": entities.get("symptoms", []),
+            "duration": entities.get("duration", []),
+            "severity": entities.get("severity", []),
+            "location": entities.get("location", []),
+            "quality": entities.get("quality", []),
+            "associated_symptoms": entities.get("associated_symptoms", []),
+            "frequency": entities.get("frequency", []),
+            "triggers": entities.get("triggers", []),
+            
+            # PHASE 2: Advanced entity data
+            "temporal_entities": advanced_extraction.get("temporal_entities", []),
+            "severity_entities": advanced_extraction.get("severity_entities", []),
+            "medical_relationships": advanced_extraction.get("medical_relationships", {}),
+            "clinical_insights": advanced_extraction.get("clinical_insights", {}),
+            "confidence_scores": entities.get("confidence_scores", {}),
+            "overall_confidence": entities.get("overall_confidence", 0.0)
+        })
+        
+        # Update emergency flags and urgency based on advanced analysis
+        emergency_flags = entities.get("emergency_flags", [])
+        if emergency_flags:
+            context.red_flags.extend(emergency_flags)
+            context.emergency_level = "urgent"
+        
+        # PHASE 2: Update clinical insights and urgency assessment
+        clinical_insights = advanced_extraction.get("clinical_insights", {})
+        if clinical_insights.get("urgency_assessment") == "urgent":
+            context.emergency_level = "urgent"
+        elif clinical_insights.get("urgency_assessment") == "emergency":
+            context.emergency_level = "critical"
+        
+        # Update medical relationships for better AI reasoning
+        medical_relationships = advanced_extraction.get("medical_relationships", {})
+        if medical_relationships:
+            # Store relationships for Gemini AI to use in medical reasoning
+            context.symptom_data["medical_relationships"] = medical_relationships
+            
+            # Update risk factors based on relationships
+            for relationship_name, relationship_data in medical_relationships.items():
+                if relationship_data.get("urgency") == "high":
+                    context.risk_factors.append(f"Medical relationship detected: {relationship_name}")
+        
+        # PHASE 2: Enhanced confidence scoring for AI reasoning
+        context.confidence_score = entities.get("overall_confidence", context.confidence_score)
         
         return context
     
