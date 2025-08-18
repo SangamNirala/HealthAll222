@@ -78,8 +78,12 @@ class IntelligentTextNormalizer:
         normalized, tense_corrections = self._fix_verb_tenses(normalized)
         corrections.extend(tense_corrections)
         
-        # Step 9: Final cleanup (but don't force periods for these examples)
+        # Step 9: Final cleanup and ensure proper sentence capitalization
         normalized = re.sub(r'\s+', ' ', normalized).strip()
+        
+        # Ensure first letter is capitalized
+        if normalized and normalized[0].islower():
+            normalized = normalized[0].upper() + normalized[1:]
         
         # Calculate confidence score based on corrections applied
         confidence_score = self._calculate_confidence_score(original_text, normalized, corrections)
