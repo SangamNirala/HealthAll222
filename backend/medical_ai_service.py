@@ -7180,7 +7180,54 @@ class WorldClassMedicalAI:
             print(f"Corrections applied: {normalization_result.corrections_applied}")
             print(f"Confidence: {normalization_result.confidence_score:.2f}")
         
-        # 1. Emergency Detection (highest priority) - use normalized text
+        # 🎯 STEP 3.1 PHASE A: MEDICAL INTENT CLASSIFICATION INTEGRATION
+        # Classify patient intent to enhance medical understanding and response quality
+        try:
+            from medical_intent_classifier import classify_patient_intent
+            
+            # Build conversation context for intent classification
+            conversation_context = {
+                "consultation_id": getattr(context, 'consultation_id', None),
+                "current_stage": context.current_stage.value if hasattr(context.current_stage, 'value') else str(context.current_stage),
+                "patient_context": {
+                    "age": context.demographics.get('age') if context.demographics else None,
+                    "gender": context.demographics.get('gender') if context.demographics else None
+                },
+                "previous_symptoms": [symptom.get('symptom') for symptom in context.symptoms] if context.symptoms else [],
+                "medical_history": context.medical_history if hasattr(context, 'medical_history') else []
+            }
+            
+            # Perform intent classification
+            intent_result = await classify_patient_intent(normalized_message, conversation_context)
+            
+            # Store intent classification results in context for enhanced medical reasoning
+            context.intent_analysis = {
+                "primary_intent": intent_result.primary_intent,
+                "confidence_score": intent_result.confidence_score,
+                "urgency_level": intent_result.urgency_level.value,
+                "clinical_significance": intent_result.clinical_significance.value,
+                "clinical_reasoning": intent_result.clinical_reasoning,
+                "red_flag_indicators": intent_result.red_flag_indicators,
+                "processing_time_ms": intent_result.processing_time_ms
+            }
+            
+            # Log intent analysis for medical quality assurance
+            print(f"Intent Analysis: {intent_result.primary_intent} (confidence: {intent_result.confidence_score:.3f}, urgency: {intent_result.urgency_level.value})")
+            
+            # Use intent analysis to enhance emergency detection
+            if intent_result.urgency_level.value in ["critical", "emergency"] or intent_result.primary_intent == "emergency_concern":
+                print(f"🚨 High urgency intent detected: {intent_result.primary_intent}")
+                
+        except Exception as intent_error:
+            print(f"Intent classification failed (continuing with medical processing): {intent_error}")
+            # Continue processing even if intent classification fails
+            context.intent_analysis = {
+                "primary_intent": "classification_unavailable", 
+                "confidence_score": 0.0,
+                "error": str(intent_error)
+            }
+        
+        # 1. Emergency Detection (highest priority) - use normalized text and intent analysis
         emergency_assessment = await self._assess_emergency_risk(normalized_message, context)
         if emergency_assessment['emergency_detected']:
             return await self._handle_emergency_response(emergency_assessment, context, normalized_message)
