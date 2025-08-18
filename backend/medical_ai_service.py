@@ -5796,23 +5796,50 @@ class ContextAwareMedicalReasoner:
                     strategies.append("Rise slowly from sitting or lying positions")
                     strategies.append("Stay well hydrated throughout the day")
             
-            # 🧠 EXERTIONAL/CARDIAC AVOIDANCE STRATEGIES
-            elif rel_type == "exertional" and clinical_sig == "emergency":
+            # 🧠 ENHANCED EXERTIONAL/CARDIAC AVOIDANCE STRATEGIES
+            elif rel_type in ["exertional", "enhanced_exertional_cardiac"] and clinical_sig == "emergency":
                 if "crushing" in symptom.lower() or "classic_angina" in symptom.lower():
-                    strategies.append("AVOID ALL strenuous activity until cardiac clearance")
-                    strategies.append("Do NOT climb stairs or walk uphill without medical approval")
-                    strategies.append("Stop activity immediately if chest pain occurs")
-                    strategies.append("Keep sublingual nitroglycerin readily available")
-                elif "cardiac_stress" in trigger.lower():
-                    strategies.append("Limit physical exertion to activities of daily living only")
-                    strategies.append("Monitor heart rate - stay below 100 BPM until cleared")
-                    strategies.append("Avoid emotional stress and extreme temperatures")
+                    strategies.append("CRITICAL: COMPLETE activity restriction - NO physical exertion until cardiac clearance")
+                    strategies.append("IMMEDIATELY stop and call 911 if ANY chest pain occurs")
+                    strategies.append("Use elevator exclusively - NO stairs or inclines")
+                    strategies.append("Avoid cold weather exposure entirely (vasoconstrictive trigger)")
+                    strategies.append("Carry nitroglycerin if prescribed and 911 access at all times")
+                    strategies.append("Have family/caregiver present during any minimal activity")
+                elif "pressure_type_angina" in symptom.lower():
+                    strategies.append("Strict activity limitation - avoid any pressure-inducing activities")
+                    strategies.append("Monitor for pressure sensation during minimal daily activities")
+                    strategies.append("Avoid heavy lifting, pushing, or straining (Valsalva maneuvers)")
+                elif "substernal" in symptom.lower():
+                    strategies.append("Avoid activities that trigger substernal pain (stairs, hills, lifting)")
+                    strategies.append("Monitor for substernal pressure during ANY exertion")
+                    strategies.append("Use assistive devices to minimize physical demands")
+                elif "radiating" in symptom.lower():
+                    strategies.append("CRITICAL: Any activity causing radiating pain must be avoided completely")
+                    strategies.append("Monitor arm, jaw, neck for pain during minimal activities")
+                    strategies.append("Have immediate access to emergency services")
+                elif "dyspnea" in symptom.lower():
+                    strategies.append("Avoid activities causing breathlessness even without chest pain")
+                    strategies.append("Monitor breathing patterns during any physical activity")
+                    strategies.append("Use pulse oximetry if available during activities")
                 else:
-                    strategies.append("Gradual activity progression only with medical supervision")
+                    strategies.append("Complete activity restriction until comprehensive cardiac evaluation")
+                    strategies.append("Avoid ALL forms of physical exertion, including household activities")
+                    strategies.append("Have caregiver assistance for basic daily activities")
             
-            elif rel_type == "exertional_relief":
-                strategies.append("Recognize early warning signs - stop activity before severe symptoms")
-                strategies.append("Plan rest breaks during any physical activity")
+            elif rel_type in ["exertional_relief", "enhanced_exertional_relief"]:
+                if "timed_angina_relief" in symptom.lower():
+                    strategies.append("CRITICAL: Stop activity IMMEDIATELY at first symptom - do not continue")
+                    strategies.append("Time relief pattern and document for emergency services")
+                    strategies.append("If relief takes longer than 5 minutes, call 911 immediately")
+                elif "medication_responsive" in symptom.lower():
+                    strategies.append("Carry prescribed nitroglycerin at all times")
+                    strategies.append("Stop activity immediately and use medication as prescribed")
+                    strategies.append("If medication ineffective, call 911 immediately")
+                else:
+                    strategies.append("Stop ALL activity at first sign of ANY chest discomfort")
+                    strategies.append("Rest in comfortable position immediately when symptoms begin")
+                    strategies.append("Have emergency contacts and 911 access readily available")
+                    strategies.append("Document symptom patterns and triggers for cardiac evaluation")
             
             # 🧠 DIETARY-STRESS INTERACTION AVOIDANCE STRATEGIES  
             elif rel_type == "dietary_stress_interaction":
