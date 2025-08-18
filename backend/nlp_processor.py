@@ -95,19 +95,17 @@ class IntelligentTextNormalizer:
     def _load_grammar_patterns(self) -> List[Dict[str, str]]:
         """Load grammar correction patterns for medical text"""
         return [
-            # Basic subject-verb corrections - with more specific patterns
-            {"pattern": r"\bi\s+having\s+fever\s+(\d+)\s+days?\b", "replacement": r"I have been having a fever for \1 days", "desc": "i having fever X days -> I have been having a fever for X days"},
-            {"pattern": r"\bi\s+having\s+(.+?)\s+(\d+)\s+days?\b", "replacement": r"I have been having \1 for \2 days", "desc": "i having X Y days -> I have been having X for Y days"},
+            # Specific fever pattern (most specific first)
+            {"pattern": r"\bI\s+having\s+fever\s+(\d+)\s+days?\b", "replacement": r"I have been having a fever for \1 days", "desc": "I having fever X days -> I have been having a fever for X days"},
+            
+            # General "having" patterns  
+            {"pattern": r"\bI\s+having\s+", "replacement": "I have been having ", "desc": "I having -> I have been having"},
             {"pattern": r"\bi\s+having\s+", "replacement": "I have been having ", "desc": "i having -> I have been having"},
             {"pattern": r"\bi\s+have\s+", "replacement": "I have ", "desc": "capitalize I"},
             {"pattern": r"\bi\s+am\s+having\s+", "replacement": "I have been having ", "desc": "i am having -> I have been having"},
             {"pattern": r"\bi\s+got\s+", "replacement": "I have ", "desc": "i got -> I have"},
             {"pattern": r"\bme\s+(.+?)\s+hurt", "replacement": r"my \1 hurts", "desc": "me X hurt -> my X hurts"},
             {"pattern": r"\bme\s+(.+?)\s+pain", "replacement": r"my \1 has pain", "desc": "me X pain -> my X has pain"},
-            
-            # Duration and temporal corrections
-            {"pattern": r"\b(\d+)\s+days?\s*$", "replacement": r"for \1 days", "desc": "X days -> for X days"},
-            {"pattern": r"\b(\d+)\s+day\b", "replacement": r"\1 days", "desc": "1 day -> 1 days (when >1)"},
             
             # When/while corrections for breathing and symptoms
             {"pattern": r"\bwhen\s+breath\b", "replacement": "when I breathe", "desc": "when breath -> when I breathe"},
