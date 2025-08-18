@@ -864,24 +864,42 @@ class WorldClassMedicalAI:
             context.chief_complaint = message
             context.current_stage = MedicalInterviewStage.HISTORY_PRESENT_ILLNESS
             
-            # Create symptom-specific response
-            symptom_names = []
-            for symptom in symptoms_detected:
-                if symptom == "fever":
-                    symptom_names.append("a fever")
-                elif symptom == "headache":
-                    symptom_names.append("a headache")
-                elif symptom == "pain":
-                    symptom_names.append("pain")
-                else:
-                    symptom_names.append(symptom.replace("_", " "))
+            # Create symptom-specific response with medical interview approach
+            if "fever" in symptoms_detected:
+                symptom_response = "fever"
+            elif "headache" in symptoms_detected:
+                symptom_response = "headache" 
+            elif "chest_pain" in symptoms_detected:
+                symptom_response = "chest discomfort"
+            elif "pain" in symptoms_detected:
+                symptom_response = "pain"
+            else:
+                symptom_response = " and ".join([s.replace("_", " ") for s in symptoms_detected])
             
-            symptoms_text = " and ".join(symptom_names) if len(symptom_names) > 1 else symptom_names[0]
-            
-            response = await self._generate_empathetic_response(
-                f"Thank you for sharing that you're experiencing {symptoms_text}. I want to gather more specific details to better understand your condition. "
-                f"Let's start with when exactly these symptoms began - was the onset sudden or did it develop gradually over time?"
-            )
+            # Real doctor approach - ask clarifying questions first
+            if "chest_pain" in symptoms_detected and "headache" in symptoms_detected:
+                response = await self._generate_empathetic_response(
+                    f"I understand you're experiencing both headache and chest discomfort. Let me help you with this. "
+                    f"Can you describe the chest discomfort for me? Is it a sharp pain, pressure, or squeezing sensation? "
+                    f"And when did these symptoms first start?"
+                )
+            elif "chest_pain" in symptoms_detected:
+                response = await self._generate_empathetic_response(
+                    f"I understand you're having chest discomfort. Can you describe what it feels like? "
+                    f"Is it a sharp, stabbing pain, or more of a pressure or squeezing sensation? "
+                    f"When did this start, and does anything make it better or worse?"
+                )
+            elif "fever" in symptoms_detected:
+                response = await self._generate_empathetic_response(
+                    f"I understand you're experiencing a fever. How long have you had the fever? "
+                    f"Have you taken your temperature, and do you have any other symptoms along with it?"
+                )
+            else:
+                response = await self._generate_empathetic_response(
+                    f"Thank you for sharing that you're experiencing {symptom_response}. "
+                    f"Can you tell me more about when this started and how it's been progressing? "
+                    f"Any specific details about the symptoms would be helpful for my assessment."
+                )
         else:
             # No clear symptoms detected - ask for clarification
             context.chief_complaint = message
