@@ -316,7 +316,7 @@ class WorldClassMedicalIntentClassifier:
                     IntentPattern(r"\b(nothing serious|just minor|tell me it's (okay|fine))\b", 0.85, ClinicalSignificance.ROUTINE),
                     IntentPattern(r"\b(reassure me|comfort|peace of mind|make me feel better)\b", 0.8, ClinicalSignificance.ROUTINE),
                 ],
-                "clinical_significance": "low"
+                "clinical_significance": "routine"
             },
             
             "emotional_distress": {
