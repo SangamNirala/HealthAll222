@@ -5559,46 +5559,117 @@ class ContextAwareMedicalReasoner:
         return sum(confidences) / len(confidences) if confidences else 0.5
     
     def _generate_context_recommendations(self, causal_relationships: List[CausalRelationship], hypotheses: List[str]) -> List[str]:
-        """Generate context-based recommendations"""
+        """🧠 REVOLUTIONARY CONTEXT-BASED RECOMMENDATIONS WITH CLINICAL PRECISION 🧠"""
         
         recommendations = []
         
-        # 🧠 ENHANCED CONTEXT-BASED RECOMMENDATIONS for Ultra-Challenging Scenarios
+        # 🎯 ULTRA-CHALLENGING SCENARIO RECOMMENDATIONS WITH URGENCY STRATIFICATION
+        
+        # Process causal relationships for specific recommendations
         for rel in causal_relationships:
-            if rel.relationship_type == "positional":
-                if rel.clinical_significance == "urgent":
-                    recommendations.append("Urgent orthostatic vitals measurement and cardiovascular evaluation - fall risk assessment needed")
-                    recommendations.append("Consider 24-hour blood pressure monitoring for orthostatic hypotension")
+            # Handle both object and dictionary formats
+            if hasattr(rel, 'relationship_type'):
+                rel_type = rel.relationship_type
+                clinical_sig = rel.clinical_significance
+                trigger = rel.trigger
+                symptom = rel.symptom
+            else:
+                rel_type = rel.get('relationship_type', 'unknown')
+                clinical_sig = rel.get('clinical_significance', 'routine')
+                trigger = rel.get('trigger', 'unknown')
+                symptom = rel.get('symptom', 'unknown')
+            
+            # 🧠 POSITIONAL/ORTHOSTATIC RECOMMENDATIONS
+            if rel_type == "positional":
+                if "morning" in trigger.lower():
+                    recommendations.append("URGENT: Orthostatic vital signs measurement within 24 hours")
+                    recommendations.append("Cardiovascular evaluation with tilt table testing if orthostatic changes confirmed")
+                    recommendations.append("Morning hydration protocol - 16oz water before rising")
+                elif clinical_sig == "urgent":
+                    recommendations.append("Immediate orthostatic vital signs assessment (lying, sitting, standing)")
+                    recommendations.append("Fall risk assessment and home safety evaluation")
+                    recommendations.append("Medication review for hypotensive agents")
                 else:
-                    recommendations.append("Orthostatic vitals and basic cardiovascular evaluation")
+                    recommendations.append("Home blood pressure monitoring in different positions")
+                    recommendations.append("Increase fluid and salt intake unless contraindicated")
             
-            elif rel.relationship_type == "exertional":
-                if rel.clinical_significance == "emergency":
-                    recommendations.append("URGENT: Immediate cardiac evaluation with ECG and troponins - possible unstable angina")
-                    recommendations.append("Exercise stress testing contraindicated until cardiac clearance")
-                else:
-                    recommendations.append("Exercise stress testing and cardiac evaluation indicated")
+            # 🧠 EXERTIONAL/CARDIAC RECOMMENDATIONS
+            elif rel_type == "exertional" and clinical_sig == "emergency":
+                if "crushing" in symptom.lower() or "classic_angina" in symptom.lower():
+                    recommendations.append("URGENT: Immediate cardiac evaluation with ECG and troponins")
+                    recommendations.append("Cardiology referral for stress testing and possible catheterization")
+                    recommendations.append("Sublingual nitroglycerin prescription for chest pain episodes")
+                    recommendations.append("Strict activity restriction pending cardiac clearance")
+                elif "cardiac_stress" in trigger.lower():
+                    recommendations.append("URGENT: Exercise stress test or cardiac imaging")
+                    recommendations.append("Risk factor modification - lipid panel, diabetes screening")
+                    recommendations.append("Dual antiplatelet therapy consideration if no contraindications")
             
-            elif rel.relationship_type == "dietary_stress_interaction":
-                recommendations.append("Comprehensive stress assessment and dietary modification counseling")
-                recommendations.append("Consider psychological evaluation for stress-related GI symptoms")
-                recommendations.append("Lactose tolerance testing under controlled conditions")
+            elif rel_type == "exertional_relief":
+                recommendations.append("Document chest pain characteristics and relief patterns for cardiology")
+                recommendations.append("Avoid exertional triggers until cardiac evaluation complete")
             
-            elif rel.relationship_type == "dietary":
-                recommendations.append("Dietary elimination trial and nutritional consultation")
+            # 🧠 DIETARY-STRESS INTERACTION RECOMMENDATIONS
+            elif rel_type == "dietary_stress_interaction":
+                if "stress_modulated" in trigger.lower():
+                    recommendations.append("Integrated gastroenterology and behavioral health referral")
+                    recommendations.append("Stress management training with focus on eating behaviors")
+                    recommendations.append("Consider probiotics and gut microbiome assessment")
+                elif "conditional" in symptom.lower():
+                    recommendations.append("Psychological evaluation for gut-brain axis dysfunction")
+                    recommendations.append("Dietary consultation with stress-aware nutritionist")
+                    recommendations.append("Food and mood diary tracking")
+            
+            # 🧠 ENVIRONMENTAL MODULATION RECOMMENDATIONS
+            elif rel_type == "environmental_modulation":
+                recommendations.append("Environmental modification counseling")
+                recommendations.append("Stress reduction technique training")
+                recommendations.append("Workplace accommodation assessment if applicable")
+            
+            # 🧠 ACTIVITY LIMITATION RECOMMENDATIONS
+            elif rel_type == "activity_limitation":
+                recommendations.append("Pulmonary function testing and echocardiogram")
+                recommendations.append("Cardiopulmonary exercise testing")
+                recommendations.append("Gradual exercise rehabilitation program")
         
-        # Add hypothesis-based recommendations
+        # 🎯 HYPOTHESIS-BASED CLINICAL RECOMMENDATIONS
+        
         for hypothesis in hypotheses:
-            if "orthostatic hypotension" in hypothesis.lower():
-                recommendations.append("Increase fluid and salt intake unless contraindicated")
-                recommendations.append("Compression stockings evaluation")
-            elif "angina" in hypothesis.lower() or "cardiac" in hypothesis.lower():
-                recommendations.append("Cardiology referral for advanced cardiac risk stratification")
-            elif "stress-modulated" in hypothesis.lower():
-                recommendations.append("Integrated approach: gastroenterology and behavioral health consultation")
+            hypothesis_lower = hypothesis.lower()
+            
+            if "orthostatic hypotension with morning predominance" in hypothesis_lower:
+                recommendations.append("Comprehensive autonomic function testing")
+                recommendations.append("Morning medication timing optimization")
+                recommendations.append("Graduated compression stockings fitting")
+            
+            elif "exertional angina" in hypothesis_lower and "urgent" in hypothesis_lower:
+                recommendations.append("STAT: 12-lead ECG and cardiac biomarkers")
+                recommendations.append("Emergent cardiology consultation")
+                recommendations.append("Aspirin 81mg daily unless contraindicated")
+                recommendations.append("Beta-blocker therapy consideration")
+            
+            elif "stress-modulated lactose intolerance" in hypothesis_lower:
+                recommendations.append("Multidisciplinary approach: GI, psychology, nutrition")
+                recommendations.append("Stress-reduction techniques training")
+                recommendations.append("Consider cognitive behavioral therapy for gut-brain axis")
+            
+            elif "morning orthostatic syndrome" in hypothesis_lower:
+                recommendations.append("Neurological evaluation for autonomic dysfunction")
+                recommendations.append("24-hour ambulatory blood pressure monitoring")
+                recommendations.append("Fludrocortisone or midodrine evaluation")
+            
+            elif "complex multi-factorial" in hypothesis_lower:
+                recommendations.append("Comprehensive biopsychosocial assessment")
+                recommendations.append("Case management coordination")
+                recommendations.append("Interdisciplinary team approach")
         
+        # 🧠 ENSURE MEANINGFUL RECOMMENDATIONS
         if not recommendations:
-            recommendations.append("Comprehensive medical evaluation with attention to symptom triggers")
+            if causal_relationships:
+                recommendations.append("Systematic evaluation of identified symptom-trigger relationships")
+                recommendations.append("Comprehensive medical assessment with contextual factor consideration")
+            else:
+                recommendations.append("Comprehensive medical evaluation with attention to symptom triggers")
         
         return recommendations
     
