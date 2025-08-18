@@ -7163,8 +7163,18 @@ class WorldClassMedicalAI:
             }
         }
     
-    async def _handle_emergency_response(self, emergency_assessment: Dict[str, Any], context: MedicalContext) -> Dict[str, Any]:
-        """Handle emergency situations with appropriate urgency"""
+    async def _handle_emergency_response(self, emergency_assessment: Dict[str, Any], context: MedicalContext, message: str = "") -> Dict[str, Any]:
+        """Handle emergency situations with appropriate urgency and contextual reasoning"""
+        
+        # 🧠 STEP 2.2: Extract contextual reasoning even for emergency scenarios
+        contextual_reasoning = {}
+        if message:
+            try:
+                advanced_extraction = self.advanced_symptom_recognizer.extract_medical_entities(message)
+                contextual_reasoning = advanced_extraction.get("contextual_reasoning", {})
+            except Exception as e:
+                print(f"Warning: Could not extract contextual reasoning for emergency: {e}")
+                contextual_reasoning = {}
         
         emergency_response = """
         🚨 **MEDICAL EMERGENCY DETECTED** 🚨
@@ -7194,7 +7204,18 @@ class WorldClassMedicalAI:
             "stage": "emergency_detected",
             "urgency": "emergency",
             "emergency_data": emergency_assessment,
-            "immediate_action": "call_911"
+            "immediate_action": "call_911",
+            
+            # 🧠 STEP 2.2: Include contextual reasoning data even for emergencies
+            "causal_relationships": contextual_reasoning.get("causal_relationships", []),
+            "clinical_hypotheses": contextual_reasoning.get("clinical_hypotheses", []),
+            "contextual_factors": contextual_reasoning.get("contextual_factors", {}),
+            "medical_reasoning_narrative": contextual_reasoning.get("medical_reasoning_narrative", ""),
+            "context_based_recommendations": contextual_reasoning.get("context_based_recommendations", []),
+            "trigger_avoidance_strategies": contextual_reasoning.get("trigger_avoidance_strategies", []),
+            "specialist_referral_context": contextual_reasoning.get("specialist_referral_context"),
+            "contextual_significance": contextual_reasoning.get("contextual_significance", "emergency"),
+            "reasoning_confidence": contextual_reasoning.get("reasoning_confidence", 0.0)
         }
     
     # PHASE 1: ENHANCED SYMPTOM PATTERN ARCHITECTURE
