@@ -555,12 +555,7 @@ class UltraChallengingScenario2Tester:
         print("=" * 80)
         print()
         
-        # Initialize Medical AI
-        if not self.initialize_medical_ai():
-            print("❌ CRITICAL: Medical AI initialization failed. Cannot proceed with testing.")
-            return
-        
-        # Run all test scenarios
+        # Run all test scenarios (each will initialize its own consultation)
         print("🧪 TESTING ULTRA-CHALLENGING SCENARIOS")
         print("-" * 50)
         
