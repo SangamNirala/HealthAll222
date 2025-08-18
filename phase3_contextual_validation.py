@@ -346,33 +346,42 @@ class Phase3ContextualValidator:
         entities = result_data.get("entities", {})
         contextual_reasoning = result_data.get("contextual_reasoning", {})
         
-        # Factor 1: Entity-context alignment (0.4 weight)
-        symptoms_detected = len(entities.get("symptoms", []))
-        contextual_factors_count = sum(
-            len(factors) for factors in contextual_reasoning.get("contextual_factors", {}).values()
-        )
+        # Factor 1: Contextual factors completeness (0.4 weight)
+        contextual_factors = contextual_reasoning.get("contextual_factors", {})
+        total_factors = sum(len(factors) for factors in contextual_factors.values() if isinstance(factors, list))
         
-        if symptoms_detected > 0 and contextual_factors_count > 0:
+        if total_factors >= 4:  # Expect at least 4 contextual factors for high coherence
             coherence_factors.append(0.4)
+        elif total_factors >= 2:
+            coherence_factors.append(0.25)
         else:
             coherence_factors.append(0.0)
         
-        # Factor 2: Causal relationship plausibility (0.3 weight) 
+        # Factor 2: Causal relationship quality (0.4 weight) 
         causal_relationships = contextual_reasoning.get("causal_relationships", [])
         if causal_relationships:
             avg_causality_strength = sum(
                 rel.get("causality_strength", 0.0) for rel in causal_relationships
             ) / len(causal_relationships)
-            coherence_factors.append(0.3 * avg_causality_strength)
+            coherence_factors.append(0.4 * avg_causality_strength)
         else:
             coherence_factors.append(0.0)
         
-        # Factor 3: Clinical hypothesis quality (0.3 weight)
+        # Factor 3: Clinical hypothesis meaningfulness (0.2 weight)
         clinical_hypotheses = contextual_reasoning.get("clinical_hypotheses", [])
-        if clinical_hypotheses and any(len(hyp) > 20 for hyp in clinical_hypotheses):
-            coherence_factors.append(0.3)
+        if clinical_hypotheses:
+            # Check for meaningful medical content
+            meaningful_count = sum(
+                1 for hyp in clinical_hypotheses 
+                if len(hyp) > 30 and any(term in hyp.lower() for term in 
+                    ['evaluation', 'assessment', 'emergency', 'urgent', 'cardiology', 'orthostatic'])
+            )
+            if meaningful_count > 0:
+                coherence_factors.append(0.2)
+            else:
+                coherence_factors.append(0.1)
         else:
-            coherence_factors.append(0.1)
+            coherence_factors.append(0.0)
         
         return min(sum(coherence_factors), 1.0)
     
