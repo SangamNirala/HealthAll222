@@ -5591,17 +5591,49 @@ class ContextAwareMedicalReasoner:
         
         strategies = []
         
+        # 🧠 ENHANCED TRIGGER AVOIDANCE STRATEGIES for Ultra-Challenging Scenarios
         for rel in causal_relationships:
-            if "standing" in rel.trigger:
+            if "morning" in rel.trigger or "position" in rel.trigger:
+                strategies.append("Rise slowly from bed - sit for 2-3 minutes before standing")
+                strategies.append("Keep water bedside for morning hydration before rising")
+                strategies.append("Avoid rapid position changes, especially in morning")
+            elif "standing" in rel.trigger or "positional" in rel.trigger:
                 strategies.append("Rise slowly from sitting/lying positions")
-            elif "exercise" in rel.trigger or "exertion" in rel.trigger:
-                strategies.append("Gradual activity progression with symptom monitoring")
+                strategies.append("Use compression stockings if recommended")
+            elif "exertional" in rel.trigger or "exercise" in rel.trigger:
+                if rel.clinical_significance == "emergency":
+                    strategies.append("AVOID strenuous activity until cardiac clearance obtained")
+                    strategies.append("Use sublingual nitroglycerin as prescribed for chest pain")
+                else:
+                    strategies.append("Gradual activity progression with symptom monitoring")
+            elif "dairy" in rel.trigger and "stress" in rel.trigger:
+                strategies.append("Avoid dairy products during high-stress periods")
+                strategies.append("Practice stress reduction before meals")
+                strategies.append("Consider lactase enzyme supplements during stressful times")
             elif "dairy" in rel.trigger:
                 strategies.append("Lactose-free diet trial")
+                strategies.append("Consider lactase enzyme supplementation")
         
+        # Environmental factor strategies
         env_factors = environmental_analysis.get("factors", [])
-        if "stress_trigger" in env_factors:
-            strategies.append("Stress management techniques and relaxation training")
+        behavioral_insights = environmental_analysis.get("behavioral_insights", [])
+        
+        if "stress_trigger" in env_factors or "workplace_stress" in env_factors:
+            strategies.append("Implement workplace stress management techniques")
+            strategies.append("Schedule relaxation breaks during workday")
+        
+        if "stress_modulated_symptoms" in behavioral_insights:
+            strategies.append("Practice mindfulness and stress reduction techniques before meals")
+            strategies.append("Create calm eating environments when possible")
+        
+        if "multi_context_trigger_interaction" in behavioral_insights:
+            strategies.append("Keep symptom diary tracking food, stress levels, and symptoms")
+            strategies.append("Identify and modify multiple trigger combinations")
+        
+        if not strategies:
+            strategies.append("Identify and avoid specific symptom triggers")
+        
+        return strategies
         
         if not strategies:
             strategies.append("Identify and avoid specific symptom triggers")
