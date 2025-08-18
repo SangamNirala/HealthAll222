@@ -4852,41 +4852,149 @@ class WorldClassMedicalAI:
         return "\n".join(assessment_parts)
     
     async def _assess_emergency_risk(self, message: str, context: MedicalContext) -> Dict[str, Any]:
-        """Assess emergency risk with proper medical triage approach"""
+        """
+        🚀 PHASE 4 ENHANCED: COMPREHENSIVE EMERGENCY RISK ASSESSMENT WITH SYNDROME DETECTION 🚀
+        
+        Integrates Phase 4 comprehensive pattern analysis with emergency detection
+        """
+        
+        # 🔥 PHASE 4: USE COMPREHENSIVE MEDICAL PATTERN ANALYSIS
+        phase4_results = self.advanced_symptom_recognizer.extract_medical_entities(message)
         
         message_lower = message.lower()
         emergency_detected = False
         emergency_level = "none"
         emergency_reasons = []
+        urgency_level = "routine"
         
-        # Only check for TRUE emergency keywords (not general symptoms)
-        for keyword in self.emergency_keywords:
-            if keyword in message_lower:
-                emergency_detected = True
-                emergency_reasons.append(f"Mentioned: {keyword}")
+        # 🧬 PHASE 4: ANALYZE SYNDROME PROBABILITIES FOR EMERGENCY CONDITIONS
+        syndrome_probs = phase4_results.get("comprehensive_analysis", {}).get("syndrome_probability", {})
         
-        # Check for very specific critical symptom combinations with qualifying language
-        critical_combinations = [
-            ["crushing chest pain", "can't breathe"],
-            ["worst headache ever", "neck stiffness"],
-            ["severe bleeding", "won't stop"],
-            ["passed out", "chest pain"]
+        # Check for high-risk syndromes that indicate emergency/urgent conditions
+        high_risk_syndromes = {
+            "acute_coronary_syndrome": ("emergency", "Acute coronary syndrome detected"),
+            "stroke_syndrome": ("emergency", "Stroke syndrome pattern identified"),
+            "acute_abdomen": ("emergency", "Acute abdomen syndrome detected"),
+            "migraine_syndrome": ("urgent", "Complex migraine syndrome identified")
+        }
+        
+        for syndrome, prob in syndrome_probs.items():
+            if syndrome in high_risk_syndromes and prob > 0.6:
+                syndrome_urgency, syndrome_reason = high_risk_syndromes[syndrome]
+                if syndrome_urgency == "emergency":
+                    emergency_detected = True
+                    emergency_level = "critical"
+                    urgency_level = "emergency"
+                    emergency_reasons.append(f"SYNDROME DETECTED: {syndrome_reason} (confidence: {prob:.2f})")
+                elif syndrome_urgency == "urgent" and urgency_level not in ["emergency"]:
+                    urgency_level = "urgent"
+                    emergency_reasons.append(f"URGENT SYNDROME: {syndrome_reason} (confidence: {prob:.2f})")
+        
+        # 💎 PHASE 4: ANALYZE QUALITY ENTITIES FOR EMERGENCY INDICATORS
+        quality_entities = phase4_results.get("entities", {}).get("quality_descriptors", [])
+        for entity in quality_entities:
+            if hasattr(entity, 'clinical_significance'):
+                if entity.clinical_significance == "urgent" and entity.confidence > 0.85:
+                    if urgency_level == "routine":
+                        urgency_level = "urgent"
+                        emergency_reasons.append(f"Urgent quality pattern: {entity.quality_descriptor}")
+                elif entity.clinical_significance == "emergency":
+                    emergency_detected = True
+                    emergency_level = "critical"
+                    urgency_level = "emergency"
+                    emergency_reasons.append(f"Emergency quality pattern: {entity.quality_descriptor}")
+        
+        # 🏥 PHASE 4: ANALYZE ANATOMICAL ENTITIES FOR HIGH-RISK LOCATIONS
+        anatomical_entities = phase4_results.get("entities", {}).get("anatomical_advanced", [])
+        for entity in anatomical_entities:
+            if hasattr(entity, 'medical_significance'):
+                if entity.medical_significance == "urgent" and entity.confidence > 0.85:
+                    if urgency_level == "routine":
+                        urgency_level = "urgent"
+                        emergency_reasons.append(f"Urgent anatomical finding: {entity.location} ({entity.anatomical_system})")
+                elif entity.medical_significance == "emergency":
+                    emergency_detected = True
+                    emergency_level = "critical"
+                    urgency_level = "emergency"
+                    emergency_reasons.append(f"Emergency anatomical pattern: {entity.location}")
+        
+        # 🔗 PHASE 4: ANALYZE ASSOCIATED SYMPTOM ENTITIES FOR RED FLAG COMBINATIONS
+        associated_entities = phase4_results.get("entities", {}).get("associated_symptoms", [])
+        for entity in associated_entities:
+            if hasattr(entity, 'medical_urgency'):
+                if entity.medical_urgency == "urgent" and urgency_level == "routine":
+                    urgency_level = "urgent"
+                    emergency_reasons.append(f"Urgent symptom combination detected")
+                elif entity.medical_urgency in ["emergency", "critical"]:
+                    emergency_detected = True
+                    emergency_level = "critical"
+                    urgency_level = "emergency"
+                    emergency_reasons.append(f"Emergency symptom combination: {entity.primary_symptom}")
+        
+        # 🚨 FALLBACK: BASIC EMERGENCY KEYWORD DETECTION (Enhanced)
+        emergency_keywords_enhanced = [
+            "crushing chest pain", "can't breathe", "difficulty breathing", 
+            "worst headache ever", "thunderclap headache", "sudden severe",
+            "loss of consciousness", "passed out", "severe allergic reaction",
+            "anaphylaxis", "throat swelling", "severe bleeding"
         ]
         
-        for combination in critical_combinations:
-            if all(symptom in message_lower for symptom in combination):
-                emergency_detected = True
-                emergency_level = "critical"
-                emergency_reasons.append(f"Critical combination: {' + '.join(combination)}")
+        for keyword in emergency_keywords_enhanced:
+            if keyword in message_lower:
+                if "crushing" in keyword or "worst headache" in keyword or "can't breathe" in keyword:
+                    emergency_detected = True
+                    emergency_level = "critical"
+                    urgency_level = "emergency"
+                    emergency_reasons.append(f"Critical keyword detected: {keyword}")
+                elif urgency_level == "routine":
+                    urgency_level = "urgent"
+                    emergency_reasons.append(f"High-risk symptom: {keyword}")
         
-        # Lower confidence to allow for follow-up questions unless very clear emergency
+        # 🎯 PHASE 4: ENHANCED CRITICAL COMBINATION DETECTION
+        critical_combinations = [
+            (["crushing", "chest pain"], "emergency", "Crushing chest pain (ACS concern)"),
+            (["chest pain", "radiating", "arm"], "emergency", "Chest pain with radiation (cardiac)"),
+            (["chest pain", "shortness", "breath"], "emergency", "Chest pain with dyspnea"),
+            (["worst", "headache"], "emergency", "Worst headache ever (SAH concern)"),
+            (["sudden", "weakness"], "emergency", "Sudden weakness (stroke concern)"),
+            (["throbbing", "headache", "nausea"], "urgent", "Migraine syndrome pattern"),
+            (["pulsating", "one side"], "urgent", "Unilateral pulsatile headache")
+        ]
+        
+        for combination, combination_urgency, description in critical_combinations:
+            if all(symptom in message_lower for symptom in combination):
+                if combination_urgency == "emergency":
+                    emergency_detected = True
+                    emergency_level = "critical"
+                    urgency_level = "emergency"
+                elif combination_urgency == "urgent" and urgency_level == "routine":
+                    urgency_level = "urgent"
+                emergency_reasons.append(f"Pattern detected: {description}")
+        
+        # Set emergency detection flag
+        if urgency_level in ["urgent", "emergency"]:
+            emergency_detected = True
+        
+        # Enhanced confidence calculation based on Phase 4 analysis
         confidence = 0.95 if emergency_detected and len(emergency_reasons) > 0 else 0.05
+        if syndrome_probs:  # Boost confidence if syndrome detection was used
+            confidence = min(0.98, confidence + 0.15)
         
         return {
             "emergency_detected": emergency_detected,
             "emergency_level": emergency_level,
+            "urgency_level": urgency_level,  # NEW: Explicit urgency level
             "reasons": emergency_reasons,
-            "confidence": confidence
+            "confidence": confidence,
+            "phase4_analysis": {
+                "syndromes_detected": list(syndrome_probs.keys()),
+                "syndrome_probabilities": syndrome_probs,
+                "entities_analyzed": {
+                    "quality_entities": len(quality_entities),
+                    "anatomical_entities": len(anatomical_entities),
+                    "associated_entities": len(associated_entities)
+                }
+            }
         }
     
     async def _handle_emergency_response(self, emergency_assessment: Dict[str, Any], context: MedicalContext) -> Dict[str, Any]:
