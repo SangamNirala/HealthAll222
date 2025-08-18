@@ -382,7 +382,7 @@ class WorldClassMedicalIntentClassifier:
                 "description": "Reporting progress on treatment",
                 "patterns": [
                     IntentPattern(r"\b(update on|how i'm doing|since last time|progress)\b", 0.9, ClinicalSignificance.MEDIUM),
-                    IntentPattern(r"\b(improvement|getting better|responding well)\b", 0.85, ClinicalSignificance.LOW),
+                    IntentPattern(r"\b(improvement|getting better|responding well)\b", 0.85, ClinicalSignificance.ROUTINE),
                     IntentPattern(r"\b(not working|no improvement|getting worse)\b", 0.9, ClinicalSignificance.HIGH, urgency_boost=0.3),
                 ],
                 "clinical_significance": "medium"
