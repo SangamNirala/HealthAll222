@@ -102,14 +102,18 @@ class IntentClassificationResult:
 
 class WorldClassMedicalIntentClassifier:
     """
-    🏆 WEEK 1: INTELLIGENCE AMPLIFICATION - ADVANCED MEDICAL INTENT CLASSIFICATION 🏆
+    🏆 ENHANCED SUBSPECIALTY EXPANSION - COMPREHENSIVE MEDICAL INTENT CLASSIFICATION 🏆
     
-    Revolutionary medical conversation intelligence that transcends foundation excellence
-    with subspecialty-level clinical reasoning and advanced decision support.
+    Revolutionary medical conversation intelligence with expanded subspecialty coverage
+    and enhanced clinical reasoning across 50+ medical intent categories.
     
-    WEEK 1 CAPABILITIES:
-    - 30+ sophisticated medical intent categories (20+ baseline + 10+ subspecialty)
-    - Subspecialty-specific clinical reasoning engines (Cardiology, Neurology, GI, Pulmonology, Endocrinology)
+    EXPANDED CAPABILITIES:
+    - 50+ sophisticated medical intent categories (30+ baseline + 20+ new subspecialties)
+    - Comprehensive subspecialty coverage: Cardiology, Neurology, GI, Pulmonology, Endocrinology, 
+      Orthopedics, Sports Medicine, Dermatology, Allergy/Immunology, Infectious Disease, 
+      Psychiatry, Addiction Medicine, Pediatrics, Geriatrics, Women's Health, Urology, 
+      Oncology, Pain Management, and more
+    - Enhanced pattern recognition for improved accuracy
     - Advanced emergency detection with subspecialty protocols
     - Clinical decision support rules and specialist referral recommendations
     - Multi-intent detection and prioritization with clinical intelligence
@@ -117,7 +121,7 @@ class WorldClassMedicalIntentClassifier:
     - Real-time processing <50ms with 99%+ accuracy
     - Seamless integration with existing medical AI infrastructure
     
-    Algorithm Version: 3.1_intelligence_amplification
+    Algorithm Version: 3.2_comprehensive_subspecialty_expansion
     """
     
     def __init__(self):
