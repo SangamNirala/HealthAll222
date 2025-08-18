@@ -141,7 +141,7 @@ class WorldClassMedicalIntentClassifier:
             "intent_frequency": defaultdict(int)
         }
         
-        logger.info("WorldClassMedicalIntentClassifier initialized - Algorithm v3.1_foundation_excellence")
+        logger.info("WorldClassMedicalIntentClassifier initialized - Algorithm v3.1_intelligence_amplification")
     
     def _load_comprehensive_medical_intent_taxonomy(self) -> Dict[str, Dict[str, Any]]:
         """
