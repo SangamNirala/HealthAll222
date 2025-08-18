@@ -5795,12 +5795,13 @@ class WorldClassMedicalAI:
             symptoms_detected = advanced_extraction.get("entities", {}).get("symptoms", [])
             causal_relationships = contextual_reasoning.get("causal_relationships", [])
             
+            # 🧠 STEP 2.2: PRIORITIZE CONTEXTUAL PATTERNS OVER BASIC SYMPTOMS
             # Only treat as symptom if we actually detected medical symptoms or contextual patterns
-            if symptoms_detected or causal_relationships:
+            if causal_relationships or symptoms_detected:
                 context.chief_complaint = message
                 context.current_stage = MedicalInterviewStage.HISTORY_PRESENT_ILLNESS
                 
-                # Create contextually aware response based on detected patterns
+                # 🚀 STEP 2.2: CONTEXTUALLY INTELLIGENT RESPONSE GENERATION
                 if causal_relationships:
                     # Use contextual reasoning to provide more intelligent response
                     triggers = [rel.get("trigger", "") for rel in causal_relationships if rel.get("trigger")]
@@ -5808,8 +5809,8 @@ class WorldClassMedicalAI:
                     
                     contextual_response = self._generate_contextual_greeting_response(triggers, symptoms, contextual_reasoning)
                     ai_response = await self._generate_empathetic_response(contextual_response)
-                else:
-                    # Fallback to basic symptom response
+                elif symptoms_detected:
+                    # Fallback to basic symptom response with enhanced contextual awareness
                     symptom_names = []
                     for symptom in symptoms_detected:
                         if hasattr(symptom, 'symptom'):
@@ -5819,16 +5820,30 @@ class WorldClassMedicalAI:
                     
                     symptoms_text = " and ".join(symptom_names) if len(symptom_names) > 1 else (symptom_names[0] if symptom_names else "symptoms")
                     
+                    # Enhanced response with contextual intelligence
+                    contextual_factors = contextual_reasoning.get("contextual_factors", {})
+                    if contextual_factors.get("positional") or contextual_factors.get("temporal"):
+                        contextual_note = " I noticed some contextual patterns in your description that will help with the diagnosis."
+                    else:
+                        contextual_note = ""
+                    
                     ai_response = await self._generate_empathetic_response(
-                        f"Thank you for sharing that you're experiencing {symptoms_text}. I want to gather more specific details to better understand your condition. "
+                        f"Thank you for sharing that you're experiencing {symptoms_text}.{contextual_note} I want to gather more specific details to better understand your condition. "
                         f"Let's start with when exactly these symptoms began - was the onset sudden or did it develop gradually over time?"
                     )
+                else:
+                    # This should rarely happen now with improved extraction
+                    ai_response = await self._generate_empathetic_response(
+                        "I want to make sure I understand your concerns correctly. Could you describe what you're experiencing in a bit more detail? "
+                        "For example, any pain, discomfort, or changes you've noticed?"
+                    )
             else:
-                # No symptoms detected - ask for more information
+                # No symptoms detected - ask for more information with enhanced guidance
                 context.current_stage = MedicalInterviewStage.CHIEF_COMPLAINT
                 ai_response = await self._generate_empathetic_response(
-                    "I understand you'd like to discuss something. Could you please describe any specific symptoms or health concerns you're experiencing? "
-                    "This will help me provide you with the most accurate medical guidance."
+                    "I understand you'd like to discuss something health-related. To provide you with the most accurate guidance, "
+                    "could you describe any specific symptoms you're experiencing? For example, you might say something like "
+                    "'I have chest pain when I climb stairs' or 'I get dizzy when I stand up' - details like these help me understand the context."
                 )
         
         return {
