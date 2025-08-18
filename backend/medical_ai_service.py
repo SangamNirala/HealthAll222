@@ -230,6 +230,7 @@ class FrequencyEntity:
     periodicity: Optional[str] = None  # hourly, daily, weekly, monthly
     trigger_correlation: Dict[str, float] = None  # trigger: correlation_strength
     medical_implications: List[str] = None  # clinical significance of timing
+    temporal_correlation: Optional[str] = None  # Added for compatibility
     
     def __post_init__(self):
         if self.temporal_distribution is None:
