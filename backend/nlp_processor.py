@@ -184,8 +184,6 @@ class IntelligentTextNormalizer:
             " & ": " and ",
             " w/ ": " with ",
             " w/o ": " without ",
-            " 2 ": " for ",  # Context: "fever 2 days" -> "fever for days"
-            " 4 ": " for ",
             " b4 ": " before ",
             " ur ": " your ",
             " u ": " you ",
