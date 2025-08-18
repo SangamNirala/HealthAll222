@@ -11105,7 +11105,7 @@ async def analyze_contextual_medical_reasoning(request: ContextualAnalysisReques
         medical_ai_service = get_medical_ai()
         
         # Extract medical entities with Step 2.2 contextual reasoning
-        result = medical_ai_service.symptom_recognizer.extract_medical_entities(request.text)
+        result = medical_ai_service.advanced_symptom_recognizer.extract_medical_entities(request.text)
         
         return ContextualAnalysisResponse(
             entities=result.get("entities", {}),
