@@ -472,6 +472,9 @@ class AdvancedSymptomRecognizer:
         self.behavioral_pattern_analyzer = self._load_behavioral_medical_patterns()
         self.circadian_medical_intelligence = self._load_circadian_pattern_system()
         
+        # 🧠 STEP 2.2: CONTEXT-AWARE MEDICAL REASONING ENGINE
+        self.context_aware_reasoner = ContextAwareMedicalReasoner()
+        
     def _load_comprehensive_medical_patterns_phase4(self) -> Dict[str, List[str]]:
         """
         🔥 PHASE 4: COMPREHENSIVE MEDICAL PATTERNS - 270+ REVOLUTIONARY PATTERNS
