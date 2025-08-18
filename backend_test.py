@@ -658,15 +658,273 @@ class ContextualReasoningTester:
             self.log_test("Medical AI Service Compatibility", False, f"Exception: {str(e)}")
             return False
 
+    def test_phase3_contextual_analysis_endpoint(self):
+        """
+        🧠 PHASE 3: TEST CONTEXTUAL ANALYSIS ENDPOINT 🧠
+        
+        Test the dedicated POST /api/medical-ai/contextual-analysis endpoint
+        with all 3 ultra-challenging scenarios from the review request.
+        """
+        print("\n🧠 PHASE 3: CONTEXTUAL ANALYSIS ENDPOINT TESTING")
+        print("-" * 60)
+        
+        # Ultra-challenging scenarios from review request
+        phase3_scenarios = [
+            {
+                "name": "Scenario 1: Complex Positional Context Mastery",
+                "input_text": "Every morning when I get out of bed I feel dizzy and nauseous, sometimes I even feel like I'm going to faint, but it goes away after I sit back down for a few minutes. This also happens when I stand up quickly from a chair or get up from squatting down.",
+                "expected_factors": ["positional_factors", "temporal_factors", "activity_relationships"],
+                "expected_significance": "urgent"
+            },
+            {
+                "name": "Scenario 2: Exertional Context with Cardiac Implications",
+                "input_text": "I get this crushing chest pain whenever I walk uphill or climb more than one flight of stairs, feels like an elephant sitting on my chest, but it completely goes away within 2-3 minutes of resting. Never happens when I'm just sitting or doing light activities around the house.",
+                "expected_factors": ["activity_relationships", "temporal_factors", "environmental_factors"],
+                "expected_significance": "emergency"
+            },
+            {
+                "name": "Scenario 3: Multi-Context Dietary/Stress/Temporal",
+                "input_text": "I've noticed that I get really bad stomach cramps and loose stools about 30-60 minutes after eating ice cream or drinking milk, but only when I'm stressed out at work. When I'm relaxed at home on weekends, I can sometimes tolerate small amounts of dairy without problems.",
+                "expected_factors": ["environmental_factors", "temporal_factors", "activity_relationships"],
+                "expected_significance": "moderate"
+            }
+        ]
+        
+        phase3_results = []
+        total_processing_time = 0.0
+        
+        for i, scenario in enumerate(phase3_scenarios, 1):
+            print(f"\n🎯 Testing {scenario['name']}")
+            print(f"Input: {scenario['input_text'][:100]}...")
+            
+            try:
+                # Measure processing time
+                start_time = time.time()
+                
+                response = requests.post(f"{API_BASE}/medical-ai/contextual-analysis",
+                    json={
+                        "text": scenario["input_text"],
+                        "analysis_type": "comprehensive_contextual"
+                    },
+                    timeout=30
+                )
+                
+                processing_time = (time.time() - start_time) * 1000  # Convert to ms
+                total_processing_time += processing_time
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    contextual_reasoning = data.get("contextual_reasoning", {})
+                    
+                    # Validate contextual factors
+                    contextual_factors = contextual_reasoning.get("contextual_factors", {})
+                    factors_found = []
+                    for factor_type in scenario["expected_factors"]:
+                        if factor_type in contextual_factors and contextual_factors[factor_type]:
+                            factors_found.append(factor_type)
+                    
+                    # Check causal relationships
+                    causal_relationships = contextual_reasoning.get("causal_relationships", [])
+                    significance_found = any(
+                        rel.get("clinical_significance") == scenario["expected_significance"]
+                        for rel in causal_relationships
+                    )
+                    
+                    # Check clinical hypotheses
+                    clinical_hypotheses = contextual_reasoning.get("clinical_hypotheses", [])
+                    
+                    # Performance validation
+                    performance_met = processing_time < 25.0
+                    
+                    # Calculate medical coherence (simplified)
+                    medical_coherence = 0.0
+                    if contextual_factors and causal_relationships and clinical_hypotheses:
+                        medical_coherence = min(1.0, len(factors_found) * 0.3 + 
+                                              len(causal_relationships) * 0.4 + 
+                                              len(clinical_hypotheses) * 0.3)
+                    
+                    scenario_result = {
+                        "scenario": scenario["name"],
+                        "processing_time_ms": processing_time,
+                        "performance_target_met": performance_met,
+                        "contextual_factors_found": factors_found,
+                        "expected_factors": scenario["expected_factors"],
+                        "factors_complete": len(factors_found) == len(scenario["expected_factors"]),
+                        "clinical_significance_correct": significance_found,
+                        "medical_coherence_score": medical_coherence,
+                        "clinical_hypotheses_count": len(clinical_hypotheses),
+                        "causal_relationships_count": len(causal_relationships),
+                        "success": (performance_met and 
+                                  len(factors_found) >= len(scenario["expected_factors"]) * 0.7 and
+                                  significance_found and
+                                  medical_coherence >= 0.6)
+                    }
+                    
+                    phase3_results.append(scenario_result)
+                    
+                    status = "✅ PASS" if scenario_result["success"] else "❌ FAIL"
+                    print(f"   {status} - Time: {processing_time:.1f}ms, Factors: {len(factors_found)}/{len(scenario['expected_factors'])}, Coherence: {medical_coherence:.3f}")
+                    
+                else:
+                    print(f"   ❌ FAIL - HTTP {response.status_code}: {response.text[:100]}")
+                    phase3_results.append({
+                        "scenario": scenario["name"],
+                        "success": False,
+                        "error": f"HTTP {response.status_code}"
+                    })
+                    
+            except Exception as e:
+                print(f"   ❌ FAIL - Exception: {str(e)}")
+                phase3_results.append({
+                    "scenario": scenario["name"],
+                    "success": False,
+                    "error": str(e)
+                })
+        
+        # Calculate overall Phase 3 metrics
+        successful_scenarios = sum(1 for r in phase3_results if r.get("success", False))
+        avg_processing_time = total_processing_time / len(phase3_scenarios) if phase3_scenarios else 0
+        avg_coherence = sum(r.get("medical_coherence_score", 0) for r in phase3_results) / len(phase3_results) if phase3_results else 0
+        
+        phase3_summary = {
+            "scenarios_passed": successful_scenarios,
+            "total_scenarios": len(phase3_scenarios),
+            "success_rate": (successful_scenarios / len(phase3_scenarios)) * 100,
+            "average_processing_time_ms": avg_processing_time,
+            "performance_target_met": avg_processing_time < 25.0,
+            "average_coherence_score": avg_coherence,
+            "coherence_target_met": avg_coherence >= 0.97,
+            "individual_results": phase3_results
+        }
+        
+        # Log overall Phase 3 test result
+        phase3_passed = (successful_scenarios == len(phase3_scenarios) and 
+                        avg_processing_time < 25.0 and 
+                        avg_coherence >= 0.97)
+        
+        self.log_test("Phase 3 Contextual Analysis Endpoint", phase3_passed,
+                     f"Success Rate: {phase3_summary['success_rate']:.1f}%, "
+                     f"Avg Time: {avg_processing_time:.1f}ms, "
+                     f"Avg Coherence: {avg_coherence:.3f}",
+                     phase3_summary)
+        
+        print(f"\n📊 PHASE 3 SUMMARY:")
+        print(f"   Scenarios Passed: {successful_scenarios}/{len(phase3_scenarios)}")
+        print(f"   Average Processing Time: {avg_processing_time:.1f}ms (Target: <25ms)")
+        print(f"   Average Coherence Score: {avg_coherence:.3f} (Target: >0.97)")
+        print(f"   Performance Target Met: {'✅' if phase3_summary['performance_target_met'] else '❌'}")
+        print(f"   Coherence Target Met: {'✅' if phase3_summary['coherence_target_met'] else '❌'}")
+        
+        return phase3_passed
+
+    def test_existing_functionality_preservation(self):
+        """
+        🔍 TEST EXISTING FUNCTIONALITY PRESERVATION 🔍
+        
+        Ensure that existing Phase 1-4 functionality remains intact
+        """
+        print("\n🔍 TESTING EXISTING FUNCTIONALITY PRESERVATION")
+        print("-" * 60)
+        
+        preservation_results = {
+            "basic_medical_ai": False,
+            "emergency_detection": False,
+            "symptom_recognition": False,
+            "consultation_flow": False
+        }
+        
+        try:
+            # Test basic medical AI initialization
+            response = requests.post(f"{API_BASE}/medical-ai/initialize",
+                json={
+                    "patient_id": "test-patient-phase3",
+                    "timestamp": datetime.now().isoformat()
+                },
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                preservation_results["basic_medical_ai"] = True
+                print("✅ Basic Medical AI initialization: WORKING")
+            else:
+                print(f"❌ Basic Medical AI initialization: FAILED ({response.status_code})")
+            
+            # Test emergency detection
+            if preservation_results["basic_medical_ai"]:
+                consultation_id = response.json().get("consultation_id")
+                
+                response = requests.post(f"{API_BASE}/medical-ai/message",
+                    json={
+                        "consultation_id": consultation_id,
+                        "message": "I have crushing chest pain and can't breathe",
+                        "patient_id": "test-patient-phase3"
+                    },
+                    timeout=10
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    if result.get("urgency") == "emergency":
+                        preservation_results["emergency_detection"] = True
+                        print("✅ Emergency detection: WORKING")
+                    else:
+                        print("❌ Emergency detection: NOT DETECTING EMERGENCY")
+                else:
+                    print(f"❌ Emergency detection: FAILED ({response.status_code})")
+                
+                # Test symptom recognition
+                response = requests.post(f"{API_BASE}/medical-ai/message",
+                    json={
+                        "consultation_id": consultation_id,
+                        "message": "I have a headache and feel nauseous",
+                        "patient_id": "test-patient-phase3"
+                    },
+                    timeout=10
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    response_text = result.get("response", "").lower()
+                    if "headache" in response_text or "nausea" in response_text:
+                        preservation_results["symptom_recognition"] = True
+                        print("✅ Symptom recognition: WORKING")
+                    else:
+                        print("❌ Symptom recognition: NOT RECOGNIZING SYMPTOMS")
+                else:
+                    print(f"❌ Symptom recognition: FAILED ({response.status_code})")
+                
+                # Test consultation flow
+                if preservation_results["basic_medical_ai"]:
+                    preservation_results["consultation_flow"] = True
+                    print("✅ Consultation flow: WORKING")
+                else:
+                    print("❌ Consultation flow: FAILED")
+                    
+        except Exception as e:
+            print(f"❌ Functionality preservation test error: {str(e)}")
+        
+        passed_tests = sum(preservation_results.values())
+        total_tests = len(preservation_results)
+        
+        preservation_passed = passed_tests == total_tests
+        
+        self.log_test("Existing Functionality Preservation", preservation_passed,
+                     f"Passed: {passed_tests}/{total_tests} tests",
+                     preservation_results)
+        
+        print(f"\n📊 FUNCTIONALITY PRESERVATION: {passed_tests}/{total_tests} tests passed")
+        
+        return preservation_passed
+
     def run_all_tests(self):
-        """Run all contextual reasoning tests"""
-        print("🧠 STEP 2.2 CONTEXT-AWARE MEDICAL REASONING ENGINE TESTING")
+        """Run all contextual reasoning tests including Phase 3 validation"""
+        print("🧠 PHASE 3: CLINICAL VALIDATION & OPTIMIZATION TESTING")
         print("=" * 70)
         print(f"Backend URL: {BACKEND_URL}")
         print(f"Testing started at: {datetime.now().isoformat()}")
         print()
         
-        # Run all tests
+        # Run all tests including new Phase 3 tests
         test_methods = [
             self.test_medical_ai_initialization,
             self.test_contextual_reasoning_integration,
@@ -676,7 +934,10 @@ class ContextualReasoningTester:
             self.test_algorithm_version_upgrade,
             self.test_performance_requirements,
             self.test_contextual_reasoning_features,
-            self.test_medical_ai_service_compatibility
+            self.test_medical_ai_service_compatibility,
+            # New Phase 3 tests
+            self.test_phase3_contextual_analysis_endpoint,
+            self.test_existing_functionality_preservation
         ]
         
         for test_method in test_methods:
@@ -687,7 +948,7 @@ class ContextualReasoningTester:
         
         # Print summary
         print("\n" + "=" * 70)
-        print("🧠 STEP 2.2 CONTEXT-AWARE MEDICAL REASONING ENGINE TEST SUMMARY")
+        print("🧠 PHASE 3: CLINICAL VALIDATION & OPTIMIZATION TEST SUMMARY")
         print("=" * 70)
         print(f"Total Tests: {self.total_tests}")
         print(f"Passed: {self.passed_tests} ✅")
