@@ -375,7 +375,7 @@ class WorldClassMedicalIntentClassifier:
                     IntentPattern(r"\b(check back|return visit|come back|see again)\b", 0.85, ClinicalSignificance.ROUTINE),
                     IntentPattern(r"\b(monitoring|track progress|follow progress)\b", 0.8, ClinicalSignificance.MEDIUM),
                 ],
-                "clinical_significance": "low"
+                "clinical_significance": "routine"
             },
             
             "progress_reporting": {
