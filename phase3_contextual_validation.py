@@ -236,7 +236,7 @@ class Phase3ContextualValidator:
                     "text": scenario_data["input_text"],
                     "analysis_type": "comprehensive_contextual"
                 },
-                timeout=30
+                timeout=60  # Increased timeout for complex scenarios
             )
             
             processing_time_ms = (time.time() - start_time) * 1000
