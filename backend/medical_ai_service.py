@@ -832,11 +832,62 @@ class WorldClassMedicalAI:
         return f"Now I'd like to ask about some related symptoms. Have you noticed any associated symptoms like nausea, dizziness, fever, or changes in appetite along with your {context.chief_complaint}?"
     
     async def _handle_chief_complaint_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
-        """Handle chief complaint collection"""
-        context.chief_complaint = message
-        context.current_stage = MedicalInterviewStage.HISTORY_PRESENT_ILLNESS
+        """Handle chief complaint collection with improved message processing"""
         
-        response = f"Thank you for sharing that you're experiencing {message}. I want to gather more specific details to better understand your condition. Let's start with when exactly these symptoms began - was the onset sudden or did it develop gradually over time?"
+        # Extract medical entities first
+        medical_entities = await self._extract_medical_entities(message)
+        symptoms_detected = medical_entities.get("symptoms", [])
+        
+        # Check for common greetings or non-medical responses
+        greetings = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'greetings']
+        message_lower = message.lower().strip()
+        
+        # If it's just a greeting or very short non-medical message, ask for symptoms
+        if message_lower in greetings or len(message.strip()) < 3:
+            response = await self._generate_empathetic_response(
+                "I understand you'd like to start our consultation. Could you please describe any specific symptoms or health concerns you're experiencing? "
+                "For example, you might say 'I have a headache' or 'I'm feeling chest pain'. This will help me provide you with the most accurate medical guidance."
+            )
+            
+            return {
+                "response": response,
+                "context": asdict(context),
+                "stage": context.current_stage.value,
+                "urgency": context.emergency_level
+            }
+        
+        # If medical symptoms are detected, process normally
+        if symptoms_detected:
+            context.chief_complaint = message
+            context.current_stage = MedicalInterviewStage.HISTORY_PRESENT_ILLNESS
+            
+            # Create symptom-specific response
+            symptom_names = []
+            for symptom in symptoms_detected:
+                if symptom == "fever":
+                    symptom_names.append("a fever")
+                elif symptom == "headache":
+                    symptom_names.append("a headache")
+                elif symptom == "pain":
+                    symptom_names.append("pain")
+                else:
+                    symptom_names.append(symptom.replace("_", " "))
+            
+            symptoms_text = " and ".join(symptom_names) if len(symptom_names) > 1 else symptom_names[0]
+            
+            response = await self._generate_empathetic_response(
+                f"Thank you for sharing that you're experiencing {symptoms_text}. I want to gather more specific details to better understand your condition. "
+                f"Let's start with when exactly these symptoms began - was the onset sudden or did it develop gradually over time?"
+            )
+        else:
+            # No clear symptoms detected - ask for clarification
+            context.chief_complaint = message
+            context.current_stage = MedicalInterviewStage.HISTORY_PRESENT_ILLNESS
+            
+            response = await self._generate_empathetic_response(
+                f"I understand you mentioned '{message}'. Could you help me understand this better by describing any specific symptoms you're experiencing? "
+                f"For instance, are you feeling any pain, discomfort, or unusual sensations? When did you first notice these concerns?"
+            )
         
         return {
             "response": response,
