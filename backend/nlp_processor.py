@@ -197,10 +197,10 @@ class IntelligentTextNormalizer:
     def _load_verb_tense_patterns(self) -> List[Dict[str, str]]:
         """Load verb tense correction patterns for medical context"""
         return [
-            {"pattern": r"\bhaving\s+(.+?)\s+(\d+)\s+days?", "replacement": r"have been having \1 for \2 days", "desc": "having X Y days -> have been having X for Y days"},
+            # Only apply these if the grammar patterns didn't already handle it
             {"pattern": r"\bhurt\s+(\d+)\s+days?", "replacement": r"has been hurting for \1 days", "desc": "hurt X days -> has been hurting for X days"},
             {"pattern": r"\bpain\s+(\d+)\s+days?", "replacement": r"pain for \1 days", "desc": "pain X days -> pain for X days"},
-            {"pattern": r"\bfever\s+(\d+)\s+days?", "replacement": r"fever for \1 days", "desc": "fever X days -> fever for X days"},
+            # Skip fever pattern as it's handled by grammar patterns
         ]
     
     def _extract_and_preserve_medical_entities(self, text: str) -> List[str]:
