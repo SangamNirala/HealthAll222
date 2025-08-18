@@ -1,12 +1,16 @@
 """
 Advanced NLP Processor for Medical Text Normalization
 Implements intelligent text preprocessing to handle poor grammar, typos, and informal language in medical queries
+Enhanced with world-class medical spell correction (Step 1.2)
 """
 
 import re
 import json
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
+
+# Import the advanced medical spell checker
+from medical_spell_checker import AdvancedMedicalSpellChecker, SpellCorrectionResult
 
 
 @dataclass
