@@ -6584,6 +6584,46 @@ class WorldClassMedicalAI:
                     urgency_level = "urgent"
                     emergency_reasons.append(f"High-risk symptom: {keyword}")
         
+        # 🧠 STEP 2.2: INTEGRATE CONTEXTUAL REASONING RESULTS FOR ENHANCED URGENCY ASSESSMENT
+        contextual_reasoning = phase4_results.get("contextual_reasoning", {})
+        
+        # Check causal relationships for urgency escalation
+        causal_relationships = contextual_reasoning.get("causal_relationships", [])
+        for relationship in causal_relationships:
+            rel_clinical_sig = relationship.get("clinical_significance", "routine")
+            if rel_clinical_sig == "emergency":
+                emergency_detected = True
+                emergency_level = "critical"  
+                urgency_level = "emergency"
+                emergency_reasons.append(f"CONTEXTUAL EMERGENCY: {relationship.get('medical_mechanism', 'High-risk pattern')}")
+            elif rel_clinical_sig == "urgent" and urgency_level == "routine":
+                urgency_level = "urgent"
+                emergency_reasons.append(f"CONTEXTUAL URGENT: {relationship.get('medical_mechanism', 'Urgent pattern')}")
+        
+        # Check contextual significance for additional urgency markers
+        contextual_significance = contextual_reasoning.get("contextual_significance", "routine")
+        if contextual_significance == "urgent" and urgency_level == "routine":
+            urgency_level = "urgent"
+            emergency_reasons.append("Contextually significant symptom pattern detected")
+        elif contextual_significance == "emergency":
+            emergency_detected = True
+            emergency_level = "critical"
+            urgency_level = "emergency"
+            emergency_reasons.append("Contextually critical symptom pattern detected")
+        
+        # Check clinical hypotheses for urgent conditions
+        clinical_hypotheses = contextual_reasoning.get("clinical_hypotheses", [])
+        for hypothesis in clinical_hypotheses:
+            hypothesis_lower = hypothesis.lower() if isinstance(hypothesis, str) else ""
+            if "exertional angina" in hypothesis_lower or "cardiac evaluation" in hypothesis_lower:
+                if urgency_level != "emergency":
+                    urgency_level = "urgent"
+                    emergency_reasons.append(f"Clinical hypothesis: {hypothesis}")
+            elif "orthostatic" in hypothesis_lower and "morning" in hypothesis_lower:
+                if urgency_level == "routine":
+                    urgency_level = "urgent"
+                    emergency_reasons.append(f"Fall risk assessment: {hypothesis}")
+        
         # 🎯 PHASE 4: ENHANCED CRITICAL COMBINATION DETECTION
         critical_combinations = [
             (["crushing", "chest pain"], "emergency", "Crushing chest pain (ACS concern)"),
