@@ -10997,6 +10997,47 @@ def get_clinical_decision_support():
             raise HTTPException(status_code=503, detail=f"Clinical Decision Support System initialization failed: {str(e)}")
     return clinical_decision_support
 
+def get_provider_intelligence():
+    """Get Provider Intelligence System with lazy initialization"""
+    global provider_intelligence
+    if provider_intelligence is None:
+        try:
+            knowledge_base = ComprehensiveMedicalKnowledgeBase(db)
+            cds = get_clinical_decision_support()
+            provider_intelligence = ProviderIntelligenceSystem(db, knowledge_base, cds)
+            print("Provider Intelligence System initialized successfully")
+        except Exception as e:
+            print(f"Error initializing Provider Intelligence System: {e}")
+            raise HTTPException(status_code=503, detail=f"Provider Intelligence System initialization failed: {str(e)}")
+    return provider_intelligence
+
+def get_clinical_documentation_ai():
+    """Get Clinical Documentation AI with lazy initialization"""
+    global clinical_documentation_ai
+    if clinical_documentation_ai is None:
+        try:
+            knowledge_base = ComprehensiveMedicalKnowledgeBase(db)
+            provider_intel = get_provider_intelligence()
+            clinical_documentation_ai = ClinicalDocumentationAI(db, knowledge_base, provider_intel)
+            print("Clinical Documentation AI initialized successfully")
+        except Exception as e:
+            print(f"Error initializing Clinical Documentation AI: {e}")
+            raise HTTPException(status_code=503, detail=f"Clinical Documentation AI initialization failed: {str(e)}")
+    return clinical_documentation_ai
+
+def get_workflow_optimizer():
+    """Get Workflow Optimizer with lazy initialization"""
+    global workflow_optimizer
+    if workflow_optimizer is None:
+        try:
+            provider_intel = get_provider_intelligence()
+            workflow_optimizer = AdvancedWorkflowOptimizer(db, provider_intel)
+            print("Workflow Optimizer initialized successfully")
+        except Exception as e:
+            print(f"Error initializing Workflow Optimizer: {e}")
+            raise HTTPException(status_code=503, detail=f"Workflow Optimizer initialization failed: {str(e)}")
+    return workflow_optimizer
+
 def get_medical_knowledge_db():
     """Get Medical Knowledge Database with lazy initialization"""
     global medical_knowledge_db
