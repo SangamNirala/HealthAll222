@@ -10952,6 +10952,7 @@ medical_ai = None
 medical_knowledge_db = None
 pdf_generator = None
 soap_generator = None
+clinical_decision_support = None
 
 def get_medical_ai():
     """Get Medical AI service with lazy initialization"""
@@ -10964,6 +10965,18 @@ def get_medical_ai():
             print(f"Error initializing Medical AI Service: {e}")
             raise HTTPException(status_code=503, detail=f"Medical AI service initialization failed: {str(e)}")
     return medical_ai
+
+def get_clinical_decision_support():
+    """Get Clinical Decision Support System with lazy initialization"""
+    global clinical_decision_support
+    if clinical_decision_support is None:
+        try:
+            clinical_decision_support = ClinicalDecisionSupportSystem(db)
+            print("Clinical Decision Support System initialized successfully")
+        except Exception as e:
+            print(f"Error initializing Clinical Decision Support System: {e}")
+            raise HTTPException(status_code=503, detail=f"Clinical Decision Support System initialization failed: {str(e)}")
+    return clinical_decision_support
 
 def get_medical_knowledge_db():
     """Get Medical Knowledge Database with lazy initialization"""
