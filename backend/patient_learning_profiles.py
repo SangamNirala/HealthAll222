@@ -503,7 +503,7 @@ class PatientLearningProfileManager:
     async def _log_conversation_learning_data(self, patient_id: str, learning_data: Dict[str, Any]):
         """Log detailed conversation learning data for analysis"""
         try:
-            if not self.db:
+            if self.db is None:
                 return
             
             conversation_entry = {
