@@ -7631,18 +7631,23 @@ class WorldClassMedicalAI:
     async def _generate_hpi_question(self, element: str, context: MedicalContext) -> str:
         """Generate specific HPI questions using OLDCARTS framework"""
         
+        # Ensure we have a valid chief complaint
+        chief_complaint = context.chief_complaint or "symptoms"
+        if not chief_complaint or chief_complaint.strip() == "":
+            chief_complaint = "symptoms"
+        
         hpi_questions = {
-            "onset": f"When exactly did your {context.chief_complaint} start? Was it sudden or gradual?",
-            "location": f"Where exactly do you feel the {context.chief_complaint}? Can you point to the specific area?",
-            "duration": f"How long do episodes of {context.chief_complaint} typically last?",
-            "character": f"How would you describe the quality of your {context.chief_complaint}? For example, is it sharp, dull, burning, crushing, or aching?",
-            "alleviating": f"Is there anything that makes your {context.chief_complaint} better or worse? Such as position, activity, food, or medication?",
-            "radiation": f"Does your {context.chief_complaint} spread or radiate to any other areas of your body?",
-            "timing": f"Is your {context.chief_complaint} constant or does it come and go? Are there specific times of day when it's worse?",
-            "severity": f"On a scale of 1 to 10, with 10 being the worst pain you can imagine, how would you rate your {context.chief_complaint}?"
+            "onset": f"When exactly did your {chief_complaint} start? Was it sudden or gradual?",
+            "location": f"Where exactly do you feel the {chief_complaint}? Can you point to the specific area?",
+            "duration": f"How long do episodes of {chief_complaint} typically last?",
+            "character": f"How would you describe the quality of your {chief_complaint}? For example, is it sharp, dull, burning, crushing, or aching?",
+            "alleviating": f"Is there anything that makes your {chief_complaint} better or worse? Such as position, activity, food, or medication?",
+            "radiation": f"Does your {chief_complaint} spread or radiate to any other areas of your body?",
+            "timing": f"Is your {chief_complaint} constant or does it come and go? Are there specific times of day when it's worse?",
+            "severity": f"On a scale of 1 to 10, with 10 being the worst pain you can imagine, how would you rate your {chief_complaint}?"
         }
         
-        base_question = hpi_questions.get(element, f"Can you tell me more about your {context.chief_complaint}?")
+        base_question = hpi_questions.get(element, f"Can you tell me more about your {chief_complaint}?")
         
         # Add clinical reasoning
         reasoning_map = {
