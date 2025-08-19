@@ -7485,11 +7485,15 @@ class WorldClassMedicalAI:
         updated_context = await self._update_medical_context(medical_entities, context, normalized_message)
         
         # 4. Determine next action based on interview stage (use normalized message)
+        print(f"DEBUG: Current stage before routing: {updated_context.current_stage}")
+        
         if updated_context.current_stage == MedicalInterviewStage.GREETING:
             return await self._handle_greeting_stage(normalized_message, updated_context)
         elif updated_context.current_stage == MedicalInterviewStage.CHIEF_COMPLAINT:
+            print(f"DEBUG: Routing to chief_complaint stage")
             return await self._handle_chief_complaint_stage(normalized_message, updated_context)
         elif updated_context.current_stage == MedicalInterviewStage.HISTORY_PRESENT_ILLNESS:
+            print(f"DEBUG: Routing to HPI stage")
             return await self._handle_hpi_stage(normalized_message, updated_context)
         elif updated_context.current_stage == MedicalInterviewStage.REVIEW_OF_SYSTEMS:
             return await self._handle_ros_stage(normalized_message, updated_context)
