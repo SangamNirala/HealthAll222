@@ -7352,8 +7352,12 @@ class WorldClassMedicalAI:
         
         return context
     
-    async def process_patient_message(self, message: str, context: MedicalContext) -> Dict[str, Any]:
-        """Process patient message and generate appropriate medical response with intelligent text normalization"""
+    async def process_patient_message(self, message: str, context: MedicalContext, conversation_history: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+        """Process patient message and generate appropriate medical response with conversation tracking"""
+        
+        # 🚀 ENHANCED: Process conversation history for context tracking
+        if conversation_history:
+            self._process_conversation_history(context, conversation_history)
         
         # 0. Apply intelligent text normalization to patient input
         normalization_result = self.text_normalizer.normalize_medical_text(message)
