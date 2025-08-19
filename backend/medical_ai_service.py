@@ -7641,16 +7641,9 @@ class WorldClassMedicalAI:
     async def _handle_hpi_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
         """Handle History of Present Illness using OLDCARTS framework with enhanced conversation tracking"""
         
-        print(f"DEBUG: _handle_hpi_stage called with message: '{message}', stage: {context.current_stage}")
-        
         # 🚀 ENHANCED: Check if we've asked this question before to prevent loops
-        try:
-            if self._is_repeating_question(context):
-                print(f"DEBUG: Repeating question detected, calling loop recovery")
-                return await self._handle_conversation_loop_recovery(message, context)
-        except Exception as e:
-            print(f"DEBUG: Exception in _is_repeating_question or _handle_conversation_loop_recovery: {e}")
-            raise e
+        if self._is_repeating_question(context):
+            return await self._handle_conversation_loop_recovery(message, context)
         
         # 🧠 STEP 2.2: Extract contextual reasoning from message
         advanced_extraction = self.advanced_symptom_recognizer.extract_medical_entities(message)
