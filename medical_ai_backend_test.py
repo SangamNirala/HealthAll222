@@ -8,7 +8,7 @@ import uuid
 import base64
 
 class MedicalAITester:
-    def __init__(self, base_url="https://medical-classifier.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://chatbot-fix-4.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
