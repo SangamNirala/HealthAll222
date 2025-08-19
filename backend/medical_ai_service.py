@@ -7352,6 +7352,55 @@ class WorldClassMedicalAI:
         
         return context
     
+    def _process_conversation_history(self, context: MedicalContext, conversation_history: List[Dict[str, Any]]):
+        """Process conversation history to track questions asked and answered"""
+        
+        if not conversation_history:
+            return
+            
+        # Add conversation turns to context
+        context.conversation_turns.extend(conversation_history)
+        
+        # Analyze conversation to extract what's been asked/answered
+        for turn in conversation_history:
+            role = turn.get('role', '')
+            content = turn.get('content', '')
+            
+            if role == 'assistant' and content:
+                # Track AI questions
+                hpi_element = self._identify_hpi_element_from_question(content)
+                if hpi_element:
+                    context.questions_asked[hpi_element] = content
+                    context.last_question_element = hpi_element
+                    
+            elif role == 'user' and content and context.last_question_element:
+                # Track user responses to questions
+                context.questions_answered[context.last_question_element] = content
+                
+    def _identify_hpi_element_from_question(self, question: str) -> Optional[str]:
+        """Identify which HPI element a question is asking about"""
+        question_lower = question.lower()
+        
+        # Map question patterns to HPI elements
+        if any(word in question_lower for word in ['when', 'start', 'began', 'onset', 'sudden', 'gradual']):
+            return 'onset'
+        elif any(word in question_lower for word in ['where', 'location', 'point to']):
+            return 'location'  
+        elif any(word in question_lower for word in ['how long', 'duration', 'last']):
+            return 'duration'
+        elif any(word in question_lower for word in ['quality', 'describe', 'sharp', 'dull', 'burning', 'character']):
+            return 'character'
+        elif any(word in question_lower for word in ['better', 'worse', 'position', 'activity', 'food', 'alleviating', 'aggravating']):
+            return 'alleviating'
+        elif any(word in question_lower for word in ['spread', 'radiate', 'radiation']):
+            return 'radiation'
+        elif any(word in question_lower for word in ['timing', 'time of day', 'constant', 'comes and goes']):
+            return 'timing'
+        elif any(word in question_lower for word in ['scale', 'severity', 'rate', '1 to 10']):
+            return 'severity'
+            
+        return None
+    
     async def process_patient_message(self, message: str, context: MedicalContext, conversation_history: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
         """Process patient message and generate appropriate medical response with conversation tracking"""
         
