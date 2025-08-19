@@ -7163,6 +7163,13 @@ class WorldClassMedicalAI:
         # PHASE 2: Initialize Advanced Symptom Recognition System
         self.advanced_symptom_recognizer = AdvancedSymptomRecognizer()
         
+        # 🚀 STEP 3.2: Initialize Revolutionary Multi-Symptom Parsing System
+        from multi_symptom_parser import RevolutionaryMultiSymptomParser
+        from symptom_relationship_engine import AdvancedSymptomRelationshipEngine
+        
+        self.multi_symptom_parser = RevolutionaryMultiSymptomParser()
+        self.symptom_relationship_engine = AdvancedSymptomRelationshipEngine()
+        
         # Load medical knowledge base
         self.medical_knowledge = self._load_medical_knowledge()
         self.emergency_keywords = self._load_emergency_keywords()
