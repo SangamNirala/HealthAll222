@@ -15248,6 +15248,491 @@ async def get_clinical_decision_support_status():
             detail=f"Failed to get system status: {str(e)}"
         )
 
+# ===========================
+# PROVIDER INTELLIGENCE SYSTEM ENDPOINTS
+# ===========================
+
+# Pydantic models for Provider Intelligence API requests
+class ProviderProfileRequest(BaseModel):
+    provider_data: Dict[str, Any]
+    performance_history: Optional[List[Dict[str, Any]]] = None
+
+class CoachingRequest(BaseModel):
+    provider_id: str
+    recent_cases: Optional[List[Dict[str, Any]]] = None
+    focus_areas: Optional[List[str]] = None
+
+class ProviderAnalyticsRequest(BaseModel):
+    provider_id: str
+    analysis_period_days: int = 30
+    include_benchmarking: bool = True
+
+class CognitiveLoadRequest(BaseModel):
+    provider_id: str
+    current_workload: Dict[str, Any]
+    recent_decisions: List[Dict[str, Any]]
+
+# Provider Intelligence API endpoints
+@api_router.post("/medical-ai/provider-intelligence/create-profile")
+async def create_provider_profile(request: ProviderProfileRequest):
+    """
+    👩‍⚕️ CREATE OR UPDATE PROVIDER PROFILE
+    
+    Create or update comprehensive provider profile with AI intelligence.
+    """
+    try:
+        start_time = time.time()
+        
+        # Get Provider Intelligence System
+        provider_intel = get_provider_intelligence()
+        
+        # Create or update provider profile
+        provider_profile = await provider_intel.create_or_update_provider_profile(
+            request.provider_data,
+            request.performance_history
+        )
+        
+        processing_time = (time.time() - start_time) * 1000
+        
+        return {
+            "success": True,
+            "provider_profile": asdict(provider_profile),
+            "processing_time_ms": processing_time,
+            "message": "Provider profile created/updated successfully"
+        }
+        
+    except Exception as e:
+        logging.error(f"Provider profile creation error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create provider profile: {str(e)}"
+        )
+
+@api_router.post("/medical-ai/provider-intelligence/clinical-coaching")
+async def generate_coaching_recommendations(request: CoachingRequest):
+    """
+    🎯 GENERATE CLINICAL COACHING RECOMMENDATIONS
+    
+    Generate personalized clinical coaching recommendations using AI.
+    """
+    try:
+        start_time = time.time()
+        
+        # Get Provider Intelligence System
+        provider_intel = get_provider_intelligence()
+        
+        # Generate coaching recommendations
+        coaching_recommendations = await provider_intel.generate_clinical_coaching_recommendations(
+            request.provider_id,
+            request.recent_cases,
+            request.focus_areas
+        )
+        
+        processing_time = (time.time() - start_time) * 1000
+        
+        return {
+            "success": True,
+            "coaching_recommendations": [asdict(rec) for rec in coaching_recommendations],
+            "total_recommendations": len(coaching_recommendations),
+            "processing_time_ms": processing_time,
+            "message": f"Generated {len(coaching_recommendations)} coaching recommendations"
+        }
+        
+    except Exception as e:
+        logging.error(f"Clinical coaching error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate coaching recommendations: {str(e)}"
+        )
+
+@api_router.post("/medical-ai/provider-intelligence/analytics")
+async def get_provider_analytics(request: ProviderAnalyticsRequest):
+    """
+    📊 GET COMPREHENSIVE PROVIDER ANALYTICS
+    
+    Generate detailed provider analytics and performance insights.
+    """
+    try:
+        start_time = time.time()
+        
+        # Get Provider Intelligence System
+        provider_intel = get_provider_intelligence()
+        
+        # Generate provider analytics
+        analytics = await provider_intel.generate_comprehensive_provider_analytics(
+            request.provider_id,
+            request.analysis_period_days,
+            request.include_benchmarking
+        )
+        
+        processing_time = (time.time() - start_time) * 1000
+        
+        return {
+            "success": True,
+            "analytics": asdict(analytics),
+            "processing_time_ms": processing_time,
+            "message": "Provider analytics generated successfully"
+        }
+        
+    except Exception as e:
+        logging.error(f"Provider analytics error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate provider analytics: {str(e)}"
+        )
+
+@api_router.post("/medical-ai/provider-intelligence/cognitive-load")
+async def assess_cognitive_load(request: CognitiveLoadRequest):
+    """
+    🧠 ASSESS PROVIDER COGNITIVE LOAD
+    
+    Assess current cognitive load and provide optimization recommendations.
+    """
+    try:
+        start_time = time.time()
+        
+        # Get Provider Intelligence System
+        provider_intel = get_provider_intelligence()
+        
+        # Assess cognitive load
+        assessment = await provider_intel.assess_provider_cognitive_load(
+            request.provider_id,
+            request.current_workload,
+            request.recent_decisions
+        )
+        
+        processing_time = (time.time() - start_time) * 1000
+        
+        return {
+            "success": True,
+            "cognitive_assessment": assessment,
+            "processing_time_ms": processing_time,
+            "message": "Cognitive load assessment completed"
+        }
+        
+    except Exception as e:
+        logging.error(f"Cognitive load assessment error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to assess cognitive load: {str(e)}"
+        )
+
+# ===========================
+# CLINICAL DOCUMENTATION AI ENDPOINTS  
+# ===========================
+
+class SOAPGenerationRequest(BaseModel):
+    provider_id: str
+    patient_id: str
+    conversation_data: Dict[str, Any]
+    clinical_findings: Optional[Dict[str, Any]] = None
+    template_preferences: Optional[Dict[str, Any]] = None
+
+class ICD10SuggestionRequest(BaseModel):
+    clinical_content: Dict[str, Any]
+    provider_specialty: Optional[str] = None
+
+class CPTSuggestionRequest(BaseModel):
+    clinical_content: Dict[str, Any]
+    encounter_data: Dict[str, Any]
+    provider_specialty: Optional[str] = None
+
+class DocumentationAnalyticsRequest(BaseModel):
+    provider_id: str
+    timeframe_days: int = 30
+
+@api_router.post("/medical-ai/clinical-documentation/generate-soap")
+async def generate_soap_note(request: SOAPGenerationRequest):
+    """
+    📋 GENERATE AI-POWERED SOAP NOTE
+    
+    Generate comprehensive SOAP note with medical coding and quality assessment.
+    """
+    try:
+        start_time = time.time()
+        
+        # Get Clinical Documentation AI
+        doc_ai = get_clinical_documentation_ai()
+        
+        # Generate SOAP note
+        documentation = await doc_ai.generate_comprehensive_soap_note(
+            request.provider_id,
+            request.patient_id,
+            request.conversation_data,
+            request.clinical_findings,
+            request.template_preferences
+        )
+        
+        processing_time = (time.time() - start_time) * 1000
+        
+        return {
+            "success": True,
+            "documentation": asdict(documentation),
+            "processing_time_ms": processing_time,
+            "message": "SOAP note generated successfully"
+        }
+        
+    except Exception as e:
+        logging.error(f"SOAP generation error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate SOAP note: {str(e)}"
+        )
+
+@api_router.post("/medical-ai/clinical-documentation/suggest-icd10")
+async def suggest_icd10_codes(request: ICD10SuggestionRequest):
+    """
+    🏷️ SUGGEST ICD-10 CODES
+    
+    Generate evidence-based ICD-10 code suggestions with AI intelligence.
+    """
+    try:
+        start_time = time.time()
+        
+        # Get Clinical Documentation AI
+        doc_ai = get_clinical_documentation_ai()
+        
+        # Convert specialty string to enum if provided
+        provider_specialty = None
+        if request.provider_specialty:
+            try:
+                provider_specialty = ProviderSpecialty(request.provider_specialty)
+            except ValueError:
+                provider_specialty = None
+        
+        # Generate ICD-10 suggestions
+        suggestions = await doc_ai.suggest_icd10_codes(
+            request.clinical_content,
+            provider_specialty
+        )
+        
+        processing_time = (time.time() - start_time) * 1000
+        
+        return {
+            "success": True,
+            "icd10_suggestions": suggestions,
+            "total_suggestions": len(suggestions),
+            "processing_time_ms": processing_time,
+            "message": f"Generated {len(suggestions)} ICD-10 code suggestions"
+        }
+        
+    except Exception as e:
+        logging.error(f"ICD-10 suggestion error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to suggest ICD-10 codes: {str(e)}"
+        )
+
+@api_router.post("/medical-ai/clinical-documentation/suggest-cpt")
+async def suggest_cpt_codes(request: CPTSuggestionRequest):
+    """
+    💰 SUGGEST CPT CODES
+    
+    Generate appropriate CPT codes for billing optimization.
+    """
+    try:
+        start_time = time.time()
+        
+        # Get Clinical Documentation AI
+        doc_ai = get_clinical_documentation_ai()
+        
+        # Convert specialty string to enum if provided
+        provider_specialty = None
+        if request.provider_specialty:
+            try:
+                provider_specialty = ProviderSpecialty(request.provider_specialty)
+            except ValueError:
+                provider_specialty = None
+        
+        # Generate CPT suggestions
+        suggestions = await doc_ai.suggest_cpt_codes(
+            request.clinical_content,
+            request.encounter_data,
+            provider_specialty
+        )
+        
+        processing_time = (time.time() - start_time) * 1000
+        
+        return {
+            "success": True,
+            "cpt_suggestions": suggestions,
+            "total_suggestions": len(suggestions),
+            "processing_time_ms": processing_time,
+            "message": f"Generated {len(suggestions)} CPT code suggestions"
+        }
+        
+    except Exception as e:
+        logging.error(f"CPT suggestion error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to suggest CPT codes: {str(e)}"
+        )
+
+@api_router.post("/medical-ai/clinical-documentation/analytics")
+async def get_documentation_analytics(request: DocumentationAnalyticsRequest):
+    """
+    📊 GET DOCUMENTATION ANALYTICS
+    
+    Generate comprehensive documentation analytics and insights.
+    """
+    try:
+        start_time = time.time()
+        
+        # Get Clinical Documentation AI
+        doc_ai = get_clinical_documentation_ai()
+        
+        # Generate analytics
+        analytics = await doc_ai.get_documentation_analytics(
+            request.provider_id,
+            request.timeframe_days
+        )
+        
+        processing_time = (time.time() - start_time) * 1000
+        
+        return {
+            "success": True,
+            "analytics": analytics,
+            "processing_time_ms": processing_time,
+            "message": "Documentation analytics generated successfully"
+        }
+        
+    except Exception as e:
+        logging.error(f"Documentation analytics error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate documentation analytics: {str(e)}"
+        )
+
+# ===========================
+# WORKFLOW OPTIMIZATION ENDPOINTS
+# ===========================
+
+class WorkflowAnalysisRequest(BaseModel):
+    provider_id: str
+    analysis_period_days: int = 7
+    include_real_time: bool = True
+
+class OptimizationRequest(BaseModel):
+    provider_id: str
+    focus_areas: Optional[List[str]] = None
+
+class BottleneckDetectionRequest(BaseModel):
+    provider_id: str
+    current_workload: Dict[str, Any]
+
+@api_router.post("/medical-ai/workflow-optimization/analyze-metrics")
+async def analyze_workflow_metrics(request: WorkflowAnalysisRequest):
+    """
+    📊 ANALYZE COMPREHENSIVE WORKFLOW METRICS
+    
+    Perform comprehensive workflow efficiency and quality analysis.
+    """
+    try:
+        start_time = time.time()
+        
+        # Get Workflow Optimizer
+        workflow_opt = get_workflow_optimizer()
+        
+        # Analyze workflow metrics
+        metrics = await workflow_opt.analyze_comprehensive_workflow_metrics(
+            request.provider_id,
+            request.analysis_period_days,
+            request.include_real_time
+        )
+        
+        processing_time = (time.time() - start_time) * 1000
+        
+        return {
+            "success": True,
+            "workflow_metrics": asdict(metrics),
+            "processing_time_ms": processing_time,
+            "message": "Workflow metrics analysis completed"
+        }
+        
+    except Exception as e:
+        logging.error(f"Workflow analysis error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to analyze workflow metrics: {str(e)}"
+        )
+
+@api_router.post("/medical-ai/workflow-optimization/generate-recommendations")
+async def generate_workflow_optimizations(request: OptimizationRequest):
+    """
+    🎯 GENERATE WORKFLOW OPTIMIZATION RECOMMENDATIONS
+    
+    Generate AI-powered workflow optimization recommendations.
+    """
+    try:
+        start_time = time.time()
+        
+        # Get Workflow Optimizer
+        workflow_opt = get_workflow_optimizer()
+        
+        # First analyze current metrics
+        metrics = await workflow_opt.analyze_comprehensive_workflow_metrics(
+            request.provider_id, 7, True
+        )
+        
+        # Generate optimization recommendations
+        optimizations = await workflow_opt.generate_optimization_recommendations(
+            request.provider_id,
+            metrics,
+            request.focus_areas
+        )
+        
+        processing_time = (time.time() - start_time) * 1000
+        
+        return {
+            "success": True,
+            "workflow_optimizations": [asdict(opt) for opt in optimizations],
+            "total_optimizations": len(optimizations),
+            "processing_time_ms": processing_time,
+            "message": f"Generated {len(optimizations)} workflow optimization recommendations"
+        }
+        
+    except Exception as e:
+        logging.error(f"Workflow optimization error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate workflow optimizations: {str(e)}"
+        )
+
+@api_router.post("/medical-ai/workflow-optimization/detect-bottlenecks")
+async def detect_workflow_bottlenecks(request: BottleneckDetectionRequest):
+    """
+    🚨 DETECT REAL-TIME WORKFLOW BOTTLENECKS
+    
+    Real-time detection of workflow bottlenecks and optimization suggestions.
+    """
+    try:
+        start_time = time.time()
+        
+        # Get Workflow Optimizer
+        workflow_opt = get_workflow_optimizer()
+        
+        # Detect bottlenecks
+        bottleneck_analysis = await workflow_opt.detect_real_time_bottlenecks(
+            request.provider_id,
+            request.current_workload
+        )
+        
+        processing_time = (time.time() - start_time) * 1000
+        
+        return {
+            "success": True,
+            "bottleneck_analysis": bottleneck_analysis,
+            "processing_time_ms": processing_time,
+            "message": "Real-time bottleneck detection completed"
+        }
+        
+    except Exception as e:
+        logging.error(f"Bottleneck detection error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to detect workflow bottlenecks: {str(e)}"
+        )
+
 # Include the router in the main app (after all endpoints are defined)
 app.include_router(api_router)
 
