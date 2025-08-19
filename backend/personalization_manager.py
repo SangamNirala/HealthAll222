@@ -498,7 +498,7 @@ class PersonalizationManager:
             if not refresh_cache and cache_age < 3600 and self.population_insights_cache:  # 1 hour cache
                 return self.population_insights_cache.get('insights', [])
             
-            if not self.db:
+            if self.db is None:
                 return []
             
             insights = []
