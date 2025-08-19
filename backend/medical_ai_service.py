@@ -7810,40 +7810,15 @@ class WorldClassMedicalAI:
         
         required_elements = ["onset", "location", "duration", "character", "alleviating", "radiation", "timing", "severity"]
         
-        print(f"[HPI DEBUG] _get_next_hpi_element_smart - questions_asked keys: {list(context.questions_asked.keys())}")
-        print(f"[HPI DEBUG] _get_next_hpi_element_smart - symptom_data keys: {list(context.symptom_data.keys()) if context.symptom_data else 'None'}")
-        
         # Find elements we haven't asked about yet
         not_asked = [elem for elem in required_elements if elem not in context.questions_asked]
-        print(f"[HPI DEBUG] not_asked elements: {not_asked}")
         if not_asked:
-            print(f"[HPI DEBUG] Returning first not_asked element: {not_asked[0]}")
             return not_asked[0]
         
-        # Find elements we asked about but didn't get good answers for
-        incomplete = []
-        for elem in required_elements:
-            if elem in context.questions_asked:
-                # Check if we have good data for this element
-                has_symptom_data = elem in context.symptom_data if context.symptom_data else False
-                symptom_data_length = len(str(context.symptom_data.get(elem, "")).strip()) if context.symptom_data else 0
-                print(f"[HPI DEBUG] Element {elem}: has_symptom_data={has_symptom_data}, length={symptom_data_length}")
-                
-                if not has_symptom_data or symptom_data_length < 3:
-                    incomplete.append(elem)
-        
-        print(f"[HPI DEBUG] incomplete elements: {incomplete}")
-        
-        # Only retry incomplete elements once to avoid loops
-        for elem in incomplete:
-            retry_count = len([q for q in context.questions_asked.keys() if q == elem])
-            print(f"[HPI DEBUG] Element {elem} retry_count: {retry_count}")
-            if retry_count < 2:  # Allow one retry
-                print(f"[HPI DEBUG] Returning incomplete element for retry: {elem}")
-                return elem
-        
-        print(f"[HPI DEBUG] All elements covered, returning None")
-        return None  # All elements covered or tried enough times
+        # CRITICAL FIX: If all elements have been asked, return None immediately to prevent loops
+        # Don't try to retry incomplete answers as this causes the loop issue
+        print(f"[HPI DEBUG] All HPI elements have been asked, ending HPI collection")
+        return None  # All elements have been asked, move to next stage
     
     async def _generate_hpi_question_smart(self, element: str, context: MedicalContext) -> str:
         """Generate HPI questions with enhanced chief complaint handling"""
