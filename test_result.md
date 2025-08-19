@@ -183,7 +183,7 @@ backend:
     file: "/app/backend/integration_testing_framework.py, /app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: true
         agent: "main"
