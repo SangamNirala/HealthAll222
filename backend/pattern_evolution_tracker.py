@@ -214,7 +214,7 @@ class PatternEvolutionTracker:
         """
         📊 Retrieve pattern evolution data from database
         """
-        if not self.db:
+        if self.db is None:
             return {}
         
         try:
