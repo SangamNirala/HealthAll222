@@ -60,6 +60,7 @@ class MedicalAPIService {
           message: params.message,
           consultation_id: params.consultation_id,
           context: params.context,
+          conversation_history: params.conversation_history || [],
           patient_id: params.patient_id || 'anonymous'
         })
       });
