@@ -8,7 +8,7 @@ that meets medical documentation standards and clinical decision support require
 Algorithm Version: 3.2_multi_symptom_clinical_excellence
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from typing import List, Dict, Optional, Any, Union, Tuple
 from enum import Enum
 from datetime import datetime, timedelta
