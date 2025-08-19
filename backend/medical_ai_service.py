@@ -7849,55 +7849,39 @@ class WorldClassMedicalAI:
         return None  # All elements have been asked, move to next stage
     
     async def _analyze_response_needs_followup(self, user_response: str, question_element: str, context: MedicalContext) -> bool:
-        """Analyze if a user response needs follow-up clarification using LLM reasoning"""
+        """Analyze if a user response needs follow-up clarification - simplified and less aggressive"""
         
         # Get the original question that was asked
         original_question = context.questions_asked.get(question_element, "")
         
-        try:
-            # Create prompt for LLM to analyze if response needs follow-up
-            analysis_prompt = f"""
-You are a medical AI analyzing patient responses. Determine if the following response needs follow-up clarification.
-
-ORIGINAL QUESTION: {original_question}
-PATIENT RESPONSE: "{user_response}"
-HPI ELEMENT: {question_element}
-
-ANALYSIS CRITERIA:
-1. Is the response vague or incomplete? (e.g., "food", "position", "medication" without specifics)
-2. Does it mention something that needs elaboration? (e.g., "surgeries" needs type/when/where)
-3. Is it a single word that could mean many things?
-4. Does it indicate a trigger/factor that needs more details?
-
-EXAMPLES NEEDING FOLLOW-UP:
-- "food" → need to ask which foods
-- "position" → need to ask which positions
-- "medication" → need to ask which medications
-- "surgeries" → need to ask what type, when, where
-- "activities" → need to ask which activities
-
-EXAMPLES NOT NEEDING FOLLOW-UP:
-- "aspirin and ibuprofen make it worse"
-- "lying down relieves the pain"
-- "had appendectomy in 2020 at general hospital"
-- "spicy foods trigger the headache"
-
-Respond with only "YES" if follow-up is needed, "NO" if the response is sufficiently detailed.
-"""
-
-            # Use Gemini for analysis
-            gemini_response = await self._call_gemini_api(analysis_prompt, max_tokens=10)
+        # Simplified logic - only ask follow-up for extremely vague single-word responses
+        user_response_clean = user_response.strip().lower()
+        
+        # Don't ask follow-up if:
+        # 1. Response is detailed (more than 3 words)
+        # 2. Contains specific details, numbers, or timeframes
+        # 3. Already has qualitative descriptors
+        if len(user_response.split()) > 3:
+            return False
             
-            analysis_result = gemini_response.strip().upper()
-            needs_followup = analysis_result == "YES"
+        if any(indicator in user_response_clean for indicator in [
+            'no', 'yes', 'none', 'nothing', 'never', 'always', 'sometimes',
+            'ago', 'yesterday', 'today', 'week', 'month', 'year', 'hours',
+            'minutes', 'sharp', 'dull', 'throbbing', 'burning', 'aching',
+            'severe', 'mild', 'moderate', 'constant', 'intermittent'
+        ]):
+            return False
             
-            print(f"[FOLLOWUP DEBUG] Question: {question_element}, Response: '{user_response}', Needs followup: {needs_followup}")
-            return needs_followup
+        # Only ask follow-up for extremely vague single words that need clarification
+        vague_responses = ['food', 'position', 'medication', 'activity', 'stress', 'weather']
+        
+        # Check if it's a single vague word
+        if len(user_response.split()) == 1 and user_response_clean in vague_responses:
+            print(f"[FOLLOWUP DEBUG] Single vague word detected: '{user_response}' - asking follow-up")
+            return True
             
-        except Exception as e:
-            print(f"[FOLLOWUP ERROR] Failed to analyze response: {e}")
-            # Default: assume short responses need follow-up
-            return len(user_response.strip().split()) <= 2
+        print(f"[FOLLOWUP DEBUG] Response '{user_response}' is sufficient - moving on")
+        return False
     
     async def _generate_intelligent_followup_question(self, user_response: str, question_element: str, context: MedicalContext) -> str:
         """Generate intelligent follow-up questions based on user response using LLM reasoning"""
