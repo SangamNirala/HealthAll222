@@ -12192,6 +12192,247 @@ def _generate_conversation_insights(analyses: List[MedicalIntentResponse], progr
     
     return insights
 
+# ===== WEEK 2: MULTI-INTENT ORCHESTRATION HELPER FUNCTIONS =====
+
+def _generate_multi_intent_conversation_summary(orchestrations: List[MultiIntentOrchestrationResponse]) -> Dict[str, Any]:
+    """Generate comprehensive conversation summary for multi-intent analysis"""
+    if not orchestrations:
+        return {}
+    
+    # Extract metrics across all messages
+    total_intents_detected = sum(orch.intent_count for orch in orchestrations)
+    priority_scores = [orch.clinical_priority.priority_score for orch in orchestrations]
+    complexity_assessments = [orch.complexity_assessment for orch in orchestrations]
+    interaction_patterns = [orch.intent_interactions.dominant_interaction_pattern for orch in orchestrations]
+    
+    # Calculate summary statistics
+    summary = {
+        "total_messages": len(orchestrations),
+        "total_intents_detected": total_intents_detected,
+        "average_intents_per_message": total_intents_detected / len(orchestrations),
+        "max_simultaneous_intents": max(orch.intent_count for orch in orchestrations),
+        "average_priority_score": sum(priority_scores) / len(priority_scores),
+        "highest_priority": max(orch.clinical_priority.overall_priority for orch in orchestrations),
+        "dominant_complexity": max(set(complexity_assessments), key=complexity_assessments.count),
+        "dominant_interaction_pattern": max(set(interaction_patterns), key=interaction_patterns.count),
+        "specialist_referral_recommended": any(orch.clinical_priority.specialist_referral_needed for orch in orchestrations),
+        "emergency_protocols_activated": any(orch.clinical_priority.emergency_protocols for orch in orchestrations)
+    }
+    
+    # Identify conversation-level insights
+    all_detected_intents = []
+    for orch in orchestrations:
+        all_detected_intents.extend([intent for intent, _ in orch.detected_intents])
+    
+    summary["most_common_intents"] = [intent for intent, count in Counter(all_detected_intents).most_common(5)]
+    summary["clinical_complexity_trend"] = _assess_complexity_trend(complexity_assessments)
+    
+    return summary
+
+def _analyze_intent_evolution(intent_evolution: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Analyze how intents evolve throughout conversations"""
+    if not intent_evolution:
+        return {}
+    
+    # Track intent changes
+    intent_changes = []
+    complexity_changes = []
+    
+    for i in range(1, len(intent_evolution)):
+        prev_item = intent_evolution[i-1]
+        curr_item = intent_evolution[i]
+        
+        intent_changed = prev_item["primary_intent"] != curr_item["primary_intent"]
+        complexity_changed = prev_item["complexity"] != curr_item["complexity"]
+        
+        intent_changes.append(intent_changed)
+        complexity_changes.append(complexity_changed)
+    
+    analysis = {
+        "total_turns": len(intent_evolution),
+        "intent_stability": sum(1 for changed in intent_changes if not changed) / len(intent_changes) if intent_changes else 1.0,
+        "intent_change_frequency": sum(intent_changes) / len(intent_changes) if intent_changes else 0.0,
+        "complexity_trend": _assess_complexity_evolution_trend(intent_evolution),
+        "interaction_pattern_stability": _assess_interaction_pattern_stability(intent_evolution),
+        "conversation_progression": "stable" if sum(intent_changes) <= 1 else "dynamic" if sum(intent_changes) <= 3 else "highly_variable"
+    }
+    
+    # Identify key transition points
+    transition_points = []
+    for i, changed in enumerate(intent_changes):
+        if changed:
+            transition_points.append({
+                "turn": i + 1,
+                "from_intent": intent_evolution[i]["primary_intent"],
+                "to_intent": intent_evolution[i+1]["primary_intent"],
+                "complexity_change": intent_evolution[i]["complexity"] != intent_evolution[i+1]["complexity"]
+            })
+    
+    analysis["key_transitions"] = transition_points
+    return analysis
+
+def _analyze_prioritization_trends(priority_trends: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Analyze clinical prioritization trends over conversations"""
+    if not priority_trends:
+        return {}
+    
+    # Extract priority metrics
+    priority_scores = [trend["priority_score"] for trend in priority_trends]
+    priority_levels = [trend["priority_level"] for trend in priority_trends]
+    specialist_needs = [trend["specialist_referral_needed"] for trend in priority_trends]
+    
+    # Calculate trend analysis
+    analysis = {
+        "initial_priority": priority_trends[0]["priority_level"],
+        "final_priority": priority_trends[-1]["priority_level"],
+        "priority_escalation": _assess_priority_escalation(priority_levels),
+        "average_priority_score": sum(priority_scores) / len(priority_scores),
+        "priority_score_trend": _calculate_priority_score_trend(priority_scores),
+        "specialist_referral_consistency": all(specialist_needs) if specialist_needs else False,
+        "time_sensitivity_pattern": [trend["time_sensitivity"] for trend in priority_trends],
+        "priority_volatility": _calculate_priority_volatility(priority_scores)
+    }
+    
+    # Identify critical escalation points
+    escalation_points = []
+    priority_mapping = {"routine": 1, "low": 2, "moderate": 3, "high": 4, "critical": 5, "emergency": 6}
+    
+    for i in range(1, len(priority_trends)):
+        prev_level = priority_mapping.get(priority_trends[i-1]["priority_level"], 1)
+        curr_level = priority_mapping.get(priority_trends[i]["priority_level"], 1)
+        
+        if curr_level > prev_level:
+            escalation_points.append({
+                "turn": i,
+                "from_level": priority_trends[i-1]["priority_level"],
+                "to_level": priority_trends[i]["priority_level"],
+                "score_increase": priority_trends[i]["priority_score"] - priority_trends[i-1]["priority_score"]
+            })
+    
+    analysis["escalation_points"] = escalation_points
+    return analysis
+
+def _assess_conversation_complexity(orchestrations: List[MultiIntentOrchestrationResponse]) -> str:
+    """Assess overall conversation complexity and provide recommendations"""
+    if not orchestrations:
+        return "unknown"
+    
+    # Calculate complexity metrics
+    avg_intents = sum(orch.intent_count for orch in orchestrations) / len(orchestrations)
+    max_intents = max(orch.intent_count for orch in orchestrations)
+    complexity_scores = []
+    
+    for orch in orchestrations:
+        if orch.intent_interactions.clinical_complexity_score:
+            complexity_scores.append(orch.intent_interactions.clinical_complexity_score)
+    
+    avg_complexity_score = sum(complexity_scores) / len(complexity_scores) if complexity_scores else 0.0
+    
+    # Determine overall complexity
+    if max_intents >= 4 and avg_complexity_score > 0.7:
+        return "highly_complex"
+    elif avg_intents >= 3 and avg_complexity_score > 0.5:
+        return "moderately_complex"  
+    elif max_intents >= 3 or avg_complexity_score > 0.3:
+        return "mildly_complex"
+    else:
+        return "simple"
+
+def _assess_complexity_trend(complexity_assessments: List[str]) -> str:
+    """Assess trend in complexity assessments"""
+    complexity_mapping = {"single_intent": 1, "simple_multi_intent": 2, "moderately_complex": 3, "highly_complex": 4}
+    scores = [complexity_mapping.get(assessment, 1) for assessment in complexity_assessments]
+    
+    if len(scores) < 2:
+        return "stable"
+    
+    if scores[-1] > scores[0]:
+        return "increasing"
+    elif scores[-1] < scores[0]:
+        return "decreasing"
+    else:
+        return "stable"
+
+def _assess_complexity_evolution_trend(intent_evolution: List[Dict[str, Any]]) -> str:
+    """Assess how complexity evolves over conversation turns"""
+    complexity_values = [item["complexity"] for item in intent_evolution]
+    complexity_mapping = {"single_intent": 1, "simple_multi_intent": 2, "moderately_complex": 3, "highly_complex": 4}
+    
+    scores = [complexity_mapping.get(complexity, 1) for complexity in complexity_values]
+    
+    if len(scores) < 2:
+        return "stable"
+    
+    # Calculate trend using linear regression slope
+    n = len(scores)
+    x_sum = sum(range(n))
+    y_sum = sum(scores)
+    xy_sum = sum(i * scores[i] for i in range(n))
+    x_squared_sum = sum(i * i for i in range(n))
+    
+    slope = (n * xy_sum - x_sum * y_sum) / (n * x_squared_sum - x_sum * x_sum) if n * x_squared_sum - x_sum * x_sum != 0 else 0
+    
+    if slope > 0.1:
+        return "increasing_complexity"
+    elif slope < -0.1:
+        return "decreasing_complexity"
+    else:
+        return "stable_complexity"
+
+def _assess_interaction_pattern_stability(intent_evolution: List[Dict[str, Any]]) -> str:
+    """Assess stability of interaction patterns over conversation"""
+    patterns = [item["interaction_pattern"] for item in intent_evolution]
+    unique_patterns = set(patterns)
+    
+    if len(unique_patterns) == 1:
+        return "highly_stable"
+    elif len(unique_patterns) <= 2:
+        return "moderately_stable"
+    else:
+        return "variable"
+
+def _assess_priority_escalation(priority_levels: List[str]) -> str:
+    """Assess if there's priority escalation over conversation"""
+    priority_mapping = {"routine": 1, "low": 2, "moderate": 3, "high": 4, "critical": 5, "emergency": 6}
+    scores = [priority_mapping.get(level, 1) for level in priority_levels]
+    
+    if len(scores) < 2:
+        return "stable"
+    
+    if scores[-1] > scores[0]:
+        return "escalated"
+    elif scores[-1] < scores[0]:
+        return "de-escalated"
+    else:
+        return "stable"
+
+def _calculate_priority_score_trend(priority_scores: List[float]) -> str:
+    """Calculate trend in priority scores"""
+    if len(priority_scores) < 2:
+        return "stable"
+    
+    score_change = priority_scores[-1] - priority_scores[0]
+    
+    if score_change > 1.0:
+        return "significantly_increasing"
+    elif score_change > 0.3:
+        return "moderately_increasing"
+    elif score_change < -1.0:
+        return "significantly_decreasing"
+    elif score_change < -0.3:
+        return "moderately_decreasing"
+    else:
+        return "stable"
+
+def _calculate_priority_volatility(priority_scores: List[float]) -> float:
+    """Calculate volatility (standard deviation) of priority scores"""
+    if len(priority_scores) < 2:
+        return 0.0
+    
+    mean_score = sum(priority_scores) / len(priority_scores)
+    variance = sum((score - mean_score) ** 2 for score in priority_scores) / len(priority_scores)
+    return variance ** 0.5
+
 def _generate_multi_intent_conversation_summary(message_orchestrations: List) -> Dict[str, Any]:
     """Generate comprehensive conversation summary for multi-intent analysis"""
     if not message_orchestrations:
