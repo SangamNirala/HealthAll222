@@ -14615,8 +14615,8 @@ async def optimize_empathetic_response(request: OptimizeEmpathyRequest):
         processing_time = (time.time() - start_time) * 1000
         
         return OptimizeEmpathyResponse(
-            optimized_response=optimization_result['response'],
-            empathy_adjustments=optimization_result['adjustments'],
+            optimized_response=optimization_result['optimized_response'],
+            empathy_adjustments=optimization_result['empathy_adjustments'],
             emotional_context={
                 'primary_emotion': emotional_analysis.primary_emotion.value,
                 'empathy_level_applied': optimization_result['empathy_score'],
