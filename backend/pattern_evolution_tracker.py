@@ -762,7 +762,7 @@ class PatternEvolutionTracker:
         """
         Get pattern lifecycle statistics
         """
-        if not self.db:
+        if self.db is None:
             return {}
         
         try:
