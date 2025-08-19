@@ -517,12 +517,20 @@ class Week4ComprehensiveTester:
         emergency_scenarios = [
             {
                 "name": "Chest Pain Emergency",
-                "conversation": ["I have crushing chest pain", "It started 30 minutes ago", "I feel like I'm dying"],
+                "conversation": [
+                    {"message": "I have crushing chest pain", "timestamp": "2025-01-17T10:00:00Z", "speaker": "patient"},
+                    {"message": "It started 30 minutes ago", "timestamp": "2025-01-17T10:01:00Z", "speaker": "patient"},
+                    {"message": "I feel like I'm dying", "timestamp": "2025-01-17T10:02:00Z", "speaker": "patient"}
+                ],
                 "expected_urgency": "emergency"
             },
             {
                 "name": "Stroke Symptoms",
-                "conversation": ["I can't speak properly", "My face feels numb", "I can't move my right arm"],
+                "conversation": [
+                    {"message": "I can't speak properly", "timestamp": "2025-01-17T10:00:00Z", "speaker": "patient"},
+                    {"message": "My face feels numb", "timestamp": "2025-01-17T10:01:00Z", "speaker": "patient"},
+                    {"message": "I can't move my right arm", "timestamp": "2025-01-17T10:02:00Z", "speaker": "patient"}
+                ],
                 "expected_urgency": "emergency"
             }
         ]
@@ -531,12 +539,20 @@ class Week4ComprehensiveTester:
         routine_scenarios = [
             {
                 "name": "Mild Headache",
-                "conversation": ["I have a mild headache", "It started this morning", "It's not too bad"],
+                "conversation": [
+                    {"message": "I have a mild headache", "timestamp": "2025-01-17T10:00:00Z", "speaker": "patient"},
+                    {"message": "It started this morning", "timestamp": "2025-01-17T10:01:00Z", "speaker": "patient"},
+                    {"message": "It's not too bad", "timestamp": "2025-01-17T10:02:00Z", "speaker": "patient"}
+                ],
                 "expected_urgency": "routine"
             },
             {
                 "name": "General Wellness",
-                "conversation": ["I want to improve my health", "I exercise regularly", "Any suggestions?"],
+                "conversation": [
+                    {"message": "I want to improve my health", "timestamp": "2025-01-17T10:00:00Z", "speaker": "patient"},
+                    {"message": "I exercise regularly", "timestamp": "2025-01-17T10:01:00Z", "speaker": "patient"},
+                    {"message": "Any suggestions?", "timestamp": "2025-01-17T10:02:00Z", "speaker": "patient"}
+                ],
                 "expected_urgency": "routine"
             }
         ]
