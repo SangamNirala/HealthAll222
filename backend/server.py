@@ -11926,6 +11926,145 @@ def _generate_conversation_insights(analyses: List[MedicalIntentResponse], progr
     
     return insights
 
+def _generate_multi_intent_conversation_summary(message_orchestrations: List) -> Dict[str, Any]:
+    """Generate comprehensive conversation summary for multi-intent analysis"""
+    if not message_orchestrations:
+        return {}
+    
+    # Extract key metrics
+    total_intents = sum(msg.intent_count for msg in message_orchestrations)
+    primary_intents = [msg.primary_intent for msg in message_orchestrations]
+    priority_levels = [msg.clinical_priority.overall_priority for msg in message_orchestrations]
+    complexity_scores = [msg.complexity_assessment for msg in message_orchestrations]
+    
+    # Calculate summary statistics
+    summary = {
+        "total_messages": len(message_orchestrations),
+        "total_intents_detected": total_intents,
+        "average_intents_per_message": total_intents / len(message_orchestrations),
+        "primary_intents": list(set(primary_intents)),
+        "dominant_intent": max(set(primary_intents), key=primary_intents.count),
+        "highest_priority": max(priority_levels),
+        "average_complexity": sum(complexity_scores) / len(complexity_scores),
+        "conversation_complexity": "high" if sum(complexity_scores) / len(complexity_scores) > 7 else "moderate" if sum(complexity_scores) / len(complexity_scores) > 4 else "low"
+    }
+    
+    return summary
+
+def _analyze_intent_evolution(intent_evolution: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Analyze how intents evolve throughout the conversation"""
+    if not intent_evolution:
+        return {}
+    
+    # Track intent changes
+    intent_changes = []
+    complexity_trend = []
+    
+    for i, evolution in enumerate(intent_evolution):
+        if i > 0:
+            prev_intent = intent_evolution[i-1]["primary_intent"]
+            curr_intent = evolution["primary_intent"]
+            if prev_intent != curr_intent:
+                intent_changes.append({
+                    "from": prev_intent,
+                    "to": curr_intent,
+                    "message_index": i
+                })
+        
+        complexity_trend.append(evolution["complexity"])
+    
+    # Calculate trends
+    analysis = {
+        "intent_stability": len(intent_changes) == 0,
+        "intent_changes": intent_changes,
+        "complexity_trend": "increasing" if complexity_trend[-1] > complexity_trend[0] else "decreasing" if complexity_trend[-1] < complexity_trend[0] else "stable",
+        "peak_complexity_message": complexity_trend.index(max(complexity_trend)),
+        "average_intent_count": sum(e["intent_count"] for e in intent_evolution) / len(intent_evolution)
+    }
+    
+    return analysis
+
+def _analyze_prioritization_trends(priority_trends: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Analyze clinical prioritization trends over the conversation"""
+    if not priority_trends:
+        return {}
+    
+    # Track priority changes
+    priority_levels = {"routine": 1, "low": 2, "moderate": 3, "high": 4, "critical": 5, "emergency": 6}
+    priority_scores = [priority_levels.get(trend["priority_level"].lower(), 1) for trend in priority_trends]
+    
+    # Analyze trends
+    analysis = {
+        "priority_escalation": priority_scores[-1] > priority_scores[0],
+        "highest_priority_reached": max(trend["priority_level"] for trend in priority_trends),
+        "priority_stability": len(set(trend["priority_level"] for trend in priority_trends)) == 1,
+        "escalation_points": [i for i in range(1, len(priority_scores)) if priority_scores[i] > priority_scores[i-1]],
+        "specialist_referral_recommended": any(trend["specialist_referral_needed"] for trend in priority_trends),
+        "time_sensitivity_peak": max(trend["time_sensitivity"] for trend in priority_trends)
+    }
+    
+    return analysis
+
+def _assess_conversation_complexity(message_orchestrations: List) -> Dict[str, Any]:
+    """Assess overall conversation complexity and provide recommendations"""
+    if not message_orchestrations:
+        return {}
+    
+    # Calculate complexity metrics
+    total_intents = sum(msg.intent_count for msg in message_orchestrations)
+    avg_intents = total_intents / len(message_orchestrations)
+    complexity_scores = [msg.complexity_assessment for msg in message_orchestrations]
+    avg_complexity = sum(complexity_scores) / len(complexity_scores)
+    
+    # Count interaction types
+    interaction_types = []
+    for msg in message_orchestrations:
+        for interaction in msg.intent_interactions.interactions:
+            interaction_types.append(interaction.interaction_type)
+    
+    # Assess complexity level
+    if avg_complexity > 8 or avg_intents > 4:
+        complexity_level = "very_high"
+        recommendations = [
+            "Consider structured clinical interview",
+            "May require specialist consultation",
+            "Document all intent interactions carefully"
+        ]
+    elif avg_complexity > 6 or avg_intents > 3:
+        complexity_level = "high"
+        recommendations = [
+            "Use systematic approach to address all concerns",
+            "Prioritize based on clinical significance",
+            "Consider follow-up appointments"
+        ]
+    elif avg_complexity > 4 or avg_intents > 2:
+        complexity_level = "moderate"
+        recommendations = [
+            "Address primary concerns first",
+            "Monitor for additional symptoms",
+            "Provide clear care instructions"
+        ]
+    else:
+        complexity_level = "low"
+        recommendations = [
+            "Standard care approach appropriate",
+            "Focus on primary concern",
+            "Routine follow-up as needed"
+        ]
+    
+    assessment = {
+        "complexity_level": complexity_level,
+        "average_intents_per_message": avg_intents,
+        "average_complexity_score": avg_complexity,
+        "total_intent_interactions": len(interaction_types),
+        "dominant_interaction_types": list(set(interaction_types)),
+        "recommendations": recommendations,
+        "requires_specialist": any(msg.clinical_priority.specialist_referral_needed for msg in message_orchestrations),
+        "emergency_protocols_triggered": any(msg.clinical_priority.emergency_protocols for msg in message_orchestrations)
+    }
+    
+    return assessment
+
 # Include the router in the main app (after all endpoints are defined)
 app.include_router(api_router)
 
