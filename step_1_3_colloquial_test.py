@@ -22,7 +22,7 @@ from datetime import datetime
 import os
 
 # Backend URL from environment
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://symptom-tracker-fix.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://medchat-enhance.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class Step13ColloquialTester:
