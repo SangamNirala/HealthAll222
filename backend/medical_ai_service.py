@@ -8864,7 +8864,7 @@ class WorldClassMedicalAI:
         return f"Now I'd like to ask about some related symptoms. Have you noticed any associated symptoms like nausea, dizziness, fever, or changes in appetite along with your {context.chief_complaint}?"
     
     def _extract_clean_chief_complaint(self, message: str, symptoms_detected: list, causal_relationships: list) -> str:
-        """Extract a clean, concise chief complaint from the patient's message"""
+        """Extract a clean, concise chief complaint from the patient's message with enhanced pattern matching"""
         
         # First try to extract from causal relationships if available
         if causal_relationships:
@@ -8885,14 +8885,22 @@ class WorldClassMedicalAI:
             if symptom_names:
                 return symptom_names[0]
         
-        # Fallback: try to extract from the message directly using simple pattern matching
-        message_lower = message.lower()
+        # 🚀 ENHANCED: Comprehensive symptom extraction from message
+        message_lower = message.lower().strip()
+        
+        # Direct symptom mentions
         if "headache" in message_lower or "head ache" in message_lower or "head pain" in message_lower:
             return "headache"
         elif "chest pain" in message_lower or "chest hurt" in message_lower:
             return "chest pain"
         elif "stomach" in message_lower and ("pain" in message_lower or "ache" in message_lower or "hurt" in message_lower):
             return "abdominal pain"
+        elif "back pain" in message_lower or "back hurt" in message_lower or "back ache" in message_lower:
+            return "back pain"
+        elif "joint pain" in message_lower or "joint hurt" in message_lower or "joint ache" in message_lower:
+            return "joint pain"
+        elif "sore throat" in message_lower or "throat pain" in message_lower:
+            return "sore throat"
         elif "fever" in message_lower or "temperature" in message_lower:
             return "fever"
         elif "dizzy" in message_lower or "dizziness" in message_lower:
@@ -8901,7 +8909,26 @@ class WorldClassMedicalAI:
             return "cough"
         elif "nausea" in message_lower or "nauseous" in message_lower:
             return "nausea"
-        elif "pain" in message_lower:
+        elif "shortness of breath" in message_lower or "short of breath" in message_lower or "breathing" in message_lower:
+            return "shortness of breath"
+        elif "fatigue" in message_lower or "tired" in message_lower or "exhausted" in message_lower:
+            return "fatigue"
+        
+        # Pattern-based extraction for "I have X" format
+        if message_lower.startswith("i have "):
+            symptom_part = message_lower[7:].strip()  # Remove "i have "
+            # Clean up common endings
+            symptom_part = symptom_part.rstrip(".,!?")
+            if len(symptom_part) > 0 and len(symptom_part) <= 30:  # Reasonable symptom length
+                return symptom_part
+        elif message_lower.startswith("my "):
+            symptom_part = message_lower[3:].strip()  # Remove "my "
+            symptom_part = symptom_part.rstrip(".,!?")
+            if len(symptom_part) > 0 and len(symptom_part) <= 30:
+                return symptom_part
+        
+        # Generic pain detection
+        if "pain" in message_lower:
             return "pain"
         
         # If no clear symptom pattern, return a generic description
