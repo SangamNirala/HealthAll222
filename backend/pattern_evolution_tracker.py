@@ -725,7 +725,7 @@ class PatternEvolutionTracker:
         """
         📊 Get comprehensive evolution analytics for dashboard
         """
-        if not self.db:
+        if self.db is None:
             return {'error': 'Database not available'}
         
         try:
