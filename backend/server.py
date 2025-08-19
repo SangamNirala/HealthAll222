@@ -11667,6 +11667,72 @@ class BatchMultiIntentResponse(BaseModel):
     prioritization_trends: Dict[str, Any] = Field(..., description="Clinical priority trends")
     conversation_complexity_assessment: str = Field(..., description="Overall conversation complexity")
 
+# ===== WEEK 3: CONVERSATION FLOW OPTIMIZATION PYDANTIC MODELS =====
+
+class OptimalQuestionModel(BaseModel):
+    """Model for optimal question recommendation"""
+    question_text: str = Field(..., description="The optimally chosen next question")
+    question_category: str = Field(..., description="Category of the question (open_ended, temporal, etc.)")
+    clinical_rationale: str = Field(..., description="Clinical reasoning for this question")
+    priority: str = Field(..., description="Priority level (critical, high, moderate, low)")
+    expected_intent_responses: List[str] = Field(..., description="Expected patient intent responses")
+    follow_up_branches: Dict[str, str] = Field(..., description="Follow-up question branches")
+    clinical_significance: float = Field(..., description="Clinical significance score (0.0-1.0)")
+    time_sensitivity: str = Field(..., description="Time sensitivity (immediate, hours, days)")
+    subspecialty_relevance: List[str] = Field(..., description="Relevant medical subspecialties")
+    confidence_score: float = Field(..., description="Confidence in question selection (0.0-1.0)")
+
+class ConversationPathwayModel(BaseModel):
+    """Model for predicted conversation pathway"""
+    predicted_stages: List[str] = Field(..., description="Predicted conversation stages")
+    estimated_duration_minutes: int = Field(..., description="Estimated conversation duration")
+    clinical_complexity_score: float = Field(..., description="Clinical complexity assessment")
+    recommended_question_sequence: List[str] = Field(..., description="Recommended question sequence")
+    potential_diagnoses: List[str] = Field(..., description="Potential diagnostic considerations")
+    required_red_flag_screening: List[str] = Field(..., description="Required red flag screening items")
+    subspecialty_consultation_likely: bool = Field(..., description="Likelihood of specialist referral")
+    emergency_pathway_probability: float = Field(..., description="Probability of emergency pathway")
+    pathway_confidence: float = Field(..., description="Confidence in pathway prediction")
+    alternative_pathways: List[Dict[str, Any]] = Field(..., description="Alternative conversation pathways")
+
+class InterviewStrategyModel(BaseModel):
+    """Model for clinical interview strategy"""
+    strategy_name: str = Field(..., description="Name of the interview strategy")
+    primary_objectives: List[str] = Field(..., description="Primary clinical objectives")
+    questioning_approach: str = Field(..., description="Questioning approach (systematic, adaptive, emergency)")
+    estimated_questions_count: int = Field(..., description="Estimated number of questions needed")
+    key_decision_points: List[str] = Field(..., description="Key decision points in interview")
+    subspecialty_focus: Optional[str] = Field(None, description="Subspecialty focus if applicable")
+    patient_communication_style: str = Field(..., description="Recommended communication style")
+    time_management_strategy: str = Field(..., description="Time management approach")
+    documentation_priorities: List[str] = Field(..., description="Documentation priorities")
+    clinical_reasoning_framework: str = Field(..., description="Clinical reasoning framework")
+
+class ConversationFlowOptimizationRequest(BaseModel):
+    """Request model for conversation flow optimization"""
+    current_message: str = Field(..., description="Patient's current message")
+    conversation_history: List[Dict[str, Any]] = Field(default=[], description="Previous conversation turns")
+    patient_context: Optional[Dict[str, Any]] = Field(None, description="Patient context (demographics, history)")
+    current_stage: str = Field(default="chief_complaint", description="Current conversation stage")
+
+class ConversationFlowOptimizationResponse(BaseModel):
+    """Response model for conversation flow optimization"""
+    # Core optimization results
+    optimal_next_question: OptimalQuestionModel = Field(..., description="Optimal next question recommendation")
+    predicted_pathway: ConversationPathwayModel = Field(..., description="Predicted conversation pathway")
+    interview_strategy: InterviewStrategyModel = Field(..., description="Clinical interview strategy")
+    
+    # Quality metrics
+    conversation_efficiency_score: float = Field(..., description="Conversation efficiency assessment (0.0-1.0)")
+    clinical_completeness_score: float = Field(..., description="Clinical completeness assessment (0.0-1.0)")
+    patient_engagement_recommendations: List[str] = Field(..., description="Patient engagement recommendations")
+    conversation_risk_assessment: Dict[str, Any] = Field(..., description="Conversation risk assessment")
+    
+    # Processing metadata
+    processing_time_ms: float = Field(..., description="Processing time in milliseconds")
+    algorithm_version: str = Field(..., description="Conversation flow optimization algorithm version")
+    optimization_confidence: float = Field(..., description="Confidence in optimization recommendations")
+
 @api_router.post("/medical-ai/intent-classification", response_model=MedicalIntentResponse)
 async def classify_medical_intent_endpoint(request: MedicalIntentRequest):
     """
