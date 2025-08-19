@@ -9,11 +9,15 @@ import asyncio
 import json
 import re
 import time
+import logging
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 import google.generativeai as genai
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 # Import the new intelligent text normalizer
 from nlp_processor import IntelligentTextNormalizer, NormalizationResult
