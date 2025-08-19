@@ -4994,7 +4994,7 @@ class MedicalInterviewStage(Enum):
 
 @dataclass
 class MedicalContext:
-    """Comprehensive medical conversation context"""
+    """Comprehensive medical conversation context with enhanced conversation tracking"""
     patient_id: str
     consultation_id: str
     current_stage: MedicalInterviewStage
@@ -5011,6 +5011,20 @@ class MedicalContext:
     emergency_level: str
     clinical_hypotheses: List[Dict[str, Any]]
     confidence_score: float
+    
+    # 🚀 ENHANCED CONVERSATION TRACKING
+    questions_asked: Dict[str, str] = None  # element -> question asked
+    questions_answered: Dict[str, str] = None  # element -> user response
+    conversation_turns: List[Dict[str, Any]] = None  # Full conversation history
+    last_question_element: Optional[str] = None  # Track what was last asked
+    
+    def __post_init__(self):
+        if self.questions_asked is None:
+            self.questions_asked = {}
+        if self.questions_answered is None:
+            self.questions_answered = {}
+        if self.conversation_turns is None:
+            self.conversation_turns = []
 
 # 🧠 STEP 2.2: CONTEXT-AWARE MEDICAL REASONING ENGINE
 
