@@ -8463,6 +8463,71 @@ class WorldClassMedicalAI:
         """Generate targeted Review of Systems question"""
         return f"Now I'd like to ask about some related symptoms. Have you noticed any associated symptoms like nausea, dizziness, fever, or changes in appetite along with your {context.chief_complaint}?"
     
+    def _extract_clean_chief_complaint(self, message: str, symptoms_detected: list, causal_relationships: list) -> str:
+        """Extract a clean, concise chief complaint from the patient's message"""
+        
+        # First try to extract from causal relationships if available
+        if causal_relationships:
+            for rel in causal_relationships:
+                if hasattr(rel, 'symptom') and rel.symptom:
+                    return rel.symptom.replace("_", " ")
+        
+        # Then try symptoms_detected
+        if symptoms_detected:
+            # Map common symptom patterns to clean names
+            if "fever" in symptoms_detected:
+                return "fever"
+            elif "headache" in symptoms_detected:
+                return "headache" 
+            elif "chest_pain" in symptoms_detected:
+                return "chest pain"
+            elif "pain" in symptoms_detected:
+                return "pain"
+            elif "nausea" in symptoms_detected:
+                return "nausea"
+            elif "dizziness" in symptoms_detected:
+                return "dizziness"
+            elif "fatigue" in symptoms_detected:
+                return "fatigue"
+            elif "cough" in symptoms_detected:
+                return "cough"
+            elif "shortness_of_breath" in symptoms_detected:
+                return "shortness of breath"
+            elif "abdominal_pain" in symptoms_detected:
+                return "abdominal pain"
+            else:
+                # Generic cleanup for other symptoms
+                clean_symptoms = []
+                for symptom in symptoms_detected:
+                    if hasattr(symptom, 'symptom'):
+                        clean_symptoms.append(symptom.symptom.replace("_", " "))
+                    elif isinstance(symptom, str):
+                        clean_symptoms.append(symptom.replace("_", " "))
+                
+                return " and ".join(clean_symptoms) if clean_symptoms else "symptoms"
+        
+        # Fallback: try to extract from the message directly using simple pattern matching
+        message_lower = message.lower()
+        if "headache" in message_lower or "head ache" in message_lower or "head pain" in message_lower:
+            return "headache"
+        elif "chest pain" in message_lower or "chest hurt" in message_lower:
+            return "chest pain"
+        elif "stomach" in message_lower and ("pain" in message_lower or "ache" in message_lower or "hurt" in message_lower):
+            return "abdominal pain"
+        elif "fever" in message_lower or "temperature" in message_lower:
+            return "fever"
+        elif "dizzy" in message_lower or "dizziness" in message_lower:
+            return "dizziness"
+        elif "cough" in message_lower:
+            return "cough"
+        elif "nausea" in message_lower or "nauseous" in message_lower:
+            return "nausea"
+        elif "pain" in message_lower:
+            return "pain"
+        
+        # If no clear symptom pattern, return a generic description
+        return "health concerns"
+
     async def _handle_chief_complaint_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
         """Handle chief complaint collection with improved message processing"""
         
