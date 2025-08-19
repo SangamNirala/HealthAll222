@@ -11524,7 +11524,21 @@ from multi_intent_orchestrator import (
     ClinicalPriorityLevel,
     IntentInteractionType,
     ClinicalPriorityScore,
-    IntentInteractionMatrix
+    IntentInteractionMatrix,
+    MultiIntentResult as MultiIntentOrchestrationResult
+)
+
+# ===== WEEK 3: CONVERSATION FLOW OPTIMIZATION IMPORTS =====
+from conversation_flow_optimizer import (
+    conversation_flow_optimizer,
+    optimize_medical_conversation_flow,
+    ConversationFlowResult,
+    OptimalQuestion,
+    ConversationPathway,
+    InterviewStrategy,
+    ConversationStage,
+    QuestionCategory,
+    ConversationPriority
 )
 
 # Pydantic models for API requests/responses
