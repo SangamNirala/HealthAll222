@@ -10968,6 +10968,11 @@ pdf_generator = None
 soap_generator = None
 clinical_decision_support = None
 
+# Provider Intelligence System components
+provider_intelligence = None
+clinical_documentation_ai = None
+workflow_optimizer = None
+
 def get_medical_ai():
     """Get Medical AI service with lazy initialization"""
     global medical_ai
