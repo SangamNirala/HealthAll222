@@ -7900,6 +7900,42 @@ class WorldClassMedicalAI:
             # Generic follow-up for other cases
             return f"Can you provide more specific details about '{user_response}'? What exactly do you mean by that?"
 
+    def _filter_internal_reasoning(self, response_text: str) -> str:
+        """Filter out internal reasoning text from AI responses to keep them user-friendly"""
+        
+        # Remove phrases that indicate internal AI reasoning
+        internal_phrases = [
+            "I think there might be",
+            "I understand you'd like to discuss",
+            "I'm analyzing",
+            "I need to consider",
+            "Based on my analysis",
+            "According to my reasoning",
+            "My clinical assessment suggests",
+            "From a medical perspective, I believe",
+        ]
+        
+        filtered_response = response_text
+        
+        for phrase in internal_phrases:
+            if phrase.lower() in filtered_response.lower():
+                # Remove sentences containing these phrases
+                sentences = filtered_response.split('. ')
+                filtered_sentences = []
+                
+                for sentence in sentences:
+                    if phrase.lower() not in sentence.lower():
+                        filtered_sentences.append(sentence)
+                
+                filtered_response = '. '.join(filtered_sentences)
+        
+        # Clean up any remaining artifacts
+        filtered_response = filtered_response.strip()
+        if not filtered_response.endswith(('.', '?', '!')):
+            filtered_response += '.'
+            
+        return filtered_response
+
     async def _call_gemini_api(self, prompt: str, max_tokens: int = 500) -> str:
         """Call Gemini API for intelligent reasoning"""
         import google.generativeai as genai
