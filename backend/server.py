@@ -11050,8 +11050,12 @@ async def process_medical_message(request: MedicalConsultationRequest):
             # Initialize new context if none provided
             context = await medical_ai_service.initialize_consultation({"patient_id": request.patient_id})
         
-        # Process the message
-        response = await medical_ai_service.process_patient_message(request.message, context)
+        # Process the message with conversation history
+        response = await medical_ai_service.process_patient_message(
+            request.message, 
+            context, 
+            conversation_history=request.conversation_history
+        )
         
         return MedicalConsultationResponse(
             response=response["response"],
