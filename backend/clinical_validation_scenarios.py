@@ -668,7 +668,7 @@ class ClinicalValidationScenarios:
         
         try:
             # Import required modules for validation
-            from medical_intent_classifier import classify_medical_intent
+            from medical_intent_classifier import medical_intent_classifier
             from multi_intent_orchestrator import orchestrate_multi_intent_analysis
             
             # Execute scenario through pipeline (simplified for demo)
@@ -676,7 +676,7 @@ class ClinicalValidationScenarios:
             validation_scores = {}
             
             # Simulate pipeline execution with scenario
-            intent_result = await classify_medical_intent(scenario.patient_presentation)
+            intent_result = await medical_intent_classifier.classify_medical_intent(scenario.patient_presentation)
             
             # Calculate validation scores
             validation_scores[ValidationMetric.CLINICAL_ACCURACY] = self._calculate_clinical_accuracy(
