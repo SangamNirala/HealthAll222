@@ -13917,6 +13917,267 @@ async def get_learning_analytics():
             detail=f"Failed to retrieve learning analytics: {str(e)}"
         )
 
+# ===== STEP 2: DYNAMIC PATTERN ENHANCEMENT SYSTEM =====
+
+# Import Step 2 components
+from dynamic_pattern_learner import DynamicPatternLearner
+from pattern_evolution_tracker import PatternEvolutionTracker
+
+# Initialize Step 2 components
+dynamic_pattern_learner = DynamicPatternLearner(db)
+pattern_evolution_tracker = PatternEvolutionTracker(db)
+
+# Pydantic models for Step 2 endpoints
+class PatternDiscoveryRequest(BaseModel):
+    conversation_id: str
+    patient_id: str
+    messages: List[Dict[str, Any]]
+    context_data: Optional[Dict[str, Any]] = {}
+
+class PatternDiscoveryResponse(BaseModel):
+    status: str
+    conversation_id: str
+    patterns_discovered: int
+    new_patterns: List[Dict[str, Any]]
+    real_time_insights: List[Dict[str, Any]]
+    processing_time_ms: float
+    algorithm_version: str
+
+class EvolutionAnalysisRequest(BaseModel):
+    time_window_days: int = 30
+    analysis_type: Optional[str] = "comprehensive"
+
+class EvolutionAnalysisResponse(BaseModel):
+    status: str
+    time_window_days: int
+    patterns_analyzed: int
+    temporal_trends: Dict[str, Any]
+    lifecycle_analysis: Dict[str, Any]
+    population_insights: List[Dict[str, Any]]
+    trend_predictions: Dict[str, Any]
+    medical_language_evolution: Dict[str, Any]
+    processing_time_ms: float
+    algorithm_version: str
+
+class ConfidenceCalibrationRequest(BaseModel):
+    feedback_data: List[Dict[str, Any]]
+
+class ConfidenceCalibrationResponse(BaseModel):
+    patterns_updated: int
+    confidence_improvements: int
+    patterns_deprecated: int
+    calibration_summary: Dict[str, Any]
+
+@api_router.post("/medical-ai/dynamic-pattern-discovery", response_model=PatternDiscoveryResponse)
+async def discover_patterns_from_conversation(request: PatternDiscoveryRequest):
+    """
+    🔬 DYNAMIC PATTERN DISCOVERY: Real-time Pattern Learning
+    
+    Discovers new medical conversation patterns from live conversations using
+    advanced ML-powered pattern recognition and AI analysis.
+    
+    Step 2 Advanced Features:
+    - Real-time pattern discovery from live conversations
+    - Auto-discovery of new symptom description patterns  
+    - Medical significance assessment with AI validation
+    - Privacy-compliant pattern recording with K-anonymity
+    - Confidence calibration through feedback loops
+    - <15ms processing time for real-time integration
+    """
+    try:
+        # Prepare conversation data
+        conversation_data = {
+            'conversation_id': request.conversation_id,
+            'patient_id': request.patient_id,
+            'messages': request.messages,
+            'context_data': request.context_data
+        }
+        
+        # Discover patterns using Dynamic Pattern Learner
+        discovery_result = await dynamic_pattern_learner.discover_patterns_from_conversation(conversation_data)
+        
+        if discovery_result['status'] == 'error':
+            raise HTTPException(
+                status_code=500,
+                detail=f"Pattern discovery failed: {discovery_result.get('error', 'Unknown error')}"
+            )
+        
+        return PatternDiscoveryResponse(
+            status=discovery_result['status'],
+            conversation_id=discovery_result['conversation_id'],
+            patterns_discovered=discovery_result['patterns_discovered'],
+            new_patterns=discovery_result['new_patterns'],
+            real_time_insights=discovery_result['real_time_insights'],
+            processing_time_ms=discovery_result['processing_time_ms'],
+            algorithm_version=discovery_result['algorithm_version']
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Pattern discovery endpoint failed: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to discover patterns: {str(e)}"
+        )
+
+@api_router.post("/medical-ai/pattern-evolution-analysis", response_model=EvolutionAnalysisResponse)
+async def analyze_pattern_evolution(request: EvolutionAnalysisRequest):
+    """
+    📈 PATTERN EVOLUTION ANALYSIS: Temporal Trend Tracking
+    
+    Analyzes how medical conversation patterns evolve over time using advanced
+    statistical modeling and population-level learning insights.
+    
+    Step 2 Advanced Capabilities:
+    - Temporal pattern evolution tracking with statistical significance
+    - Medical language trend analysis and prediction
+    - Population-level learning with privacy protection (K-anonymity)
+    - Pattern lifecycle management and optimization  
+    - Medical significance assessment across patient populations
+    """
+    try:
+        # Track pattern evolution using Pattern Evolution Tracker
+        evolution_result = await pattern_evolution_tracker.track_pattern_evolution(request.time_window_days)
+        
+        if evolution_result['status'] == 'error':
+            raise HTTPException(
+                status_code=500,
+                detail=f"Evolution analysis failed: {evolution_result.get('error', 'Unknown error')}"
+            )
+        
+        return EvolutionAnalysisResponse(
+            status=evolution_result['status'],
+            time_window_days=evolution_result['time_window_days'],
+            patterns_analyzed=evolution_result['patterns_analyzed'],
+            temporal_trends=evolution_result['temporal_trends'],
+            lifecycle_analysis=evolution_result['lifecycle_analysis'],
+            population_insights=evolution_result['population_insights'],
+            trend_predictions=evolution_result['trend_predictions'],
+            medical_language_evolution=evolution_result['medical_language_evolution'],
+            processing_time_ms=evolution_result['processing_time_ms'],
+            algorithm_version=evolution_result['algorithm_version']
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Pattern evolution analysis endpoint failed: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to analyze pattern evolution: {str(e)}"
+        )
+
+@api_router.get("/medical-ai/pattern-discovery-analytics")
+async def get_pattern_discovery_analytics():
+    """
+    📊 PATTERN DISCOVERY ANALYTICS: Comprehensive Discovery Metrics
+    
+    Provides comprehensive analytics on pattern discovery performance,
+    including discovery rates, validation metrics, and system health.
+    """
+    try:
+        # Get analytics from Dynamic Pattern Learner
+        analytics = await dynamic_pattern_learner.get_pattern_discovery_analytics()
+        
+        if 'error' in analytics:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Analytics retrieval failed: {analytics['error']}"
+            )
+        
+        return {
+            "status": "success",
+            "analytics": analytics,
+            "generated_at": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Pattern discovery analytics endpoint failed: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve pattern discovery analytics: {str(e)}"
+        )
+
+@api_router.get("/medical-ai/evolution-analytics-dashboard")
+async def get_evolution_analytics_dashboard():
+    """
+    📈 EVOLUTION ANALYTICS DASHBOARD: Comprehensive Evolution Insights
+    
+    Provides comprehensive dashboard analytics for pattern evolution tracking,
+    including lifecycle statistics, trend predictions, and population insights.
+    """
+    try:
+        # Get dashboard analytics from Pattern Evolution Tracker
+        dashboard = await pattern_evolution_tracker.get_evolution_analytics_dashboard()
+        
+        if 'error' in dashboard:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Dashboard retrieval failed: {dashboard['error']}"
+            )
+        
+        return {
+            "status": "success",
+            "dashboard": dashboard,
+            "generated_at": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Evolution analytics dashboard endpoint failed: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve evolution analytics dashboard: {str(e)}"
+        )
+
+@api_router.post("/medical-ai/pattern-confidence-calibration", response_model=ConfidenceCalibrationResponse)
+async def calibrate_pattern_confidence(request: ConfidenceCalibrationRequest):
+    """
+    🎯 PATTERN CONFIDENCE CALIBRATION: Feedback-based Learning
+    
+    Calibrates pattern confidence scores based on user feedback and validation
+    results, implementing continuous improvement through feedback loops.
+    
+    Advanced Features:
+    - User feedback integration for pattern validation
+    - Confidence score adjustment based on evidence quality
+    - Pattern deprecation for low-performing patterns
+    - Continuous learning feedback loops
+    """
+    try:
+        # Calibrate confidence using Dynamic Pattern Learner
+        calibration_result = await dynamic_pattern_learner.calibrate_pattern_confidence(request.feedback_data)
+        
+        if 'error' in calibration_result:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Confidence calibration failed: {calibration_result['error']}"
+            )
+        
+        return ConfidenceCalibrationResponse(
+            patterns_updated=calibration_result['patterns_updated'],
+            confidence_improvements=calibration_result['confidence_improvements'],
+            patterns_deprecated=calibration_result['patterns_deprecated'],
+            calibration_summary={
+                "total_feedback_processed": len(request.feedback_data),
+                "improvement_rate": calibration_result['confidence_improvements'] / max(calibration_result['patterns_updated'], 1) * 100,
+                "deprecation_rate": calibration_result['patterns_deprecated'] / max(calibration_result['patterns_updated'], 1) * 100
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Pattern confidence calibration endpoint failed: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to calibrate pattern confidence: {str(e)}"
+        )
+
 # Include the router in the main app (after all endpoints are defined)
 app.include_router(api_router)
 
