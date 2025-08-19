@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import uuid
 
 class EnhancedMLEndpointsTester:
-    def __init__(self, base_url="https://predictive-medic.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://clinical-ai-4.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0

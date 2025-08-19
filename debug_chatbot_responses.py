@@ -9,7 +9,7 @@ import os
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://predictive-medic.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://clinical-ai-4.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 def debug_conversation_flow():
