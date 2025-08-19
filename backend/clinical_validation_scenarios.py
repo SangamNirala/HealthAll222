@@ -931,6 +931,108 @@ class ClinicalValidationScenarios:
         
         return analysis
     
+    def _analyze_overall_performance(self, component_benchmarks: Dict[str, Any]) -> Dict[str, Any]:
+        """Analyze overall performance across all benchmarked components"""
+        
+        if not component_benchmarks:
+            return {"status": "no_data", "overall_performance": "unknown"}
+        
+        # Extract performance metrics from component benchmarks
+        processing_times = []
+        performance_ratios = []
+        targets_met = []
+        
+        for component, benchmark in component_benchmarks.items():
+            if isinstance(benchmark, dict):
+                processing_times.append(benchmark.get("average_processing_time_ms", 0))
+                performance_ratios.append(benchmark.get("performance_ratio", 0))
+                targets_met.append(benchmark.get("meets_target", False))
+            else:
+                # If benchmark is a PerformanceBenchmark object
+                processing_times.append(benchmark.average_processing_time_ms)
+                performance_ratios.append(benchmark.performance_ratio)
+                targets_met.append(benchmark.meets_target)
+        
+        # Calculate overall metrics
+        avg_processing_time = sum(processing_times) / len(processing_times) if processing_times else 0
+        avg_performance_ratio = sum(performance_ratios) / len(performance_ratios) if performance_ratios else 0
+        overall_targets_met = sum(targets_met) / len(targets_met) if targets_met else 0
+        
+        # Determine overall performance status
+        if avg_processing_time <= 30 and overall_targets_met >= 0.8:
+            performance_status = "excellent"
+        elif avg_processing_time <= 40 and overall_targets_met >= 0.6:
+            performance_status = "good"
+        elif avg_processing_time <= 50 and overall_targets_met >= 0.4:
+            performance_status = "acceptable"
+        else:
+            performance_status = "needs_improvement"
+        
+        return {
+            "overall_status": performance_status,
+            "average_processing_time_ms": avg_processing_time,
+            "average_performance_ratio": avg_performance_ratio,
+            "targets_met_percentage": overall_targets_met * 100,
+            "component_count": len(component_benchmarks),
+            "performance_summary": {
+                "fastest_component": min(processing_times) if processing_times else 0,
+                "slowest_component": max(processing_times) if processing_times else 0,
+                "target_compliance_rate": overall_targets_met,
+                "benchmark_date": datetime.utcnow().isoformat()
+            },
+            "recommendations": self._generate_performance_recommendations(
+                avg_processing_time, overall_targets_met, performance_status
+            )
+        }
+    
+    def _generate_performance_recommendations(
+        self, 
+        avg_processing_time: float, 
+        targets_met_rate: float, 
+        performance_status: str
+    ) -> List[str]:
+        """Generate performance improvement recommendations"""
+        
+        recommendations = []
+        
+        if avg_processing_time > 30:
+            recommendations.append(f"Processing time {avg_processing_time:.1f}ms exceeds 30ms target - optimize algorithms")
+        
+        if targets_met_rate < 0.8:
+            recommendations.append(f"Only {targets_met_rate*100:.1f}% of targets met - review component performance")
+        
+        if performance_status == "needs_improvement":
+            recommendations.append("Overall performance requires significant optimization before production")
+        elif performance_status == "acceptable":
+            recommendations.append("Performance is acceptable but could benefit from optimization")
+        elif performance_status == "good":
+            recommendations.append("Performance is good - minor optimizations recommended")
+        else:
+            recommendations.append("Excellent performance - ready for production deployment")
+        
+        return recommendations
+    
+    def _generate_performance_report(
+        self, 
+        component_benchmarks: Dict[str, Any], 
+        performance_analysis: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Generate comprehensive performance report"""
+        
+        return {
+            "report_type": "comprehensive_performance_benchmarking",
+            "executive_summary": {
+                "overall_status": performance_analysis.get("overall_status", "unknown"),
+                "average_processing_time_ms": performance_analysis.get("average_processing_time_ms", 0),
+                "targets_met_percentage": performance_analysis.get("targets_met_percentage", 0),
+                "component_count": len(component_benchmarks)
+            },
+            "detailed_metrics": component_benchmarks,
+            "performance_analysis": performance_analysis,
+            "generated_at": datetime.utcnow().isoformat(),
+            "algorithm_version": self.algorithm_version
+        }
+    
     def get_clinical_validation_performance(self) -> Dict[str, Any]:
         """Get comprehensive clinical validation performance statistics"""
         
