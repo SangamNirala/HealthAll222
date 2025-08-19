@@ -11,7 +11,7 @@ import time
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = "https://clinical-ai-4.preview.emergentagent.com/api"
+BACKEND_URL = "https://medtest-platform.preview.emergentagent.com/api"
 
 def test_week5_integration_testing():
     """Test Week 5 Integration Testing with correct request format"""

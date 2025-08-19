@@ -8,7 +8,7 @@ import uuid
 import time
 
 class NutritionalTipsHealthTrackingTester:
-    def __init__(self, base_url="https://clinical-ai-4.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://medtest-platform.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0

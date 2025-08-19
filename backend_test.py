@@ -22,7 +22,7 @@ from datetime import datetime
 import traceback
 
 # Test configuration
-BACKEND_URL = "https://clinical-ai-4.preview.emergentagent.com/api"
+BACKEND_URL = "https://medtest-platform.preview.emergentagent.com/api"
 TEST_TIMEOUT = 30  # seconds
 
 class WeekFourFiveTestSuite:

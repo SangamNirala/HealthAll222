@@ -25,7 +25,7 @@ from dataclasses import dataclass
 import statistics
 
 # Backend URL from environment
-BACKEND_URL = "https://clinical-ai-4.preview.emergentagent.com/api"
+BACKEND_URL = "https://medtest-platform.preview.emergentagent.com/api"
 
 @dataclass
 class TestResult:
