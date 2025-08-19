@@ -7293,7 +7293,8 @@ class WorldClassMedicalAI:
             # 🧠 STEP 2.2: PRIORITIZE CONTEXTUAL PATTERNS OVER BASIC SYMPTOMS
             # Only treat as symptom if we actually detected medical symptoms or contextual patterns
             if causal_relationships or symptoms_detected:
-                context.chief_complaint = message
+                # Extract clean symptom name for chief_complaint instead of full message
+                context.chief_complaint = self._extract_clean_chief_complaint(message, symptoms_detected, causal_relationships)
                 context.current_stage = MedicalInterviewStage.HISTORY_PRESENT_ILLNESS
                 
                 # 🚀 STEP 2.2: CONTEXTUALLY INTELLIGENT RESPONSE GENERATION
