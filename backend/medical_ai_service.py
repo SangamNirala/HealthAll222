@@ -2334,6 +2334,172 @@ class AdvancedSymptomRecognizer:
         
         return individual_symptoms
     
+    def _extract_basic_individual_symptoms(self, text: str) -> List[SymptomEntity]:
+        """Extract individual symptoms from simple phrases like 'I have a headache'"""
+        
+        symptoms = []
+        text_lower = text.lower()
+        
+        # Common symptom expressions with enhanced patterns
+        symptom_expressions = {
+            "headache": [
+                r"\b(I\s+have\s+a\s+headache|headache|head\s+ache|head\s+pain|skull\s+pain|cranial\s+pain)",
+                r"\b(my\s+head\s+hurts|my\s+head\s+aches|head\s+is\s+pounding|head\s+is\s+throbbing)",
+                r"\b(migraine|tension\s+headache|cluster\s+headache|sinus\s+headache)"
+            ],
+            "chest_pain": [
+                r"\b(I\s+have\s+chest\s+pain|chest\s+pain|chest\s+hurt|chest\s+ache|heart\s+pain)",
+                r"\b(my\s+chest\s+hurts|my\s+chest\s+aches|chest\s+is\s+tight|chest\s+pressure)",
+                r"\b(cardiac\s+pain|angina|heart\s+attack\s+symptoms)"
+            ],
+            "abdominal_pain": [
+                r"\b(I\s+have\s+stomach\s+pain|stomach\s+pain|stomach\s+ache|belly\s+ache|abdominal\s+pain)",
+                r"\b(my\s+stomach\s+hurts|my\s+belly\s+hurts|gut\s+pain|tummy\s+ache)",
+                r"\b(gastric\s+pain|epigastric\s+pain|lower\s+abdomen\s+pain)"
+            ],
+            "back_pain": [
+                r"\b(I\s+have\s+back\s+pain|back\s+pain|back\s+ache|spine\s+pain|spinal\s+pain)",
+                r"\b(my\s+back\s+hurts|lower\s+back\s+pain|upper\s+back\s+pain|mid\s+back\s+pain)",
+                r"\b(lumbar\s+pain|thoracic\s+pain|cervical\s+pain|sciatica)"
+            ],
+            "fever": [
+                r"\b(I\s+have\s+a\s+fever|fever|high\s+temperature|running\s+a\s+fever)",
+                r"\b(I\s+feel\s+feverish|feeling\s+hot|burning\s+up|chills\s+and\s+fever)",
+                r"\b(pyrexia|hyperthermia|temperature\s+is\s+high)"
+            ],
+            "nausea": [
+                r"\b(I\s+feel\s+nauseous|nausea|feeling\s+sick|queasy|sick\s+to\s+my\s+stomach)",
+                r"\b(want\s+to\s+vomit|feel\s+like\s+throwing\s+up|nauseated|motion\s+sick)",
+                r"\b(gastric\s+upset|stomach\s+upset)"
+            ],
+            "dizziness": [
+                r"\b(I\s+feel\s+dizzy|dizziness|dizzy|lightheaded|light\s+headed)",
+                r"\b(feeling\s+faint|vertigo|spinning|room\s+is\s+spinning|unsteady)",
+                r"\b(balance\s+problems|wobbly|off\s+balance)"
+            ],
+            "fatigue": [
+                r"\b(I\s+feel\s+tired|fatigue|exhausted|weary|worn\s+out|drained)",
+                r"\b(low\s+energy|no\s+energy|feeling\s+weak|weakness|lethargic)",
+                r"\b(chronic\s+fatigue|always\s+tired|constant\s+tiredness)"
+            ],
+            "cough": [
+                r"\b(I\s+have\s+a\s+cough|cough|coughing|persistent\s+cough|dry\s+cough)",
+                r"\b(hacking\s+cough|productive\s+cough|wet\s+cough|clearing\s+throat)",
+                r"\b(bronchial\s+cough|whooping\s+cough)"
+            ],
+            "shortness_of_breath": [
+                r"\b(short\s+of\s+breath|shortness\s+of\s+breath|trouble\s+breathing|difficulty\s+breathing)",
+                r"\b(breathless|winded|can't\s+breathe|hard\s+to\s+breathe|gasping)",
+                r"\b(dyspnea|respiratory\s+distress)"
+            ],
+            "joint_pain": [
+                r"\b(joint\s+pain|joints\s+hurt|joint\s+ache|arthritis\s+pain)",
+                r"\b(knee\s+pain|shoulder\s+pain|hip\s+pain|ankle\s+pain|wrist\s+pain|elbow\s+pain)",
+                r"\b(arthralgia|joint\s+stiffness|joint\s+swelling)"
+            ],
+            "sore_throat": [
+                r"\b(sore\s+throat|throat\s+pain|throat\s+hurts|scratchy\s+throat)",
+                r"\b(strep\s+throat|pharyngitis|throat\s+infection|swollen\s+throat)",
+                r"\b(difficulty\s+swallowing|painful\s+swallowing)"
+            ]
+        }
+        
+        # Check each symptom type
+        for symptom_name, patterns in symptom_expressions.items():
+            for pattern in patterns:
+                if re.search(pattern, text_lower):
+                    # Calculate confidence based on pattern specificity
+                    confidence = 0.8 if "I have" in text_lower or "my" in text_lower else 0.7
+                    
+                    # Extract additional context
+                    location = self._extract_symptom_location(text_lower, symptom_name)
+                    quality = self._extract_symptom_quality(text_lower)
+                    severity = self._extract_symptom_severity(text_lower)
+                    
+                    symptom = SymptomEntity(
+                        symptom=symptom_name,
+                        location=location,
+                        quality=quality,
+                        severity=severity,
+                        confidence=confidence,
+                        raw_text=text
+                    )
+                    
+                    symptoms.append(symptom)
+                    break  # Only add one instance per symptom type
+        
+        return symptoms
+    
+    def _extract_symptom_location(self, text_lower: str, symptom_name: str) -> str:
+        """Extract location information for a symptom"""
+        
+        # Location patterns specific to symptom types
+        location_patterns = {
+            "headache": {
+                "temporal": r"\b(temple|temporal|side\s+of\s+head)",
+                "frontal": r"\b(forehead|front\s+of\s+head|frontal)",
+                "occipital": r"\b(back\s+of\s+head|occipital|base\s+of\s+skull)",
+                "parietal": r"\b(top\s+of\s+head|crown|parietal)"
+            },
+            "chest_pain": {
+                "left_chest": r"\b(left\s+chest|left\s+side\s+of\s+chest)",
+                "right_chest": r"\b(right\s+chest|right\s+side\s+of\s+chest)",
+                "center_chest": r"\b(center\s+chest|middle\s+of\s+chest|substernal)"
+            },
+            "abdominal_pain": {
+                "upper_abdomen": r"\b(upper\s+abdomen|upper\s+stomach|epigastric)",
+                "lower_abdomen": r"\b(lower\s+abdomen|lower\s+stomach|pelvic)",
+                "right_side": r"\b(right\s+side|right\s+abdomen)",
+                "left_side": r"\b(left\s+side|left\s+abdomen)"
+            },
+            "back_pain": {
+                "lower_back": r"\b(lower\s+back|lumbar|tailbone)",
+                "upper_back": r"\b(upper\s+back|between\s+shoulders|thoracic)",
+                "neck": r"\b(neck|cervical|base\s+of\s+neck)"
+            }
+        }
+        
+        if symptom_name in location_patterns:
+            for location, pattern in location_patterns[symptom_name].items():
+                if re.search(pattern, text_lower):
+                    return location.replace("_", " ")
+        
+        return None
+    
+    def _extract_symptom_quality(self, text_lower: str) -> str:
+        """Extract quality/character of symptom"""
+        
+        quality_patterns = {
+            "sharp": r"\b(sharp|stabbing|knife\s+like|piercing|jabbing)",
+            "dull": r"\b(dull|aching|gnawing|constant)",
+            "throbbing": r"\b(throbbing|pulsating|pounding|beating)",
+            "burning": r"\b(burning|searing|fire\s+like)",
+            "cramping": r"\b(cramping|gripping|twisting)",
+            "crushing": r"\b(crushing|pressure|squeezing|tight)",
+            "shooting": r"\b(shooting|radiating|traveling)"
+        }
+        
+        for quality, pattern in quality_patterns.items():
+            if re.search(pattern, text_lower):
+                return quality
+        
+        return None
+    
+    def _extract_symptom_severity(self, text_lower: str) -> str:
+        """Extract severity information"""
+        
+        severity_patterns = {
+            "severe": r"\b(severe|excruciating|unbearable|worst|terrible|intense)",
+            "moderate": r"\b(moderate|significant|noticeable|considerable)",
+            "mild": r"\b(mild|slight|minor|little|small|light)"
+        }
+        
+        for severity, pattern in severity_patterns.items():
+            if re.search(pattern, text_lower):
+                return severity
+        
+        return None
+    
     def _parse_temporal_expressions_advanced(self, text: str, context_analysis: Dict[str, Any]) -> List[TemporalEntity]:
         """
         ENHANCED TEMPORAL PROCESSING
