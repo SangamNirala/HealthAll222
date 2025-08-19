@@ -1012,6 +1012,52 @@ class ClinicalValidationScenarios:
         
         return recommendations
     
+    def _serialize_validation_result(self, result: ValidationResult) -> Dict[str, Any]:
+        """Serialize ValidationResult to dictionary with proper handling of complex objects"""
+        try:
+            result_dict = asdict(result)
+            
+            # Handle scenario serialization with enum values
+            if 'scenario' in result_dict and isinstance(result_dict['scenario'], dict):
+                scenario_dict = result_dict['scenario']
+                if 'specialty' in scenario_dict and hasattr(scenario_dict['specialty'], 'value'):
+                    scenario_dict['specialty'] = scenario_dict['specialty'].value
+                elif 'specialty' in scenario_dict:
+                    scenario_dict['specialty'] = str(scenario_dict['specialty'])
+                    
+                if 'severity' in scenario_dict and hasattr(scenario_dict['severity'], 'value'):
+                    scenario_dict['severity'] = scenario_dict['severity'].value
+                elif 'severity' in scenario_dict:
+                    scenario_dict['severity'] = str(scenario_dict['severity'])
+            
+            # Handle validation_scores enum keys
+            if 'validation_scores' in result_dict:
+                serialized_scores = {}
+                for metric, score in result_dict['validation_scores'].items():
+                    if hasattr(metric, 'value'):
+                        key = metric.value
+                    else:
+                        key = str(metric)
+                    serialized_scores[key] = score
+                result_dict['validation_scores'] = serialized_scores
+            
+            return result_dict
+            
+        except Exception as e:
+            logger.warning(f"Failed to serialize ValidationResult: {str(e)}")
+            # Fallback to basic serialization
+            return {
+                "scenario_id": getattr(result.scenario, 'scenario_id', 'unknown'),
+                "overall_score": result.overall_score,
+                "clinical_appropriateness": result.clinical_appropriateness,
+                "safety_score": result.safety_score,
+                "processing_time_ms": result.processing_time_ms,
+                "recommendations": result.recommendations,
+                "passed_criteria": result.passed_criteria,
+                "failed_criteria": result.failed_criteria,
+                "serialization_error": str(e)
+            }
+    
     def _generate_performance_report(
         self, 
         component_benchmarks: Dict[str, Any], 
