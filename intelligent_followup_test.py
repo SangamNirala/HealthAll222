@@ -328,7 +328,8 @@ class IntelligentFollowUpTester:
         surgery_followup_triggered = any(keyword in surgery_response for keyword in [
             "what type of surgery", "which surgery", "what kind of surgery",
             "when was the surgery", "where was the surgery", "surgery details",
-            "what surgery", "type of surgery"
+            "what surgery", "type of surgery", "tell me more about", "more about",
+            "can you provide more details", "more information about"
         ])
         
         if surgery_followup_triggered:
