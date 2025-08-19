@@ -93,9 +93,9 @@ class Week4ComprehensiveTester:
         # Test scenario from review request
         test_data = {
             "conversation_history": [
-                "I have chest pain",
-                "It started 2 hours ago", 
-                "It's crushing pressure"
+                {"message": "I have chest pain", "timestamp": "2025-01-17T10:00:00Z", "speaker": "patient"},
+                {"message": "It started 2 hours ago", "timestamp": "2025-01-17T10:01:00Z", "speaker": "patient"},
+                {"message": "It's crushing pressure", "timestamp": "2025-01-17T10:02:00Z", "speaker": "patient"}
             ],
             "current_context": {
                 "patient_age": 55,
