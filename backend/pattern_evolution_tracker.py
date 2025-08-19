@@ -827,7 +827,7 @@ class PatternEvolutionTracker:
         """
         📝 Record a pattern evolution event
         """
-        if not self.db:
+        if self.db is None:
             return False
         
         try:
