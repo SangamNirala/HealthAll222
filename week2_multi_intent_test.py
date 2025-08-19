@@ -296,8 +296,8 @@ class Week2MultiIntentTester:
                 
                 # Validate response structure
                 required_fields = [
-                    "conversation_summary", "message_analyses", "intent_evolution",
-                    "priority_trends", "conversation_pathway_recommendations"
+                    "conversation_summary", "message_orchestrations", "intent_evolution_analysis",
+                    "prioritization_trends", "conversation_complexity_assessment"
                 ]
                 
                 missing_fields = [field for field in required_fields if field not in data]
