@@ -149,7 +149,7 @@ backend:
     file: "/app/backend/medical_ai_service.py, /app/frontend/src/services/medicalAPI.js, /app/backend/server.py"
     stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: true
         agent: "main"
