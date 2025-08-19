@@ -9280,8 +9280,8 @@ Generate the follow-up question:
         # If it's just a greeting or very short non-medical message, ask for symptoms
         if message_lower in greetings or len(message.strip()) < 3:
             response = await self._generate_empathetic_response(
-                "I understand you'd like to start our consultation. Could you please describe any specific symptoms or health concerns you're experiencing? "
-                "For example, you might say 'I have a headache' or 'I'm feeling chest pain'. This will help me provide you with the most accurate medical guidance."
+                "Could you please describe any specific symptoms or health concerns you're experiencing? "
+                "For example, you might say 'I have a headache' or 'I'm feeling chest pain'."
             )
             
             return {
@@ -9289,12 +9289,11 @@ Generate the follow-up question:
                 "context": asdict(context),
                 "stage": context.current_stage.value,
                 "urgency": context.emergency_level,
-                # 🧠 STEP 2.2: ADD CONTEXTUAL REASONING TO API RESPONSE
-                "contextual_reasoning": context.symptom_data.get("contextual_reasoning", {}),
-                "causal_relationships": context.symptom_data.get("causal_relationships", []),
-                "clinical_hypotheses": context.symptom_data.get("clinical_hypotheses", []),
-                "medical_reasoning_narrative": context.symptom_data.get("medical_reasoning_narrative", ""),
-                "context_based_recommendations": context.symptom_data.get("context_based_recommendations", [])
+                "consultation_id": getattr(context, 'consultation_id', None),
+                "emergency_detected": context.emergency_level == "emergency",
+                "next_questions": [],
+                "differential_diagnoses": [],
+                "recommendations": []
             }
         
         # If medical symptoms are detected, process normally
