@@ -11575,6 +11575,83 @@ class MultiMessageIntentResponse(BaseModel):
     intent_progression: List[Dict[str, Any]] = Field(..., description="Intent evolution over conversation")
     conversation_insights: List[str] = Field(..., description="Insights from conversation flow")
 
+# ===== WEEK 2: MULTI-INTENT ORCHESTRATION PYDANTIC MODELS =====
+
+class IntentInteractionModel(BaseModel):
+    """Model for intent interaction analysis"""
+    intent_a: str
+    intent_b: str
+    interaction_type: str
+    clinical_significance: float
+    priority_modifier: float
+    clinical_reasoning: str
+    medical_knowledge_basis: List[str]
+
+class IntentInteractionMatrixModel(BaseModel):
+    """Model for intent interaction matrix"""
+    interactions: List[IntentInteractionModel]
+    dominant_interaction_pattern: str
+    clinical_complexity_score: float
+    interaction_summary: str
+    clinical_implications: List[str]
+
+class ClinicalPriorityScoreModel(BaseModel):
+    """Model for clinical priority assessment"""
+    overall_priority: str
+    priority_score: float
+    primary_driving_intent: str
+    contributing_factors: List[str]
+    clinical_reasoning: str
+    time_sensitivity: str
+    recommended_action: str
+    specialist_referral_needed: bool
+    emergency_protocols: List[str]
+
+class MultiIntentOrchestrationRequest(BaseModel):
+    """Request model for advanced multi-intent orchestration"""
+    message: str = Field(..., description="Patient message to analyze")
+    conversation_context: Optional[Dict[str, Any]] = Field(None, description="Optional conversation context")
+    include_interaction_analysis: bool = Field(True, description="Include detailed intent interaction analysis")
+    include_clinical_prioritization: bool = Field(True, description="Include clinical prioritization")
+    include_conversation_pathways: bool = Field(True, description="Include conversation pathway recommendations")
+
+class MultiIntentOrchestrationResponse(BaseModel):
+    """Response model for advanced multi-intent orchestration"""
+    # Core multi-intent detection
+    detected_intents: List[Tuple[str, float]] = Field(..., description="All detected intents with confidence scores")
+    primary_intent: str = Field(..., description="Primary detected intent")
+    secondary_intents: List[str] = Field(..., description="Secondary detected intents")
+    intent_count: int = Field(..., description="Number of detected intents")
+    
+    # Clinical prioritization
+    clinical_priority: ClinicalPriorityScoreModel = Field(..., description="Comprehensive clinical priority assessment")
+    intent_interactions: IntentInteractionMatrixModel = Field(..., description="Intent interaction analysis")
+    
+    # Advanced analysis
+    conversation_pathway_recommendations: List[str] = Field(..., description="Recommended conversation pathways")
+    clinical_decision_support: Dict[str, Any] = Field(..., description="Clinical decision support recommendations")
+    predictive_next_intents: List[str] = Field(..., description="Predicted next likely intents")
+    
+    # Processing metadata
+    processing_time_ms: float = Field(..., description="Processing time in milliseconds")
+    algorithm_version: str = Field(..., description="Multi-intent orchestration algorithm version")
+    complexity_assessment: str = Field(..., description="Complexity assessment of the scenario")
+
+class BatchMultiIntentRequest(BaseModel):
+    """Request model for batch multi-intent analysis"""
+    messages: List[str] = Field(..., description="List of patient messages to analyze")
+    conversation_id: Optional[str] = Field(None, description="Conversation identifier")
+    analyze_conversation_flow: bool = Field(True, description="Analyze conversation flow and intent evolution")
+    include_prioritization_trends: bool = Field(True, description="Include priority trends over conversation")
+
+class BatchMultiIntentResponse(BaseModel):
+    """Response model for batch multi-intent analysis"""
+    conversation_summary: Dict[str, Any] = Field(..., description="Overall conversation multi-intent analysis")
+    message_orchestrations: List[MultiIntentOrchestrationResponse] = Field(..., description="Individual message orchestrations")
+    intent_evolution_analysis: Dict[str, Any] = Field(..., description="How intents evolve over the conversation")
+    prioritization_trends: Dict[str, Any] = Field(..., description="Clinical priority trends")
+    conversation_complexity_assessment: str = Field(..., description="Overall conversation complexity")
+
 @api_router.post("/medical-ai/intent-classification", response_model=MedicalIntentResponse)
 async def classify_medical_intent_endpoint(request: MedicalIntentRequest):
     """
