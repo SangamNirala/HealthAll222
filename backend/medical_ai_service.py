@@ -7884,65 +7884,30 @@ class WorldClassMedicalAI:
         return False
     
     async def _generate_intelligent_followup_question(self, user_response: str, question_element: str, context: MedicalContext) -> str:
-        """Generate intelligent follow-up questions based on user response using LLM reasoning"""
+        """Generate intelligent follow-up questions based on user response - simplified and direct"""
         
         # Get the original question and symptom context
         original_question = context.questions_asked.get(question_element, "")
         chief_complaint = context.chief_complaint or "symptoms"
+        user_response_clean = user_response.strip().lower()
         
-        try:
-            # Create prompt for LLM to generate specific follow-up question
-            followup_prompt = f"""
-You are a medical AI conducting a patient interview. Generate a specific, relevant follow-up question based on the patient's response.
-
-PATIENT'S MAIN SYMPTOM: {chief_complaint}
-ORIGINAL QUESTION: {original_question}
-PATIENT RESPONSE: "{user_response}"
-HPI ELEMENT: {question_element}
-
-TASK: Generate a specific follow-up question to get more details about their response.
-
-EXAMPLES:
-
-If patient said "food" when asked about triggers:
-→ "What specific foods seem to trigger or worsen your {chief_complaint}? For example, certain types of food, drinks, or eating patterns?"
-
-If patient said "position" when asked about alleviating factors:
-→ "Which specific positions help or worsen your {chief_complaint}? For example, lying down, sitting up, bending over?"
-
-If patient said "surgeries" when asked about medical history:
-→ "Can you tell me more about the surgeries you've had? What type of surgery, when did it occur, and what was it for?"
-
-If patient said "medication" when asked about what makes it worse:
-→ "Which specific medications seem to affect your {chief_complaint}? Are these prescription medications, over-the-counter drugs, or supplements?"
-
-If patient said "activities" when asked about triggers:
-→ "What specific activities tend to trigger your {chief_complaint}? For example, physical exercise, reading, computer work, or certain movements?"
-
-GUIDELINES:
-1. Be specific and ask for concrete details
-2. Provide examples to help the patient understand what you're looking for
-3. Keep it conversational and medical professional
-4. Reference their main symptom when relevant
-5. Ask for timeframes, specifics, patterns when appropriate
-
-Generate the follow-up question:
-"""
-
-            # Use Gemini for intelligent question generation
-            followup_question = await self._call_gemini_api(followup_prompt, max_tokens=200)
-            
-            # Clean up the response
-            followup_question = followup_question.strip()
-            if not followup_question.endswith('?'):
-                followup_question += "?"
-                
-            print(f"[FOLLOWUP DEBUG] Generated question: {followup_question[:100]}...")
+        # Generate direct, simple follow-up questions without LLM complexity
+        followup_templates = {
+            'food': f"Can you tell me more about how food relates to your {chief_complaint}? For example, do you experience {chief_complaint} immediately after eating, or is it more of a delayed reaction?",
+            'position': f"Which specific positions help or worsen your {chief_complaint}? For example, lying down, sitting up, bending over?",
+            'medication': f"Which specific medications seem to affect your {chief_complaint}? Are these prescription medications, over-the-counter drugs, or supplements?",
+            'activity': f"What specific activities tend to trigger your {chief_complaint}? For example, physical exercise, reading, computer work, or certain movements?",
+            'stress': f"How does stress relate to your {chief_complaint}? Does it make it worse, better, or doesn't seem to have an effect?",
+            'weather': f"How does weather affect your {chief_complaint}? For example, does it get worse with changes in temperature, humidity, or pressure?"
+        }
+        
+        # Get the appropriate follow-up question
+        if user_response_clean in followup_templates:
+            followup_question = followup_templates[user_response_clean]
+            print(f"[FOLLOWUP DEBUG] Using template for '{user_response_clean}'")
             return followup_question
-            
-        except Exception as e:
-            print(f"[FOLLOWUP ERROR] Failed to generate followup question: {e}")
-            # Fallback to generic follow-up
+        else:
+            # Generic follow-up for other cases
             return f"Can you provide more specific details about '{user_response}'? What exactly do you mean by that?"
 
     async def _call_gemini_api(self, prompt: str, max_tokens: int = 500) -> str:
