@@ -7848,6 +7848,191 @@ class WorldClassMedicalAI:
         print(f"[HPI DEBUG] All HPI elements have been asked, ending HPI collection")
         return None  # All elements have been asked, move to next stage
     
+    async def _analyze_response_needs_followup(self, user_response: str, question_element: str, context: MedicalContext) -> bool:
+        """Analyze if a user response needs follow-up clarification using LLM reasoning"""
+        
+        # Get the original question that was asked
+        original_question = context.questions_asked.get(question_element, "")
+        
+        try:
+            # Create prompt for LLM to analyze if response needs follow-up
+            analysis_prompt = f"""
+You are a medical AI analyzing patient responses. Determine if the following response needs follow-up clarification.
+
+ORIGINAL QUESTION: {original_question}
+PATIENT RESPONSE: "{user_response}"
+HPI ELEMENT: {question_element}
+
+ANALYSIS CRITERIA:
+1. Is the response vague or incomplete? (e.g., "food", "position", "medication" without specifics)
+2. Does it mention something that needs elaboration? (e.g., "surgeries" needs type/when/where)
+3. Is it a single word that could mean many things?
+4. Does it indicate a trigger/factor that needs more details?
+
+EXAMPLES NEEDING FOLLOW-UP:
+- "food" → need to ask which foods
+- "position" → need to ask which positions
+- "medication" → need to ask which medications
+- "surgeries" → need to ask what type, when, where
+- "activities" → need to ask which activities
+
+EXAMPLES NOT NEEDING FOLLOW-UP:
+- "aspirin and ibuprofen make it worse"
+- "lying down relieves the pain"
+- "had appendectomy in 2020 at general hospital"
+- "spicy foods trigger the headache"
+
+Respond with only "YES" if follow-up is needed, "NO" if the response is sufficiently detailed.
+"""
+
+            # Use Gemini for analysis
+            gemini_response = await self._call_gemini_api(analysis_prompt, max_tokens=10)
+            
+            analysis_result = gemini_response.strip().upper()
+            needs_followup = analysis_result == "YES"
+            
+            print(f"[FOLLOWUP DEBUG] Question: {question_element}, Response: '{user_response}', Needs followup: {needs_followup}")
+            return needs_followup
+            
+        except Exception as e:
+            print(f"[FOLLOWUP ERROR] Failed to analyze response: {e}")
+            # Default: assume short responses need follow-up
+            return len(user_response.strip().split()) <= 2
+    
+    async def _generate_intelligent_followup_question(self, user_response: str, question_element: str, context: MedicalContext) -> str:
+        """Generate intelligent follow-up questions based on user response using LLM reasoning"""
+        
+        # Get the original question and symptom context
+        original_question = context.questions_asked.get(question_element, "")
+        chief_complaint = context.chief_complaint or "symptoms"
+        
+        try:
+            # Create prompt for LLM to generate specific follow-up question
+            followup_prompt = f"""
+You are a medical AI conducting a patient interview. Generate a specific, relevant follow-up question based on the patient's response.
+
+PATIENT'S MAIN SYMPTOM: {chief_complaint}
+ORIGINAL QUESTION: {original_question}
+PATIENT RESPONSE: "{user_response}"
+HPI ELEMENT: {question_element}
+
+TASK: Generate a specific follow-up question to get more details about their response.
+
+EXAMPLES:
+
+If patient said "food" when asked about triggers:
+→ "What specific foods seem to trigger or worsen your {chief_complaint}? For example, certain types of food, drinks, or eating patterns?"
+
+If patient said "position" when asked about alleviating factors:
+→ "Which specific positions help or worsen your {chief_complaint}? For example, lying down, sitting up, bending over?"
+
+If patient said "surgeries" when asked about medical history:
+→ "Can you tell me more about the surgeries you've had? What type of surgery, when did it occur, and what was it for?"
+
+If patient said "medication" when asked about what makes it worse:
+→ "Which specific medications seem to affect your {chief_complaint}? Are these prescription medications, over-the-counter drugs, or supplements?"
+
+If patient said "activities" when asked about triggers:
+→ "What specific activities tend to trigger your {chief_complaint}? For example, physical exercise, reading, computer work, or certain movements?"
+
+GUIDELINES:
+1. Be specific and ask for concrete details
+2. Provide examples to help the patient understand what you're looking for
+3. Keep it conversational and medical professional
+4. Reference their main symptom when relevant
+5. Ask for timeframes, specifics, patterns when appropriate
+
+Generate the follow-up question:
+"""
+
+            # Use Gemini for intelligent question generation
+            followup_question = await self._call_gemini_api(followup_prompt, max_tokens=200)
+            
+            # Clean up the response
+            followup_question = followup_question.strip()
+            if not followup_question.endswith('?'):
+                followup_question += "?"
+                
+            print(f"[FOLLOWUP DEBUG] Generated question: {followup_question[:100]}...")
+            return followup_question
+            
+        except Exception as e:
+            print(f"[FOLLOWUP ERROR] Failed to generate followup question: {e}")
+            # Fallback to generic follow-up
+            return f"Can you provide more specific details about '{user_response}'? What exactly do you mean by that?"
+
+    async def _call_gemini_api(self, prompt: str, max_tokens: int = 500) -> str:
+        """Call Gemini API for intelligent reasoning"""
+        import google.generativeai as genai
+        import os
+        
+        try:
+            # Configure Gemini with API key
+            api_key = os.getenv('GEMINI_API_KEY')
+            if not api_key:
+                raise ValueError("Gemini API key not found")
+                
+            genai.configure(api_key=api_key)
+            
+            # Use Gemini Pro model
+            model = genai.GenerativeModel('gemini-pro')
+            
+            # Generate response
+            response = model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    max_output_tokens=max_tokens,
+                    temperature=0.3,  # Low temperature for consistent medical reasoning
+                )
+            )
+            
+            return response.text if response.text else ""
+            
+        except Exception as e:
+            print(f"[GEMINI ERROR] API call failed: {e}")
+            # Fallback: try with a different API key if available
+            return await self._call_groq_api_fallback(prompt, max_tokens)
+
+    async def _call_groq_api_fallback(self, prompt: str, max_tokens: int = 500) -> str:
+        """Fallback to Groq API for intelligent reasoning"""
+        import os
+        import httpx
+        
+        try:
+            api_key = os.getenv('GROQ_API_KEY')
+            if not api_key:
+                raise ValueError("Groq API key not found")
+            
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            payload = {
+                "model": "llama3-70b-8192",  # Use the powerful Llama model
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": max_tokens,
+                "temperature": 0.3
+            }
+            
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers=headers,
+                    json=payload,
+                    timeout=30
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    return data["choices"][0]["message"]["content"]
+                else:
+                    raise Exception(f"Groq API error: {response.status_code}")
+                    
+        except Exception as e:
+            print(f"[GROQ ERROR] Fallback API call failed: {e}")
+            return ""
+    
     async def _generate_hpi_question_smart(self, element: str, context: MedicalContext) -> str:
         """Generate HPI questions with enhanced chief complaint handling"""
         
