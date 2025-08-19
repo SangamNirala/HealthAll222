@@ -259,8 +259,8 @@ class IntelligenceAmplificationTestSuite:
             pipeline_timings["week3_ms"] = (time.time() - week3_start) * 1000
             pipeline_results["week3_conversation_flow"] = {
                 "optimal_question": conversation_result.optimal_next_question,
-                "interview_strategy": conversation_result.recommended_interview_strategy,
-                "pathway_prediction": conversation_result.conversation_pathway_prediction
+                "interview_strategy": conversation_result.interview_strategy,
+                "pathway_prediction": conversation_result.predicted_pathway
             }
             
             # Week 4: Predictive Modeling & Subspecialty Reasoning
