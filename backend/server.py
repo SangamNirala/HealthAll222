@@ -12371,7 +12371,6 @@ from predictive_intent_modeling import (
 
 from subspecialty_clinical_reasoning import (
     generate_subspecialty_reasoning,
-    comprehensive_subspecialty_analysis,
     subspecialty_clinical_reasoning,
     CardiologyReasoning,
     NeurologyReasoning,
