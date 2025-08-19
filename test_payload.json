@@ -1,0 +1,30 @@
+{
+  "message": "it started 2 days ago",
+  "consultation_id": "consult_20250819_024329",
+  "context": {
+    "patient_id": "anonymous",
+    "consultation_id": "consult_20250819_024329", 
+    "current_stage": "history_present_illness",
+    "chief_complaint": "headache",
+    "symptom_data": {},
+    "medical_history": {},
+    "medications": [],
+    "allergies": [],
+    "social_history": {},
+    "family_history": {},
+    "risk_factors": [],
+    "red_flags": [],
+    "emergency_level": "none",
+    "clinical_hypotheses": [],
+    "confidence_score": 0.1,
+    "questions_asked": {},
+    "questions_answered": {},
+    "conversation_turns": [],
+    "last_question_element": null,
+    "demographics": {}
+  },
+  "conversation_history": [
+    {"role": "assistant", "content": "When exactly did your headache start? Was it sudden or gradual?"},
+    {"role": "user", "content": "it started 2 days ago"}
+  ]
+}
