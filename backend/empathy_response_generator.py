@@ -304,6 +304,7 @@ class EmpathyResponseGenerator:
                 'validation_phrases': validated_response['validation_elements'],
                 'boundary_maintenance': validated_response['professional_boundaries'],
                 'cultural_considerations': validated_response['cultural_adaptations'],
+                'emotional_validation': validated_response['validation_elements'],
                 
                 # Scoring and analytics
                 'empathy_score': optimization_metrics['empathy_score'],
