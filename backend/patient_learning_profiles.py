@@ -614,7 +614,7 @@ class PatientLearningProfileManager:
         📊 Get system-wide learning analytics
         """
         try:
-            if not self.db:
+            if self.db is None:
                 return {'error': 'Database not available'}
             
             # Get aggregated statistics
