@@ -446,7 +446,7 @@ class PatternEvolutionTracker:
         """
         insights = []
         
-        if not self.db or len(evolution_data) < self.config['population_min_sample_size']:
+        if self.db is None or len(evolution_data) < self.config['population_min_sample_size']:
             return insights
         
         try:
