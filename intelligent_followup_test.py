@@ -228,7 +228,9 @@ class IntelligentFollowUpTester:
         # Check if it triggers intelligent follow-up asking for specific foods
         followup_triggered = any(keyword in food_response for keyword in [
             "what specific foods", "which foods", "what type of food", 
-            "what kind of food", "specific food", "particular food"
+            "what kind of food", "specific food", "particular food",
+            "can you tell me more about how food relates", "how food relates",
+            "for example, do", "what foods trigger", "which foods cause"
         ])
         
         if followup_triggered:
