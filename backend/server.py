@@ -11515,6 +11515,17 @@ from medical_intent_classifier import (
     ClinicalSignificance
 )
 
+# ===== WEEK 2: MULTI-INTENT ORCHESTRATION IMPORTS =====
+from multi_intent_orchestrator import (
+    advanced_multi_intent_orchestrator,
+    orchestrate_multi_intent_analysis,
+    MultiIntentResult,
+    ClinicalPriorityLevel,
+    IntentInteractionType,
+    ClinicalPriorityScore,
+    IntentInteractionMatrix
+)
+
 # Pydantic models for API requests/responses
 class MedicalIntentRequest(BaseModel):
     """Request model for medical intent classification"""
