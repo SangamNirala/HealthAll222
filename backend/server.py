@@ -11044,7 +11044,13 @@ async def process_medical_message(request: MedicalConsultationRequest):
                 red_flags=request.context.get("red_flags", []),
                 emergency_level=request.context.get("emergency_level", "none"),
                 clinical_hypotheses=request.context.get("clinical_hypotheses", []),
-                confidence_score=request.context.get("confidence_score", 0.0)
+                confidence_score=request.context.get("confidence_score", 0.0),
+                
+                # 🚀 ENHANCED: Conversation tracking fields
+                questions_asked=request.context.get("questions_asked", {}),
+                questions_answered=request.context.get("questions_answered", {}),
+                conversation_turns=request.context.get("conversation_turns", []),
+                last_question_element=request.context.get("last_question_element")
             )
         else:
             # Initialize new context if none provided
