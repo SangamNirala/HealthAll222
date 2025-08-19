@@ -269,28 +269,12 @@ class Week2MultiIntentTester:
         print("-" * 60)
         
         try:
-            # Test conversation with multiple messages
+            # Test conversation with multiple messages (simple string list)
             messages = [
-                {
-                    "message": "Hi, I've been having some health concerns",
-                    "timestamp": "2025-01-17T10:00:00Z",
-                    "message_id": "msg-1"
-                },
-                {
-                    "message": "I have chest pain that comes and goes",
-                    "timestamp": "2025-01-17T10:01:00Z", 
-                    "message_id": "msg-2"
-                },
-                {
-                    "message": "I'm also worried it might be my heart, should I take my medication?",
-                    "timestamp": "2025-01-17T10:02:00Z",
-                    "message_id": "msg-3"
-                },
-                {
-                    "message": "The pain is getting worse and I'm really anxious now",
-                    "timestamp": "2025-01-17T10:03:00Z",
-                    "message_id": "msg-4"
-                }
+                "Hi, I've been having some health concerns",
+                "I have chest pain that comes and goes",
+                "I'm also worried it might be my heart, should I take my medication?",
+                "The pain is getting worse and I'm really anxious now"
             ]
             
             start_time = time.time()
