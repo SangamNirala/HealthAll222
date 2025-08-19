@@ -25,7 +25,7 @@ from dataclasses import dataclass
 import statistics
 
 # Backend URL from environment
-BACKEND_URL = "https://emotion-verify-1.preview.emergentagent.com/api"
+BACKEND_URL = "https://medpro-testing.preview.emergentagent.com/api"
 
 @dataclass
 class TestResult:
