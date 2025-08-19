@@ -24,7 +24,7 @@ from dataclasses import dataclass
 from enum import Enum
 import asyncio
 import google.generativeai as genai
-from motor.motor.asyncio import AsyncIOMotorDatabase
+from motor.motor_asyncio import AsyncIOMotorDatabase
 from medical_knowledge_base import (
     ComprehensiveMedicalKnowledgeBase, DiseaseProfile, 
     RiskLevel, AlertType
