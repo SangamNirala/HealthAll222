@@ -9321,19 +9321,19 @@ Generate the follow-up question:
             # Real doctor approach - ask clarifying questions first
             if "chest_pain" in symptoms_detected and "headache" in symptoms_detected:
                 response = await self._generate_empathetic_response(
-                    f"I understand you're experiencing both headache and chest discomfort. Let me help you with this. "
+                    f"You're experiencing both headache and chest discomfort. Let me help you with this. "
                     f"Can you describe the chest discomfort for me? Is it a sharp pain, pressure, or squeezing sensation? "
                     f"And when did these symptoms first start?"
                 )
             elif "chest_pain" in symptoms_detected:
                 response = await self._generate_empathetic_response(
-                    f"I understand you're having chest discomfort. Can you describe what it feels like? "
+                    f"You're having chest discomfort. Can you describe what it feels like? "
                     f"Is it a sharp, stabbing pain, or more of a pressure or squeezing sensation? "
                     f"When did this start, and does anything make it better or worse?"
                 )
             elif "fever" in symptoms_detected:
                 response = await self._generate_empathetic_response(
-                    f"I understand you're experiencing a fever. How long have you had the fever? "
+                    f"You're experiencing a fever. How long have you had the fever? "
                     f"Have you taken your temperature, and do you have any other symptoms along with it?"
                 )
             else:
