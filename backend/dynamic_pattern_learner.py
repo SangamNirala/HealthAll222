@@ -650,7 +650,7 @@ class DynamicPatternLearner:
         """
         Check if pattern already exists in database
         """
-        if not self.db:
+        if self.db is None:
             return False
         
         try:
