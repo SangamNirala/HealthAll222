@@ -2021,6 +2021,10 @@ class AdvancedSymptomRecognizer:
         # Extract individual symptoms from compound descriptions
         individual_symptoms = self._extract_individual_symptoms_from_compounds(extracted_compounds)
         
+        # FALLBACK: If no compound symptoms detected, try basic symptom extraction
+        if not individual_symptoms:
+            individual_symptoms = self._extract_basic_individual_symptoms(text)
+        
         return {
             "symptoms": individual_symptoms,
             "clusters": extracted_compounds["cluster_analysis"],
