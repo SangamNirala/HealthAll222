@@ -9378,6 +9378,18 @@ Generate the follow-up question:
                     f"Can you tell me more about when this started and how it's been progressing? "
                     f"Any specific details about the symptoms would be helpful for my assessment."
                 )
+            
+            return {
+                "response": response,
+                "context": asdict(context),
+                "stage": context.current_stage.value,
+                "urgency": context.emergency_level,
+                "consultation_id": getattr(context, 'consultation_id', None),
+                "emergency_detected": context.emergency_level == "emergency",
+                "next_questions": [],
+                "differential_diagnoses": [],
+                "recommendations": []
+            }
         else:
             # No clear symptoms detected - ask for clarification
             context.chief_complaint = message
