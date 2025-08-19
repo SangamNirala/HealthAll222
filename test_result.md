@@ -195,7 +195,7 @@ backend:
     file: "/app/backend/clinical_validation_scenarios.py, /app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: true
         agent: "main"
