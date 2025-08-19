@@ -7635,7 +7635,7 @@ class WorldClassMedicalAI:
                    "Let's start with when exactly these symptoms began - was the onset sudden or did it develop gradually over time?")
     
     async def _handle_hpi_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
-        """Handle History of Present Illness with intelligent LLM-based reasoning and follow-up questions"""
+        """Handle History of Present Illness with improved conversation flow and user-friendly responses"""
         
         print(f"[HPI DEBUG] Message: '{message}', questions_asked keys: {list(context.questions_asked.keys())}, last_element: {context.last_question_element}")
         
@@ -7644,7 +7644,7 @@ class WorldClassMedicalAI:
             print(f"[HPI DEBUG] Loop detected, calling recovery")
             return await self._handle_conversation_loop_recovery(message, context)
         
-        # 🧠 NEW: Intelligent response analysis and follow-up question generation
+        # 🧠 Intelligent response analysis for follow-up questions (simplified)
         if context.last_question_element and message.strip():
             # Analyze if the user's response needs follow-up clarification
             needs_followup = await self._analyze_response_needs_followup(
@@ -7664,13 +7664,15 @@ class WorldClassMedicalAI:
                     "context": asdict(context),
                     "stage": context.current_stage.value,
                     "urgency": context.emergency_level,
-                    "hpi_progress": f"{len(context.questions_asked)}/8 elements asked",
-                    "medical_reasoning": f"Following up on {context.last_question_element} for more specific details"
+                    "consultation_id": getattr(context, 'consultation_id', None),
+                    "emergency_detected": context.emergency_level == "emergency",
+                    "next_questions": [],
+                    "differential_diagnoses": [],
+                    "recommendations": []
                 }
         
         # 🧠 STEP 2.2: Extract contextual reasoning from message
         advanced_extraction = self.advanced_symptom_recognizer.extract_medical_entities(message)
-        contextual_reasoning = advanced_extraction.get("contextual_reasoning", {})
         
         # 🚀 ENHANCED: Extract HPI elements with conversation context awareness
         hpi_elements = await self._extract_hpi_elements_smart(message, context)
@@ -7703,18 +7705,11 @@ class WorldClassMedicalAI:
                 "context": asdict(context),
                 "stage": context.current_stage.value,
                 "urgency": context.emergency_level,
-                "hpi_progress": f"{len(context.questions_asked)}/8 elements asked",
-                
-                # 🧠 STEP 2.2: Include contextual reasoning data
-                "causal_relationships": contextual_reasoning.get("causal_relationships", []),
-                "clinical_hypotheses": contextual_reasoning.get("clinical_hypotheses", []),
-                "contextual_factors": contextual_reasoning.get("contextual_factors", {}),
-                "medical_reasoning_narrative": contextual_reasoning.get("medical_reasoning_narrative", ""),
-                "context_based_recommendations": contextual_reasoning.get("context_based_recommendations", []),
-                "trigger_avoidance_strategies": contextual_reasoning.get("trigger_avoidance_strategies", []),
-                "specialist_referral_context": contextual_reasoning.get("specialist_referral_context"),
-                "contextual_significance": contextual_reasoning.get("contextual_significance", "routine"),
-                "reasoning_confidence": contextual_reasoning.get("reasoning_confidence", 0.0)
+                "consultation_id": getattr(context, 'consultation_id', None),
+                "emergency_detected": context.emergency_level == "emergency",
+                "next_questions": [],
+                "differential_diagnoses": [],
+                "recommendations": []
             }
         else:
             # HPI complete, move to Review of Systems
@@ -7727,18 +7722,12 @@ class WorldClassMedicalAI:
                 "context": asdict(context),
                 "stage": context.current_stage.value,
                 "urgency": context.emergency_level,
+                "consultation_id": getattr(context, 'consultation_id', None),
+                "emergency_detected": context.emergency_level == "emergency",
                 "transition": "Moving to review of systems",
-                
-                # 🧠 STEP 2.2: Include contextual reasoning data
-                "causal_relationships": contextual_reasoning.get("causal_relationships", []),
-                "clinical_hypotheses": contextual_reasoning.get("clinical_hypotheses", []),
-                "contextual_factors": contextual_reasoning.get("contextual_factors", {}),
-                "medical_reasoning_narrative": contextual_reasoning.get("medical_reasoning_narrative", ""),
-                "context_based_recommendations": contextual_reasoning.get("context_based_recommendations", []),
-                "trigger_avoidance_strategies": contextual_reasoning.get("trigger_avoidance_strategies", []),
-                "specialist_referral_context": contextual_reasoning.get("specialist_referral_context"),
-                "contextual_significance": contextual_reasoning.get("contextual_significance", "routine"),
-                "reasoning_confidence": contextual_reasoning.get("reasoning_confidence", 0.0)
+                "next_questions": [],
+                "differential_diagnoses": [],
+                "recommendations": []
             }
     
     async def _generate_hpi_question(self, element: str, context: MedicalContext) -> str:
