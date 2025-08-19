@@ -681,7 +681,7 @@ class DynamicPatternLearner:
         """
         Get usage frequency for a pattern from database
         """
-        if not self.db:
+        if self.db is None:
             return 0
         
         try:
