@@ -2162,6 +2162,7 @@ class MedicalConsultationRequest(BaseModel):
     message: str
     consultation_id: Optional[str] = None
     context: Optional[Dict[str, Any]] = None
+    conversation_history: Optional[List[Dict[str, Any]]] = None
 
 class MedicalConsultationResponse(BaseModel):
     response: str
