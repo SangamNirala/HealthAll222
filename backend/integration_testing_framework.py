@@ -403,7 +403,7 @@ class IntelligenceAmplificationTestSuite:
             
             # Week 1: Intent Classification
             week1_start = time.time()
-            intent_result = await classify_medical_intent(input_message)
+            intent_result = await classify_patient_intent(input_message)
             pipeline_timings["week1_ms"] = (time.time() - week1_start) * 1000
             pipeline_results["week1_intent_classification"] = {
                 "primary_intent": intent_result.primary_intent,
