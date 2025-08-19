@@ -89,8 +89,8 @@ class IntelligentFollowUpTester:
             
             if response.status_code == 200:
                 data = response.json()
-                self.consultation_context = data
-                consultation_id = data.get("consultation_id", "")
+                self.consultation_context = data.get("context", {})
+                consultation_id = data.get("consultation_id", "") or self.consultation_context.get("consultation_id", "")
                 
                 if consultation_id:
                     self.log_test("Medical Consultation Initialization", True,
