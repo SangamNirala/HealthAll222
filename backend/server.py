@@ -12049,7 +12049,7 @@ async def batch_multi_intent_analysis(request: BatchMultiIntentRequest):
             message_orchestrations=message_orchestrations,
             intent_evolution_analysis=intent_evolution_analysis,
             prioritization_trends=prioritization_trends_analysis,
-            conversation_complexity_assessment=overall_complexity
+            conversation_complexity_assessment=overall_complexity.get("complexity_level", "moderate")
         )
         
         logger.info(f"Batch multi-intent analysis completed for conversation {request.conversation_id}")
