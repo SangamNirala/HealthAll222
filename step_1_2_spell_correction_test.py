@@ -13,7 +13,7 @@ import os
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://medimpl-verify.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://predictive-medic.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class Step12SpellCorrectionTester:
