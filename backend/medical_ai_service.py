@@ -7194,7 +7194,7 @@ class WorldClassMedicalAI:
                     "age": context.demographics.get('age') if context.demographics else None,
                     "gender": context.demographics.get('gender') if context.demographics else None
                 },
-                "previous_symptoms": [symptom.get('symptom') for symptom in context.symptoms] if context.symptoms else [],
+                "previous_symptoms": [symptom.get('symptom') for symptom in context.symptom_data.get('symptoms', [])] if context.symptom_data and context.symptom_data.get('symptoms') else [],
                 "medical_history": context.medical_history if hasattr(context, 'medical_history') else []
             }
             
