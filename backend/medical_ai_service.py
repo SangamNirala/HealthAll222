@@ -9519,8 +9519,10 @@ Generate the follow-up question:
         return await self._generate_differential_diagnosis(context)
     
     async def _generate_empathetic_response(self, base_response: str) -> str:
-        """Generate empathetic medical response"""
-        return base_response
+        """Generate empathetic medical response with internal reasoning filtering"""
+        # Apply the internal reasoning filter to keep responses user-friendly
+        filtered_response = self._filter_internal_reasoning(base_response)
+        return filtered_response
     
     def _get_stage_questions(self, stage: MedicalInterviewStage) -> List[str]:
         """Get suggested questions for current stage"""
