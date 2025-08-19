@@ -12,7 +12,7 @@ import time
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = "https://pattern-testing.preview.emergentagent.com/api"
+BACKEND_URL = "https://medemo-ai.preview.emergentagent.com/api"
 
 def test_basic_endpoint_availability():
     """Test basic endpoint availability"""

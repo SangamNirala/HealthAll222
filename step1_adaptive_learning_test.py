@@ -43,7 +43,7 @@ import uuid
 sys.path.append('/app/backend')
 
 # Test configuration
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://pattern-testing.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://medemo-ai.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class AdaptiveLearningTester:
