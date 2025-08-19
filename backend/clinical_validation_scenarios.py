@@ -1033,6 +1033,25 @@ class ClinicalValidationScenarios:
             "algorithm_version": self.algorithm_version
         }
     
+    def _serialize_validation_result(self, result: ValidationResult) -> Dict[str, Any]:
+        """Serialize ValidationResult to dictionary with proper handling of complex objects"""
+        result_dict = asdict(result)
+        
+        # Handle scenario serialization
+        if 'scenario' in result_dict and hasattr(result_dict['scenario'], 'specialty'):
+            result_dict['scenario']['specialty'] = result_dict['scenario']['specialty'].value
+            result_dict['scenario']['severity'] = result_dict['scenario']['severity'].value
+        
+        # Handle validation_scores enum keys
+        if 'validation_scores' in result_dict:
+            serialized_scores = {}
+            for metric, score in result_dict['validation_scores'].items():
+                key = metric.value if hasattr(metric, 'value') else str(metric)
+                serialized_scores[key] = score
+            result_dict['validation_scores'] = serialized_scores
+        
+        return result_dict
+    
     def get_clinical_validation_performance(self) -> Dict[str, Any]:
         """Get comprehensive clinical validation performance statistics"""
         
