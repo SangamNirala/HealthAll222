@@ -8400,23 +8400,56 @@ class WorldClassMedicalAI:
         return context
     
     async def _extract_hpi_elements(self, message: str, existing_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Extract History of Present Illness elements"""
+        """Extract History of Present Illness elements with enhanced pattern recognition"""
         hpi_elements = {}
-        
-        # Simple pattern matching - would be more sophisticated in production
-        message_lower = message.lower()
+        message_lower = message.lower().strip()
         
         # Onset patterns
-        if any(word in message_lower for word in ["sudden", "gradually", "slowly", "started", "began"]):
+        if any(word in message_lower for word in ["sudden", "gradually", "slowly", "started", "began", "yesterday", "today", "morning", "night", "ago", "hours", "days", "weeks"]):
             hpi_elements["onset"] = message
         
-        # Character patterns  
-        if any(word in message_lower for word in ["sharp", "dull", "burning", "crushing", "aching", "throbbing"]):
+        # Character/quality patterns  
+        if any(word in message_lower for word in ["sharp", "dull", "burning", "crushing", "aching", "throbbing", "stabbing", "pressure", "tight"]):
             hpi_elements["character"] = message
             
         # Duration patterns
-        if any(word in message_lower for word in ["minutes", "hours", "days", "weeks", "constant", "intermittent"]):
+        if any(word in message_lower for word in ["minutes", "hours", "days", "weeks", "constant", "intermittent", "comes and goes", "all day", "brief"]):
             hpi_elements["duration"] = message
+        
+        # Location patterns
+        if any(word in message_lower for word in ["left", "right", "front", "back", "top", "side", "all over", "everywhere", "here", "there"]):
+            hpi_elements["location"] = message
+            
+        # Alleviating/aggravating factors patterns
+        if any(word in message_lower for word in ["better", "worse", "food", "eating", "position", "lying", "sitting", "standing", "walking", "exercise", "rest", "medication", "nothing", "heat", "cold"]):
+            hpi_elements["alleviating"] = message
+            
+        # Severity patterns
+        if any(word in message_lower for word in ["mild", "moderate", "severe", "terrible", "unbearable", "scale", "/10", "out of 10"]) or any(char.isdigit() for char in message):
+            hpi_elements["severity"] = message
+            
+        # Timing patterns
+        if any(word in message_lower for word in ["morning", "evening", "night", "always", "sometimes", "often", "rarely", "never", "when i", "after i", "before i"]):
+            hpi_elements["timing"] = message
+            
+        # Radiation patterns
+        if any(word in message_lower for word in ["spreads", "radiates", "shoots", "travels", "moves", "goes to", "down to", "up to"]):
+            hpi_elements["radiation"] = message
+        
+        # Special handling for very short responses that might still be meaningful
+        if len(message_lower) <= 15 and message_lower not in ["hi", "hello", "yes", "no", "ok", "okay"]:
+            # For short responses, try to infer what element they might be answering
+            # This helps with responses like "food", "position", "2 days", "dull", etc.
+            if not hpi_elements:  # Only if no other pattern matched
+                if any(word in message_lower for word in ["food", "eating", "position", "sitting", "standing", "lying"]):
+                    hpi_elements["alleviating"] = message
+                elif any(char.isdigit() for char in message):
+                    if "day" in message_lower or "hour" in message_lower:
+                        hpi_elements["onset"] = message
+                    else:
+                        hpi_elements["severity"] = message
+                elif len(message_lower) >= 3:  # Generic fallback for meaningful short responses
+                    hpi_elements["character"] = message
             
         return hpi_elements
     
