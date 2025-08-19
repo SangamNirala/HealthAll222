@@ -7649,16 +7649,9 @@ class WorldClassMedicalAI:
         advanced_extraction = self.advanced_symptom_recognizer.extract_medical_entities(message)
         contextual_reasoning = advanced_extraction.get("contextual_reasoning", {})
         
-        print(f"DEBUG: Advanced extraction completed for HPI stage")
-        
         # 🚀 ENHANCED: Extract HPI elements with conversation context awareness
-        try:
-            hpi_elements = await self._extract_hpi_elements_smart(message, context)
-            context.symptom_data.update(hpi_elements)
-            print(f"DEBUG: HPI elements extracted successfully: {hpi_elements}")
-        except Exception as e:
-            print(f"DEBUG: Exception in _extract_hpi_elements_smart: {e}")
-            raise e
+        hpi_elements = await self._extract_hpi_elements_smart(message, context)
+        context.symptom_data.update(hpi_elements)
         
         # Update conversation tracking
         if context.last_question_element and message.strip():
