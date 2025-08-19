@@ -8642,39 +8642,18 @@ class WorldClassMedicalAI:
                 if hasattr(rel, 'symptom') and rel.symptom:
                     return rel.symptom.replace("_", " ")
         
-        # Then try symptoms_detected
+        # Then try symptoms_detected - handle both SymptomEntity objects and strings
         if symptoms_detected:
-            # Map common symptom patterns to clean names
-            if "fever" in symptoms_detected:
-                return "fever"
-            elif "headache" in symptoms_detected:
-                return "headache" 
-            elif "chest_pain" in symptoms_detected:
-                return "chest pain"
-            elif "pain" in symptoms_detected:
-                return "pain"
-            elif "nausea" in symptoms_detected:
-                return "nausea"
-            elif "dizziness" in symptoms_detected:
-                return "dizziness"
-            elif "fatigue" in symptoms_detected:
-                return "fatigue"
-            elif "cough" in symptoms_detected:
-                return "cough"
-            elif "shortness_of_breath" in symptoms_detected:
-                return "shortness of breath"
-            elif "abdominal_pain" in symptoms_detected:
-                return "abdominal pain"
-            else:
-                # Generic cleanup for other symptoms
-                clean_symptoms = []
-                for symptom in symptoms_detected:
-                    if hasattr(symptom, 'symptom'):
-                        clean_symptoms.append(symptom.symptom.replace("_", " "))
-                    elif isinstance(symptom, str):
-                        clean_symptoms.append(symptom.replace("_", " "))
-                
-                return " and ".join(clean_symptoms) if clean_symptoms else "symptoms"
+            symptom_names = []
+            for symptom in symptoms_detected:
+                if hasattr(symptom, 'symptom') and symptom.symptom:
+                    symptom_names.append(symptom.symptom.replace("_", " "))
+                elif isinstance(symptom, str):
+                    symptom_names.append(symptom.replace("_", " "))
+            
+            # Return the first symptom name if any found
+            if symptom_names:
+                return symptom_names[0]
         
         # Fallback: try to extract from the message directly using simple pattern matching
         message_lower = message.lower()
