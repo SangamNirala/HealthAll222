@@ -593,7 +593,7 @@ class PersonalizationManager:
     async def _store_population_insights(self, insights: List[PopulationInsight]):
         """Store anonymized population insights in database"""
         try:
-            if not self.db or not insights:
+            if self.db is None or not insights:
                 return
             
             # Prepare insights for storage
