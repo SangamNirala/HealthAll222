@@ -208,9 +208,9 @@ class Week4ComprehensiveTester:
                 "name": "Routine Scenario", 
                 "data": {
                     "conversation_history": [
-                        "I have a mild headache",
-                        "It started this morning",
-                        "It's not too bad, just annoying"
+                        {"message": "I have a mild headache", "timestamp": "2025-01-17T10:00:00Z", "speaker": "patient"},
+                        {"message": "It started this morning", "timestamp": "2025-01-17T10:01:00Z", "speaker": "patient"},
+                        {"message": "It's not too bad, just annoying", "timestamp": "2025-01-17T10:02:00Z", "speaker": "patient"}
                     ],
                     "current_context": {
                         "patient_age": 28,
