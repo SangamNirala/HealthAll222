@@ -797,7 +797,7 @@ class DynamicPatternLearner:
             'patterns_deprecated': 0
         }
         
-        if not self.db:
+        if self.db is None:
             return calibration_results
         
         try:
