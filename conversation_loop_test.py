@@ -1,34 +1,25 @@
 #!/usr/bin/env python3
 """
-🔄 CONVERSATION LOOP FIX COMPREHENSIVE TESTING SUITE 🔄
+🔄 CONVERSATION LOOP DEBUGGING TEST SUITE 🔄
 
-Comprehensive backend testing for the recently implemented conversation loop fixes 
-for the Quick Health Tracking chatbot as requested in the review.
+Comprehensive testing for the exact conversation flow that's causing the loop issue
+to get detailed debugging output and identify the root cause.
 
-TESTING FOCUS: The exact conversation flow that was previously failing:
-1. POST /api/medical-ai/initialize (basic setup)
-2. POST /api/medical-ai/message with message: "hi"  
-3. POST /api/medical-ai/message with message: "I have a headache"
-4. POST /api/medical-ai/message with message: "it has started 2 days before"
-5. POST /api/medical-ai/message with message: "it is dull"
-6. POST /api/medical-ai/message with message: "food" 
-7. POST /api/medical-ai/message with message: "position"
+TESTING OBJECTIVES:
+✅ Test the exact 7-step conversation flow mentioned in review request
+✅ Pass complete "context" object from previous response (not just consultation_id)
+✅ Capture HPI DEBUG messages to see what's happening in _get_next_hpi_element_smart
+✅ Identify why already asked questions are being selected again
+✅ Validate conversation state management and context handling
 
-CRITICAL ISSUES FIXED:
-- Conversation history processing now working (conversation_history parameter)
-- Enhanced HPI question generation with proper symptom names  
-- Loop detection and prevention (_is_repeating_question)
-- Smart question progression (_get_next_hpi_element_smart)
-- Enhanced chief complaint extraction (_get_clean_chief_complaint)
-- Context-aware element extraction (_extract_hpi_elements_smart)
-
-TEST VALIDATION REQUIRED:
-✅ No malformed questions like "When exactly did your start?" 
-✅ No repetitive questioning loops 
-✅ Proper conversation progression through HPI elements
-✅ Clean symptom names used in questions ("headache" not "I have a headache")
-✅ Context maintained across conversation turns
-✅ Graceful handling of short responses like "food", "position", "dull"
+CONVERSATION FLOW TO TEST:
+1. POST /api/medical-ai/initialize with patient_id='anonymous'
+2. POST /api/medical-ai/message with message='hi' and full context from step 1
+3. POST /api/medical-ai/message with message='I have a headache' and full context from step 2  
+4. POST /api/medical-ai/message with message='it has started 2 days before' and full context from step 3
+5. POST /api/medical-ai/message with message='it is dull' and full context from step 4
+6. POST /api/medical-ai/message with message='food' and full context from step 5
+7. POST /api/medical-ai/message with message='position' and full context from step 6
 
 Author: Testing Agent
 Date: 2025-01-19
