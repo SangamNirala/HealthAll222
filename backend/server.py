@@ -90,6 +90,20 @@ from diagnostic_suggestion_system import (
     DiagnosticSuggestion, DiagnosticWorkup, DiagnosticCategory, SuggestionPriority
 )
 
+# Import Provider Intelligence System components
+from provider_intelligence import (
+    ProviderIntelligenceSystem, ProviderProfile, ClinicalCoachingRecommendation,
+    ProviderAnalytics, ProviderSpecialty, ProviderPerformanceLevel, ClinicalCoachingPriority
+)
+from clinical_documentation_ai import (
+    ClinicalDocumentationAI, GeneratedDocumentation, ClinicalTemplate,
+    DocumentationType, DocumentationQuality
+)
+from workflow_optimization import (
+    AdvancedWorkflowOptimizer, WorkflowMetrics, WorkflowOptimization,
+    WorkflowPhase, OptimizationPriority, WorkflowBottleneckType
+)
+
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
