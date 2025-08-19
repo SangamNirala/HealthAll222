@@ -1,832 +1,424 @@
 #!/usr/bin/env python3
 """
-🚀 INTELLIGENCE AMPLIFICATION PHASE B WEEKS 4 & 5 COMPREHENSIVE TESTING
+🔬 WEEK 5 MEDICAL AI ENDPOINTS FOCUSED TESTING
 
-Testing the most advanced medical conversation intelligence system ever conceived.
-This test suite validates Week 4 Predictive Modeling & Subspecialty Clinical Reasoning
-and Week 5 Integration Testing & Clinical Validation implementations.
+Testing the specific Week 5 medical AI endpoints to verify critical issues have been fixed:
+1. POST /api/medical-ai/integration-testing - ConversationFlowResult attribute issue
+2. POST /api/medical-ai/clinical-validation - ValidationResult serialization issue  
+3. POST /api/medical-ai/performance-benchmarking - Missing '_analyze_overall_performance' method
+4. GET /api/medical-ai/week5-integration-performance - Ensure still working
 
-TESTING SCOPE:
-- Week 4: Predictive Intent Modeling, Subspecialty Clinical Reasoning
-- Week 5: Integration Testing Framework, Clinical Validation Scenarios
-- Performance benchmarking and production readiness assessment
+Focus: Verify fixes for the original issues and capture specific error messages.
 """
 
-import asyncio
-import aiohttp
+import requests
 import json
 import time
-import sys
-from typing import Dict, List, Any, Optional
 from datetime import datetime
 import traceback
 
-# Test configuration
+# Backend URL from environment
 BACKEND_URL = "https://medtest-platform.preview.emergentagent.com/api"
-TEST_TIMEOUT = 30  # seconds
 
-class WeekFourFiveTestSuite:
-    """Comprehensive test suite for Week 4 & 5 implementations"""
+def test_integration_testing_complete_pipeline():
+    """Test POST /api/medical-ai/integration-testing with test_category='complete_pipeline'"""
+    print("🧪 TESTING POST /api/medical-ai/integration-testing")
+    print("   Focus: Verify ConversationFlowResult attribute issue is fixed")
+    print("=" * 70)
     
-    def __init__(self):
-        self.session = None
-        self.test_results = {
-            "week4_predictive_modeling": {},
-            "week4_subspecialty_reasoning": {},
-            "week5_integration_testing": {},
-            "week5_clinical_validation": {},
-            "performance_metrics": {},
-            "overall_status": "pending"
+    try:
+        print("Testing with test_category='complete_pipeline'...")
+        
+        # Test payload as specified in review request
+        payload = {
+            "test_category": "complete_pipeline",
+            "performance_targets": {
+                "processing_time_ms": 30,
+                "accuracy_threshold": 0.95
+            },
+            "validation_level": "comprehensive"
         }
-        self.start_time = time.time()
-    
-    async def __aenter__(self):
-        """Async context manager entry"""
-        self.session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=TEST_TIMEOUT))
-        return self
-    
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Async context manager exit"""
-        if self.session:
-            await self.session.close()
-    
-    async def run_comprehensive_tests(self):
-        """Run all Week 4 & 5 tests"""
-        print("🚀 STARTING INTELLIGENCE AMPLIFICATION PHASE B WEEKS 4 & 5 COMPREHENSIVE TESTING")
-        print("=" * 80)
         
-        try:
-            # Week 4 Testing
-            print("\n📊 WEEK 4 TESTING: PREDICTIVE MODELING & SUBSPECIALTY CLINICAL REASONING")
-            await self.test_week4_predictive_intent_modeling()
-            await self.test_week4_subspecialty_clinical_reasoning()
-            
-            # Week 5 Testing  
-            print("\n🔬 WEEK 5 TESTING: INTEGRATION TESTING & CLINICAL VALIDATION")
-            await self.test_week5_integration_testing()
-            await self.test_week5_clinical_validation()
-            
-            # Performance Testing
-            print("\n⚡ PERFORMANCE BENCHMARKING")
-            await self.test_performance_benchmarking()
-            
-            # Generate final report
-            await self.generate_final_report()
-            
-        except Exception as e:
-            print(f"❌ CRITICAL ERROR in comprehensive testing: {str(e)}")
-            traceback.print_exc()
-            self.test_results["overall_status"] = "failed"
-    
-    async def test_week4_predictive_intent_modeling(self):
-        """Test Week 4 Predictive Intent Modeling capabilities"""
-        print("\n🔮 Testing Week 4 Predictive Intent Modeling...")
+        start_time = time.time()
+        response = requests.post(
+            f"{BACKEND_URL}/medical-ai/integration-testing",
+            json=payload,
+            timeout=30
+        )
+        processing_time = (time.time() - start_time) * 1000
         
-        test_scenarios = [
-            {
-                "name": "Complex Multi-Intent Prediction",
-                "conversation_history": [
-                    {"message": "I have severe chest pain", "intent": "symptom_reporting", "timestamp": "2024-01-15T10:00:00Z"},
-                    {"message": "It started about an hour ago", "intent": "duration_inquiry", "timestamp": "2024-01-15T10:01:00Z"},
-                    {"message": "The pain is crushing and radiating to my arm", "intent": "severity_assessment", "timestamp": "2024-01-15T10:02:00Z"}
-                ],
-                "current_context": {
-                    "patient_data": {"age": 55, "gender": "male"},
-                    "conversation_length": 3,
-                    "urgency_level": "high"
-                }
-            },
-            {
-                "name": "Neurological Symptom Progression",
-                "conversation_history": [
-                    {"message": "I have the worst headache of my life", "intent": "symptom_reporting", "timestamp": "2024-01-15T10:00:00Z"},
-                    {"message": "It came on suddenly", "intent": "onset_description", "timestamp": "2024-01-15T10:01:00Z"},
-                    {"message": "I also have neck stiffness", "intent": "associated_symptoms", "timestamp": "2024-01-15T10:02:00Z"}
-                ],
-                "current_context": {
-                    "patient_data": {"age": 42, "gender": "female"},
-                    "conversation_length": 3,
-                    "urgency_level": "critical"
-                }
-            }
-        ]
+        print(f"📊 Response Status: {response.status_code}")
+        print(f"⏱️  Processing Time: {processing_time:.1f}ms")
         
-        # Test 1: Predictive Intent Modeling Endpoint
-        print("  🎯 Testing POST /api/medical-ai/predictive-intent-modeling...")
-        
-        for scenario in test_scenarios:
+        if response.status_code == 200:
             try:
-                start_time = time.time()
+                data = response.json()
+                print(f"✅ SUCCESS: Integration testing endpoint working correctly")
+                print(f"   Test Type: {data.get('test_type')}")
+                print(f"   Total Tests: {data.get('total_tests')}")
+                print(f"   Success Rate: {data.get('success_rate', 0):.1%}")
+                print(f"   Algorithm Version: {data.get('algorithm_version')}")
                 
-                payload = {
-                    "conversation_history": scenario["conversation_history"],
-                    "current_context": scenario["current_context"],
-                    "prediction_horizon": "next_3_intents",
-                    "include_progression_analysis": True
-                }
+                # Check for required fields
+                required_fields = ["test_type", "total_tests", "passed_tests", "failed_tests", "success_rate"]
+                missing_fields = [field for field in required_fields if field not in data]
+                if missing_fields:
+                    print(f"⚠️  Missing response fields: {missing_fields}")
                 
-                async with self.session.post(
-                    f"{BACKEND_URL}/medical-ai/predictive-intent-modeling",
-                    json=payload
-                ) as response:
-                    processing_time = (time.time() - start_time) * 1000
-                    
-                    if response.status == 200:
-                        data = await response.json()
-                        
-                        # Validate response structure
-                        required_fields = [
-                            "predicted_intents", "progression_analysis", "proactive_responses",
-                            "processing_time_ms", "algorithm_version", "prediction_confidence"
-                        ]
-                        
-                        missing_fields = [field for field in required_fields if field not in data]
-                        if missing_fields:
-                            print(f"    ❌ {scenario['name']}: Missing fields: {missing_fields}")
-                            continue
-                        
-                        # Validate prediction accuracy requirements
-                        predicted_intents = data.get("predicted_intents", [])
-                        if len(predicted_intents) < 3:
-                            print(f"    ❌ {scenario['name']}: Expected at least 3 predicted intents, got {len(predicted_intents)}")
-                            continue
-                        
-                        # Check processing time target (<25ms)
-                        if processing_time > 25:
-                            print(f"    ⚠️ {scenario['name']}: Processing time {processing_time:.1f}ms exceeds 25ms target")
-                        
-                        # Validate algorithm version
-                        if data.get("algorithm_version") != "3.1_intelligence_amplification_week4":
-                            print(f"    ❌ {scenario['name']}: Wrong algorithm version: {data.get('algorithm_version')}")
-                            continue
-                        
-                        # Check prediction confidence (target >90%)
-                        avg_confidence = sum(intent.get("confidence_score", 0) for intent in predicted_intents) / len(predicted_intents)
-                        if avg_confidence < 0.9:
-                            print(f"    ⚠️ {scenario['name']}: Average confidence {avg_confidence:.2f} below 90% target")
-                        
-                        print(f"    ✅ {scenario['name']}: SUCCESS - {len(predicted_intents)} intents predicted in {processing_time:.1f}ms")
-                        
-                        # Store detailed results
-                        self.test_results["week4_predictive_modeling"][scenario['name']] = {
-                            "status": "success",
-                            "processing_time_ms": processing_time,
-                            "predicted_intents_count": len(predicted_intents),
-                            "average_confidence": avg_confidence,
-                            "algorithm_version": data.get("algorithm_version")
-                        }
-                        
-                    else:
-                        error_text = await response.text()
-                        print(f"    ❌ {scenario['name']}: HTTP {response.status} - {error_text}")
-                        self.test_results["week4_predictive_modeling"][scenario['name']] = {
-                            "status": "failed",
-                            "error": f"HTTP {response.status}",
-                            "details": error_text
-                        }
-                        
-            except Exception as e:
-                print(f"    ❌ {scenario['name']}: Exception - {str(e)}")
-                self.test_results["week4_predictive_modeling"][scenario['name']] = {
-                    "status": "error",
-                    "error": str(e)
-                }
-        
-        # Test 2: Conversation Intelligence Endpoint
-        print("  🧠 Testing POST /api/medical-ai/conversation-intelligence...")
-        
-        try:
-            payload = {
-                "conversation_history": test_scenarios[0]["conversation_history"],
-                "patient_data": test_scenarios[0]["current_context"]["patient_data"],
-                "current_context": test_scenarios[0]["current_context"],
-                "analysis_depth": "comprehensive"
-            }
-            
-            start_time = time.time()
-            async with self.session.post(
-                f"{BACKEND_URL}/medical-ai/conversation-intelligence",
-                json=payload
-            ) as response:
-                processing_time = (time.time() - start_time) * 1000
+                return True, "SUCCESS", data
                 
-                if response.status == 200:
-                    data = await response.json()
-                    
-                    # Validate comprehensive intelligence analysis
-                    required_fields = [
-                        "predicted_intents", "progression_analysis", "proactive_responses",
-                        "conversation_risk_assessment", "engagement_optimization", 
-                        "clinical_decision_support", "processing_time_ms"
-                    ]
-                    
-                    missing_fields = [field for field in required_fields if field not in data]
-                    if missing_fields:
-                        print(f"    ❌ Conversation Intelligence: Missing fields: {missing_fields}")
-                    else:
-                        print(f"    ✅ Conversation Intelligence: SUCCESS - Comprehensive analysis in {processing_time:.1f}ms")
-                        self.test_results["week4_predictive_modeling"]["conversation_intelligence"] = {
-                            "status": "success",
-                            "processing_time_ms": processing_time,
-                            "comprehensive_analysis": True
-                        }
-                else:
-                    error_text = await response.text()
-                    print(f"    ❌ Conversation Intelligence: HTTP {response.status} - {error_text}")
-                    
-        except Exception as e:
-            print(f"    ❌ Conversation Intelligence: Exception - {str(e)}")
-        
-        # Test 3: Performance Metrics Endpoint
-        print("  📈 Testing GET /api/medical-ai/predictive-modeling-performance...")
-        
-        try:
-            async with self.session.get(f"{BACKEND_URL}/medical-ai/predictive-modeling-performance") as response:
-                if response.status == 200:
-                    data = await response.json()
-                    
-                    required_metrics = [
-                        "total_predictions", "average_processing_time_ms", "model_accuracy",
-                        "algorithm_version", "system_status"
-                    ]
-                    
-                    missing_metrics = [metric for metric in required_metrics if metric not in data]
-                    if missing_metrics:
-                        print(f"    ❌ Performance Metrics: Missing metrics: {missing_metrics}")
-                    else:
-                        accuracy = data.get("model_accuracy", 0)
-                        avg_time = data.get("average_processing_time_ms", 0)
-                        
-                        print(f"    ✅ Performance Metrics: Accuracy {accuracy:.1%}, Avg Time {avg_time:.1f}ms")
-                        self.test_results["week4_predictive_modeling"]["performance_metrics"] = {
-                            "status": "success",
-                            "model_accuracy": accuracy,
-                            "average_processing_time_ms": avg_time
-                        }
-                else:
-                    error_text = await response.text()
-                    print(f"    ❌ Performance Metrics: HTTP {response.status} - {error_text}")
-                    
-        except Exception as e:
-            print(f"    ❌ Performance Metrics: Exception - {str(e)}")
-    
-    async def test_week4_subspecialty_clinical_reasoning(self):
-        """Test Week 4 Subspecialty Clinical Reasoning Engine"""
-        print("\n🏥 Testing Week 4 Subspecialty Clinical Reasoning...")
-        
-        subspecialty_scenarios = [
-            {
-                "subspecialty": "cardiology",
-                "intents": [
-                    {"intent_name": "cardiac_chest_pain_assessment", "confidence": 0.95},
-                    {"intent_name": "cardiac_symptom_evaluation", "confidence": 0.88}
-                ],
-                "context": {
-                    "patient_data": {"age": 58, "gender": "male", "risk_factors": ["hypertension", "diabetes"]},
-                    "message": "I have crushing chest pain radiating to my left arm",
-                    "urgency_level": "critical"
-                },
-                "expected_features": ["cardiac_risk_stratification", "ecg_indications", "biomarker_recommendations"]
-            },
-            {
-                "subspecialty": "neurology", 
-                "intents": [
-                    {"intent_name": "neurological_symptom_assessment", "confidence": 0.92},
-                    {"intent_name": "headache_migraine_evaluation", "confidence": 0.85}
-                ],
-                "context": {
-                    "patient_data": {"age": 45, "gender": "female"},
-                    "message": "Sudden severe headache with neck stiffness",
-                    "urgency_level": "critical"
-                },
-                "expected_features": ["stroke_assessment", "neuroimaging_indications", "red_flag_symptoms"]
-            },
-            {
-                "subspecialty": "emergency_medicine",
-                "intents": [
-                    {"intent_name": "emergency_concern", "confidence": 0.96},
-                    {"intent_name": "urgent_scheduling", "confidence": 0.89}
-                ],
-                "context": {
-                    "patient_data": {"age": 35, "gender": "male"},
-                    "message": "Severe shortness of breath and chest pain",
-                    "urgency_level": "critical"
-                },
-                "expected_features": ["triage_category", "immediate_interventions", "time_sensitive_protocols"]
-            }
-        ]
-        
-        print("  🔬 Testing POST /api/medical-ai/subspecialty-reasoning...")
-        
-        for scenario in subspecialty_scenarios:
-            try:
-                start_time = time.time()
-                
-                payload = {
-                    "subspecialty": scenario["subspecialty"],
-                    "intents": scenario["intents"],
-                    "context": scenario["context"],
-                    "reasoning_depth": "expert_level"
-                }
-                
-                async with self.session.post(
-                    f"{BACKEND_URL}/medical-ai/subspecialty-reasoning",
-                    json=payload
-                ) as response:
-                    processing_time = (time.time() - start_time) * 1000
-                    
-                    if response.status == 200:
-                        data = await response.json()
-                        
-                        # Validate subspecialty-specific reasoning
-                        subspecialty_key = f"{scenario['subspecialty']}_reasoning"
-                        if subspecialty_key not in data:
-                            print(f"    ❌ {scenario['subspecialty'].title()}: Missing subspecialty reasoning")
-                            continue
-                        
-                        reasoning_data = data[subspecialty_key]
-                        
-                        # Check for expected subspecialty features
-                        missing_features = [
-                            feature for feature in scenario["expected_features"] 
-                            if feature not in reasoning_data
-                        ]
-                        
-                        if missing_features:
-                            print(f"    ❌ {scenario['subspecialty'].title()}: Missing features: {missing_features}")
-                            continue
-                        
-                        # Check processing time target (<25ms)
-                        if processing_time > 25:
-                            print(f"    ⚠️ {scenario['subspecialty'].title()}: Processing time {processing_time:.1f}ms exceeds 25ms target")
-                        
-                        # Validate subspecialty confidence
-                        confidence = reasoning_data.get("subspecialty_confidence", "")
-                        if confidence not in ["expert_level", "specialist", "experienced"]:
-                            print(f"    ⚠️ {scenario['subspecialty'].title()}: Low subspecialty confidence: {confidence}")
-                        
-                        print(f"    ✅ {scenario['subspecialty'].title()}: SUCCESS - Expert reasoning in {processing_time:.1f}ms")
-                        
-                        self.test_results["week4_subspecialty_reasoning"][scenario['subspecialty']] = {
-                            "status": "success",
-                            "processing_time_ms": processing_time,
-                            "subspecialty_confidence": confidence,
-                            "features_validated": len(scenario["expected_features"]) - len(missing_features)
-                        }
-                        
-                    else:
-                        error_text = await response.text()
-                        print(f"    ❌ {scenario['subspecialty'].title()}: HTTP {response.status} - {error_text}")
-                        self.test_results["week4_subspecialty_reasoning"][scenario['subspecialty']] = {
-                            "status": "failed",
-                            "error": f"HTTP {response.status}",
-                            "details": error_text
-                        }
-                        
-            except Exception as e:
-                print(f"    ❌ {scenario['subspecialty'].title()}: Exception - {str(e)}")
-                self.test_results["week4_subspecialty_reasoning"][scenario['subspecialty']] = {
-                    "status": "error",
-                    "error": str(e)
-                }
-    
-    async def test_week5_integration_testing(self):
-        """Test Week 5 Integration Testing Framework"""
-        print("\n🔗 Testing Week 5 Integration Testing Framework...")
-        
-        integration_scenarios = [
-            {
-                "name": "Complete Pipeline Integration",
-                "test_type": "end_to_end_pipeline",
-                "medical_scenario": "acute_chest_pain",
-                "components_to_test": ["week1", "week2", "week3", "week4"],
-                "performance_targets": {
-                    "total_processing_time_ms": 30,
-                    "accuracy_threshold": 0.95
-                }
-            },
-            {
-                "name": "Neurological Emergency Integration",
-                "test_type": "subspecialty_integration", 
-                "medical_scenario": "acute_stroke_symptoms",
-                "components_to_test": ["intent_classification", "multi_intent_orchestration", "subspecialty_reasoning"],
-                "performance_targets": {
-                    "total_processing_time_ms": 25,
-                    "clinical_accuracy": 0.90
-                }
-            }
-        ]
-        
-        print("  🧪 Testing POST /api/medical-ai/integration-testing...")
-        
-        for scenario in integration_scenarios:
-            try:
-                start_time = time.time()
-                
-                payload = {
-                    "test_scenario": scenario["medical_scenario"],
-                    "integration_type": scenario["test_type"],
-                    "components_to_test": scenario["components_to_test"],
-                    "performance_targets": scenario["performance_targets"],
-                    "validation_level": "comprehensive"
-                }
-                
-                async with self.session.post(
-                    f"{BACKEND_URL}/medical-ai/integration-testing",
-                    json=payload
-                ) as response:
-                    processing_time = (time.time() - start_time) * 1000
-                    
-                    if response.status == 200:
-                        data = await response.json()
-                        
-                        # Validate integration test results
-                        required_fields = [
-                            "integration_results", "component_performance", "pipeline_metrics",
-                            "clinical_accuracy_validation", "performance_benchmarking"
-                        ]
-                        
-                        missing_fields = [field for field in required_fields if field not in data]
-                        if missing_fields:
-                            print(f"    ❌ {scenario['name']}: Missing fields: {missing_fields}")
-                            continue
-                        
-                        # Check pipeline performance
-                        pipeline_metrics = data.get("pipeline_metrics", {})
-                        total_time = pipeline_metrics.get("total_processing_time_ms", 0)
-                        target_time = scenario["performance_targets"]["total_processing_time_ms"]
-                        
-                        if total_time > target_time:
-                            print(f"    ⚠️ {scenario['name']}: Pipeline time {total_time:.1f}ms exceeds {target_time}ms target")
-                        
-                        # Check clinical accuracy
-                        accuracy_validation = data.get("clinical_accuracy_validation", {})
-                        clinical_accuracy = accuracy_validation.get("overall_accuracy", 0)
-                        target_accuracy = scenario["performance_targets"].get("accuracy_threshold", 0.95)
-                        
-                        if clinical_accuracy < target_accuracy:
-                            print(f"    ⚠️ {scenario['name']}: Clinical accuracy {clinical_accuracy:.2%} below {target_accuracy:.2%} target")
-                        
-                        print(f"    ✅ {scenario['name']}: SUCCESS - Pipeline integration validated in {processing_time:.1f}ms")
-                        
-                        self.test_results["week5_integration_testing"][scenario['name']] = {
-                            "status": "success",
-                            "processing_time_ms": processing_time,
-                            "pipeline_time_ms": total_time,
-                            "clinical_accuracy": clinical_accuracy,
-                            "components_tested": len(scenario["components_to_test"])
-                        }
-                        
-                    else:
-                        error_text = await response.text()
-                        print(f"    ❌ {scenario['name']}: HTTP {response.status} - {error_text}")
-                        self.test_results["week5_integration_testing"][scenario['name']] = {
-                            "status": "failed",
-                            "error": f"HTTP {response.status}",
-                            "details": error_text
-                        }
-                        
-            except Exception as e:
-                print(f"    ❌ {scenario['name']}: Exception - {str(e)}")
-                self.test_results["week5_integration_testing"][scenario['name']] = {
-                    "status": "error",
-                    "error": str(e)
-                }
-    
-    async def test_week5_clinical_validation(self):
-        """Test Week 5 Clinical Validation Scenarios"""
-        print("\n🏥 Testing Week 5 Clinical Validation Scenarios...")
-        
-        clinical_scenarios = [
-            {
-                "name": "Emergency Medicine - STEMI",
-                "specialty": "emergency_medicine",
-                "scenario_type": "acute_myocardial_infarction",
-                "patient_presentation": {
-                    "chief_complaint": "Severe crushing chest pain for 2 hours",
-                    "vital_signs": {"bp": "160/90", "hr": 110, "rr": 22},
-                    "symptoms": ["chest_pain", "diaphoresis", "nausea"],
-                    "risk_factors": ["smoking", "hypertension", "family_history"]
-                },
-                "expected_outcomes": {
-                    "urgency_classification": "critical",
-                    "clinical_accuracy_score": 0.95,
-                    "safety_score": 0.98
-                }
-            },
-            {
-                "name": "Neurology - Acute Stroke",
-                "specialty": "neurology",
-                "scenario_type": "acute_ischemic_stroke",
-                "patient_presentation": {
-                    "chief_complaint": "Sudden weakness and speech difficulty",
-                    "vital_signs": {"bp": "180/100", "hr": 88, "rr": 18},
-                    "symptoms": ["facial_drooping", "arm_weakness", "speech_difficulty"],
-                    "onset_time": "45_minutes_ago"
-                },
-                "expected_outcomes": {
-                    "urgency_classification": "critical",
-                    "clinical_accuracy_score": 0.92,
-                    "safety_score": 0.96
-                }
-            },
-            {
-                "name": "Cardiology - Heart Failure",
-                "specialty": "cardiology",
-                "scenario_type": "acute_decompensated_heart_failure",
-                "patient_presentation": {
-                    "chief_complaint": "Shortness of breath and leg swelling",
-                    "vital_signs": {"bp": "140/85", "hr": 95, "rr": 24},
-                    "symptoms": ["dyspnea", "orthopnea", "peripheral_edema"],
-                    "medical_history": ["previous_heart_failure", "diabetes"]
-                },
-                "expected_outcomes": {
-                    "urgency_classification": "high",
-                    "clinical_accuracy_score": 0.88,
-                    "safety_score": 0.94
-                }
-            }
-        ]
-        
-        print("  🔬 Testing POST /api/medical-ai/clinical-validation...")
-        
-        for scenario in clinical_scenarios:
-            try:
-                start_time = time.time()
-                
-                payload = {
-                    "clinical_scenario": scenario["scenario_type"],
-                    "specialty": scenario["specialty"],
-                    "patient_presentation": scenario["patient_presentation"],
-                    "validation_criteria": {
-                        "clinical_accuracy_weight": 0.4,
-                        "urgency_assessment_weight": 0.35,
-                        "clinical_context_weight": 0.25
-                    },
-                    "safety_assessment": True
-                }
-                
-                async with self.session.post(
-                    f"{BACKEND_URL}/medical-ai/clinical-validation",
-                    json=payload
-                ) as response:
-                    processing_time = (time.time() - start_time) * 1000
-                    
-                    if response.status == 200:
-                        data = await response.json()
-                        
-                        # Validate clinical validation results
-                        required_fields = [
-                            "clinical_accuracy_score", "urgency_assessment", "safety_assessment",
-                            "subspecialty_validation", "clinical_reasoning_quality"
-                        ]
-                        
-                        missing_fields = [field for field in required_fields if field not in data]
-                        if missing_fields:
-                            print(f"    ❌ {scenario['name']}: Missing fields: {missing_fields}")
-                            continue
-                        
-                        # Check clinical accuracy
-                        clinical_accuracy = data.get("clinical_accuracy_score", 0)
-                        expected_accuracy = scenario["expected_outcomes"]["clinical_accuracy_score"]
-                        
-                        if clinical_accuracy < expected_accuracy:
-                            print(f"    ⚠️ {scenario['name']}: Clinical accuracy {clinical_accuracy:.2%} below expected {expected_accuracy:.2%}")
-                        
-                        # Check safety score
-                        safety_assessment = data.get("safety_assessment", {})
-                        safety_score = safety_assessment.get("overall_safety_score", 0)
-                        expected_safety = scenario["expected_outcomes"]["safety_score"]
-                        
-                        if safety_score < expected_safety:
-                            print(f"    ⚠️ {scenario['name']}: Safety score {safety_score:.2%} below expected {expected_safety:.2%}")
-                        
-                        # Check urgency classification
-                        urgency_assessment = data.get("urgency_assessment", {})
-                        urgency_classification = urgency_assessment.get("classification", "")
-                        expected_urgency = scenario["expected_outcomes"]["urgency_classification"]
-                        
-                        if urgency_classification.lower() != expected_urgency.lower():
-                            print(f"    ⚠️ {scenario['name']}: Urgency '{urgency_classification}' != expected '{expected_urgency}'")
-                        
-                        print(f"    ✅ {scenario['name']}: SUCCESS - Clinical validation completed in {processing_time:.1f}ms")
-                        print(f"        Accuracy: {clinical_accuracy:.1%}, Safety: {safety_score:.1%}, Urgency: {urgency_classification}")
-                        
-                        self.test_results["week5_clinical_validation"][scenario['name']] = {
-                            "status": "success",
-                            "processing_time_ms": processing_time,
-                            "clinical_accuracy_score": clinical_accuracy,
-                            "safety_score": safety_score,
-                            "urgency_classification": urgency_classification
-                        }
-                        
-                    else:
-                        error_text = await response.text()
-                        print(f"    ❌ {scenario['name']}: HTTP {response.status} - {error_text}")
-                        self.test_results["week5_clinical_validation"][scenario['name']] = {
-                            "status": "failed",
-                            "error": f"HTTP {response.status}",
-                            "details": error_text
-                        }
-                        
-            except Exception as e:
-                print(f"    ❌ {scenario['name']}: Exception - {str(e)}")
-                self.test_results["week5_clinical_validation"][scenario['name']] = {
-                    "status": "error",
-                    "error": str(e)
-                }
-    
-    async def test_performance_benchmarking(self):
-        """Test performance benchmarking endpoints"""
-        print("\n⚡ Testing Performance Benchmarking...")
-        
-        # Test performance benchmarking endpoint
-        print("  📊 Testing POST /api/medical-ai/performance-benchmarking...")
-        
-        try:
-            payload = {
-                "benchmark_type": "comprehensive",
-                "test_scenarios": ["emergency", "routine", "subspecialty"],
-                "performance_targets": {
-                    "processing_time_ms": 30,
-                    "accuracy_threshold": 0.95,
-                    "safety_score_threshold": 0.90
-                },
-                "concurrent_requests": 10
-            }
-            
-            start_time = time.time()
-            async with self.session.post(
-                f"{BACKEND_URL}/medical-ai/performance-benchmarking",
-                json=payload
-            ) as response:
-                processing_time = (time.time() - start_time) * 1000
-                
-                if response.status == 200:
-                    data = await response.json()
-                    
-                    # Validate benchmarking results
-                    required_fields = [
-                        "benchmark_results", "performance_metrics", "stress_test_results",
-                        "system_health_assessment", "production_readiness_score"
-                    ]
-                    
-                    missing_fields = [field for field in required_fields if field not in data]
-                    if missing_fields:
-                        print(f"    ❌ Performance Benchmarking: Missing fields: {missing_fields}")
-                    else:
-                        performance_metrics = data.get("performance_metrics", {})
-                        avg_processing_time = performance_metrics.get("average_processing_time_ms", 0)
-                        production_readiness = data.get("production_readiness_score", 0)
-                        
-                        print(f"    ✅ Performance Benchmarking: SUCCESS")
-                        print(f"        Avg Processing Time: {avg_processing_time:.1f}ms")
-                        print(f"        Production Readiness: {production_readiness:.1%}")
-                        
-                        self.test_results["performance_metrics"]["benchmarking"] = {
-                            "status": "success",
-                            "average_processing_time_ms": avg_processing_time,
-                            "production_readiness_score": production_readiness
-                        }
-                else:
-                    error_text = await response.text()
-                    print(f"    ❌ Performance Benchmarking: HTTP {response.status} - {error_text}")
-                    
-        except Exception as e:
-            print(f"    ❌ Performance Benchmarking: Exception - {str(e)}")
-        
-        # Test Week 5 integration performance endpoint
-        print("  📈 Testing GET /api/medical-ai/week5-integration-performance...")
-        
-        try:
-            async with self.session.get(f"{BACKEND_URL}/medical-ai/week5-integration-performance") as response:
-                if response.status == 200:
-                    data = await response.json()
-                    
-                    required_metrics = [
-                        "integration_performance", "pipeline_metrics", "clinical_validation_stats",
-                        "system_health", "week5_capabilities"
-                    ]
-                    
-                    missing_metrics = [metric for metric in required_metrics if metric not in data]
-                    if missing_metrics:
-                        print(f"    ❌ Week 5 Performance: Missing metrics: {missing_metrics}")
-                    else:
-                        pipeline_metrics = data.get("pipeline_metrics", {})
-                        total_pipeline_time = pipeline_metrics.get("total_processing_time_ms", 0)
-                        
-                        print(f"    ✅ Week 5 Integration Performance: SUCCESS")
-                        print(f"        Total Pipeline Time: {total_pipeline_time:.1f}ms")
-                        
-                        self.test_results["performance_metrics"]["week5_integration"] = {
-                            "status": "success",
-                            "total_pipeline_time_ms": total_pipeline_time
-                        }
-                else:
-                    error_text = await response.text()
-                    print(f"    ❌ Week 5 Performance: HTTP {response.status} - {error_text}")
-                    
-        except Exception as e:
-            print(f"    ❌ Week 5 Performance: Exception - {str(e)}")
-    
-    async def generate_final_report(self):
-        """Generate comprehensive final test report"""
-        print("\n" + "=" * 80)
-        print("📋 FINAL TEST REPORT - INTELLIGENCE AMPLIFICATION PHASE B WEEKS 4 & 5")
-        print("=" * 80)
-        
-        total_time = time.time() - self.start_time
-        
-        # Calculate success rates
-        week4_predictive_success = sum(1 for result in self.test_results["week4_predictive_modeling"].values() 
-                                     if isinstance(result, dict) and result.get("status") == "success")
-        week4_predictive_total = len(self.test_results["week4_predictive_modeling"])
-        
-        week4_subspecialty_success = sum(1 for result in self.test_results["week4_subspecialty_reasoning"].values() 
-                                       if isinstance(result, dict) and result.get("status") == "success")
-        week4_subspecialty_total = len(self.test_results["week4_subspecialty_reasoning"])
-        
-        week5_integration_success = sum(1 for result in self.test_results["week5_integration_testing"].values() 
-                                      if isinstance(result, dict) and result.get("status") == "success")
-        week5_integration_total = len(self.test_results["week5_integration_testing"])
-        
-        week5_clinical_success = sum(1 for result in self.test_results["week5_clinical_validation"].values() 
-                                   if isinstance(result, dict) and result.get("status") == "success")
-        week5_clinical_total = len(self.test_results["week5_clinical_validation"])
-        
-        # Calculate overall success rate
-        total_success = week4_predictive_success + week4_subspecialty_success + week5_integration_success + week5_clinical_success
-        total_tests = week4_predictive_total + week4_subspecialty_total + week5_integration_total + week5_clinical_total
-        overall_success_rate = (total_success / total_tests * 100) if total_tests > 0 else 0
-        
-        print(f"\n🎯 OVERALL RESULTS:")
-        print(f"   Total Tests: {total_tests}")
-        print(f"   Successful: {total_success}")
-        print(f"   Success Rate: {overall_success_rate:.1f}%")
-        print(f"   Total Testing Time: {total_time:.1f}s")
-        
-        print(f"\n📊 WEEK 4 PREDICTIVE MODELING & SUBSPECIALTY REASONING:")
-        if week4_predictive_total > 0:
-            print(f"   Predictive Modeling: {week4_predictive_success}/{week4_predictive_total} ({week4_predictive_success/week4_predictive_total*100:.1f}%)")
-        if week4_subspecialty_total > 0:
-            print(f"   Subspecialty Reasoning: {week4_subspecialty_success}/{week4_subspecialty_total} ({week4_subspecialty_success/week4_subspecialty_total*100:.1f}%)")
-        
-        print(f"\n🔬 WEEK 5 INTEGRATION TESTING & CLINICAL VALIDATION:")
-        if week5_integration_total > 0:
-            print(f"   Integration Testing: {week5_integration_success}/{week5_integration_total} ({week5_integration_success/week5_integration_total*100:.1f}%)")
-        if week5_clinical_total > 0:
-            print(f"   Clinical Validation: {week5_clinical_success}/{week5_clinical_total} ({week5_clinical_success/week5_clinical_total*100:.1f}%)")
-        
-        # Performance summary
-        print(f"\n⚡ PERFORMANCE SUMMARY:")
-        performance_data = []
-        
-        for category, results in self.test_results.items():
-            if isinstance(results, dict):
-                for test_name, result in results.items():
-                    if isinstance(result, dict) and "processing_time_ms" in result:
-                        performance_data.append(result["processing_time_ms"])
-        
-        if performance_data:
-            avg_performance = sum(performance_data) / len(performance_data)
-            max_performance = max(performance_data)
-            print(f"   Average Processing Time: {avg_performance:.1f}ms")
-            print(f"   Maximum Processing Time: {max_performance:.1f}ms")
-            print(f"   Target Processing Time: <30ms (Pipeline), <25ms (Individual)")
-        
-        # Production readiness assessment
-        print(f"\n🚀 PRODUCTION READINESS ASSESSMENT:")
-        
-        if overall_success_rate >= 90:
-            readiness_status = "READY FOR PRODUCTION"
-            status_emoji = "✅"
-        elif overall_success_rate >= 75:
-            readiness_status = "READY WITH MINOR ISSUES"
-            status_emoji = "⚠️"
+            except json.JSONDecodeError as e:
+                print(f"❌ JSON decode error: {str(e)}")
+                response_text = response.text
+                print(f"📄 Raw response: {response_text[:500]}...")
+                return False, f"JSON decode error: {str(e)}", response_text[:500]
         else:
-            readiness_status = "NOT READY - REQUIRES FIXES"
-            status_emoji = "❌"
-        
-        print(f"   {status_emoji} Status: {readiness_status}")
-        print(f"   Overall Success Rate: {overall_success_rate:.1f}%")
-        
-        # Set overall status
-        if overall_success_rate >= 75:
-            self.test_results["overall_status"] = "success"
-        else:
-            self.test_results["overall_status"] = "failed"
-        
-        print(f"\n📝 DETAILED RESULTS:")
-        print(json.dumps(self.test_results, indent=2, default=str))
-        
-        print("\n" + "=" * 80)
-        print("🏁 INTELLIGENCE AMPLIFICATION PHASE B WEEKS 4 & 5 TESTING COMPLETE")
-        print("=" * 80)
+            error_text = response.text
+            print(f"❌ HTTP {response.status_code} Error")
+            print(f"📄 Error Details: {error_text}")
+            
+            # Check for specific ConversationFlowResult attribute errors
+            if "ConversationFlowResult" in error_text and "attribute" in error_text:
+                print(f"🚨 CRITICAL: ConversationFlowResult attribute issue still exists!")
+                print(f"🔍 Error contains: ConversationFlowResult attribute problem")
+            elif "recommended_interview_strategy" in error_text:
+                print(f"🚨 CRITICAL: 'recommended_interview_strategy' attribute error detected!")
+            
+            return False, f"HTTP {response.status_code}", error_text
+            
+    except Exception as e:
+        print(f"❌ Exception during integration testing: {str(e)}")
+        traceback.print_exc()
+        return False, f"Exception: {str(e)}", str(e)
 
-async def main():
+def test_clinical_validation():
+    """Test POST /api/medical-ai/clinical-validation"""
+    print("\n🔬 TESTING POST /api/medical-ai/clinical-validation")
+    print("   Focus: Verify ValidationResult serialization works properly")
+    print("=" * 70)
+    
+    try:
+        print("Testing clinical validation endpoint...")
+        
+        # Test payload for clinical validation
+        payload = {
+            "specialty": "emergency_medicine",
+            "validation_criteria": {
+                "clinical_accuracy_weight": 0.4,
+                "urgency_assessment_weight": 0.35,
+                "clinical_context_weight": 0.25
+            },
+            "safety_assessment": True
+        }
+        
+        start_time = time.time()
+        response = requests.post(
+            f"{BACKEND_URL}/medical-ai/clinical-validation",
+            json=payload,
+            timeout=30
+        )
+        processing_time = (time.time() - start_time) * 1000
+        
+        print(f"📊 Response Status: {response.status_code}")
+        print(f"⏱️  Processing Time: {processing_time:.1f}ms")
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print(f"✅ SUCCESS: Clinical validation endpoint working correctly")
+                print(f"   Validation Type: {data.get('validation_type')}")
+                print(f"   Specialty: {data.get('specialty')}")
+                print(f"   Clinical Accuracy: {data.get('clinical_accuracy_rate', 0):.1%}")
+                print(f"   Safety Score: {data.get('safety_score', 0):.1%}")
+                print(f"   Algorithm Version: {data.get('algorithm_version')}")
+                
+                # Check for required fields
+                required_fields = ["validation_type", "specialty", "total_scenarios", "clinical_accuracy_rate", "safety_score"]
+                missing_fields = [field for field in required_fields if field not in data]
+                if missing_fields:
+                    print(f"⚠️  Missing response fields: {missing_fields}")
+                
+                return True, "SUCCESS", data
+                
+            except json.JSONDecodeError as e:
+                print(f"❌ JSON decode error: {str(e)}")
+                response_text = response.text
+                print(f"📄 Raw response: {response_text[:500]}...")
+                return False, f"JSON decode error: {str(e)}", response_text[:500]
+        else:
+            error_text = response.text
+            print(f"❌ HTTP {response.status_code} Error")
+            print(f"📄 Error Details: {error_text}")
+            
+            # Check for specific ValidationResult serialization errors
+            if "ValidationResult" in error_text and ("serialization" in error_text or "Pydantic" in error_text):
+                print(f"🚨 CRITICAL: ValidationResult serialization issue still exists!")
+                print(f"🔍 Error contains: ValidationResult serialization problem")
+            elif "dictionaries" in error_text and "validation" in error_text:
+                print(f"🚨 CRITICAL: Pydantic validation error about dictionaries detected!")
+            
+            return False, f"HTTP {response.status_code}", error_text
+            
+    except Exception as e:
+        print(f"❌ Exception during clinical validation: {str(e)}")
+        traceback.print_exc()
+        return False, f"Exception: {str(e)}", str(e)
+
+def test_performance_benchmarking():
+    """Test POST /api/medical-ai/performance-benchmarking"""
+    print("\n⚡ TESTING POST /api/medical-ai/performance-benchmarking")
+    print("   Focus: Verify missing '_analyze_overall_performance' method is implemented")
+    print("=" * 70)
+    
+    try:
+        print("Testing performance benchmarking endpoint...")
+        
+        start_time = time.time()
+        response = requests.post(
+            f"{BACKEND_URL}/medical-ai/performance-benchmarking",
+            json={},  # Empty payload as endpoint doesn't require specific parameters
+            timeout=30
+        )
+        processing_time = (time.time() - start_time) * 1000
+        
+        print(f"📊 Response Status: {response.status_code}")
+        print(f"⏱️  Processing Time: {processing_time:.1f}ms")
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print(f"✅ SUCCESS: Performance benchmarking endpoint working correctly")
+                print(f"   Benchmarking Type: {data.get('benchmarking_type')}")
+                
+                # Check system health assessment
+                system_health = data.get("system_health_assessment", {})
+                health_score = system_health.get("overall_health_score", 0)
+                performance_grade = system_health.get("performance_grade", "N/A")
+                
+                print(f"   Health Score: {health_score:.1%}")
+                print(f"   Performance Grade: {performance_grade}")
+                
+                # Check performance targets
+                targets = data.get("performance_targets_summary", {})
+                all_targets_met = targets.get("all_targets_met", False)
+                print(f"   All Targets Met: {all_targets_met}")
+                print(f"   Algorithm Version: {data.get('algorithm_version')}")
+                
+                # Check for required fields
+                required_fields = ["benchmarking_type", "benchmark_results", "overall_performance_metrics", "system_health_assessment"]
+                missing_fields = [field for field in required_fields if field not in data]
+                if missing_fields:
+                    print(f"⚠️  Missing response fields: {missing_fields}")
+                
+                return True, "SUCCESS", data
+                
+            except json.JSONDecodeError as e:
+                print(f"❌ JSON decode error: {str(e)}")
+                response_text = response.text
+                print(f"📄 Raw response: {response_text[:500]}...")
+                return False, f"JSON decode error: {str(e)}", response_text[:500]
+        else:
+            error_text = response.text
+            print(f"❌ HTTP {response.status_code} Error")
+            print(f"📄 Error Details: {error_text}")
+            
+            # Check for specific _analyze_overall_performance method errors
+            if "_analyze_overall_performance" in error_text:
+                print(f"🚨 CRITICAL: '_analyze_overall_performance' method still missing!")
+                print(f"🔍 Error contains: _analyze_overall_performance method issue")
+            elif "AttributeError" in error_text and "method" in error_text:
+                print(f"🚨 CRITICAL: Method missing error detected!")
+            
+            return False, f"HTTP {response.status_code}", error_text
+            
+    except Exception as e:
+        print(f"❌ Exception during performance benchmarking: {str(e)}")
+        traceback.print_exc()
+        return False, f"Exception: {str(e)}", str(e)
+
+def test_week5_integration_performance():
+    """Test GET /api/medical-ai/week5-integration-performance"""
+    print("\n📊 TESTING GET /api/medical-ai/week5-integration-performance")
+    print("   Focus: Ensure this endpoint still works properly")
+    print("=" * 70)
+    
+    try:
+        print("Testing week5 integration performance endpoint...")
+        
+        start_time = time.time()
+        response = requests.get(
+            f"{BACKEND_URL}/medical-ai/week5-integration-performance",
+            timeout=30
+        )
+        processing_time = (time.time() - start_time) * 1000
+        
+        print(f"📊 Response Status: {response.status_code}")
+        print(f"⏱️  Processing Time: {processing_time:.1f}ms")
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print(f"✅ SUCCESS: Week5 integration performance endpoint working correctly")
+                print(f"   Status: {data.get('status')}")
+                
+                # Check capabilities
+                capabilities = data.get("week5_capabilities", {})
+                integration_active = capabilities.get("integration_testing_active", False)
+                validation_active = capabilities.get("clinical_validation_active", False)
+                benchmarking_active = capabilities.get("performance_benchmarking_active", False)
+                
+                print(f"   Integration Testing Active: {integration_active}")
+                print(f"   Clinical Validation Active: {validation_active}")
+                print(f"   Performance Benchmarking Active: {benchmarking_active}")
+                
+                # Check system readiness
+                readiness = data.get("system_readiness_assessment", {})
+                deployment_ready = readiness.get("production_deployment_ready", False)
+                print(f"   Production Deployment Ready: {deployment_ready}")
+                
+                # Check for required fields
+                required_fields = ["status", "integration_testing_metrics", "clinical_validation_metrics", "week5_capabilities"]
+                missing_fields = [field for field in required_fields if field not in data]
+                if missing_fields:
+                    print(f"⚠️  Missing response fields: {missing_fields}")
+                
+                return True, "SUCCESS", data
+                
+            except json.JSONDecodeError as e:
+                print(f"❌ JSON decode error: {str(e)}")
+                response_text = response.text
+                print(f"📄 Raw response: {response_text[:500]}...")
+                return False, f"JSON decode error: {str(e)}", response_text[:500]
+        else:
+            error_text = response.text
+            print(f"❌ HTTP {response.status_code} Error")
+            print(f"📄 Error Details: {error_text}")
+            
+            return False, f"HTTP {response.status_code}", error_text
+            
+    except Exception as e:
+        print(f"❌ Exception during week5 integration performance: {str(e)}")
+        traceback.print_exc()
+        return False, f"Exception: {str(e)}", str(e)
+
+def main():
     """Main test execution function"""
-    async with WeekFourFiveTestSuite() as test_suite:
-        await test_suite.run_comprehensive_tests()
+    print("🔬 WEEK 5 MEDICAL AI ENDPOINTS FOCUSED TESTING")
+    print("=" * 70)
+    print("Testing specific endpoints to verify critical issue fixes:")
+    print("1. POST /api/medical-ai/integration-testing")
+    print("2. POST /api/medical-ai/clinical-validation") 
+    print("3. POST /api/medical-ai/performance-benchmarking")
+    print("4. GET /api/medical-ai/week5-integration-performance")
+    print("=" * 70)
+    print(f"Backend URL: {BACKEND_URL}")
+    print(f"Test started at: {datetime.utcnow().isoformat()}")
+    print("=" * 70)
+    
+    # Store test results
+    test_results = {}
+    
+    # Test 1: Integration Testing
+    success, status, details = test_integration_testing_complete_pipeline()
+    test_results["integration_testing"] = {"success": success, "status": status, "details": details}
+    
+    # Test 2: Clinical Validation
+    success, status, details = test_clinical_validation()
+    test_results["clinical_validation"] = {"success": success, "status": status, "details": details}
+    
+    # Test 3: Performance Benchmarking
+    success, status, details = test_performance_benchmarking()
+    test_results["performance_benchmarking"] = {"success": success, "status": status, "details": details}
+    
+    # Test 4: Week5 Integration Performance
+    success, status, details = test_week5_integration_performance()
+    test_results["week5_integration_performance"] = {"success": success, "status": status, "details": details}
+    
+    # Generate final report
+    print("\n" + "=" * 70)
+    print("📋 WEEK 5 FOCUSED TEST REPORT - CRITICAL ISSUE VERIFICATION")
+    print("=" * 70)
+    
+    successful_tests = sum(1 for result in test_results.values() if result["success"])
+    total_tests = len(test_results)
+    success_rate = (successful_tests / total_tests * 100) if total_tests > 0 else 0
+    
+    print(f"\n🎯 ENDPOINT TEST RESULTS:")
+    
+    for endpoint, result in test_results.items():
+        endpoint_name = endpoint.replace("_", " ").title()
+        status_emoji = "✅" if result["success"] else "❌"
+        print(f"   {status_emoji} {endpoint_name}: {result['status']}")
+    
+    print(f"\n📊 OVERALL RESULTS:")
+    print(f"   Total Endpoints Tested: {total_tests}")
+    print(f"   Successful Endpoints: {successful_tests}")
+    print(f"   Success Rate: {success_rate:.1f}%")
+    
+    print(f"\n🔍 CRITICAL ISSUE STATUS:")
+    
+    # Check specific issues mentioned in review request
+    integration_result = test_results.get("integration_testing", {})
+    if integration_result.get("success"):
+        print(f"   ✅ ConversationFlowResult attribute issue: FIXED")
+    else:
+        error_details = str(integration_result.get("details", ""))
+        if "ConversationFlowResult" in error_details or "recommended_interview_strategy" in error_details:
+            print(f"   ❌ ConversationFlowResult attribute issue: STILL EXISTS")
+        else:
+            print(f"   ⚠️  ConversationFlowResult attribute issue: UNKNOWN (different error)")
+    
+    validation_result = test_results.get("clinical_validation", {})
+    if validation_result.get("success"):
+        print(f"   ✅ ValidationResult serialization issue: FIXED")
+    else:
+        error_details = str(validation_result.get("details", ""))
+        if "ValidationResult" in error_details or "Pydantic" in error_details:
+            print(f"   ❌ ValidationResult serialization issue: STILL EXISTS")
+        else:
+            print(f"   ⚠️  ValidationResult serialization issue: UNKNOWN (different error)")
+    
+    benchmarking_result = test_results.get("performance_benchmarking", {})
+    if benchmarking_result.get("success"):
+        print(f"   ✅ Missing '_analyze_overall_performance' method: FIXED")
+    else:
+        error_details = str(benchmarking_result.get("details", ""))
+        if "_analyze_overall_performance" in error_details:
+            print(f"   ❌ Missing '_analyze_overall_performance' method: STILL EXISTS")
+        else:
+            print(f"   ⚠️  Missing '_analyze_overall_performance' method: UNKNOWN (different error)")
+    
+    performance_result = test_results.get("week5_integration_performance", {})
+    if performance_result.get("success"):
+        print(f"   ✅ Week5 performance endpoint: WORKING PROPERLY")
+    else:
+        print(f"   ❌ Week5 performance endpoint: HAS ISSUES")
+    
+    # Final assessment
+    if success_rate == 100:
+        overall_status = "ALL ISSUES FIXED"
+        status_emoji = "🎉"
+    elif success_rate >= 75:
+        overall_status = "MOSTLY SUCCESSFUL"
+        status_emoji = "⚠️"
+    else:
+        overall_status = "NEEDS ATTENTION"
+        status_emoji = "❌"
+    
+    print(f"\n🚀 FINAL ASSESSMENT:")
+    print(f"   {status_emoji} Overall Status: {overall_status}")
+    print(f"   Success Rate: {success_rate:.1f}%")
+    
+    if success_rate == 100:
+        print(f"   🎉 All critical issues have been resolved!")
+    elif success_rate >= 75:
+        print(f"   👍 Most issues resolved, some endpoints need attention")
+    else:
+        print(f"   🔧 Multiple critical issues still need to be addressed")
+    
+    print("\n" + "=" * 70)
+    print("🏁 WEEK 5 FOCUSED TESTING COMPLETE")
+    print("=" * 70)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
