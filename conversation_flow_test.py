@@ -124,6 +124,14 @@ class ConversationFlowTester:
                     "timestamp": msg.get("timestamp", datetime.now().isoformat())
                 })
             
+            # Get the current stage from the last response or default to greeting
+            current_stage = "greeting"
+            if self.conversation_history:
+                for entry in reversed(self.conversation_history):
+                    if entry.get("role") == "assistant" and entry.get("stage"):
+                        current_stage = entry.get("stage")
+                        break
+            
             request_data = {
                 "patient_id": "anonymous",
                 "message": message,
@@ -132,7 +140,7 @@ class ConversationFlowTester:
                 "context": {
                     "patient_id": "anonymous",
                     "consultation_id": self.consultation_id,
-                    "current_stage": "greeting" if not self.conversation_history else self.conversation_history[-1].get("stage", "greeting"),
+                    "current_stage": current_stage,
                     "demographics": {}
                 }
             }
