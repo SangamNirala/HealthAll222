@@ -796,9 +796,604 @@ class ConversationFlowOptimizer:
         
         return priority_mapping.get(clinical_priority.overall_priority, ConversationPriority.MODERATE)
     
-    # Additional helper methods continue...
-    # (Due to length limits, showing core structure - additional methods would include
-    # pathway prediction, strategy generation, and performance tracking)
+    async def _generate_emergency_question(
+        self,
+        multi_intent_result: MultiIntentResult,
+        patient_context: Optional[Dict[str, Any]]
+    ) -> OptimalQuestion:
+        """Generate emergency-focused question for critical scenarios"""
+        return OptimalQuestion(
+            question_text="This sounds like it could be serious. Are you experiencing severe symptoms right now that are getting worse?",
+            question_category=QuestionCategory.RED_FLAG_SCREENING,
+            clinical_rationale="Emergency triage requires immediate assessment of symptom severity and progression",
+            priority=ConversationPriority.CRITICAL,
+            expected_intent_responses=["emergency_concern", "symptom_reporting"],
+            follow_up_branches={
+                "yes": "emergency_protocol_activation",
+                "no": "urgent_assessment_protocol"
+            },
+            clinical_significance=1.0,
+            time_sensitivity="immediate",
+            subspecialty_relevance=["emergency_medicine"],
+            confidence_score=0.95
+        )
+    
+    def _generate_emergency_pathway(self, multi_intent_result: MultiIntentResult) -> ConversationPathway:
+        """Generate emergency conversation pathway"""
+        return ConversationPathway(
+            predicted_stages=[ConversationStage.EMERGENCY_TRIAGE, ConversationStage.ASSESSMENT_PLAN],
+            estimated_duration_minutes=5,
+            clinical_complexity_score=1.0,
+            recommended_question_sequence=["emergency_severity", "call_911_assessment"],
+            potential_diagnoses=["medical_emergency"],
+            required_red_flag_screening=["severity_assessment", "911_indication"],
+            subspecialty_consultation_likely=True,
+            emergency_pathway_probability=1.0,
+            pathway_confidence=0.95,
+            alternative_pathways=[]
+        )
+    
+    def _predict_conversation_stages(
+        self,
+        multi_intent_result: MultiIntentResult,
+        conversation_history: List[Dict[str, Any]]
+    ) -> List[ConversationStage]:
+        """Predict likely conversation stages based on intent patterns"""
+        primary_intent = multi_intent_result.primary_intent
+        clinical_priority = multi_intent_result.clinical_priority
+        
+        # Emergency pathway
+        if clinical_priority.overall_priority == ClinicalPriorityLevel.EMERGENCY:
+            return [ConversationStage.EMERGENCY_TRIAGE, ConversationStage.ASSESSMENT_PLAN]
+        
+        # Standard pathway based on intent
+        base_stages = [
+            ConversationStage.CHIEF_COMPLAINT,
+            ConversationStage.HISTORY_PRESENT_ILLNESS
+        ]
+        
+        # Add stages based on clinical priority and intent
+        if clinical_priority.overall_priority in [ClinicalPriorityLevel.CRITICAL, ClinicalPriorityLevel.HIGH]:
+            base_stages.extend([
+                ConversationStage.REVIEW_OF_SYSTEMS,
+                ConversationStage.PAST_MEDICAL_HISTORY,
+                ConversationStage.MEDICATIONS,
+                ConversationStage.ASSESSMENT_PLAN
+            ])
+        else:
+            base_stages.extend([
+                ConversationStage.REVIEW_OF_SYSTEMS,
+                ConversationStage.PAST_MEDICAL_HISTORY,
+                ConversationStage.MEDICATIONS,
+                ConversationStage.ALLERGIES,
+                ConversationStage.SOCIAL_HISTORY,
+                ConversationStage.FAMILY_HISTORY,
+                ConversationStage.ASSESSMENT_PLAN
+            ])
+        
+        return base_stages
+    
+    def _estimate_conversation_duration(
+        self,
+        predicted_stages: List[ConversationStage],
+        clinical_priority: Any
+    ) -> int:
+        """Estimate conversation duration in minutes"""
+        stage_durations = {
+            ConversationStage.EMERGENCY_TRIAGE: 2,
+            ConversationStage.CHIEF_COMPLAINT: 3,
+            ConversationStage.HISTORY_PRESENT_ILLNESS: 8,
+            ConversationStage.REVIEW_OF_SYSTEMS: 4,
+            ConversationStage.PAST_MEDICAL_HISTORY: 3,
+            ConversationStage.MEDICATIONS: 2,
+            ConversationStage.ALLERGIES: 1,
+            ConversationStage.SOCIAL_HISTORY: 2,
+            ConversationStage.FAMILY_HISTORY: 2,
+            ConversationStage.ASSESSMENT_PLAN: 5
+        }
+        
+        total_duration = sum(stage_durations.get(stage, 2) for stage in predicted_stages)
+        
+        # Adjust based on clinical priority
+        if clinical_priority.overall_priority == ClinicalPriorityLevel.EMERGENCY:
+            total_duration *= 0.5  # Faster for emergencies
+        elif clinical_priority.overall_priority == ClinicalPriorityLevel.CRITICAL:
+            total_duration *= 0.7  # Somewhat faster for critical
+        
+        return max(5, int(total_duration))
+    
+    def _calculate_pathway_complexity(
+        self,
+        multi_intent_result: MultiIntentResult,
+        conversation_length: int
+    ) -> float:
+        """Calculate clinical complexity score for pathway"""
+        base_complexity = 0.3
+        
+        # Add complexity for multiple intents
+        intent_complexity = min(0.4, len(multi_intent_result.detected_intents) * 0.1)
+        
+        # Add complexity for high clinical priority
+        priority_complexity = {
+            ClinicalPriorityLevel.EMERGENCY: 0.3,
+            ClinicalPriorityLevel.CRITICAL: 0.2,
+            ClinicalPriorityLevel.HIGH: 0.1,
+            ClinicalPriorityLevel.MODERATE: 0.0,
+            ClinicalPriorityLevel.LOW: -0.1
+        }.get(multi_intent_result.clinical_priority.overall_priority, 0.0)
+        
+        # Add complexity for conversation length
+        length_complexity = min(0.2, conversation_length * 0.02)
+        
+        return min(1.0, base_complexity + intent_complexity + priority_complexity + length_complexity)
+    
+    def _generate_question_sequence(
+        self,
+        predicted_stages: List[ConversationStage],
+        primary_intent: str
+    ) -> List[str]:
+        """Generate recommended question sequence for pathway"""
+        sequence = []
+        
+        for stage in predicted_stages:
+            if stage == ConversationStage.CHIEF_COMPLAINT:
+                sequence.append("open_ended_chief_complaint")
+            elif stage == ConversationStage.HISTORY_PRESENT_ILLNESS:
+                sequence.extend([
+                    "temporal_onset",
+                    "quality_description",
+                    "severity_scale",
+                    "associated_symptoms"
+                ])
+            elif stage == ConversationStage.REVIEW_OF_SYSTEMS:
+                sequence.append("systematic_review")
+            elif stage == ConversationStage.PAST_MEDICAL_HISTORY:
+                sequence.append("medical_history")
+            elif stage == ConversationStage.MEDICATIONS:
+                sequence.append("current_medications")
+        
+        return sequence[:8]  # Limit to top 8 questions
+    
+    def _predict_potential_diagnoses(
+        self,
+        multi_intent_result: MultiIntentResult,
+        patient_context: Optional[Dict[str, Any]]
+    ) -> List[str]:
+        """Predict potential diagnoses based on intent patterns"""
+        primary_intent = multi_intent_result.primary_intent
+        
+        diagnosis_mapping = {
+            "cardiac_chest_pain_assessment": [
+                "Acute coronary syndrome",
+                "Unstable angina",
+                "Myocardial infarction",
+                "Chest wall pain"
+            ],
+            "neurological_symptom_assessment": [
+                "Migraine",
+                "Tension headache",
+                "Transient ischemic attack",
+                "Stroke"
+            ],
+            "gi_symptom_assessment": [
+                "Gastroenteritis",
+                "Peptic ulcer disease",
+                "Inflammatory bowel disease",
+                "Appendicitis"
+            ],
+            "respiratory_symptom_assessment": [
+                "Asthma exacerbation",
+                "Pneumonia",
+                "Pulmonary embolism",
+                "Chronic obstructive pulmonary disease"
+            ]
+        }
+        
+        return diagnosis_mapping.get(primary_intent, ["Undifferentiated symptoms"])[:4]
+    
+    def _determine_red_flag_screening(self, multi_intent_result: MultiIntentResult) -> List[str]:
+        """Determine required red flag screening questions"""
+        primary_intent = multi_intent_result.primary_intent
+        clinical_priority = multi_intent_result.clinical_priority
+        
+        red_flags = []
+        
+        if "cardiac" in primary_intent:
+            red_flags.extend([
+                "Crushing chest pain with radiation",
+                "Shortness of breath",
+                "Diaphoresis or nausea",
+                "Hemodynamic instability"
+            ])
+        
+        if "neurological" in primary_intent:
+            red_flags.extend([
+                "Sudden severe headache",
+                "Focal neurological deficits",
+                "Altered mental status",
+                "Signs of increased intracranial pressure"
+            ])
+        
+        if clinical_priority.overall_priority in [ClinicalPriorityLevel.EMERGENCY, ClinicalPriorityLevel.CRITICAL]:
+            red_flags.append("Rapid symptom progression")
+        
+        return red_flags[:5]
+    
+    def _calculate_emergency_probability(self, multi_intent_result: MultiIntentResult) -> float:
+        """Calculate probability of emergency pathway"""
+        clinical_priority = multi_intent_result.clinical_priority
+        
+        if clinical_priority.overall_priority == ClinicalPriorityLevel.EMERGENCY:
+            return 0.9
+        elif clinical_priority.overall_priority == ClinicalPriorityLevel.CRITICAL:
+            return 0.6
+        elif clinical_priority.overall_priority == ClinicalPriorityLevel.HIGH:
+            return 0.3
+        else:
+            return 0.1
+    
+    def _generate_alternative_pathways(
+        self,
+        multi_intent_result: MultiIntentResult,
+        predicted_stages: List[ConversationStage]
+    ) -> List[Dict[str, Any]]:
+        """Generate alternative conversation pathways"""
+        alternatives = []
+        
+        # Abbreviated pathway for time constraints
+        alternatives.append({
+            "pathway_name": "Abbreviated Assessment",
+            "stages": predicted_stages[:4],
+            "estimated_duration": 8,
+            "use_case": "Time constraints or stable patient"
+        })
+        
+        # Comprehensive pathway for complex cases
+        if len(predicted_stages) < 8:
+            comprehensive_stages = predicted_stages + [
+                ConversationStage.SOCIAL_HISTORY,
+                ConversationStage.FAMILY_HISTORY
+            ]
+            alternatives.append({
+                "pathway_name": "Comprehensive Assessment",
+                "stages": comprehensive_stages,
+                "estimated_duration": 25,
+                "use_case": "Complex case or specialist consultation"
+            })
+        
+        return alternatives
+    
+    def _calculate_pathway_confidence(
+        self,
+        multi_intent_result: MultiIntentResult,
+        predicted_stages: List[ConversationStage]
+    ) -> float:
+        """Calculate confidence in pathway prediction"""
+        base_confidence = 0.7
+        
+        # Boost confidence for clear intent patterns
+        if len(multi_intent_result.detected_intents) > 0:
+            intent_confidence = min(0.2, sum(conf for _, conf in multi_intent_result.detected_intents[:3]) / 3)
+            base_confidence += intent_confidence
+        
+        # Boost confidence for emergency scenarios (clear protocols)
+        if multi_intent_result.clinical_priority.overall_priority == ClinicalPriorityLevel.EMERGENCY:
+            base_confidence += 0.1
+        
+        return min(0.95, base_confidence)
+    
+    def _define_interview_objectives(
+        self,
+        multi_intent_result: MultiIntentResult,
+        predicted_pathway: ConversationPathway
+    ) -> List[str]:
+        """Define primary objectives for clinical interview"""
+        objectives = ["Establish accurate diagnosis", "Assess symptom severity"]
+        
+        if multi_intent_result.clinical_priority.overall_priority in [
+            ClinicalPriorityLevel.EMERGENCY, ClinicalPriorityLevel.CRITICAL
+        ]:
+            objectives.insert(0, "Rule out life-threatening conditions")
+        
+        if predicted_pathway.subspecialty_consultation_likely:
+            objectives.append("Gather information for specialist referral")
+        
+        return objectives
+    
+    def _estimate_question_count(
+        self,
+        predicted_pathway: ConversationPathway,
+        clinical_priority: Any
+    ) -> int:
+        """Estimate number of questions needed"""
+        base_count = len(predicted_pathway.predicted_stages) * 2
+        
+        if clinical_priority.overall_priority == ClinicalPriorityLevel.EMERGENCY:
+            return max(3, base_count // 2)
+        elif clinical_priority.overall_priority == ClinicalPriorityLevel.CRITICAL:
+            return max(5, int(base_count * 0.7))
+        
+        return min(15, base_count)
+    
+    def _identify_decision_points(
+        self,
+        multi_intent_result: MultiIntentResult,
+        predicted_pathway: ConversationPathway
+    ) -> List[str]:
+        """Identify key decision points in interview"""
+        decision_points = ["Initial symptom assessment"]
+        
+        if multi_intent_result.clinical_priority.overall_priority in [
+            ClinicalPriorityLevel.EMERGENCY, ClinicalPriorityLevel.CRITICAL
+        ]:
+            decision_points.append("Emergency vs urgent care determination")
+        
+        if predicted_pathway.subspecialty_consultation_likely:
+            decision_points.append("Specialist referral indication")
+        
+        decision_points.append("Treatment plan formulation")
+        
+        return decision_points
+    
+    def _determine_subspecialty_focus(self, multi_intent_result: MultiIntentResult) -> Optional[str]:
+        """Determine subspecialty focus based on intents"""
+        primary_intent = multi_intent_result.primary_intent
+        
+        subspecialty_mapping = {
+            "cardiac_chest_pain_assessment": "cardiology",
+            "cardiac_symptom_evaluation": "cardiology",
+            "neurological_symptom_assessment": "neurology",
+            "neurological_emergency_detection": "neurology",
+            "gi_symptom_assessment": "gastroenterology",
+            "respiratory_symptom_assessment": "pulmonology"
+        }
+        
+        return subspecialty_mapping.get(primary_intent)
+    
+    def _assess_communication_style_needs(
+        self,
+        multi_intent_result: MultiIntentResult,
+        patient_context: Optional[Dict[str, Any]]
+    ) -> str:
+        """Assess patient communication style needs"""
+        # Check for anxiety in intents
+        if any("anxiety" in intent for intent, _ in multi_intent_result.detected_intents):
+            return "empathetic"
+        
+        # Check clinical priority
+        if multi_intent_result.clinical_priority.overall_priority == ClinicalPriorityLevel.EMERGENCY:
+            return "direct"
+        
+        # Default to detailed for complex cases
+        if len(multi_intent_result.detected_intents) > 2:
+            return "detailed"
+        
+        return "empathetic"
+    
+    def _define_documentation_priorities(self, multi_intent_result: MultiIntentResult) -> List[str]:
+        """Define documentation priorities based on intents"""
+        priorities = ["Chief complaint", "History of present illness"]
+        
+        if multi_intent_result.clinical_priority.overall_priority in [
+            ClinicalPriorityLevel.EMERGENCY, ClinicalPriorityLevel.CRITICAL
+        ]:
+            priorities.insert(0, "Emergency assessment and interventions")
+        
+        if multi_intent_result.clinical_priority.specialist_referral_needed:
+            priorities.append("Specialist referral rationale")
+        
+        return priorities
+    
+    def _select_reasoning_framework(self, primary_intent: str, subspecialty_focus: Optional[str]) -> str:
+        """Select clinical reasoning framework"""
+        if subspecialty_focus:
+            return f"{subspecialty_focus.capitalize()} clinical reasoning"
+        
+        if "emergency" in primary_intent:
+            return "Emergency medicine triage protocols"
+        
+        return "Standard medical reasoning framework"
+    
+    def _extract_asked_question_categories(self, conversation_history: List[Dict[str, Any]]) -> List[QuestionCategory]:
+        """Extract question categories already asked in conversation"""
+        # This would analyze conversation history to identify what types of questions
+        # have already been asked to avoid repetition
+        asked_categories = []
+        
+        for message in conversation_history:
+            question_text = message.get("question", "").lower()
+            if "when" in question_text or "started" in question_text:
+                asked_categories.append(QuestionCategory.TEMPORAL)
+            elif "describe" in question_text or "feel" in question_text:
+                asked_categories.append(QuestionCategory.QUALITY)
+            elif "scale" in question_text or "1 to 10" in question_text:
+                asked_categories.append(QuestionCategory.SEVERITY_SCALE)
+        
+        return asked_categories
+    
+    def _predict_patient_responses(self, question_category: QuestionCategory, primary_intent: str) -> List[str]:
+        """Predict likely patient responses to question category"""
+        response_patterns = {
+            QuestionCategory.TEMPORAL: ["duration_description", "onset_timing"],
+            QuestionCategory.QUALITY: ["symptom_description", "pain_quality"],
+            QuestionCategory.SEVERITY_SCALE: ["severity_rating", "pain_scale"],
+            QuestionCategory.ASSOCIATED_SYMPTOMS: ["additional_symptoms", "symptom_cluster"],
+            QuestionCategory.RED_FLAG_SCREENING: ["emergency_confirmation", "severity_escalation"]
+        }
+        
+        return response_patterns.get(question_category, ["general_response"])
+    
+    def _generate_follow_up_branches(
+        self,
+        question_category: QuestionCategory,
+        expected_responses: List[str]
+    ) -> Dict[str, str]:
+        """Generate follow-up question branches based on expected responses"""
+        branches = {}
+        
+        for response in expected_responses:
+            if response == "severity_rating":
+                branches["high_severity"] = "emergency_assessment"
+                branches["moderate_severity"] = "detailed_history"
+                branches["low_severity"] = "routine_assessment"
+            elif response == "emergency_confirmation":
+                branches["yes"] = "emergency_protocol"
+                branches["no"] = "standard_assessment"
+        
+        return branches
+    
+    def _generate_clinical_rationale(
+        self,
+        question_category: QuestionCategory,
+        primary_intent: str,
+        clinical_priority: Any
+    ) -> str:
+        """Generate clinical rationale for question selection"""
+        rationale_templates = {
+            QuestionCategory.TEMPORAL: "Understanding symptom onset and duration is crucial for differential diagnosis and urgency assessment",
+            QuestionCategory.QUALITY: "Symptom quality characteristics help narrow differential diagnosis and guide treatment decisions",
+            QuestionCategory.SEVERITY_SCALE: "Objective severity assessment is essential for triage decisions and treatment planning",
+            QuestionCategory.RED_FLAG_SCREENING: "Screening for red flag symptoms is critical to identify life-threatening conditions requiring immediate intervention",
+            QuestionCategory.ASSOCIATED_SYMPTOMS: "Associated symptoms provide important diagnostic clues and help assess disease severity"
+        }
+        
+        base_rationale = rationale_templates.get(
+            question_category,
+            "This question helps gather important clinical information for assessment"
+        )
+        
+        if clinical_priority.overall_priority in [ClinicalPriorityLevel.EMERGENCY, ClinicalPriorityLevel.CRITICAL]:
+            base_rationale += " and supports urgent care decision-making"
+        
+        return base_rationale
+    
+    def _assess_subspecialty_relevance(self, multi_intent_result: MultiIntentResult) -> List[str]:
+        """Assess subspecialty relevance for question"""
+        primary_intent = multi_intent_result.primary_intent
+        
+        relevance_mapping = {
+            "cardiac_chest_pain_assessment": ["cardiology", "emergency_medicine"],
+            "neurological_symptom_assessment": ["neurology", "emergency_medicine"],
+            "gi_symptom_assessment": ["gastroenterology", "emergency_medicine"],
+            "respiratory_symptom_assessment": ["pulmonology", "emergency_medicine"]
+        }
+        
+        return relevance_mapping.get(primary_intent, ["primary_care"])
+    
+    def _calculate_conversation_efficiency(self, conversation_history: List[Dict[str, Any]]) -> float:
+        """Calculate conversation efficiency score"""
+        if not conversation_history:
+            return 0.8  # Default for new conversations
+        
+        # Base efficiency on conversation length vs information gathered
+        base_efficiency = 0.7
+        
+        # Boost for focused questions
+        focused_questions = sum(1 for msg in conversation_history if len(msg.get("message", "")) < 100)
+        if focused_questions > len(conversation_history) * 0.7:
+            base_efficiency += 0.1
+        
+        # Penalize for very long conversations without progression
+        if len(conversation_history) > 10:
+            base_efficiency -= 0.1
+        
+        return min(1.0, max(0.3, base_efficiency))
+    
+    def _assess_clinical_completeness(
+        self,
+        conversation_history: List[Dict[str, Any]],
+        current_stage: ConversationStage
+    ) -> float:
+        """Assess clinical completeness of conversation"""
+        stage_weights = {
+            ConversationStage.CHIEF_COMPLAINT: 0.2,
+            ConversationStage.HISTORY_PRESENT_ILLNESS: 0.5,
+            ConversationStage.REVIEW_OF_SYSTEMS: 0.8,
+            ConversationStage.PAST_MEDICAL_HISTORY: 0.9,
+            ConversationStage.MEDICATIONS: 0.95,
+            ConversationStage.ALLERGIES: 0.97,
+            ConversationStage.ASSESSMENT_PLAN: 1.0
+        }
+        
+        return stage_weights.get(current_stage, 0.5)
+    
+    def _generate_engagement_recommendations(
+        self,
+        multi_intent_result: MultiIntentResult,
+        patient_context: Optional[Dict[str, Any]]
+    ) -> List[str]:
+        """Generate patient engagement recommendations"""
+        recommendations = []
+        
+        # Check for anxiety in intents
+        if any("anxiety" in intent for intent, _ in multi_intent_result.detected_intents):
+            recommendations.extend([
+                "Use reassuring tone and acknowledge patient concerns",
+                "Provide clear explanations for questions and procedures",
+                "Allow time for patient questions and concerns"
+            ])
+        
+        # Emergency scenarios
+        if multi_intent_result.clinical_priority.overall_priority == ClinicalPriorityLevel.EMERGENCY:
+            recommendations.extend([
+                "Maintain calm, professional demeanor",
+                "Provide clear, direct communication",
+                "Explain urgency and next steps clearly"
+            ])
+        else:
+            recommendations.extend([
+                "Use active listening techniques",
+                "Ask open-ended questions to encourage dialogue",
+                "Summarize and reflect patient concerns"
+            ])
+        
+        return recommendations
+    
+    def _assess_conversation_risks(
+        self,
+        multi_intent_result: MultiIntentResult,
+        conversation_history: List[Dict[str, Any]],
+        current_stage: ConversationStage
+    ) -> Dict[str, Any]:
+        """Assess conversation-related risks"""
+        risks = {
+            "risk_level": "low",
+            "concerns": [],
+            "mitigation_strategies": []
+        }
+        
+        # Emergency risk assessment
+        if multi_intent_result.clinical_priority.overall_priority == ClinicalPriorityLevel.EMERGENCY:
+            risks["risk_level"] = "high"
+            risks["concerns"].append("Potential life-threatening condition")
+            risks["mitigation_strategies"].append("Activate emergency protocols immediately")
+        
+        # Communication risk assessment
+        if len(conversation_history) > 8 and current_stage == ConversationStage.CHIEF_COMPLAINT:
+            risks["concerns"].append("Prolonged conversation without clear progression")
+            risks["mitigation_strategies"].append("Refocus on key clinical information")
+        
+        # Anxiety risk assessment
+        if any("anxiety" in intent for intent, _ in multi_intent_result.detected_intents):
+            risks["concerns"].append("Patient anxiety may affect information gathering")
+            risks["mitigation_strategies"].append("Use empathetic communication techniques")
+        
+        return risks
+    
+    def _calculate_optimization_confidence(
+        self,
+        optimal_question: OptimalQuestion,
+        predicted_pathway: ConversationPathway,
+        interview_strategy: InterviewStrategy
+    ) -> float:
+        """Calculate overall optimization confidence"""
+        question_confidence = optimal_question.confidence_score
+        pathway_confidence = predicted_pathway.pathway_confidence
+        
+        # Average the confidences with weighting
+        overall_confidence = (question_confidence * 0.4 + pathway_confidence * 0.6)
+        
+        return min(0.95, overall_confidence)
     
     def _build_intent_context(
         self,
