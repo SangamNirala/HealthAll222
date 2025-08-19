@@ -80,6 +80,16 @@ from services.medical_knowledge_database import ComprehensiveMedicalKnowledgeDat
 from services.pdf_report_generator import MedicalReportPDFGenerator
 from services.soap_generator import ProfessionalSOAPGenerator
 
+# Import Clinical Decision Support System components
+from clinical_decision_support import (
+    ClinicalDecisionSupportSystem, ClinicalAlert, RiskAssessmentResult,
+    GuidelineApplicationResult, ClinicalAlertSeverity, AlertType
+)
+from medical_knowledge_base import ComprehensiveMedicalKnowledgeBase, RiskLevel
+from diagnostic_suggestion_system import (
+    DiagnosticSuggestion, DiagnosticWorkup, DiagnosticCategory, SuggestionPriority
+)
+
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
