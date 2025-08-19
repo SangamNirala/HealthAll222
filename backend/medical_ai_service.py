@@ -8467,20 +8467,25 @@ class WorldClassMedicalAI:
         
         # If medical symptoms are detected, process normally
         if symptoms_detected:
-            context.chief_complaint = message
-            context.current_stage = MedicalInterviewStage.HISTORY_PRESENT_ILLNESS
-            
-            # Create symptom-specific response with medical interview approach
+            # Extract clean symptom name for chief_complaint instead of full message
             if "fever" in symptoms_detected:
+                context.chief_complaint = "fever"
                 symptom_response = "fever"
             elif "headache" in symptoms_detected:
+                context.chief_complaint = "headache"
                 symptom_response = "headache" 
             elif "chest_pain" in symptoms_detected:
+                context.chief_complaint = "chest pain"
                 symptom_response = "chest discomfort"
             elif "pain" in symptoms_detected:
+                context.chief_complaint = "pain"
                 symptom_response = "pain"
             else:
-                symptom_response = " and ".join([s.replace("_", " ") for s in symptoms_detected])
+                clean_symptoms = [s.replace("_", " ") for s in symptoms_detected]
+                context.chief_complaint = " and ".join(clean_symptoms)
+                symptom_response = " and ".join(clean_symptoms)
+            
+            context.current_stage = MedicalInterviewStage.HISTORY_PRESENT_ILLNESS
             
             # Real doctor approach - ask clarifying questions first
             if "chest_pain" in symptoms_detected and "headache" in symptoms_detected:
