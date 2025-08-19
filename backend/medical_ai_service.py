@@ -9284,7 +9284,36 @@ Generate the follow-up question:
         }
     
     async def _handle_pmh_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
-        """Handle Past Medical History stage"""
+        """Handle Past Medical History stage with intelligent follow-up questions"""
+        
+        # Initialize PMH tracking if not present
+        if not hasattr(context, 'pmh_questions_asked'):
+            context.pmh_questions_asked = set()
+            context.pmh_complete_responses = {}
+        
+        # Check if this is initial PMH entry or follow-up response
+        if not context.pmh_questions_asked:
+            # First time in PMH stage, store the initial response
+            context.medical_history["initial_response"] = message
+            context.pmh_questions_asked.add("initial")
+            
+            # Analyze if the response needs follow-up
+            needs_followup = await self._analyze_pmh_needs_followup(message)
+            
+            if needs_followup:
+                followup_question = await self._generate_pmh_followup_question(message, context)
+                return {
+                    "response": followup_question,
+                    "context": asdict(context),
+                    "stage": context.current_stage.value,
+                    "urgency": context.emergency_level,
+                    "medical_reasoning": "Gathering detailed past medical history information"
+                }
+        else:
+            # This is a follow-up response
+            context.pmh_complete_responses["details"] = message
+        
+        # Store complete PMH information
         context.medical_history["past_conditions"] = message
         context.current_stage = MedicalInterviewStage.MEDICATIONS_ALLERGIES
         
@@ -9298,8 +9327,36 @@ Generate the follow-up question:
         }
     
     async def _handle_medications_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
-        """Handle Medications and Allergies stage"""
-        # Simple parsing - would be more sophisticated in production
+        """Handle Medications and Allergies stage with intelligent follow-up questions"""
+        
+        # Initialize medications tracking if not present
+        if not hasattr(context, 'med_questions_asked'):
+            context.med_questions_asked = set()
+            context.med_complete_responses = {}
+        
+        # Check if this is initial medications entry or follow-up response  
+        if not context.med_questions_asked:
+            # First time in medications stage, store the initial response
+            context.med_complete_responses["initial_response"] = message
+            context.med_questions_asked.add("initial")
+            
+            # Analyze if the response needs follow-up
+            needs_followup = await self._analyze_medications_needs_followup(message)
+            
+            if needs_followup:
+                followup_question = await self._generate_medications_followup_question(message, context)
+                return {
+                    "response": followup_question,
+                    "context": asdict(context),
+                    "stage": context.current_stage.value,
+                    "urgency": context.emergency_level,
+                    "medical_reasoning": "Gathering detailed medication and allergy information"
+                }
+        else:
+            # This is a follow-up response
+            context.med_complete_responses["details"] = message
+        
+        # Simple parsing - enhanced version
         if "allerg" in message.lower():
             context.allergies = [message]
         if any(word in message.lower() for word in ["medication", "pill", "tablet", "mg", "taking"]):
