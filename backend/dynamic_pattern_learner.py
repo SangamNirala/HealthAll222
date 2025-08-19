@@ -744,7 +744,7 @@ class DynamicPatternLearner:
         """
         📊 Get comprehensive pattern discovery analytics
         """
-        if not self.db:
+        if self.db is None:
             return {'error': 'Database not available'}
         
         try:
