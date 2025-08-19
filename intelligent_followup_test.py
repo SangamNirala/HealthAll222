@@ -128,8 +128,11 @@ class IntelligentFollowUpTester:
             if response.status_code == 200:
                 data = response.json()
                 
-                # Update context for next request
-                self.consultation_context = data
+                # Update context for next request - handle both direct context and nested context
+                if "context" in data:
+                    self.consultation_context = data["context"]
+                else:
+                    self.consultation_context = data
                 
                 # Add to conversation history
                 self.conversation_history.append({
