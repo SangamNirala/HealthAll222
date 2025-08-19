@@ -8032,6 +8032,182 @@ Generate the follow-up question:
         except Exception as e:
             print(f"[GROQ ERROR] Fallback API call failed: {e}")
             return ""
+
+    async def _analyze_pmh_needs_followup(self, user_response: str) -> bool:
+        """Analyze if a Past Medical History response needs follow-up clarification"""
+        
+        try:
+            analysis_prompt = f"""
+You are a medical AI analyzing patient past medical history responses. Determine if the following response needs follow-up clarification.
+
+PATIENT RESPONSE: "{user_response}"
+
+ANALYSIS CRITERIA:
+1. Does the response mention vague terms that need elaboration?
+2. Are there medical conditions/procedures mentioned without details?
+3. Does it indicate surgeries, hospitalizations, or treatments needing specifics?
+4. Are there incomplete timeframes or missing critical details?
+
+EXAMPLES NEEDING FOLLOW-UP:
+- "surgeries" → need type, when, where, complications
+- "diabetes" → need type, diagnosis date, treatment
+- "heart problems" → need specific diagnosis, when, treatment
+- "hospitalized" → need reason, when, duration
+- "cancer" → need type, stage, treatment, when
+
+EXAMPLES NOT NEEDING FOLLOW-UP:
+- "appendectomy in 2020 at Memorial Hospital, no complications"
+- "type 2 diabetes diagnosed 2018, on metformin"
+- "no significant past medical history"
+- "hypertension since 2015, controlled with lisinopril"
+
+Respond with only "YES" if follow-up is needed, "NO" if the response is sufficiently detailed.
+"""
+
+            gemini_response = await self._call_gemini_api(analysis_prompt, max_tokens=10)
+            analysis_result = gemini_response.strip().upper()
+            return analysis_result == "YES"
+            
+        except Exception as e:
+            print(f"[PMH ANALYSIS ERROR] {e}")
+            # Default: vague single-word responses need follow-up
+            return len(user_response.strip().split()) <= 3 and any(
+                word in user_response.lower() 
+                for word in ["surgery", "surgeries", "hospital", "diabetes", "heart", "cancer", "condition"]
+            )
+
+    async def _generate_pmh_followup_question(self, user_response: str, context: MedicalContext) -> str:
+        """Generate intelligent follow-up questions for Past Medical History"""
+        
+        try:
+            followup_prompt = f"""
+You are a medical AI conducting a patient interview. Generate a specific, relevant follow-up question about their past medical history.
+
+PATIENT RESPONSE: "{user_response}"
+
+TASK: Generate a detailed follow-up question to get complete medical history information.
+
+EXAMPLES:
+
+If patient said "surgeries":
+→ "Can you tell me more about the surgeries you've had? What type of surgery was it, when did it occur, what was it for, and were there any complications?"
+
+If patient said "diabetes":
+→ "Can you provide more details about your diabetes? What type (Type 1 or Type 2), when were you diagnosed, how is it currently managed, and what medications are you taking for it?"
+
+If patient said "heart problems":
+→ "What specific heart problems have you been diagnosed with? When were you diagnosed, what treatments have you received, and are you currently taking any heart medications?"
+
+If patient said "hospitalized":
+→ "Can you tell me more about your hospitalizations? What were you hospitalized for, when did this occur, how long were you in the hospital, and what was the outcome?"
+
+If patient said "cancer":
+→ "Can you provide details about your cancer diagnosis? What type of cancer, when were you diagnosed, what stage was it, what treatments did you receive, and what is your current status?"
+
+GUIDELINES:
+1. Ask for specific diagnosis names, not just general categories
+2. Always ask for timeframes (when diagnosed, when occurred)
+3. Ask about current treatment status and medications
+4. Ask about outcomes, complications, or ongoing effects
+5. Be thorough but not overwhelming - cover key aspects in one question
+
+Generate the follow-up question:
+"""
+
+            followup_question = await self._call_gemini_api(followup_prompt, max_tokens=200)
+            return followup_question.strip()
+            
+        except Exception as e:
+            print(f"[PMH FOLLOWUP ERROR] {e}")
+            return f"Can you provide more specific details about '{user_response}'? For example, what type, when it occurred, and any current treatments or medications related to it?"
+
+    async def _analyze_medications_needs_followup(self, user_response: str) -> bool:
+        """Analyze if a medications response needs follow-up clarification"""
+        
+        try:
+            analysis_prompt = f"""
+You are a medical AI analyzing patient medication/allergy responses. Determine if the following response needs follow-up clarification.
+
+PATIENT RESPONSE: "{user_response}"
+
+ANALYSIS CRITERIA:
+1. Does the response mention medications without specifics (names, doses, frequencies)?
+2. Are there allergies mentioned without details about reactions?
+3. Are there vague terms that need elaboration?
+4. Missing critical information about current treatments?
+
+EXAMPLES NEEDING FOLLOW-UP:
+- "yes i am taking medications" → need names, doses, what for
+- "some allergies" → need specific allergens and reactions
+- "blood pressure pills" → need specific medication names
+- "vitamins" → need which vitamins and doses
+- "pain medication" → need specific names and usage
+
+EXAMPLES NOT NEEDING FOLLOW-UP:
+- "lisinopril 10mg daily for blood pressure, metformin 500mg twice daily for diabetes"
+- "allergic to penicillin - causes rash, no other known allergies"
+- "no current medications, no known allergies"
+- "vitamin D 1000 IU daily, multivitamin, no prescription drugs"
+
+Respond with only "YES" if follow-up is needed, "NO" if the response is sufficiently detailed.
+"""
+
+            gemini_response = await self._call_gemini_api(analysis_prompt, max_tokens=10)
+            analysis_result = gemini_response.strip().upper()
+            return analysis_result == "YES"
+            
+        except Exception as e:
+            print(f"[MED ANALYSIS ERROR] {e}")
+            # Default: vague responses need follow-up
+            return len(user_response.strip().split()) <= 4 and any(
+                phrase in user_response.lower() 
+                for phrase in ["taking medications", "some allerg", "pills", "vitamins", "yes i"]
+            )
+
+    async def _generate_medications_followup_question(self, user_response: str, context: MedicalContext) -> str:
+        """Generate intelligent follow-up questions for medications and allergies"""
+        
+        try:
+            followup_prompt = f"""
+You are a medical AI conducting a patient interview. Generate a specific, relevant follow-up question about their medications and allergies.
+
+PATIENT RESPONSE: "{user_response}"
+
+TASK: Generate a detailed follow-up question to get complete medication and allergy information.
+
+EXAMPLES:
+
+If patient said "yes i am taking medications":
+→ "What specific medications are you currently taking? Please include the names, doses, how often you take them, and what conditions they're treating."
+
+If patient said "some allergies":
+→ "What specific substances are you allergic to? For each allergy, can you tell me what type of reaction you have (such as rash, swelling, difficulty breathing)?"
+
+If patient said "blood pressure pills":
+→ "What is the specific name and dose of your blood pressure medication? How often do you take it, and how long have you been on this medication?"
+
+If patient said "vitamins":
+→ "Which specific vitamins or supplements do you take? What are the doses and how often do you take them?"
+
+If patient said "pain medication":
+→ "What specific pain medications do you take? What are the names, doses, how often, and what type of pain are you treating with them?"
+
+GUIDELINES:
+1. Ask for specific names, not just categories
+2. Always ask for doses and frequencies  
+3. Ask what conditions the medications treat
+4. For allergies, ask about specific reactions
+5. Be thorough but clear - one comprehensive question
+
+Generate the follow-up question:
+"""
+
+            followup_question = await self._call_gemini_api(followup_prompt, max_tokens=200)
+            return followup_question.strip()
+            
+        except Exception as e:
+            print(f"[MED FOLLOWUP ERROR] {e}")
+            return f"Can you provide more specific details about '{user_response}'? Please include exact names, doses, frequencies, and what conditions they're for."
     
     async def _generate_hpi_question_smart(self, element: str, context: MedicalContext) -> str:
         """Generate HPI questions with enhanced chief complaint handling"""
