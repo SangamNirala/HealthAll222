@@ -7774,7 +7774,7 @@ class WorldClassMedicalAI:
         return asked_count >= 2
     
     async def _handle_conversation_loop_recovery(self, message: str, context: MedicalContext) -> Dict[str, Any]:
-        """Handle conversation loop recovery by moving to next available element"""
+        """Handle conversation loop recovery by moving to next available element with clean response"""
         
         # Mark current element as answered even if incomplete
         if context.last_question_element:
@@ -7794,7 +7794,11 @@ class WorldClassMedicalAI:
                 "context": asdict(context),
                 "stage": context.current_stage.value,
                 "urgency": context.emergency_level,
-                "hpi_progress": f"{len(context.symptom_data)}/8 elements collected"
+                "consultation_id": getattr(context, 'consultation_id', None),
+                "emergency_detected": context.emergency_level == "emergency",
+                "next_questions": [],
+                "differential_diagnoses": [],
+                "recommendations": []
             }
         else:
             # Move to next stage
@@ -7806,7 +7810,12 @@ class WorldClassMedicalAI:
                 "context": asdict(context),
                 "stage": context.current_stage.value,
                 "urgency": context.emergency_level,
-                "transition": "Moving to review of systems"
+                "consultation_id": getattr(context, 'consultation_id', None),
+                "emergency_detected": context.emergency_level == "emergency",
+                "transition": "Moving to review of systems",
+                "next_questions": [],
+                "differential_diagnoses": [],
+                "recommendations": []
             }
     
     async def _extract_hpi_elements_smart(self, message: str, context: MedicalContext) -> Dict[str, Any]:
