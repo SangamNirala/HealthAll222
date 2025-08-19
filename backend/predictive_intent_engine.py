@@ -33,14 +33,20 @@ import numpy as np
 sys.path.append('/app/backend/ml_models')
 sys.path.append('/app/backend')
 
-# Local imports
-from ml_models.intent_prediction_model import intent_prediction_model
-from conversation_pathway_predictor import ConversationPathwayPredictor
-from intent_sequence_analyzer import IntentSequenceAnalyzer
-
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Local imports
+try:
+    from ml_models.intent_prediction_model import intent_prediction_model
+    from conversation_pathway_predictor import ConversationPathwayPredictor
+    from intent_sequence_analyzer import IntentSequenceAnalyzer
+except ImportError as e:
+    logger.warning(f"Import warning in predictive_intent_engine: {str(e)}")
+    intent_prediction_model = None
+    ConversationPathwayPredictor = None
+    IntentSequenceAnalyzer = None
 
 class PredictiveIntentEngine:
     """
