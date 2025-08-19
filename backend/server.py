@@ -11836,6 +11836,271 @@ async def get_intent_classification_performance():
             detail=f"Failed to retrieve performance metrics: {str(e)}"
         )
 
+# ===== WEEK 2: MULTI-INTENT ORCHESTRATION API ENDPOINTS =====
+
+@api_router.post("/medical-ai/multi-intent-orchestration", response_model=MultiIntentOrchestrationResponse)
+async def advanced_multi_intent_orchestration(request: MultiIntentOrchestrationRequest):
+    """
+    🧠 WEEK 2: ADVANCED MULTI-INTENT ORCHESTRATION & CLINICAL PRIORITIZATION
+    
+    Revolutionary multi-intent detection and clinical prioritization system that can:
+    - Detect 3-5 simultaneous intents in complex medical utterances
+    - Clinical prioritization using advanced medical decision support algorithms
+    - Intent interaction analysis showing how multiple intents influence each other
+    - Conversation pathway recommendations based on intent combinations
+    - Real-time processing <30ms for multi-intent scenarios
+    
+    WEEK 2 ADVANCED FEATURES:
+    - Multi-intent detection with clinical prioritization
+    - Intent interaction matrix with clinical significance assessment
+    - Advanced conversation pathway optimization
+    - Predictive intent modeling for next likely patient concerns
+    - Clinical decision support based on intent combinations
+    - Comprehensive priority scoring using medical knowledge
+    
+    Algorithm Version: 3.1_intelligence_amplification_week2
+    """
+    try:
+        logger.info(f"Processing advanced multi-intent orchestration for message: {request.message[:100]}...")
+        
+        # Execute multi-intent orchestration analysis
+        result = await orchestrate_multi_intent_analysis(
+            text=request.message,
+            context=request.conversation_context
+        )
+        
+        # Convert intent interactions to response models
+        interaction_models = []
+        for interaction in result.intent_interactions.interactions:
+            interaction_model = IntentInteractionModel(
+                intent_a=interaction.intent_a,
+                intent_b=interaction.intent_b,
+                interaction_type=interaction.interaction_type.value,
+                clinical_significance=interaction.clinical_significance,
+                priority_modifier=interaction.priority_modifier,
+                clinical_reasoning=interaction.clinical_reasoning,
+                medical_knowledge_basis=interaction.medical_knowledge_basis
+            )
+            interaction_models.append(interaction_model)
+        
+        # Convert intent interaction matrix
+        interaction_matrix_model = IntentInteractionMatrixModel(
+            interactions=interaction_models,
+            dominant_interaction_pattern=result.intent_interactions.dominant_interaction_pattern,
+            clinical_complexity_score=result.intent_interactions.clinical_complexity_score,
+            interaction_summary=result.intent_interactions.interaction_summary,
+            clinical_implications=result.intent_interactions.clinical_implications
+        )
+        
+        # Convert clinical priority score
+        clinical_priority_model = ClinicalPriorityScoreModel(
+            overall_priority=result.clinical_priority.overall_priority.value,
+            priority_score=result.clinical_priority.priority_score,
+            primary_driving_intent=result.clinical_priority.primary_driving_intent,
+            contributing_factors=result.clinical_priority.contributing_factors,
+            clinical_reasoning=result.clinical_priority.clinical_reasoning,
+            time_sensitivity=result.clinical_priority.time_sensitivity,
+            recommended_action=result.clinical_priority.recommended_action,
+            specialist_referral_needed=result.clinical_priority.specialist_referral_needed,
+            emergency_protocols=result.clinical_priority.emergency_protocols
+        )
+        
+        # Build comprehensive response
+        response = MultiIntentOrchestrationResponse(
+            detected_intents=result.detected_intents,
+            primary_intent=result.primary_intent,
+            secondary_intents=result.secondary_intents,
+            intent_count=result.intent_count,
+            clinical_priority=clinical_priority_model,
+            intent_interactions=interaction_matrix_model,
+            conversation_pathway_recommendations=result.conversation_pathway_recommendations,
+            clinical_decision_support=result.clinical_decision_support,
+            predictive_next_intents=result.predictive_next_intents,
+            processing_time_ms=result.processing_time_ms,
+            algorithm_version=result.algorithm_version,
+            complexity_assessment=result.complexity_assessment
+        )
+        
+        logger.info(f"Multi-intent orchestration completed: {result.intent_count} intents, priority: {result.clinical_priority.overall_priority.value}")
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Multi-intent orchestration failed: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to perform multi-intent orchestration: {str(e)}"
+        )
+
+@api_router.post("/medical-ai/batch-multi-intent-analysis", response_model=BatchMultiIntentResponse)  
+async def batch_multi_intent_analysis(request: BatchMultiIntentRequest):
+    """
+    📊 WEEK 2: BATCH MULTI-INTENT CONVERSATION ANALYSIS
+    
+    Analyze multiple messages in a conversation for multi-intent patterns,
+    priority evolution, and conversation complexity assessment.
+    
+    ADVANCED CAPABILITIES:
+    - Multi-intent evolution tracking across conversation turns
+    - Clinical priority trend analysis over time
+    - Conversation complexity assessment and recommendations
+    - Intent interaction patterns in multi-turn conversations
+    - Predictive conversation pathway modeling
+    """
+    try:
+        logger.info(f"Processing batch multi-intent analysis for {len(request.messages)} messages")
+        
+        message_orchestrations = []
+        intent_evolution = []
+        priority_trends = []
+        
+        # Process each message with multi-intent orchestration
+        for i, message in enumerate(request.messages):
+            # Build conversation context
+            conversation_context = {
+                "conversation_id": request.conversation_id,
+                "message_index": i,
+                "previous_messages": request.messages[:i] if i > 0 else [],
+                "conversation_stage": "follow_up" if i > 0 else "initial"
+            }
+            
+            # Execute multi-intent orchestration
+            result = await orchestrate_multi_intent_analysis(message, conversation_context)
+            
+            # Convert to response model (similar to single orchestration)
+            interaction_models = [
+                IntentInteractionModel(
+                    intent_a=interaction.intent_a,
+                    intent_b=interaction.intent_b,
+                    interaction_type=interaction.interaction_type.value,
+                    clinical_significance=interaction.clinical_significance,
+                    priority_modifier=interaction.priority_modifier,
+                    clinical_reasoning=interaction.clinical_reasoning,
+                    medical_knowledge_basis=interaction.medical_knowledge_basis
+                )
+                for interaction in result.intent_interactions.interactions
+            ]
+            
+            interaction_matrix_model = IntentInteractionMatrixModel(
+                interactions=interaction_models,
+                dominant_interaction_pattern=result.intent_interactions.dominant_interaction_pattern,
+                clinical_complexity_score=result.intent_interactions.clinical_complexity_score,
+                interaction_summary=result.intent_interactions.interaction_summary,
+                clinical_implications=result.intent_interactions.clinical_implications
+            )
+            
+            clinical_priority_model = ClinicalPriorityScoreModel(
+                overall_priority=result.clinical_priority.overall_priority.value,
+                priority_score=result.clinical_priority.priority_score,
+                primary_driving_intent=result.clinical_priority.primary_driving_intent,
+                contributing_factors=result.clinical_priority.contributing_factors,
+                clinical_reasoning=result.clinical_priority.clinical_reasoning,
+                time_sensitivity=result.clinical_priority.time_sensitivity,
+                recommended_action=result.clinical_priority.recommended_action,
+                specialist_referral_needed=result.clinical_priority.specialist_referral_needed,
+                emergency_protocols=result.clinical_priority.emergency_protocols
+            )
+            
+            orchestration_response = MultiIntentOrchestrationResponse(
+                detected_intents=result.detected_intents,
+                primary_intent=result.primary_intent,
+                secondary_intents=result.secondary_intents,
+                intent_count=result.intent_count,
+                clinical_priority=clinical_priority_model,
+                intent_interactions=interaction_matrix_model,
+                conversation_pathway_recommendations=result.conversation_pathway_recommendations,
+                clinical_decision_support=result.clinical_decision_support,
+                predictive_next_intents=result.predictive_next_intents,
+                processing_time_ms=result.processing_time_ms,
+                algorithm_version=result.algorithm_version,
+                complexity_assessment=result.complexity_assessment
+            )
+            
+            message_orchestrations.append(orchestration_response)
+            
+            # Track evolution and trends
+            if request.analyze_conversation_flow:
+                intent_evolution.append({
+                    "message_index": i,
+                    "primary_intent": result.primary_intent,
+                    "intent_count": result.intent_count,
+                    "complexity": result.complexity_assessment,
+                    "interaction_pattern": result.intent_interactions.dominant_interaction_pattern
+                })
+                
+            if request.include_prioritization_trends:
+                priority_trends.append({
+                    "message_index": i,
+                    "priority_level": result.clinical_priority.overall_priority.value,
+                    "priority_score": result.clinical_priority.priority_score,
+                    "time_sensitivity": result.clinical_priority.time_sensitivity,
+                    "specialist_referral_needed": result.clinical_priority.specialist_referral_needed
+                })
+        
+        # Generate conversation-level analysis
+        conversation_summary = _generate_multi_intent_conversation_summary(message_orchestrations)
+        intent_evolution_analysis = _analyze_intent_evolution(intent_evolution)
+        prioritization_trends_analysis = _analyze_prioritization_trends(priority_trends)
+        overall_complexity = _assess_conversation_complexity(message_orchestrations)
+        
+        response = BatchMultiIntentResponse(
+            conversation_summary=conversation_summary,
+            message_orchestrations=message_orchestrations,
+            intent_evolution_analysis=intent_evolution_analysis,
+            prioritization_trends=prioritization_trends_analysis,
+            conversation_complexity_assessment=overall_complexity
+        )
+        
+        logger.info(f"Batch multi-intent analysis completed for conversation {request.conversation_id}")
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Batch multi-intent analysis failed: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to perform batch multi-intent analysis: {str(e)}"
+        )
+
+@api_router.get("/medical-ai/multi-intent-performance")
+async def get_multi_intent_orchestration_performance():
+    """
+    📊 WEEK 2: MULTI-INTENT ORCHESTRATION PERFORMANCE METRICS
+    
+    Get comprehensive performance statistics for the advanced multi-intent
+    orchestration and clinical prioritization system.
+    """
+    try:
+        orchestration_stats = advanced_multi_intent_orchestrator.get_orchestration_performance_stats()
+        
+        return {
+            "status": "operational",
+            "orchestration_metrics": orchestration_stats,
+            "system_capabilities": {
+                "max_simultaneous_intents": 5,
+                "clinical_prioritization": True,
+                "intent_interaction_analysis": True,
+                "conversation_pathway_optimization": True,
+                "predictive_modeling": True,
+                "average_processing_time_ms": orchestration_stats["average_processing_time_ms"],
+                "target_processing_time_ms": 30,
+                "algorithm_version": orchestration_stats["algorithm_version"]
+            },
+            "interaction_capabilities": {
+                "supported_interaction_types": ["synergistic", "contradictory", "sequential", "independent", "masking", "amplifying"],
+                "clinical_priority_levels": ["emergency", "critical", "high", "moderate", "low", "routine"],
+                "decision_support_integration": True
+            },
+            "last_updated": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get multi-intent orchestration performance metrics: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve orchestration performance metrics: {str(e)}"
+        )
+
 def _assess_urgency_escalation(previous_urgency: str, current_urgency: str) -> str:
     """Assess if there's urgency escalation between messages"""
     urgency_levels = {
