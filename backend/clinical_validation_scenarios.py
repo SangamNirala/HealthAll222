@@ -177,7 +177,7 @@ class ClinicalValidationScenarios:
             return {
                 "specialty": "emergency_medicine",
                 "total_scenarios": len(validation_results),
-                "validation_results": [asdict(result) for result in validation_results],
+                "validation_results": [self._serialize_validation_result(result) for result in validation_results],
                 "performance_analysis": em_analysis,
                 "processing_time_ms": processing_time,
                 "algorithm_version": self.algorithm_version
