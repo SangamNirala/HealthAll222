@@ -12533,7 +12533,20 @@ def _assess_conversation_complexity(message_orchestrations: List) -> Dict[str, A
     # Calculate complexity metrics
     total_intents = sum(msg.intent_count for msg in message_orchestrations)
     avg_intents = total_intents / len(message_orchestrations)
-    complexity_scores = [msg.complexity_assessment for msg in message_orchestrations]
+    complexity_assessments = [msg.complexity_assessment for msg in message_orchestrations]
+    
+    # Convert complexity assessments to numeric scores
+    def complexity_to_score(complexity: str) -> float:
+        complexity_mapping = {
+            "highly_complex": 8.0,
+            "moderately_complex": 6.0,
+            "simple_multi_intent": 4.0,
+            "single_intent": 2.0,
+            "fallback": 1.0
+        }
+        return complexity_mapping.get(complexity, 3.0)
+    
+    complexity_scores = [complexity_to_score(assessment) for assessment in complexity_assessments]
     avg_complexity = sum(complexity_scores) / len(complexity_scores)
     
     # Count interaction types
