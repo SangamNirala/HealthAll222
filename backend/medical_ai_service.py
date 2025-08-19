@@ -7583,18 +7583,11 @@ class WorldClassMedicalAI:
             "context": asdict(context),
             "stage": context.current_stage.value,
             "urgency": "routine",
-            "next_questions": self._get_stage_questions(context.current_stage),
-            
-            # 🧠 STEP 2.2: Include contextual reasoning data
-            "causal_relationships": contextual_reasoning.get("causal_relationships", []),
-            "clinical_hypotheses": contextual_reasoning.get("clinical_hypotheses", []),
-            "contextual_factors": contextual_reasoning.get("contextual_factors", {}),
-            "medical_reasoning_narrative": contextual_reasoning.get("medical_reasoning_narrative", ""),
-            "context_based_recommendations": contextual_reasoning.get("context_based_recommendations", []),
-            "trigger_avoidance_strategies": contextual_reasoning.get("trigger_avoidance_strategies", []),
-            "specialist_referral_context": contextual_reasoning.get("specialist_referral_context"),
-            "contextual_significance": contextual_reasoning.get("contextual_significance", "routine"),
-            "reasoning_confidence": contextual_reasoning.get("reasoning_confidence", 0.0)
+            "consultation_id": getattr(context, 'consultation_id', None),
+            "emergency_detected": False,
+            "next_questions": [],
+            "differential_diagnoses": [],
+            "recommendations": []
         }
     
     def _generate_contextual_greeting_response(self, triggers: List[str], symptoms: List[str], contextual_reasoning: Dict[str, Any]) -> str:
