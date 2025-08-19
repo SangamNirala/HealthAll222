@@ -26,6 +26,7 @@ import numpy as np
 # Import all Week 1-4 components for integration testing
 from medical_intent_classifier import (
     classify_medical_intent,
+    classify_patient_intent,
     world_class_medical_intent_classifier
 )
 from multi_intent_orchestrator import (
