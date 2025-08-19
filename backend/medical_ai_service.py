@@ -7739,6 +7739,153 @@ class WorldClassMedicalAI:
         
         return f"{base_question}\n\nI'm asking this because {clinical_reasoning.lower()}"
     
+    def _is_repeating_question(self, context: MedicalContext) -> bool:
+        """Check if we're about to ask the same question repeatedly"""
+        
+        if not context.last_question_element:
+            return False
+            
+        # Check if we've asked about this element multiple times already
+        asked_count = len([q for q in context.questions_asked.keys() if q == context.last_question_element])
+        return asked_count >= 2
+    
+    async def _handle_conversation_loop_recovery(self, message: str, context: MedicalContext) -> Dict[str, Any]:
+        """Handle conversation loop recovery by moving to next available element"""
+        
+        # Mark current element as answered even if incomplete
+        if context.last_question_element:
+            context.symptom_data[context.last_question_element] = message
+            context.questions_answered[context.last_question_element] = message
+        
+        # Find next element
+        next_element = self._get_next_hpi_element_smart(context)
+        
+        if next_element:
+            question = await self._generate_hpi_question_smart(next_element, context)
+            context.questions_asked[next_element] = question
+            context.last_question_element = next_element
+            
+            return {
+                "response": f"Thank you for that information. {question}",
+                "context": asdict(context),
+                "stage": context.current_stage.value,
+                "urgency": context.emergency_level,
+                "hpi_progress": f"{len(context.symptom_data)}/8 elements collected"
+            }
+        else:
+            # Move to next stage
+            context.current_stage = MedicalInterviewStage.REVIEW_OF_SYSTEMS
+            ros_question = await self._generate_targeted_ros_question(context)
+            
+            return {
+                "response": f"Thank you for all that information. {ros_question}",
+                "context": asdict(context),
+                "stage": context.current_stage.value,
+                "urgency": context.emergency_level,
+                "transition": "Moving to review of systems"
+            }
+    
+    async def _extract_hpi_elements_smart(self, message: str, context: MedicalContext) -> Dict[str, Any]:
+        """Enhanced HPI element extraction with conversation context awareness"""
+        
+        # Use existing extraction as base
+        hpi_elements = await self._extract_hpi_elements(message, context.symptom_data)
+        
+        # If we have a last question element and got an answer, prioritize that mapping
+        if context.last_question_element and message.strip() and not hpi_elements:
+            # The user is likely answering the last question asked
+            hpi_elements[context.last_question_element] = message
+            
+        return hpi_elements
+    
+    def _get_next_hpi_element_smart(self, context: MedicalContext) -> Optional[str]:
+        """Get next HPI element with conversation awareness to prevent loops"""
+        
+        required_elements = ["onset", "location", "duration", "character", "alleviating", "radiation", "timing", "severity"]
+        
+        # Find elements we haven't asked about yet
+        not_asked = [elem for elem in required_elements if elem not in context.questions_asked]
+        if not_asked:
+            return not_asked[0]
+        
+        # Find elements we asked about but didn't get good answers for
+        incomplete = [elem for elem in required_elements 
+                     if elem in context.questions_asked 
+                     and (elem not in context.symptom_data or len(str(context.symptom_data[elem]).strip()) < 3)]
+        
+        # Only retry incomplete elements once to avoid loops
+        for elem in incomplete:
+            retry_count = len([q for q in context.questions_asked.keys() if q == elem])
+            if retry_count < 2:  # Allow one retry
+                return elem
+        
+        return None  # All elements covered or tried enough times
+    
+    async def _generate_hpi_question_smart(self, element: str, context: MedicalContext) -> str:
+        """Generate HPI questions with enhanced chief complaint handling"""
+        
+        # 🚀 ENHANCED: Better chief complaint extraction and handling
+        chief_complaint = self._get_clean_chief_complaint(context)
+        
+        hpi_questions = {
+            "onset": f"When exactly did your {chief_complaint} start? Was it sudden or gradual?",
+            "location": f"Where exactly do you feel the {chief_complaint}? Can you point to the specific area?",
+            "duration": f"How long do episodes of {chief_complaint} typically last?",
+            "character": f"How would you describe the quality of your {chief_complaint}? For example, is it sharp, dull, burning, crushing, or aching?",
+            "alleviating": f"Is there anything that makes your {chief_complaint} better or worse? Such as position, activity, food, or medication?",
+            "radiation": f"Does your {chief_complaint} spread or radiate to any other areas of your body?",
+            "timing": f"Is your {chief_complaint} constant or does it come and go? Are there specific times of day when it's worse?",
+            "severity": f"On a scale of 1 to 10, with 10 being the worst pain you can imagine, how would you rate your {chief_complaint}?"
+        }
+        
+        base_question = hpi_questions.get(element, f"Can you tell me more about your {chief_complaint}?")
+        
+        # Add clinical reasoning
+        reasoning_map = {
+            "onset": "This helps me understand whether we're dealing with an acute or chronic condition.",
+            "character": "The quality of symptoms can help distinguish between different underlying causes.",
+            "severity": "Understanding severity helps me assess urgency and impact on your daily life.",
+            "radiation": "Whether symptoms spread can indicate which organs or systems might be involved.",
+            "alleviating": "This information helps me narrow down the possible causes.",
+            "location": "The location helps me focus on the most likely body systems involved.",
+            "duration": "The timing pattern provides important diagnostic clues.",
+            "timing": "The timing pattern can help identify triggers and underlying causes."
+        }
+        
+        clinical_reasoning = reasoning_map.get(element, "This information helps me provide better medical guidance.")
+        
+        return f"{base_question}\n\nI'm asking this because {clinical_reasoning.lower()}"
+    
+    def _get_clean_chief_complaint(self, context: MedicalContext) -> str:
+        """Get a clean, properly formatted chief complaint"""
+        
+        # Try to get from context first
+        if context.chief_complaint and context.chief_complaint.strip() and len(context.chief_complaint.strip()) > 2:
+            complaint = context.chief_complaint.strip()
+            
+            # Clean up if it starts with "I have" or similar
+            if complaint.lower().startswith(("i have ", "i am ", "my ")):
+                # Extract the actual symptom
+                words = complaint.split()
+                if len(words) >= 3:
+                    complaint = " ".join(words[2:])  # Skip "I have"
+                elif len(words) == 2:
+                    complaint = words[1]  # Just take the symptom
+            
+            # Ensure it's not a full sentence
+            if not complaint.endswith('.'):
+                return complaint
+        
+        # Fallback to symptom data if available
+        if context.symptom_data:
+            for key in ['character', 'location', 'onset']:
+                if key in context.symptom_data:
+                    potential = str(context.symptom_data[key]).strip()
+                    if len(potential) > 2 and not potential.lower().startswith('i '):
+                        return potential
+        
+        return "symptoms"
+    
     async def _generate_differential_diagnosis(self, context: MedicalContext) -> Dict[str, Any]:
         """
         ENHANCED with Phase 2: Generate evidence-based differential diagnosis with advanced entity extraction
