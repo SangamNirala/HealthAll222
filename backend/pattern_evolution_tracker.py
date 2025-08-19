@@ -795,7 +795,7 @@ class PatternEvolutionTracker:
         """
         Get population learning insights summary
         """
-        if not self.db:
+        if self.db is None:
             return {}
         
         try:
