@@ -100,13 +100,21 @@ class PredictiveIntentEngine:
     async def initialize_components(self):
         """Initialize dependent components after imports are available"""
         try:
-            self.pathway_predictor = ConversationPathwayPredictor()
-            self.sequence_analyzer = IntentSequenceAnalyzer()
-            await self.pathway_predictor.initialize()
-            await self.sequence_analyzer.initialize()
-            logger.info("✅ All predictive components initialized successfully")
+            if ConversationPathwayPredictor is not None:
+                self.pathway_predictor = ConversationPathwayPredictor()
+                await self.pathway_predictor.initialize()
+            else:
+                logger.warning("ConversationPathwayPredictor not available")
+                
+            if IntentSequenceAnalyzer is not None:
+                self.sequence_analyzer = IntentSequenceAnalyzer()
+                await self.sequence_analyzer.initialize()
+            else:
+                logger.warning("IntentSequenceAnalyzer not available")
+                
+            logger.info("✅ Predictive components initialized (available components only)")
         except Exception as e:
-            logger.warning(f"Some components not available yet: {str(e)}")
+            logger.warning(f"Component initialization error: {str(e)}")
     
     async def predict_next_intents(self, conversation_context: Dict[str, Any], options: Dict[str, Any] = None) -> Dict[str, Any]:
         """
