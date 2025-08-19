@@ -226,10 +226,10 @@ class Week4ComprehensiveTester:
                 "name": "Complex Scenario",
                 "data": {
                     "conversation_history": [
-                        "I've been having stomach pain",
-                        "Also feeling nauseous and dizzy",
-                        "The pain is getting worse",
-                        "I haven't eaten much today"
+                        {"message": "I've been having stomach pain", "timestamp": "2025-01-17T10:00:00Z", "speaker": "patient"},
+                        {"message": "Also feeling nauseous and dizzy", "timestamp": "2025-01-17T10:01:00Z", "speaker": "patient"},
+                        {"message": "The pain is getting worse", "timestamp": "2025-01-17T10:02:00Z", "speaker": "patient"},
+                        {"message": "I haven't eaten much today", "timestamp": "2025-01-17T10:03:00Z", "speaker": "patient"}
                     ],
                     "current_context": {
                         "patient_age": 45,
