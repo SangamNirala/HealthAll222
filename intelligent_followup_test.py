@@ -388,7 +388,8 @@ class IntelligentFollowUpTester:
         medication_followup_triggered = any(keyword in medication_response for keyword in [
             "what medications", "which medications", "what type of medication",
             "medication names", "specific medications", "what are you taking",
-            "medication details", "name of the medication"
+            "medication details", "name of the medication", "tell me more about",
+            "can you provide more details", "more information about", "which ones"
         ])
         
         if medication_followup_triggered:
