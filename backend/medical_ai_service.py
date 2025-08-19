@@ -7635,7 +7635,7 @@ class WorldClassMedicalAI:
                    "Let's start with when exactly these symptoms began - was the onset sudden or did it develop gradually over time?")
     
     async def _handle_hpi_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
-        """Handle History of Present Illness using OLDCARTS framework with enhanced conversation tracking"""
+        """Handle History of Present Illness with intelligent LLM-based reasoning and follow-up questions"""
         
         print(f"[HPI DEBUG] Message: '{message}', questions_asked keys: {list(context.questions_asked.keys())}, last_element: {context.last_question_element}")
         
@@ -7643,6 +7643,30 @@ class WorldClassMedicalAI:
         if self._is_repeating_question(context):
             print(f"[HPI DEBUG] Loop detected, calling recovery")
             return await self._handle_conversation_loop_recovery(message, context)
+        
+        # 🧠 NEW: Intelligent response analysis and follow-up question generation
+        if context.last_question_element and message.strip():
+            # Analyze if the user's response needs follow-up clarification
+            needs_followup = await self._analyze_response_needs_followup(
+                message, context.last_question_element, context
+            )
+            
+            if needs_followup:
+                # Generate intelligent follow-up question
+                followup_question = await self._generate_intelligent_followup_question(
+                    message, context.last_question_element, context
+                )
+                
+                print(f"[HPI DEBUG] Follow-up needed for {context.last_question_element}: {followup_question[:100]}...")
+                
+                return {
+                    "response": followup_question,
+                    "context": asdict(context),
+                    "stage": context.current_stage.value,
+                    "urgency": context.emergency_level,
+                    "hpi_progress": f"{len(context.questions_asked)}/8 elements asked",
+                    "medical_reasoning": f"Following up on {context.last_question_element} for more specific details"
+                }
         
         # 🧠 STEP 2.2: Extract contextual reasoning from message
         advanced_extraction = self.advanced_symptom_recognizer.extract_medical_entities(message)
@@ -7652,9 +7676,13 @@ class WorldClassMedicalAI:
         hpi_elements = await self._extract_hpi_elements_smart(message, context)
         context.symptom_data.update(hpi_elements)
         
-        # Update conversation tracking
+        # Update conversation tracking - mark element as complete if we have good info
         if context.last_question_element and message.strip():
             context.questions_answered[context.last_question_element] = message
+            # Mark element as complete with detailed info
+            if not hasattr(context, 'completed_elements'):
+                context.completed_elements = set()
+            context.completed_elements.add(context.last_question_element)
         
         # 🚀 ENHANCED: Get next question with conversation awareness
         next_element = self._get_next_hpi_element_smart(context)
@@ -7675,7 +7703,7 @@ class WorldClassMedicalAI:
                 "context": asdict(context),
                 "stage": context.current_stage.value,
                 "urgency": context.emergency_level,
-                "hpi_progress": f"{len(context.symptom_data)}/8 elements collected",
+                "hpi_progress": f"{len(context.questions_asked)}/8 elements asked",
                 
                 # 🧠 STEP 2.2: Include contextual reasoning data
                 "causal_relationships": contextual_reasoning.get("causal_relationships", []),
