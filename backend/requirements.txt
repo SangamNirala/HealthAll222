@@ -92,3 +92,9 @@ storage3
 supabase-functions
 deprecation>=2.1.0
 httpcore
+
+# Step 2: Dynamic Pattern Enhancement System Dependencies
+nltk>=3.8.1
+scipy>=1.11.0
+scikit-learn>=1.3.0
+pandas>=2.2.0
