@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
 """
-WEEK 5 FOCUSED TESTING - INTEGRATION TESTING & CLINICAL VALIDATION FRAMEWORK
+🔬 WEEK 5 MEDICAL AI ENDPOINTS FOCUSED TESTING
 
-Focused testing to identify and validate Week 5 specific issues and functionality.
+Testing the specific Week 5 medical AI endpoints to verify critical issues have been fixed:
+1. POST /api/medical-ai/integration-testing - ConversationFlowResult attribute issue
+2. POST /api/medical-ai/clinical-validation - ValidationResult serialization issue  
+3. POST /api/medical-ai/performance-benchmarking - Missing '_analyze_overall_performance' method
+4. GET /api/medical-ai/week5-integration-performance - Ensure still working
+
+Focus: Verify fixes for the original issues and capture specific error messages.
 """
 
 import requests
 import json
 import time
 from datetime import datetime
+import traceback
 
 # Backend URL from environment
 BACKEND_URL = "https://medtest-platform.preview.emergentagent.com/api"
