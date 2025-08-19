@@ -7635,29 +7635,40 @@ class WorldClassMedicalAI:
                    "Let's start with when exactly these symptoms began - was the onset sudden or did it develop gradually over time?")
     
     async def _handle_hpi_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
-        """Handle History of Present Illness using OLDCARTS framework with Step 2.2 contextual reasoning"""
+        """Handle History of Present Illness using OLDCARTS framework with enhanced conversation tracking"""
+        
+        # 🚀 ENHANCED: Check if we've asked this question before to prevent loops
+        if self._is_repeating_question(context):
+            return await self._handle_conversation_loop_recovery(message, context)
         
         # 🧠 STEP 2.2: Extract contextual reasoning from message
         advanced_extraction = self.advanced_symptom_recognizer.extract_medical_entities(message)
         contextual_reasoning = advanced_extraction.get("contextual_reasoning", {})
         
-        # Extract HPI elements from patient response
-        hpi_elements = await self._extract_hpi_elements(message, context.symptom_data)
+        # 🚀 ENHANCED: Extract HPI elements with conversation context awareness
+        hpi_elements = await self._extract_hpi_elements_smart(message, context)
         context.symptom_data.update(hpi_elements)
         
-        # Determine next HPI question based on missing elements
-        missing_elements = self._get_missing_hpi_elements(context.symptom_data)
+        # Update conversation tracking
+        if context.last_question_element and message.strip():
+            context.questions_answered[context.last_question_element] = message
         
-        if missing_elements:
-            next_element = missing_elements[0]
-            question = await self._generate_hpi_question(next_element, context)
+        # 🚀 ENHANCED: Get next question with conversation awareness
+        next_element = self._get_next_hpi_element_smart(context)
+        
+        if next_element:
+            question = await self._generate_hpi_question_smart(next_element, context)
+            
+            # Track the question we're asking
+            context.questions_asked[next_element] = question
+            context.last_question_element = next_element
             
             return {
                 "response": question,
                 "context": asdict(context),
                 "stage": context.current_stage.value,
                 "urgency": context.emergency_level,
-                "hpi_progress": f"{8 - len(missing_elements)}/8 complete",
+                "hpi_progress": f"{len(context.symptom_data)}/8 elements collected",
                 
                 # 🧠 STEP 2.2: Include contextual reasoning data
                 "causal_relationships": contextual_reasoning.get("causal_relationships", []),
