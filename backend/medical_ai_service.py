@@ -9348,7 +9348,7 @@ Generate the follow-up question:
             context.current_stage = MedicalInterviewStage.HISTORY_PRESENT_ILLNESS
             
             response = await self._generate_empathetic_response(
-                f"I understand you mentioned '{message}'. Could you help me understand this better by describing any specific symptoms you're experiencing? "
+                f"Could you help me understand this better by describing any specific symptoms you're experiencing? "
                 f"For instance, are you feeling any pain, discomfort, or unusual sensations? When did you first notice these concerns?"
             )
         
@@ -9357,15 +9357,11 @@ Generate the follow-up question:
             "context": asdict(context),
             "stage": context.current_stage.value,
             "urgency": context.emergency_level,
-            # 🧠 STEP 2.2: ADD CONTEXTUAL REASONING TO API RESPONSE  
-            "contextual_reasoning": context.symptom_data.get("contextual_reasoning", {}),
-            "causal_relationships": context.symptom_data.get("causal_relationships", []),
-            "clinical_hypotheses": context.symptom_data.get("clinical_hypotheses", []),
-            "medical_reasoning_narrative": context.symptom_data.get("medical_reasoning_narrative", ""),
-            "context_based_recommendations": context.symptom_data.get("context_based_recommendations", []),
-            "trigger_avoidance_strategies": context.symptom_data.get("trigger_avoidance_strategies", []),
-            "specialist_referral_context": context.symptom_data.get("specialist_referral_context"),
-            "contextual_significance": context.symptom_data.get("contextual_significance", "routine")
+            "consultation_id": getattr(context, 'consultation_id', None),
+            "emergency_detected": context.emergency_level == "emergency",
+            "next_questions": [],
+            "differential_diagnoses": [],
+            "recommendations": []
         }
     
     async def _handle_ros_stage(self, message: str, context: MedicalContext) -> Dict[str, Any]:
