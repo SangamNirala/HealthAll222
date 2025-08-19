@@ -282,9 +282,9 @@ class Week2MultiIntentTester:
             response = requests.post(f"{API_BASE}/medical-ai/batch-multi-intent-analysis",
                 json={
                     "conversation_id": "batch-test-conv-789",
-                    "user_id": "batch-test-user",
                     "messages": messages,
-                    "analysis_depth": "comprehensive"
+                    "analyze_conversation_flow": True,
+                    "include_prioritization_trends": True
                 },
                 timeout=45
             )
