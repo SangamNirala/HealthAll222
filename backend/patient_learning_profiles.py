@@ -382,7 +382,7 @@ class PatientLearningProfileManager:
     async def _calculate_learning_velocity(self, patient_id: str) -> float:
         """Calculate how quickly the patient's profile is improving"""
         try:
-            if not self.db:
+            if self.db is None:
                 return 0.0
             
             # Get conversation data from last 30 days
