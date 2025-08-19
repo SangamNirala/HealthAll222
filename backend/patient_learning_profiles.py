@@ -349,7 +349,7 @@ class PatientLearningProfileManager:
     async def _calculate_accuracy_trend(self, patient_id: str) -> str:
         """Calculate accuracy trend over recent interactions"""
         try:
-            if not self.db:
+            if self.db is None:
                 return "stable"
             
             # Get recent conversation data
