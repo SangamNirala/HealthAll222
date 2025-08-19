@@ -7571,12 +7571,11 @@ class WorldClassMedicalAI:
                         "For example, any pain, discomfort, or changes you've noticed?"
                     )
             else:
-                # No symptoms detected - ask for more information with enhanced guidance
+                # No symptoms detected - ask for more information with simple guidance
                 context.current_stage = MedicalInterviewStage.CHIEF_COMPLAINT
                 ai_response = await self._generate_empathetic_response(
-                    "I understand you'd like to discuss something health-related. To provide you with the most accurate guidance, "
-                    "could you describe any specific symptoms you're experiencing? For example, you might say something like "
-                    "'I have chest pain when I climb stairs' or 'I get dizzy when I stand up' - details like these help me understand the context."
+                    "Could you please describe any symptoms or health concerns you're experiencing? "
+                    "For example, any pain, discomfort, or changes you've noticed in how you feel?"
                 )
         
         return {
