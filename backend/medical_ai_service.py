@@ -7659,12 +7659,16 @@ class WorldClassMedicalAI:
         # 🚀 ENHANCED: Get next question with conversation awareness
         next_element = self._get_next_hpi_element_smart(context)
         
+        print(f"[HPI DEBUG] Next element selected: {next_element}")
+        
         if next_element:
             question = await self._generate_hpi_question_smart(next_element, context)
             
             # Track the question we're asking
             context.questions_asked[next_element] = question
             context.last_question_element = next_element
+            
+            print(f"[HPI DEBUG] Added to questions_asked: {next_element} -> questions_asked now: {list(context.questions_asked.keys())}")
             
             return {
                 "response": question,
