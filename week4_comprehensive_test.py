@@ -188,9 +188,9 @@ class Week4ComprehensiveTester:
                 "name": "Emergency Scenario",
                 "data": {
                     "conversation_history": [
-                        "I'm having severe chest pain",
-                        "It feels like an elephant sitting on my chest",
-                        "I'm also short of breath"
+                        {"message": "I'm having severe chest pain", "timestamp": "2025-01-17T10:00:00Z", "speaker": "patient"},
+                        {"message": "It feels like an elephant sitting on my chest", "timestamp": "2025-01-17T10:01:00Z", "speaker": "patient"},
+                        {"message": "I'm also short of breath", "timestamp": "2025-01-17T10:02:00Z", "speaker": "patient"}
                     ],
                     "current_context": {
                         "patient_age": 67,
