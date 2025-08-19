@@ -629,7 +629,7 @@ class PersonalizationManager:
         📊 Generate comprehensive feedback integration report
         """
         try:
-            if not self.db:
+            if self.db is None:
                 return {'error': 'Database not available'}
             
             # Get recent personalization performance
