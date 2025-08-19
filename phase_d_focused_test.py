@@ -19,7 +19,7 @@ import os
 from datetime import datetime
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://9512079a-1aa9-427a-b910-7de6af152872.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://multi-symptom-engine.preview.emergentagent.com')
 BASE_URL = f"{BACKEND_URL}/api"
 
 async def test_performance_benchmarking_concurrent_loads():
