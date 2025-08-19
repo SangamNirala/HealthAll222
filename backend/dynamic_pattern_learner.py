@@ -546,7 +546,7 @@ class DynamicPatternLearner:
         """
         📊 Record discovered patterns in database with privacy protection
         """
-        if not self.db:
+        if self.db is None:
             return {'status': 'no_database'}
         
         try:
