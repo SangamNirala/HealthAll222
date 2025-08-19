@@ -423,7 +423,7 @@ class PersonalizationManager:
                                          style_adaptations: Dict[str, Any], processing_time: float):
         """Log personalization outcome for learning"""
         try:
-            if not self.db:
+            if self.db is None:
                 return
             
             log_entry = {
