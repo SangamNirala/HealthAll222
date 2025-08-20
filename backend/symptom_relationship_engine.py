@@ -1230,27 +1230,39 @@ class AdvancedSymptomRelationshipEngine:
         if not symptoms:
             return 0.0
         
-        # Base coherence on relationship strength
-        relationship_coherence = sum(r.relationship_strength for r in relationships) / len(relationships) if relationships else 0.3
+        coherence_factors = []
         
-        # Boost for identified clusters
-        cluster_coherence = min(1.0, len(clusters) * 0.2)
+        # Factor 1: Relationship density (more relationships = more coherent)
+        max_possible_relationships = len(symptoms) * (len(symptoms) - 1) / 2
+        relationship_density = len(relationships) / max_possible_relationships if max_possible_relationships > 0 else 0
+        coherence_factors.append(relationship_density * 0.3)
         
-        # Boost for syndrome identification
-        syndrome_boost = 0.2 if any(c.cluster_type == "medical_syndrome" for c in clusters) else 0.0
+        # Factor 2: Average relationship strength
+        if relationships:
+            avg_strength = sum(r.strength for r in relationships) / len(relationships)
+            coherence_factors.append(avg_strength * 0.3)
         
-        # Penalty for isolated symptoms
-        all_symptom_names = [s.symptom_name for s in symptoms]
-        clustered_symptoms = set()
-        for cluster in clusters:
-            clustered_symptoms.update(cluster.symptoms_in_cluster)
+        # Factor 3: Cluster formation (symptoms that cluster are more coherent)
+        if clusters:
+            cluster_coverage = sum(len(c.symptom_names) for c in clusters) / len(symptoms)
+            coherence_factors.append(min(1.0, cluster_coverage) * 0.25)
         
-        isolated_count = len([s for s in all_symptom_names if s not in clustered_symptoms])
-        isolation_penalty = isolated_count * 0.1
+        # Factor 4: Emergency vs routine consistency
+        urgency_levels = [self._assess_symptom_urgency_level(s) for s in symptoms]
+        urgency_consistency = 1.0 - (len(set(urgency_levels)) - 1) * 0.2  # Penalty for mixed urgency
+        coherence_factors.append(max(0.0, urgency_consistency) * 0.15)
         
-        coherence = relationship_coherence + cluster_coherence + syndrome_boost - isolation_penalty
+        return sum(coherence_factors)
+    
+    def _assess_symptom_urgency_level(self, symptom: StructuredSymptom) -> str:
+        """Assess urgency level of individual symptom"""
         
-        return max(0.0, min(1.0, coherence))
+        high_urgency = ["chest_pain", "dyspnea", "severe_headache", "weakness", "confusion"]
+        
+        if symptom.symptom_name in high_urgency or symptom.severity_level in ["severe", "critical"]:
+            return "high"
+        else:
+            return "routine"
     
     def _generate_relationship_reasoning(self, symptoms: List[StructuredSymptom], clusters: List[ClinicalCluster], syndromes: List[MedicalSyndrome]) -> List[str]:
         """Generate clinical reasoning for relationships"""
