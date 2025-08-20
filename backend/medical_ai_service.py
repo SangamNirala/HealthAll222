@@ -10197,27 +10197,34 @@ Generate the follow-up question:
     def _assess_multi_symptom_urgency(self, parse_result) -> str:
         """Assess overall urgency based on multi-symptom analysis"""
         
-        # Use the built-in urgency assessment from parse result
-        base_urgency = str(parse_result.urgency_indicators.urgency_level)
-        
-        # Adjust based on additional factors
-        if parse_result.potential_syndromes:
-            syndrome_urgencies = [str(s.urgency_level) for s in parse_result.potential_syndromes]
-            max_syndrome_urgency = max(syndrome_urgencies) if syndrome_urgencies else "routine"
-            if max_syndrome_urgency == "emergency":
-                return "emergency"
-            elif max_syndrome_urgency == "urgent" and base_urgency == "routine":
-                return "urgent"
-        
-        # Consider symptom cluster urgency
-        if parse_result.symptom_relationships.identified_clusters:
-            cluster_urgencies = [str(c.urgency_implications) for c in parse_result.symptom_relationships.identified_clusters]
-            if "emergency" in cluster_urgencies:
-                return "emergency"
-            elif "urgent" in cluster_urgencies and base_urgency == "routine":
-                return "urgent"
-        
-        return base_urgency
+        try:
+            # Use the built-in urgency assessment from parse result
+            base_urgency = str(parse_result.urgency_indicators.urgency_level)
+            
+            # Adjust based on additional factors
+            if parse_result.potential_syndromes:
+                syndrome_urgencies = [str(s.urgency_level) for s in parse_result.potential_syndromes]
+                max_syndrome_urgency = max(syndrome_urgencies) if syndrome_urgencies else "routine"
+                if max_syndrome_urgency == "emergency":
+                    return "emergency"
+                elif max_syndrome_urgency == "urgent" and base_urgency == "routine":
+                    return "urgent"
+            
+            # Consider symptom cluster urgency
+            if parse_result.symptom_relationships.identified_clusters:
+                cluster_urgencies = [str(c.urgency_implications) for c in parse_result.symptom_relationships.identified_clusters]
+                if "emergency" in cluster_urgencies:
+                    return "emergency"
+                elif "urgent" in cluster_urgencies and base_urgency == "routine":
+                    return "urgent"
+            
+            return base_urgency
+        except Exception as e:
+            logging.error(f"Error in _assess_multi_symptom_urgency: {str(e)}")
+            logging.error(f"Error type: {type(e)}")
+            import traceback
+            logging.error(f"Traceback: {traceback.format_exc()}")
+            return "routine"  # Safe fallback
     
     def get_multi_symptom_parser_statistics(self) -> Dict[str, Any]:
         """Get statistics about multi-symptom parsing performance"""
