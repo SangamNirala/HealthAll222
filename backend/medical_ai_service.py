@@ -9972,16 +9972,28 @@ Generate the follow-up question:
                 }
             
             # REVOLUTIONARY MULTI-SYMPTOM PARSING
-            parse_result = self.multi_symptom_parser.parse_multi_symptom_expression(text, context_data)
+            try:
+                parse_result = self.multi_symptom_parser.parse_multi_symptom_expression(text, context_data)
+            except Exception as e:
+                logger.error(f"Multi-symptom parsing failed: {e}")
+                raise e
             
             # ADVANCED RELATIONSHIP ANALYSIS
-            if parse_result.primary_symptoms or parse_result.secondary_symptoms:
-                all_symptoms = parse_result.primary_symptoms + parse_result.secondary_symptoms
-                relationship_map = self.symptom_relationship_engine.map_symptom_relationships(all_symptoms)
-                parse_result.symptom_relationships = relationship_map
+            try:
+                if parse_result.primary_symptoms or parse_result.secondary_symptoms:
+                    all_symptoms = parse_result.primary_symptoms + parse_result.secondary_symptoms
+                    relationship_map = self.symptom_relationship_engine.map_symptom_relationships(all_symptoms)
+                    parse_result.symptom_relationships = relationship_map
+            except Exception as e:
+                logger.error(f"Relationship analysis failed: {e}")
+                # Continue without relationship analysis
             
             # ENHANCE WITH EXISTING MEDICAL AI CAPABILITIES
-            enhanced_result = await self._enhance_parse_result_with_existing_ai(parse_result, text, context)
+            try:
+                enhanced_result = await self._enhance_parse_result_with_existing_ai(parse_result, text, context)
+            except Exception as e:
+                logger.error(f"Enhancement with existing AI failed: {e}")
+                enhanced_result = parse_result  # Use original result if enhancement fails
             
             return {
                 "success": True,
