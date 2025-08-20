@@ -1033,8 +1033,8 @@ performance_benchmarking_system = PerformanceBenchmarkingSystem()
 async def initialize_performance_optimization():
     """Initialize all performance optimization components"""
     try:
-        # Initialize Redis caching if available
-        await advanced_caching_layer.initialize_redis_cache()
+        # Initialize MongoDB caching if available
+        await advanced_caching_layer.initialize_mongodb_cache()
         
         logger.info("Phase D Performance Optimization System initialized successfully")
         return True
