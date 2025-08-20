@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import uuid
 
 class SOAPGeneratorTester:
-    def __init__(self, base_url="https://healthai-testing.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://symptom-parse.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
