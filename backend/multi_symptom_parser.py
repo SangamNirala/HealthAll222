@@ -452,6 +452,9 @@ class RevolutionaryMultiSymptomParser:
         # PERFORMANCE: Quick pattern detection
         text_lower = text.lower()
         
+        # DEBUG: Log input for temporal extraction debugging
+        logger.info(f"TEMPORAL EXTRACTION DEBUG - Input text: '{text}' -> '{text_lower}'")
+        
         # Enhanced duration pattern detection including "3 nights" format
         duration_patterns = [
             r"(\d+)\s+(day|days)",
@@ -464,12 +467,15 @@ class RevolutionaryMultiSymptomParser:
             r"last\s+(\d+)\s+(day|days|hour|hours|week|weeks|month|months|night|nights)"
         ]
         
-        for pattern in duration_patterns:
+        for i, pattern in enumerate(duration_patterns):
             duration_match = re.search(pattern, text_lower)
             if duration_match:
                 temporal_analysis["overall_duration"] = duration_match.group(0)
                 temporal_analysis["temporal_confidence"] = 0.85
+                logger.info(f"TEMPORAL EXTRACTION DEBUG - Pattern {i+1} MATCHED: '{pattern}' -> '{duration_match.group(0)}'")
                 break
+        else:
+            logger.info(f"TEMPORAL EXTRACTION DEBUG - No duration patterns matched")
         
         # Enhanced temporal pattern detection
         if any(word in text_lower for word in ["constant", "persistent", "continuous", "all the time"]):
@@ -494,6 +500,9 @@ class RevolutionaryMultiSymptomParser:
             elif any(unit in duration_str for unit in ["hour", "minute"]):
                 temporal_analysis["temporal_pattern"] = "acute_onset"
             temporal_analysis["temporal_confidence"] = max(temporal_analysis["temporal_confidence"], 0.75)
+        
+        # DEBUG: Log final result
+        logger.info(f"TEMPORAL EXTRACTION DEBUG - Final result: {temporal_analysis}")
         
         return temporal_analysis
     
