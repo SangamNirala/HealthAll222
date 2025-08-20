@@ -585,8 +585,10 @@ class RevolutionaryMultiSymptomParser:
             "persistent": TemporalPattern.PERSISTENT,
             "intermittent": TemporalPattern.INTERMITTENT, 
             "acute_onset": TemporalPattern.ACUTE,
-            "gradual_onset": TemporalPattern.GRADUAL,
+            "gradual_onset": TemporalPattern.SUBACUTE,
             "progressive": TemporalPattern.PROGRESSIVE,
+            "cyclical": TemporalPattern.CYCLICAL,
+            "chronic": TemporalPattern.CHRONIC,
             "unknown": TemporalPattern.UNKNOWN
         }
         
