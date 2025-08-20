@@ -209,16 +209,12 @@ class AdvancedCachingLayer:
         # Store patterns for similarity matching
         await self._store_pattern_cache(text, result)
         
-        # Store in Redis if available
-        if self.redis_client:
+        # Store in MongoDB if available
+        if self.mongodb_cache:
             try:
-                await self.redis_client.setex(
-                    f"intent_cache:{cache_key}",
-                    ttl,
-                    json.dumps(result, default=str)
-                )
+                await self.mongodb_cache.store_cached_result(text, context, result, ttl)
             except Exception as e:
-                logger.error(f"Redis cache storage failed: {e}")
+                logger.error(f"MongoDB cache storage failed: {e}")
         
         # Manage memory cache size
         self._manage_cache_size()
