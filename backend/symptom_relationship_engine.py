@@ -1303,8 +1303,8 @@ class AdvancedSymptomRelationshipEngine:
         matrix = defaultdict(lambda: defaultdict(float))
         
         for rel in relationships:
-            matrix[rel.symptom1_name][rel.symptom2_name] = rel.strength
-            matrix[rel.symptom2_name][rel.symptom1_name] = rel.strength
+            matrix[rel.primary_symptom][rel.related_symptom] = rel.relationship_strength
+            matrix[rel.related_symptom][rel.primary_symptom] = rel.relationship_strength
         
         return dict(matrix)
     
