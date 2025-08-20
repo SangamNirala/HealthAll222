@@ -484,6 +484,16 @@ class RevolutionaryMultiSymptomParser:
         elif any(word in text_lower for word in ["gradual", "gradually", "slowly", "over time"]):
             temporal_analysis["temporal_pattern"] = "gradual_onset"
             temporal_analysis["temporal_confidence"] = max(temporal_analysis["temporal_confidence"], 0.8)
+        elif temporal_analysis.get("overall_duration"):
+            # If we found a duration but no specific pattern, classify as chronic/subacute based on duration
+            duration_str = temporal_analysis["overall_duration"].lower()
+            if any(unit in duration_str for unit in ["week", "month", "year"]):
+                temporal_analysis["temporal_pattern"] = "chronic"
+            elif any(unit in duration_str for unit in ["day", "night"]):
+                temporal_analysis["temporal_pattern"] = "subacute"
+            elif any(unit in duration_str for unit in ["hour", "minute"]):
+                temporal_analysis["temporal_pattern"] = "acute_onset"
+            temporal_analysis["temporal_confidence"] = max(temporal_analysis["temporal_confidence"], 0.75)
         
         return temporal_analysis
     
