@@ -297,7 +297,7 @@ class AdvancedCachingLayer:
             "cache_misses": self.cache_stats["cache_misses"],
             "memory_cache_size": len(self.memory_cache),
             "pattern_cache_size": len(self.pattern_cache),
-            "redis_available": self.redis_client is not None
+            "mongodb_available": self.mongodb_cache is not None
         }
 
 class ConcurrentProcessingEngine:
