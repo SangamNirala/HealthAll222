@@ -452,11 +452,38 @@ class RevolutionaryMultiSymptomParser:
         # PERFORMANCE: Quick pattern detection
         text_lower = text.lower()
         
-        if re.search(r"\d+\s+(day|hour|week|month|night)s?", text_lower):
-            duration_match = re.search(r"(\d+)\s+(day|hour|week|month|night)s?", text_lower)
+        # Enhanced duration pattern detection including "3 nights" format
+        duration_patterns = [
+            r"(\d+)\s+(day|days)",
+            r"(\d+)\s+(hour|hours)", 
+            r"(\d+)\s+(week|weeks)",
+            r"(\d+)\s+(month|months)",
+            r"(\d+)\s+(night|nights)",
+            r"for\s+(\d+)\s+(day|days|hour|hours|week|weeks|month|months|night|nights)",
+            r"past\s+(\d+)\s+(day|days|hour|hours|week|weeks|month|months|night|nights)",
+            r"last\s+(\d+)\s+(day|days|hour|hours|week|weeks|month|months|night|nights)"
+        ]
+        
+        for pattern in duration_patterns:
+            duration_match = re.search(pattern, text_lower)
             if duration_match:
                 temporal_analysis["overall_duration"] = duration_match.group(0)
                 temporal_analysis["temporal_confidence"] = 0.85
+                break
+        
+        # Enhanced temporal pattern detection
+        if any(word in text_lower for word in ["constant", "persistent", "continuous", "all the time"]):
+            temporal_analysis["temporal_pattern"] = "persistent"
+            temporal_analysis["temporal_confidence"] = max(temporal_analysis["temporal_confidence"], 0.8)
+        elif any(word in text_lower for word in ["comes and goes", "intermittent", "on and off", "sometimes"]):
+            temporal_analysis["temporal_pattern"] = "intermittent"
+            temporal_analysis["temporal_confidence"] = max(temporal_analysis["temporal_confidence"], 0.8)
+        elif any(word in text_lower for word in ["sudden", "suddenly", "all of a sudden"]):
+            temporal_analysis["temporal_pattern"] = "acute_onset"
+            temporal_analysis["temporal_confidence"] = max(temporal_analysis["temporal_confidence"], 0.8)
+        elif any(word in text_lower for word in ["gradual", "gradually", "slowly", "over time"]):
+            temporal_analysis["temporal_pattern"] = "gradual_onset"
+            temporal_analysis["temporal_confidence"] = max(temporal_analysis["temporal_confidence"], 0.8)
         
         return temporal_analysis
     
