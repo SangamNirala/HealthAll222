@@ -148,7 +148,7 @@ class OnsetAnalysis:
     onset_type: str = "unknown"  # sudden, gradual, insidious
     onset_triggers: List[str] = field(default_factory=list)
     onset_circumstances: List[str] = field(default_factory=list)
-    onset_severity: SeverityLevel = SeverityLevel.UNKNOWN
+    onset_severity: SeverityLevel = SeverityLevel.NONE
     
     # Clinical onset significance
     onset_clinical_significance: str = "routine"
