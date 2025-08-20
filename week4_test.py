@@ -12,7 +12,7 @@ import time
 from typing import Dict, List, Any
 
 # Test configuration
-BACKEND_URL = "https://symptom-parse.preview.emergentagent.com/api"
+BACKEND_URL = "https://symptom-analyzer-6.preview.emergentagent.com/api"
 TEST_TIMEOUT = 30
 
 class Week4TestSuite:

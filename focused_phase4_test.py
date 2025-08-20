@@ -13,7 +13,7 @@ import time
 from datetime import datetime
 
 # Backend URL
-BACKEND_URL = "https://symptom-parse.preview.emergentagent.com/api"
+BACKEND_URL = "https://symptom-analyzer-6.preview.emergentagent.com/api"
 
 class FocusedPhase4Tester:
     """Focused Phase 4 testing with proper consultation flow"""
