@@ -572,18 +572,23 @@ def create_structured_symptom(
     category: SymptomCategory,
     confidence: float = 0.0,
     severity: SeverityLevel = SeverityLevel.NONE,
+    original_text: str = None,
     **kwargs
 ) -> StructuredSymptom:
     """Factory function to create structured symptom with defaults"""
+    
+    # Remove original_text from kwargs to avoid duplicate parameter
+    filtered_kwargs = {k: v for k, v in kwargs.items() if k != 'original_text'}
+    
     return StructuredSymptom(
         symptom_name=symptom_name,
         medical_terminology=medical_term,
-        original_text=kwargs.get('original_text', symptom_name),
+        original_text=original_text or symptom_name,
         anatomical_location=location,
         symptom_category=category,
         confidence_score=confidence,
         severity_level=severity,
-        **kwargs
+        **filtered_kwargs
     )
 
 
