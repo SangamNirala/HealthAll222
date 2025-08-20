@@ -1422,27 +1422,363 @@ class RevolutionaryMultiSymptomParser:
         relationship_analysis: Dict[str, Any],
         confidence_analysis: ConfidenceAnalysis
     ) -> ClinicalReasoning:
-        """Generate clinical reasoning for the multi-symptom analysis"""
+        """
+        PHASE 1.4: CRITICAL FIX - Generate comprehensive clinical reasoning for multi-symptom analysis
+        """
         
-        clinical_logic = [
-            f"Identified {len(symptoms)} distinct symptoms with {confidence_analysis.overall_confidence:.1%} confidence",
-            "Pattern analysis suggests multi-system involvement" if len(symptoms) > 2 else "Single system presentation"
-        ]
+        if not symptoms:
+            return ClinicalReasoning(
+                clinical_logic=["No symptoms identified for analysis"],
+                reasoning_confidence=0.0,
+                reasoning_completeness=0.0,
+                clinical_appropriateness=0.0
+            )
         
+        clinical_logic = []
+        
+        # REASONING COMPONENT 1: Symptom Analysis Summary
+        primary_symptoms = [s["symptom_name"] for s in symptoms if s.get("confidence", 0) > 0.7]
+        secondary_symptoms = [s["symptom_name"] for s in symptoms if s.get("confidence", 0) <= 0.7]
+        
+        if len(symptoms) == 1:
+            clinical_logic.append(f"Single symptom presentation: {symptoms[0]['symptom_name']} identified with {symptoms[0].get('confidence', 0):.1%} confidence")
+        else:
+            clinical_logic.append(f"Multi-symptom presentation identified: {len(primary_symptoms)} primary symptoms, {len(secondary_symptoms)} secondary symptoms")
+            clinical_logic.append(f"Primary symptoms: {', '.join(primary_symptoms)}")
+            if secondary_symptoms:
+                clinical_logic.append(f"Secondary symptoms: {', '.join(secondary_symptoms)}")
+        
+        # REASONING COMPONENT 2: Emergency Assessment
+        emergency_symptoms = self._identify_emergency_symptoms(symptoms)
+        if emergency_symptoms:
+            clinical_logic.append(f"🚨 EMERGENCY INDICATORS DETECTED: {', '.join(emergency_symptoms)}")
+            clinical_logic.append("Immediate medical evaluation strongly recommended")
+            
+            # Specific emergency reasoning
+            if "chest_pain" in emergency_symptoms:
+                clinical_logic.append("Chest pain requires immediate cardiac assessment to rule out acute coronary syndrome")
+            if "dyspnea" in emergency_symptoms:
+                clinical_logic.append("Shortness of breath may indicate respiratory or cardiac emergency")
+        
+        # REASONING COMPONENT 3: Syndrome Recognition  
+        potential_syndromes = self._identify_potential_syndromes_from_symptoms(symptoms)
+        if potential_syndromes:
+            for syndrome in potential_syndromes:
+                clinical_logic.append(f"Clinical pattern suggests possible {syndrome['name']} (confidence: {syndrome['confidence']:.1%})")
+                clinical_logic.append(f"Supporting evidence: {syndrome['reasoning']}")
+        
+        # REASONING COMPONENT 4: System Analysis
+        affected_systems = self._analyze_affected_systems(symptoms)
+        if len(affected_systems) == 1:
+            clinical_logic.append(f"Single system involvement: {affected_systems[0]} system affected")
+        elif len(affected_systems) > 1:
+            clinical_logic.append(f"Multi-system involvement: {', '.join(affected_systems)} systems affected")
+            clinical_logic.append("Multi-system presentation requires comprehensive evaluation")
+        
+        # REASONING COMPONENT 5: Temporal Analysis
+        temporal_reasoning = self._generate_temporal_reasoning(symptoms)
+        if temporal_reasoning:
+            clinical_logic.extend(temporal_reasoning)
+        
+        # REASONING COMPONENT 6: Severity Assessment
+        severity_reasoning = self._generate_severity_reasoning(symptoms)
+        clinical_logic.extend(severity_reasoning)
+        
+        # REASONING COMPONENT 7: Relationship Analysis
         if relationship_analysis.get("potential_syndromes"):
-            clinical_logic.append("Symptom constellation suggests possible syndrome pattern")
-            
-        if confidence_analysis.overall_confidence > 0.8:
-            clinical_logic.append("High confidence in symptom identification and relationships")
-        elif confidence_analysis.overall_confidence < 0.6:
-            clinical_logic.append("Lower confidence suggests need for additional clarification")
-            
+            clinical_logic.append("Symptom constellation analysis supports syndrome-based presentation")
+        
+        # REASONING COMPONENT 8: Confidence Assessment
+        overall_confidence = confidence_analysis.overall_confidence
+        if overall_confidence > 0.8:
+            clinical_logic.append("High confidence in symptom identification and clinical assessment")
+        elif overall_confidence < 0.6:
+            clinical_logic.append("Lower confidence suggests need for additional history and clarification")
+        else:
+            clinical_logic.append("Moderate confidence in current assessment - consider additional information")
+        
+        # REASONING COMPONENT 9: Recommendations
+        recommendations = self._generate_clinical_recommendations(symptoms, emergency_symptoms)
+        clinical_logic.extend(recommendations)
+        
+        # Calculate reasoning metrics
+        reasoning_confidence = self._calculate_reasoning_confidence(symptoms, clinical_logic)
+        reasoning_completeness = self._calculate_reasoning_completeness(symptoms, clinical_logic)
+        clinical_appropriateness = self._assess_clinical_appropriateness(symptoms, clinical_logic)
+        
         return ClinicalReasoning(
             clinical_logic=clinical_logic,
-            reasoning_confidence=confidence_analysis.overall_confidence,
-            reasoning_completeness=0.8,
-            clinical_appropriateness=0.85
+            reasoning_confidence=reasoning_confidence,
+            reasoning_completeness=reasoning_completeness,
+            clinical_appropriateness=clinical_appropriateness
         )
+    
+    def _identify_emergency_symptoms(self, symptoms: List[Dict[str, Any]]) -> List[str]:
+        """Identify emergency symptoms requiring immediate attention"""
+        
+        emergency_symptoms = []
+        
+        emergency_indicators = {
+            "chest_pain": ["chest pain", "chest_pain", "cardiac pain"],
+            "dyspnea": ["dyspnea", "shortness of breath", "breathing difficulty"],
+            "severe_headache": ["severe headache", "worst headache", "thunderclap headache"],
+            "weakness": ["weakness", "paralysis", "inability to move"],
+            "altered_consciousness": ["confusion", "disorientation", "loss of consciousness"],
+            "severe_abdominal_pain": ["severe abdominal pain", "acute abdomen"]
+        }
+        
+        for symptom in symptoms:
+            symptom_name = symptom["symptom_name"].lower()
+            
+            for emergency_type, indicators in emergency_indicators.items():
+                if symptom_name in indicators or any(indicator in symptom_name for indicator in indicators):
+                    # Check if severity suggests emergency
+                    if (symptom.get("contextual_severity", {}).get("indicators") and
+                        any(sev["level"] in ["severe", "extreme"] for sev in symptom.get("contextual_severity", {}).get("indicators", []))):
+                        emergency_symptoms.append(emergency_type)
+                        break
+                    elif symptom_name in ["chest_pain", "dyspnea"]:  # Always consider these emergent
+                        emergency_symptoms.append(emergency_type)
+                        break
+        
+        return list(set(emergency_symptoms))
+    
+    def _identify_potential_syndromes_from_symptoms(self, symptoms: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Identify potential medical syndromes from symptom patterns"""
+        
+        symptom_names = [s["symptom_name"].lower() for s in symptoms]
+        potential_syndromes = []
+        
+        # Define syndrome patterns with reasoning
+        syndrome_patterns = {
+            "migraine_syndrome": {
+                "required": ["headache"],
+                "supporting": ["nausea", "vomiting", "dizziness", "light_sensitivity", "sound_sensitivity"],
+                "confidence_base": 0.70,
+                "reasoning": "Headache with associated neurovegetative symptoms typical of migraine"
+            },
+            "acute_coronary_syndrome": {
+                "required": ["chest_pain"],
+                "supporting": ["dyspnea", "sweating", "nausea", "weakness", "arm_pain"],
+                "confidence_base": 0.85,
+                "reasoning": "Chest pain with associated symptoms concerning for myocardial infarction"
+            },
+            "tension_headache_syndrome": {
+                "required": ["headache"],
+                "supporting": ["neck_pain", "stress", "fatigue", "muscle_tension"],
+                "confidence_base": 0.60,
+                "reasoning": "Headache pattern consistent with tension-type headache"
+            },
+            "gastroenteritis_syndrome": {
+                "required": ["nausea"],
+                "supporting": ["vomiting", "diarrhea", "abdominal_pain", "fever", "fatigue"],
+                "confidence_base": 0.65,
+                "reasoning": "GI symptoms consistent with gastroenteritis or food poisoning"
+            },
+            "anxiety_disorder": {
+                "required": ["anxiety"],
+                "supporting": ["insomnia", "fatigue", "concentration_difficulty", "muscle_tension", "palpitations"],
+                "confidence_base": 0.60,
+                "reasoning": "Symptom constellation consistent with anxiety disorder"
+            }
+        }
+        
+        for syndrome_name, pattern in syndrome_patterns.items():
+            # Check if required symptoms present
+            required_present = any(req in symptom_names for req in pattern["required"])
+            
+            if required_present:
+                # Count supporting symptoms
+                supporting_present = [sup for sup in pattern["supporting"] if sup in symptom_names]
+                
+                # Calculate confidence
+                support_ratio = len(supporting_present) / len(pattern["supporting"]) if pattern["supporting"] else 0
+                syndrome_confidence = pattern["confidence_base"] + (support_ratio * 0.25)
+                
+                if syndrome_confidence > 0.50:  # Minimum threshold
+                    potential_syndromes.append({
+                        "name": syndrome_name,
+                        "confidence": syndrome_confidence,
+                        "supporting_symptoms": supporting_present,
+                        "reasoning": pattern["reasoning"]
+                    })
+        
+        return sorted(potential_syndromes, key=lambda x: x["confidence"], reverse=True)
+    
+    def _analyze_affected_systems(self, symptoms: List[Dict[str, Any]]) -> List[str]:
+        """Analyze which body systems are affected"""
+        
+        systems = set()
+        
+        system_mapping = {
+            "headache": "neurological",
+            "dizziness": "neurological", 
+            "insomnia": "neurological",
+            "chest_pain": "cardiovascular",
+            "dyspnea": "respiratory",
+            "nausea": "gastrointestinal",
+            "vomiting": "gastrointestinal", 
+            "abdominal_pain": "gastrointestinal",
+            "back_pain": "musculoskeletal",
+            "joint_pain": "musculoskeletal",
+            "fatigue": "constitutional",
+            "fever": "constitutional",
+            "anxiety": "psychiatric",
+            "depression": "psychiatric"
+        }
+        
+        for symptom in symptoms:
+            symptom_name = symptom["symptom_name"].lower()
+            system = system_mapping.get(symptom_name)
+            if system:
+                systems.add(system)
+        
+        return list(systems)
+    
+    def _generate_temporal_reasoning(self, symptoms: List[Dict[str, Any]]) -> List[str]:
+        """Generate reasoning about temporal patterns"""
+        
+        temporal_reasoning = []
+        
+        # Check for temporal data in symptoms
+        has_temporal_data = any(s.get("temporal_data", {}).get("duration_indicators") for s in symptoms)
+        
+        if has_temporal_data:
+            # Analyze onset patterns
+            acute_onset_symptoms = []
+            chronic_symptoms = []
+            
+            for symptom in symptoms:
+                temporal_data = symptom.get("temporal_data", {})
+                for indicator in temporal_data.get("duration_indicators", []):
+                    if indicator.get("temporal_significance") == "high":
+                        acute_onset_symptoms.append(symptom["symptom_name"])
+                    elif indicator.get("temporal_significance") == "routine":
+                        chronic_symptoms.append(symptom["symptom_name"])
+            
+            if acute_onset_symptoms:
+                temporal_reasoning.append(f"Acute onset noted for: {', '.join(acute_onset_symptoms)} - suggests urgent evaluation")
+            
+            if chronic_symptoms:
+                temporal_reasoning.append(f"Chronic pattern noted for: {', '.join(chronic_symptoms)} - suggests systematic evaluation")
+        
+        return temporal_reasoning
+    
+    def _generate_severity_reasoning(self, symptoms: List[Dict[str, Any]]) -> List[str]:
+        """Generate reasoning about severity patterns"""
+        
+        severity_reasoning = []
+        
+        severe_symptoms = []
+        moderate_symptoms = []
+        
+        for symptom in symptoms:
+            contextual_severity = symptom.get("contextual_severity", {})
+            if contextual_severity.get("indicators"):
+                for indicator in contextual_severity["indicators"]:
+                    if indicator["level"] in ["severe", "extreme"]:
+                        severe_symptoms.append(symptom["symptom_name"])
+                        break
+                    elif indicator["level"] in ["moderate", "moderate_to_severe"]:
+                        moderate_symptoms.append(symptom["symptom_name"])
+                        break
+        
+        if severe_symptoms:
+            severity_reasoning.append(f"Severe symptoms identified: {', '.join(severe_symptoms)} - indicates significant pathology")
+        
+        if moderate_symptoms:
+            severity_reasoning.append(f"Moderate severity symptoms: {', '.join(moderate_symptoms)} - warrants medical evaluation")
+        
+        return severity_reasoning
+    
+    def _generate_clinical_recommendations(self, symptoms: List[Dict[str, Any]], emergency_symptoms: List[str]) -> List[str]:
+        """Generate clinical recommendations based on symptom analysis"""
+        
+        recommendations = []
+        
+        if emergency_symptoms:
+            recommendations.append("🚨 IMMEDIATE ACTION: Seek emergency medical care immediately")
+            recommendations.append("Consider calling 911 or going to nearest emergency department")
+        else:
+            # Non-emergency recommendations
+            if len(symptoms) > 3:
+                recommendations.append("Comprehensive medical evaluation recommended due to multi-symptom presentation")
+            elif any(s.get("confidence", 0) > 0.8 for s in symptoms):
+                recommendations.append("Medical consultation recommended for symptomatic relief and diagnosis")
+            else:
+                recommendations.append("Consider medical evaluation if symptoms persist or worsen")
+        
+        # Specific symptom recommendations
+        symptom_names = [s["symptom_name"].lower() for s in symptoms]
+        
+        if "headache" in symptom_names and "nausea" in symptom_names:
+            recommendations.append("Consider migraine evaluation and management strategies")
+        
+        if "fatigue" in symptom_names and "insomnia" in symptom_names:
+            recommendations.append("Sleep study evaluation may be beneficial")
+        
+        return recommendations
+    
+    def _calculate_reasoning_confidence(self, symptoms: List[Dict[str, Any]], clinical_logic: List[str]) -> float:
+        """Calculate confidence in clinical reasoning"""
+        
+        base_confidence = 0.70
+        
+        # Boost for more symptoms
+        symptom_bonus = min(0.15, len(symptoms) * 0.03)
+        
+        # Boost for comprehensive reasoning
+        logic_bonus = min(0.10, len(clinical_logic) * 0.01)
+        
+        # Boost for emergency identification
+        emergency_bonus = 0.05 if any("EMERGENCY" in logic for logic in clinical_logic) else 0
+        
+        return min(0.95, base_confidence + symptom_bonus + logic_bonus + emergency_bonus)
+    
+    def _calculate_reasoning_completeness(self, symptoms: List[Dict[str, Any]], clinical_logic: List[str]) -> float:
+        """Calculate completeness of clinical reasoning"""
+        
+        expected_components = [
+            "symptom identification",
+            "system analysis", 
+            "severity assessment",
+            "recommendations"
+        ]
+        
+        identified_components = 0
+        logic_text = " ".join(clinical_logic).lower()
+        
+        if any(word in logic_text for word in ["symptom", "identified", "presentation"]):
+            identified_components += 1
+        if any(word in logic_text for word in ["system", "involvement", "affected"]):
+            identified_components += 1
+        if any(word in logic_text for word in ["severe", "moderate", "mild", "severity"]):
+            identified_components += 1
+        if any(word in logic_text for word in ["recommend", "evaluation", "consider"]):
+            identified_components += 1
+            
+        return identified_components / len(expected_components)
+    
+    def _assess_clinical_appropriateness(self, symptoms: List[Dict[str, Any]], clinical_logic: List[str]) -> float:
+        """Assess clinical appropriateness of reasoning"""
+        
+        appropriateness_score = 0.80  # Base score
+        
+        # Check for appropriate emergency identification
+        emergency_symptoms = self._identify_emergency_symptoms(symptoms)
+        has_emergency_reasoning = any("EMERGENCY" in logic or "emergency" in logic for logic in clinical_logic)
+        
+        if emergency_symptoms and has_emergency_reasoning:
+            appropriateness_score += 0.10  # Bonus for proper emergency identification
+        elif emergency_symptoms and not has_emergency_reasoning:
+            appropriateness_score -= 0.20  # Penalty for missing emergency
+        
+        # Check for appropriate recommendations
+        has_recommendations = any("recommend" in logic.lower() for logic in clinical_logic)
+        if has_recommendations:
+            appropriateness_score += 0.05
+        
+        return min(0.95, max(0.30, appropriateness_score))
     
     def _assemble_structured_result(
         self,
