@@ -32,7 +32,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://health-parser.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://healthai-testing.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class IntelligentFollowUpTester:
