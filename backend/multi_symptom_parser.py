@@ -541,9 +541,11 @@ class RevolutionaryMultiSymptomParser:
         for symptom in symptoms:
             structured_symptom = create_structured_symptom(
                 symptom_name=symptom["symptom_name"],
-                original_text=symptom.get("original_text", ""),
+                medical_term=symptom.get("medical_term", symptom["symptom_name"]),  # Use symptom name as fallback
+                location=symptom.get("anatomical_location", "unspecified"),  # Use unspecified as fallback
+                category=self._get_symptom_category(symptom.get("clinical_category", "other")),  # Convert string to enum
                 confidence=symptom.get("confidence", 0.7),
-                clinical_category=symptom.get("clinical_category", "other")
+                original_text=symptom.get("original_text", "")
             )
             structured_symptoms.append(structured_symptom)
         
