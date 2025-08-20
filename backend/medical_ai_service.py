@@ -10210,7 +10210,7 @@ Generate the follow-up question:
         
         # Consider symptom cluster urgency
         if parse_result.symptom_relationships.identified_clusters:
-            cluster_urgencies = [c.urgency_implications.value for c in parse_result.symptom_relationships.identified_clusters]
+            cluster_urgencies = [str(c.urgency_implications) for c in parse_result.symptom_relationships.identified_clusters]
             if "emergency" in cluster_urgencies:
                 return "emergency"
             elif "urgent" in cluster_urgencies and base_urgency == "routine":
