@@ -22,7 +22,7 @@ from datetime import datetime
 import os
 
 # Backend URL from environment
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://symptom-analyzer-5.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://redis-to-mongo.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class Step13ColloquialTester:

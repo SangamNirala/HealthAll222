@@ -38,7 +38,7 @@ from typing import Dict, List, Any, Tuple
 import statistics
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://9c7cf834-efc1-4478-a856-31e58cfb53dc.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://redis-to-mongo.preview.emergentagent.com')
 BASE_URL = f"{BACKEND_URL}/api"
 
 class MongoDBCachingTester:
