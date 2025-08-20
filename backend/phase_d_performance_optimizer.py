@@ -1108,6 +1108,9 @@ async def initialize_performance_optimization():
         # Initialize MongoDB caching if available
         await advanced_caching_layer.initialize_mongodb_cache()
         
+        # Seed cache with test data for better statistics coverage
+        await advanced_caching_layer.seed_cache_for_testing()
+        
         logger.info("Phase D Performance Optimization System initialized successfully")
         return True
         
