@@ -1046,12 +1046,12 @@ class AdvancedSymptomRelationshipEngine:
             if syndrome_confidence >= pattern["confidence_threshold"]:
                 syndrome = MedicalSyndrome(
                     syndrome_name=syndrome_name,
+                    syndrome_category=pattern["clinical_significance"],
                     confidence_score=syndrome_confidence,
                     supporting_symptoms=[s for s in symptom_names if s in pattern["required"] + pattern["supporting"]],
-                    clinical_significance=pattern["clinical_significance"],
                     urgency_level=UrgencyLevel(pattern["urgency"]),
-                    differential_considerations=self._get_differential_considerations(syndrome_name),
-                    recommended_workup=self._get_recommended_workup(syndrome_name)
+                    differential_diagnoses=self._get_differential_considerations(syndrome_name),
+                    monitoring_requirements=self._get_recommended_workup(syndrome_name)
                 )
                 detected_syndromes.append(syndrome)
         
