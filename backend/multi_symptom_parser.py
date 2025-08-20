@@ -607,7 +607,7 @@ class RevolutionaryMultiSymptomParser:
             "unknown": TemporalPattern.UNKNOWN
         }
         
-        result.temporal_analysis = TemporalAnalysis(
+        result.temporal_data = TemporalAnalysis(
             overall_duration=temporal_analysis.get("overall_duration"),
             temporal_pattern=temporal_pattern_mapping.get(temporal_pattern_str, TemporalPattern.UNKNOWN)
         )
