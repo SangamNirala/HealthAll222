@@ -17,8 +17,8 @@ import json
 import time
 import sys
 
-# Backend URL from review request
-BACKEND_URL = "https://symptom-analyzer-6.preview.emergentagent.com"
+# Backend URL from environment
+BACKEND_URL = "https://med-ai-debug.preview.emergentagent.com"
 
 def test_temporal_extraction():
     """Test the specific temporal extraction fixes"""
