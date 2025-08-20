@@ -1636,8 +1636,267 @@ class MedicalSyndromeDetector:
 
 
 class CombinedUrgencyAnalyzer:
-    """Analyze urgency based on symptom combinations"""
-    pass
+    """
+    REVOLUTIONARY FIX: Analyze urgency based on symptom combinations
+    Implements clinical-grade emergency detection algorithms
+    """
+    
+    def __init__(self):
+        """Initialize urgency analyzer with clinical-grade emergency detection"""
+        self.emergency_combinations = self._load_emergency_combinations()
+        self.red_flag_indicators = self._load_red_flag_indicators()
+        self.urgency_scoring_matrix = self._load_urgency_scoring_matrix()
+        
+    def analyze_combination_urgency(self, symptoms: List[StructuredSymptom]) -> Dict[str, Any]:
+        """
+        REVOLUTIONARY FIX: Analyze urgency based on symptom combinations
+        Returns proper UrgencyLevel enum values, not strings
+        """
+        
+        if not symptoms:
+            return {
+                "urgency_level": UrgencyLevel.ROUTINE,
+                "urgency_score": 0.0,
+                "emergency_red_flags": [],
+                "critical_combinations": [],
+                "urgency_reasoning": ["No symptoms to assess"]
+            }
+        
+        symptom_names = [s.symptom_name.lower() for s in symptoms]
+        
+        # PHASE 1: Check for emergency combinations
+        emergency_flags = []
+        critical_combinations = []
+        urgency_score = 0.0
+        
+        # Critical emergency combinations
+        for combo in self.emergency_combinations["critical"]:
+            if all(symptom in symptom_names for symptom in combo["symptoms"]):
+                emergency_flags.append(combo["description"])
+                critical_combinations.append(combo["combination_name"])
+                urgency_score = max(urgency_score, combo["urgency_score"])
+        
+        # If critical emergency detected, return immediately
+        if critical_combinations:
+            return {
+                "urgency_level": UrgencyLevel.CRITICAL,
+                "urgency_score": urgency_score,
+                "emergency_red_flags": emergency_flags,
+                "critical_combinations": critical_combinations,
+                "urgency_reasoning": [f"Critical emergency combination detected: {', '.join(critical_combinations)}"]
+            }
+        
+        # PHASE 2: Check for emergency combinations
+        for combo in self.emergency_combinations["emergency"]:
+            if all(symptom in symptom_names for symptom in combo["symptoms"]):
+                emergency_flags.append(combo["description"])
+                critical_combinations.append(combo["combination_name"])
+                urgency_score = max(urgency_score, combo["urgency_score"])
+        
+        if critical_combinations:
+            return {
+                "urgency_level": UrgencyLevel.EMERGENCY,
+                "urgency_score": urgency_score,
+                "emergency_red_flags": emergency_flags,
+                "critical_combinations": critical_combinations,
+                "urgency_reasoning": [f"Emergency combination detected: {', '.join(critical_combinations)}"]
+            }
+        
+        # PHASE 3: Check for urgent combinations
+        for combo in self.emergency_combinations["urgent"]:
+            if all(symptom in symptom_names for symptom in combo["symptoms"]):
+                emergency_flags.append(combo["description"])
+                critical_combinations.append(combo["combination_name"])
+                urgency_score = max(urgency_score, combo["urgency_score"])
+        
+        if critical_combinations:
+            return {
+                "urgency_level": UrgencyLevel.URGENT,
+                "urgency_score": urgency_score,
+                "emergency_red_flags": emergency_flags,
+                "critical_combinations": critical_combinations,
+                "urgency_reasoning": [f"Urgent combination detected: {', '.join(critical_combinations)}"]
+            }
+        
+        # PHASE 4: Individual symptom urgency assessment
+        individual_urgency_scores = []
+        for symptom in symptoms:
+            individual_score = self._assess_individual_symptom_urgency(symptom)
+            individual_urgency_scores.append(individual_score)
+            urgency_score = max(urgency_score, individual_score)
+        
+        # Determine final urgency level
+        if urgency_score >= 8.0:
+            urgency_level = UrgencyLevel.CRITICAL
+        elif urgency_score >= 6.0:
+            urgency_level = UrgencyLevel.EMERGENCY
+        elif urgency_score >= 4.0:
+            urgency_level = UrgencyLevel.URGENT
+        else:
+            urgency_level = UrgencyLevel.ROUTINE
+        
+        return {
+            "urgency_level": urgency_level,
+            "urgency_score": urgency_score,
+            "emergency_red_flags": emergency_flags,
+            "critical_combinations": critical_combinations,
+            "urgency_reasoning": self._generate_urgency_reasoning(symptoms, urgency_level, urgency_score)
+        }
+    
+    def _load_emergency_combinations(self) -> Dict[str, List[Dict]]:
+        """Load clinical-grade emergency combination patterns"""
+        
+        return {
+            "critical": [
+                {
+                    "symptoms": ["chest_pain", "dyspnea", "sweating"],
+                    "combination_name": "acute_coronary_syndrome",
+                    "description": "Classic ACS triad - immediate emergency care required",
+                    "urgency_score": 9.5
+                },
+                {
+                    "symptoms": ["severe_headache", "neck_stiffness", "photophobia"],
+                    "combination_name": "meningitis_syndrome",
+                    "description": "Meningeal signs - immediate emergency care required",
+                    "urgency_score": 9.8
+                },
+                {
+                    "symptoms": ["weakness", "facial_drooping", "speech_difficulty"],
+                    "combination_name": "stroke_syndrome",
+                    "description": "Stroke signs - immediate emergency care required",
+                    "urgency_score": 10.0
+                }
+            ],
+            "emergency": [
+                {
+                    "symptoms": ["chest_pain", "dyspnea"],
+                    "combination_name": "cardiopulmonary_emergency",
+                    "description": "Cardiopulmonary distress - emergency evaluation needed",
+                    "urgency_score": 8.5
+                },
+                {
+                    "symptoms": ["severe_abdominal_pain", "vomiting"],
+                    "combination_name": "acute_abdomen",
+                    "description": "Acute abdominal emergency - immediate evaluation needed",
+                    "urgency_score": 8.0
+                },
+                {
+                    "symptoms": ["dyspnea", "chest_pain"],
+                    "combination_name": "respiratory_cardiac_emergency",
+                    "description": "Respiratory or cardiac emergency - immediate care needed",
+                    "urgency_score": 8.2
+                }
+            ],
+            "urgent": [
+                {
+                    "symptoms": ["chest_pain", "nausea"],
+                    "combination_name": "possible_cardiac_event",
+                    "description": "Possible cardiac event - urgent evaluation needed",
+                    "urgency_score": 6.5
+                },
+                {
+                    "symptoms": ["headache", "dizziness", "nausea"],
+                    "combination_name": "neurological_concern",
+                    "description": "Neurological concern - urgent evaluation recommended",
+                    "urgency_score": 5.5
+                },
+                {
+                    "symptoms": ["fever", "chills", "sweating"],
+                    "combination_name": "infectious_syndrome",
+                    "description": "Infectious process - urgent evaluation recommended",
+                    "urgency_score": 5.0
+                }
+            ]
+        }
+    
+    def _load_red_flag_indicators(self) -> Dict[str, float]:
+        """Load individual red flag symptom indicators"""
+        
+        return {
+            "chest_pain": 7.0,
+            "dyspnea": 6.5,
+            "severe_headache": 6.0,
+            "weakness": 5.5,
+            "confusion": 6.0,
+            "severe_abdominal_pain": 6.5,
+            "difficulty_breathing": 7.5,
+            "crushing_chest_pain": 9.0,
+            "sudden_onset": 7.0,
+            "worst_headache_ever": 8.5,
+            "facial_drooping": 9.5,
+            "speech_difficulty": 8.0,
+            "neck_stiffness": 7.5,
+            "photophobia": 6.5
+        }
+    
+    def _load_urgency_scoring_matrix(self) -> Dict[str, Dict[str, float]]:
+        """Load urgency scoring matrix for symptom combinations"""
+        
+        return {
+            "cardiovascular": {
+                "chest_pain": 7.0,
+                "dyspnea": 6.5,
+                "sweating": 4.0,
+                "nausea": 3.5,
+                "arm_pain": 5.0
+            },
+            "neurological": {
+                "headache": 4.0,
+                "severe_headache": 7.0,
+                "dizziness": 3.0,
+                "weakness": 6.0,
+                "confusion": 7.5,
+                "speech_difficulty": 8.0
+            },
+            "respiratory": {
+                "dyspnea": 7.0,
+                "cough": 2.0,
+                "chest_pain": 6.0,
+                "wheezing": 4.5
+            }
+        }
+    
+    def _assess_individual_symptom_urgency(self, symptom: StructuredSymptom) -> float:
+        """Assess urgency score for individual symptom"""
+        
+        base_score = self.red_flag_indicators.get(symptom.symptom_name, 2.0)
+        
+        # Adjust for severity
+        if symptom.severity_level == SeverityLevel.CRITICAL:
+            base_score += 3.0
+        elif symptom.severity_level == SeverityLevel.SEVERE:
+            base_score += 2.0
+        elif symptom.severity_level == SeverityLevel.EXTREME:
+            base_score += 2.5
+        
+        # Adjust for red flags
+        if symptom.red_flag_indicators:
+            base_score += len(symptom.red_flag_indicators) * 0.5
+        
+        return min(10.0, base_score)
+    
+    def _generate_urgency_reasoning(self, symptoms: List[StructuredSymptom], urgency_level: UrgencyLevel, urgency_score: float) -> List[str]:
+        """Generate clinical reasoning for urgency assessment"""
+        
+        reasoning = []
+        symptom_names = [s.symptom_name for s in symptoms]
+        
+        if urgency_level in [UrgencyLevel.CRITICAL, UrgencyLevel.EMERGENCY]:
+            reasoning.append(f"High-risk symptom combination detected requiring immediate medical attention")
+            reasoning.append(f"Urgency score: {urgency_score:.1f}/10.0 indicates emergency-level concern")
+        elif urgency_level == UrgencyLevel.URGENT:
+            reasoning.append(f"Symptom combination suggests urgent medical evaluation needed")
+            reasoning.append(f"Urgency score: {urgency_score:.1f}/10.0 indicates urgent-level concern")
+        else:
+            reasoning.append(f"Symptom presentation appears routine with standard follow-up appropriate")
+            reasoning.append(f"Urgency score: {urgency_score:.1f}/10.0 indicates routine-level concern")
+        
+        # Add specific symptom reasoning
+        high_risk_symptoms = [s.symptom_name for s in symptoms if s.symptom_name in ["chest_pain", "dyspnea", "severe_headache", "weakness"]]
+        if high_risk_symptoms:
+            reasoning.append(f"High-risk symptoms present: {', '.join(high_risk_symptoms)}")
+        
+        return reasoning
 
 
 # Export main class
