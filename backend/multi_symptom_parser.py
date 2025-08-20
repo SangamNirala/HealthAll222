@@ -788,9 +788,12 @@ class RevolutionaryMultiSymptomParser:
         return consolidated
     
     def _enhance_symptoms_with_context(self, symptoms: List[Dict[str, Any]], text: str) -> List[Dict[str, Any]]:
-        """Enhance symptoms with contextual information"""
+        """Enhanced temporal extraction integrated into symptom enhancement"""
         
         enhanced = []
+        
+        # Extract temporal information from the full text
+        temporal_data = self._extract_comprehensive_temporal_data(text)
         
         for symptom in symptoms:
             enhanced_symptom = symptom.copy()
@@ -808,9 +811,231 @@ class RevolutionaryMultiSymptomParser:
             clinical_category = self._determine_clinical_category(symptom["symptom_name"])
             enhanced_symptom["clinical_category"] = clinical_category
             
+            # CRITICAL FIX: Add temporal relationship data
+            enhanced_symptom["temporal_data"] = temporal_data
+            enhanced_symptom["temporal_relationships"] = self._analyze_symptom_temporal_relationship(symptom, temporal_data)
+            
             enhanced.append(enhanced_symptom)
             
         return enhanced
+    
+    def _extract_comprehensive_temporal_data(self, text: str) -> Dict[str, Any]:
+        """
+        PHASE 1.5: CRITICAL FIX - Extract comprehensive temporal information from text
+        """
+        
+        temporal_data = {
+            "duration_indicators": [],
+            "onset_indicators": [],
+            "progression_indicators": [],
+            "frequency_indicators": [],
+            "temporal_modifiers": [],
+            "temporal_confidence": 0.0
+        }
+        
+        text_lower = text.lower()
+        
+        # DURATION EXTRACTION PATTERNS
+        duration_patterns = [
+            # Specific time periods
+            (r"(?:for\s+)?(?:the\s+)?(?:past|last|previous)\s+(\d+)\s+(second|minute|hour|day|week|month|year)s?", "specific_duration"),
+            (r"(?:since|from)\s+(\d+|\w+)\s+(second|minute|hour|day|week|month|year)s?\s+ago", "relative_duration"),
+            (r"(?:been\s+(?:going\s+on|happening|occurring)\s+for)\s+(\d+|\w+)\s+(second|minute|hour|day|week|month|year)s?", "ongoing_duration"),
+            (r"(\d+)\s+(night|day|week|month)s?\s+(?:now|so far)", "current_duration"),
+            
+            # Relative patterns  
+            (r"since\s+(yesterday|today|this\s+morning|last\s+night|last\s+week)", "relative_reference"),
+            (r"(?:started|began)\s+(yesterday|today|this\s+morning|last\s+night)", "onset_reference")
+        ]
+        
+        for pattern, pattern_type in duration_patterns:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                temporal_data["duration_indicators"].append({
+                    "pattern_type": pattern_type,
+                    "matched_text": match.group(0),
+                    "extracted_value": match.groups(),
+                    "confidence": 0.85,
+                    "temporal_significance": self._assess_temporal_significance(match.group(0))
+                })
+        
+        # ONSET EXTRACTION PATTERNS
+        onset_patterns = [
+            (r"\b(?:sudden|suddenly|all\s+of\s+a\s+sudden|out\s+of\s+nowhere|acute|abrupt)\b", "acute_onset"),
+            (r"\b(?:gradual|gradually|slowly|progressive|over\s+time|insidious|creeping)\b", "gradual_onset"),
+            (r"(?:started|began|commenced)\s+(\d+)\s+(hour|day|week|month)s?\s+ago", "timed_onset"),
+            (r"(?:woke\s+up\s+with|started\s+this\s+morning|began\s+yesterday)", "specific_onset"),
+            (r"(?:came\s+on|hit\s+me|struck)\s+(?:suddenly|quickly|fast)", "rapid_onset")
+        ]
+        
+        for pattern, onset_type in onset_patterns:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                temporal_data["onset_indicators"].append({
+                    "onset_type": onset_type,
+                    "matched_text": match.group(0),
+                    "confidence": 0.80,
+                    "clinical_significance": self._assess_onset_significance(onset_type)
+                })
+        
+        # PROGRESSION PATTERNS
+        progression_patterns = [
+            (r"\b(?:getting|becoming|growing)\s+(?:worse|better|more|less)\b", "changing"),
+            (r"\b(?:worsening|deteriorating|declining|progressing)\b", "worsening"), 
+            (r"\b(?:improving|getting\s+better|resolving|subsiding)\b", "improving"),
+            (r"\b(?:stable|unchanged|same|constant|steady)\b", "stable"),
+            (r"\b(?:fluctuating|varying|up\s+and\s+down|comes\s+and\s+goes)\b", "fluctuating")
+        ]
+        
+        for pattern, progression_type in progression_patterns:
+            if re.search(pattern, text_lower):
+                temporal_data["progression_indicators"].append({
+                    "progression_type": progression_type,
+                    "matched_text": re.search(pattern, text_lower).group(0),
+                    "confidence": 0.75,
+                    "clinical_significance": self._assess_progression_significance(progression_type)
+                })
+        
+        # FREQUENCY PATTERNS
+        frequency_patterns = [
+            (r"(?:every|each)\s+(\d+|\w+)\s+(second|minute|hour|day|week|month)", "regular_frequency"),
+            (r"(\d+)\s+(?:times?|episodes?)\s+(?:per|a|each)\s+(second|minute|hour|day|week|month)", "counted_frequency"),
+            (r"\b(?:constantly|all\s+the\s+time|continuous|persistent|never\s+stops)\b", "constant"),
+            (r"\b(?:intermittent|on\s+and\s+off|comes\s+and\s+goes|cyclical|periodic)\b", "intermittent"),
+            (r"\b(?:rarely|seldom|occasionally|sometimes|often|frequently)\b", "variable_frequency")
+        ]
+        
+        for pattern, freq_type in frequency_patterns:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                temporal_data["frequency_indicators"].append({
+                    "frequency_type": freq_type,
+                    "matched_text": match.group(0),
+                    "confidence": 0.70
+                })
+        
+        # Calculate overall temporal confidence
+        total_indicators = (len(temporal_data["duration_indicators"]) + 
+                          len(temporal_data["onset_indicators"]) + 
+                          len(temporal_data["progression_indicators"]) + 
+                          len(temporal_data["frequency_indicators"]))
+        
+        if total_indicators > 0:
+            temporal_data["temporal_confidence"] = min(0.95, 0.60 + (total_indicators * 0.1))
+        
+        return temporal_data
+    
+    def _assess_temporal_significance(self, temporal_text: str) -> str:
+        """Assess clinical significance of temporal information"""
+        
+        text_lower = temporal_text.lower()
+        
+        # High significance - emergency timeframes
+        if any(term in text_lower for term in ["sudden", "acute", "minutes", "hour", "emergency"]):
+            return "high"
+        # Moderate significance - acute presentations
+        elif any(term in text_lower for term in ["day", "days", "yesterday", "recent"]):
+            return "moderate"  
+        # Low significance - chronic presentations
+        elif any(term in text_lower for term in ["week", "month", "year", "chronic"]):
+            return "routine"
+        
+        return "moderate"
+    
+    def _assess_onset_significance(self, onset_type: str) -> str:
+        """Assess clinical significance of onset pattern"""
+        
+        high_significance = ["acute_onset", "rapid_onset", "sudden_onset"]
+        moderate_significance = ["timed_onset", "specific_onset"]
+        
+        if onset_type in high_significance:
+            return "high"
+        elif onset_type in moderate_significance:
+            return "moderate"
+        
+        return "routine"
+    
+    def _assess_progression_significance(self, progression_type: str) -> str:
+        """Assess clinical significance of progression pattern"""
+        
+        if progression_type == "worsening":
+            return "high"
+        elif progression_type == "improving":
+            return "moderate"
+        elif progression_type == "stable":
+            return "routine"
+        
+        return "moderate"
+    
+    def _analyze_symptom_temporal_relationship(self, symptom: Dict[str, Any], temporal_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Analyze temporal relationships for individual symptom"""
+        
+        relationships = {
+            "symptom_specific_timing": None,
+            "onset_correlation": None,
+            "duration_assessment": None,
+            "progression_pattern": None,
+            "temporal_urgency": "routine"
+        }
+        
+        symptom_name = symptom["symptom_name"]
+        
+        # Correlate onset indicators with symptom
+        for onset in temporal_data.get("onset_indicators", []):
+            if onset["clinical_significance"] == "high":
+                relationships["onset_correlation"] = {
+                    "type": onset["onset_type"],
+                    "urgency_modifier": "urgent",
+                    "clinical_reasoning": f"Acute onset of {symptom_name} requires immediate evaluation"
+                }
+                relationships["temporal_urgency"] = "urgent"
+                break
+        
+        # Assess duration implications
+        if temporal_data.get("duration_indicators"):
+            longest_duration = max(temporal_data["duration_indicators"], 
+                                 key=lambda x: x.get("confidence", 0))
+            relationships["duration_assessment"] = {
+                "duration_text": longest_duration["matched_text"],
+                "chronicity": "acute" if "day" in longest_duration["matched_text"] else "chronic",
+                "clinical_implication": self._get_duration_clinical_implication(symptom_name, longest_duration["matched_text"])
+            }
+        
+        # Assess progression implications
+        if temporal_data.get("progression_indicators"):
+            for progression in temporal_data["progression_indicators"]:
+                if progression["progression_type"] == "worsening":
+                    relationships["progression_pattern"] = {
+                        "trend": "worsening",
+                        "clinical_concern": f"Worsening {symptom_name} requires urgent evaluation",
+                        "urgency_modifier": "urgent"
+                    }
+                    relationships["temporal_urgency"] = "urgent"
+                    break
+        
+        return relationships
+    
+    def _get_duration_clinical_implication(self, symptom_name: str, duration_text: str) -> str:
+        """Get clinical implications of symptom duration"""
+        
+        implications = {
+            "chest_pain": {
+                "acute": "Acute chest pain requires immediate cardiac evaluation",
+                "chronic": "Chronic chest pain warrants systematic cardiac workup"
+            },
+            "headache": {
+                "acute": "Acute severe headache needs neurological assessment",
+                "chronic": "Chronic headaches require comprehensive headache evaluation"
+            },
+            "dyspnea": {
+                "acute": "Acute dyspnea is a respiratory emergency",
+                "chronic": "Chronic dyspnea needs pulmonary and cardiac evaluation"
+            }
+        }
+        
+        chronicity = "acute" if any(term in duration_text.lower() for term in ["hour", "day", "sudden"]) else "chronic"
+        
+        return implications.get(symptom_name, {}).get(chronicity, f"Duration of {symptom_name} affects diagnostic approach")
     
     def _assess_contextual_severity(self, symptom: Dict[str, Any], text: str) -> Optional[Dict[str, Any]]:
         """Assess severity from context"""
