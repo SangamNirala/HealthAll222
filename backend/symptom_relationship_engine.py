@@ -1308,16 +1308,28 @@ class AdvancedSymptomRelationshipEngine:
         
         return dict(matrix)
     
-    def _build_cluster_hierarchy(self, clusters: List[ClinicalCluster]) -> Dict[str, List[str]]:
-        """Build hierarchical cluster relationships"""
+    def _build_cluster_hierarchy(self, clusters: List[ClinicalCluster]) -> Dict[str, Any]:
+        """Build cluster hierarchy"""
         
-        hierarchy = defaultdict(list)
+        if not clusters:
+            return {}
         
-        # Group clusters by type
-        for cluster in clusters:
-            hierarchy[cluster.cluster_type].append(cluster.cluster_name)
+        # Sort clusters by significance
+        sorted_clusters = sorted(clusters, key=lambda c: len(c.symptom_names), reverse=True)
         
-        return dict(hierarchy)
+        hierarchy = {
+            "primary_cluster": sorted_clusters[0].cluster_name if sorted_clusters else None,
+            "cluster_levels": [
+                {
+                    "name": c.cluster_name,
+                    "symptoms": len(c.symptom_names),
+                    "significance": c.clinical_significance
+                } for c in sorted_clusters
+            ],
+            "total_clusters": len(clusters)
+        }
+        
+        return hierarchy
     
     def _analyze_symptom_sequence(self, symptoms: List[StructuredSymptom], timeline: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Analyze symptom onset sequence"""
