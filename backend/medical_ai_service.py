@@ -10202,7 +10202,8 @@ Generate the follow-up question:
         
         # Adjust based on additional factors
         if parse_result.potential_syndromes:
-            max_syndrome_urgency = max((str(s.urgency_level) for s in parse_result.potential_syndromes), default="routine")
+            syndrome_urgencies = [str(s.urgency_level) for s in parse_result.potential_syndromes]
+            max_syndrome_urgency = max(syndrome_urgencies) if syndrome_urgencies else "routine"
             if max_syndrome_urgency == "emergency":
                 return "emergency"
             elif max_syndrome_urgency == "urgent" and base_urgency == "routine":
