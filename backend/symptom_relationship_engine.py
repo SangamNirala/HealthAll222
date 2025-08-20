@@ -1239,7 +1239,7 @@ class AdvancedSymptomRelationshipEngine:
         
         # Factor 2: Average relationship strength
         if relationships:
-            avg_strength = sum(r.strength for r in relationships) / len(relationships)
+            avg_strength = sum(r.relationship_strength for r in relationships) / len(relationships)
             coherence_factors.append(avg_strength * 0.3)
         
         # Factor 3: Cluster formation (symptoms that cluster are more coherent)
