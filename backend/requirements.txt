@@ -102,3 +102,4 @@ regex
 
 # Phase D Performance Monitoring Dependencies  
 psutil>=5.9.0
+aiofiles>=23.0.0
