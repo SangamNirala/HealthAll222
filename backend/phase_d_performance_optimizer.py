@@ -293,7 +293,7 @@ class AdvancedCachingLayer:
             "cache_hit_rate_percentage": round(cache_hit_rate, 2),
             "memory_hits": self.cache_stats["memory_hits"],
             "pattern_hits": self.cache_stats["pattern_hits"],
-            "redis_hits": self.cache_stats["redis_hits"],
+            "mongodb_hits": self.cache_stats["mongodb_hits"],
             "cache_misses": self.cache_stats["cache_misses"],
             "memory_cache_size": len(self.memory_cache),
             "pattern_cache_size": len(self.pattern_cache),
