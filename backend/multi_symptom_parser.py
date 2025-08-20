@@ -487,7 +487,13 @@ class RevolutionaryMultiSymptomParser:
         raw_symptoms = []
         pattern_matches = []
         
-        # Extract symptoms from each pattern category
+        # REVOLUTIONARY FIX: Enhanced multi-symptom extraction with proper symptom identification
+        
+        # Phase 1: Direct symptom recognition from comprehensive symptom library
+        direct_symptoms = self._extract_direct_symptoms(text)
+        raw_symptoms.extend(direct_symptoms)
+        
+        # Phase 2: Pattern-based extraction with improved logic
         for category, patterns in self.multi_symptom_patterns.items():
             category_matches = []
             
@@ -505,8 +511,8 @@ class RevolutionaryMultiSymptomParser:
                     }
                     category_matches.append(match_data)
                     
-                    # Extract individual symptoms from the match
-                    extracted_symptoms = self._extract_symptoms_from_match(match_data)
+                    # Extract individual symptoms from the match with improved logic
+                    extracted_symptoms = self._extract_symptoms_from_match_enhanced(match_data, text)
                     raw_symptoms.extend(extracted_symptoms)
             
             pattern_matches.append({
@@ -515,10 +521,18 @@ class RevolutionaryMultiSymptomParser:
                 "count": len(category_matches)
             })
         
+        # Phase 3: Remove duplicates and consolidate symptoms
+        consolidated_symptoms = self._consolidate_symptoms(raw_symptoms)
+        
+        # Phase 4: Enhance with contextual analysis
+        enhanced_symptoms = self._enhance_symptoms_with_context(consolidated_symptoms, text)
+        
         return {
-            "raw_symptoms": raw_symptoms,
+            "raw_symptoms": enhanced_symptoms,
             "pattern_matches": pattern_matches,
-            "total_patterns_matched": sum(len(cat["matches"]) for cat in pattern_matches)
+            "total_patterns_matched": sum(len(cat["matches"]) for cat in pattern_matches),
+            "extraction_method": "enhanced_multi_symptom_v3.2",
+            "consolidation_applied": len(raw_symptoms) != len(consolidated_symptoms)
         }
     
     def _extract_symptoms_from_match(self, match_data: Dict[str, Any]) -> List[Dict[str, Any]]:
