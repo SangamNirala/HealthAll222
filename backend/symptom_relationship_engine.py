@@ -982,32 +982,144 @@ class AdvancedSymptomRelationshipEngine:
             return UrgencyLevel.ROUTINE
     
     def _detect_medical_syndromes(self, symptoms: List[StructuredSymptom], clusters: List[ClinicalCluster]) -> List[MedicalSyndrome]:
-        """Detect specific medical syndromes from symptoms and clusters"""
+        """
+        CRITICAL FIX: Detect medical syndromes from symptom patterns
+        """
         
-        syndromes = []
+        detected_syndromes = []
         
-        for cluster in clusters:
-            if cluster.cluster_type == "medical_syndrome" and cluster.medical_syndrome:
-                
-                syndrome_data = self.clinical_syndromes.get(cluster.medical_syndrome, {})
-                
+        if len(symptoms) < 2:
+            return detected_syndromes
+        
+        symptom_names = [s.symptom_name.lower() for s in symptoms]
+        
+        # Define syndrome patterns with confidence thresholds
+        syndrome_patterns = {
+            "migraine_complex": {
+                "required": ["headache"],
+                "supporting": ["nausea", "vomiting", "dizziness", "light_sensitivity", "sound_sensitivity"],
+                "confidence_threshold": 0.70,
+                "clinical_significance": "moderate",
+                "urgency": "routine"
+            },
+            "acute_coronary_syndrome": {
+                "required": ["chest_pain"],
+                "supporting": ["dyspnea", "sweating", "nausea", "weakness", "arm_pain", "jaw_pain"],
+                "confidence_threshold": 0.80,
+                "clinical_significance": "critical",
+                "urgency": "emergency"
+            },
+            "tension_headache_syndrome": {
+                "required": ["headache"],
+                "supporting": ["neck_pain", "stress", "fatigue", "concentration_difficulty", "muscle_tension"],
+                "confidence_threshold": 0.65,
+                "clinical_significance": "routine",
+                "urgency": "routine"
+            },
+            "gastroenteritis_syndrome": {
+                "required": ["nausea"],
+                "supporting": ["vomiting", "diarrhea", "abdominal_pain", "fever", "fatigue", "dehydration"],
+                "confidence_threshold": 0.70,
+                "clinical_significance": "moderate",
+                "urgency": "routine"
+            },
+            "anxiety_disorder_complex": {
+                "required": ["anxiety"],
+                "supporting": ["insomnia", "fatigue", "concentration_difficulty", "muscle_tension", "palpitations"],
+                "confidence_threshold": 0.65,
+                "clinical_significance": "moderate",
+                "urgency": "routine"
+            },
+            "respiratory_distress_syndrome": {
+                "required": ["dyspnea"],
+                "supporting": ["chest_pain", "cough", "wheezing", "fatigue", "anxiety"],
+                "confidence_threshold": 0.75,
+                "clinical_significance": "urgent",
+                "urgency": "urgent"
+            }
+        }
+        
+        # Check each syndrome pattern
+        for syndrome_name, pattern in syndrome_patterns.items():
+            syndrome_confidence = self._calculate_syndrome_confidence(symptom_names, pattern)
+            
+            if syndrome_confidence >= pattern["confidence_threshold"]:
                 syndrome = MedicalSyndrome(
-                    syndrome_name=cluster.medical_syndrome,
-                    syndrome_category=self._classify_syndrome_category(cluster.medical_syndrome),
-                    confidence_score=cluster.cluster_confidence,
-                    supporting_symptoms=cluster.symptoms_in_cluster,
-                    urgency_level=cluster.urgency_implications,
-                    clinical_reasoning=cluster.clinical_reasoning,
-                    diagnostic_criteria_met=len(cluster.symptoms_in_cluster),
-                    diagnostic_criteria_total=len(syndrome_data.get("required_symptoms", []) + syndrome_data.get("major_criteria", [])),
-                    treatment_urgency=self._assess_treatment_urgency(cluster.urgency_implications),
-                    monitoring_requirements=self._get_monitoring_requirements(cluster.medical_syndrome),
-                    prognostic_implications=self._get_prognostic_implications(cluster.medical_syndrome)
+                    syndrome_name=syndrome_name,
+                    confidence_score=syndrome_confidence,
+                    supporting_symptoms=[s for s in symptom_names if s in pattern["required"] + pattern["supporting"]],
+                    clinical_significance=pattern["clinical_significance"],
+                    urgency_level=UrgencyLevel(pattern["urgency"]),
+                    differential_considerations=self._get_differential_considerations(syndrome_name),
+                    recommended_workup=self._get_recommended_workup(syndrome_name)
                 )
-                
-                syndromes.append(syndrome)
+                detected_syndromes.append(syndrome)
         
-        return syndromes
+        # Sort by confidence and clinical significance
+        detected_syndromes.sort(key=lambda s: (s.confidence_score, self._urgency_weight(s.urgency_level)), reverse=True)
+        
+        return detected_syndromes
+    
+    def _calculate_syndrome_confidence(self, symptom_names: List[str], pattern: Dict[str, Any]) -> float:
+        """Calculate confidence for syndrome detection"""
+        
+        # Check required symptoms
+        required_present = sum(1 for req in pattern["required"] if req in symptom_names)
+        required_ratio = required_present / len(pattern["required"]) if pattern["required"] else 0
+        
+        if required_ratio < 1.0:  # All required symptoms must be present
+            return 0.0
+        
+        # Check supporting symptoms
+        supporting_present = sum(1 for sup in pattern["supporting"] if sup in symptom_names)
+        supporting_ratio = supporting_present / len(pattern["supporting"]) if pattern["supporting"] else 0
+        
+        # Calculate weighted confidence
+        base_confidence = 0.60  # Base for having all required symptoms
+        supporting_bonus = supporting_ratio * 0.35  # Up to 35% bonus for supporting symptoms
+        completeness_bonus = min(0.05, len(symptom_names) * 0.01)  # Small bonus for completeness
+        
+        total_confidence = base_confidence + supporting_bonus + completeness_bonus
+        
+        return min(0.95, total_confidence)
+    
+    def _get_differential_considerations(self, syndrome_name: str) -> List[str]:
+        """Get differential diagnostic considerations for syndrome"""
+        
+        differentials = {
+            "migraine_complex": ["Tension headache", "Cluster headache", "Sinusitis", "Intracranial pathology"],
+            "acute_coronary_syndrome": ["Pulmonary embolism", "Aortic dissection", "Pericarditis", "GERD"],
+            "tension_headache_syndrome": ["Migraine", "Cervical spondylosis", "TMJ disorder"],
+            "gastroenteritis_syndrome": ["Food poisoning", "IBD", "Appendicitis", "Viral syndrome"],
+            "anxiety_disorder_complex": ["Hyperthyroidism", "Cardiac arrhythmia", "Substance withdrawal"],
+            "respiratory_distress_syndrome": ["Asthma", "COPD", "Pneumonia", "Heart failure"]
+        }
+        
+        return differentials.get(syndrome_name, ["Consider alternative diagnoses"])
+    
+    def _get_recommended_workup(self, syndrome_name: str) -> List[str]:
+        """Get recommended diagnostic workup for syndrome"""
+        
+        workups = {
+            "migraine_complex": ["Headache history", "Neurological exam", "Consider MRI if atypical"],
+            "acute_coronary_syndrome": ["ECG", "Troponins", "CXR", "Cardiology consult"],
+            "tension_headache_syndrome": ["Stress assessment", "Cervical spine exam", "Sleep history"],
+            "gastroenteritis_syndrome": ["Stool culture", "CBC", "Electrolytes", "Hydration status"],
+            "anxiety_disorder_complex": ["Anxiety scales", "TSH", "Consider cardiology if palpitations"],
+            "respiratory_distress_syndrome": ["Pulse oximetry", "CXR", "ABG", "Peak flow"]
+        }
+        
+        return workups.get(syndrome_name, ["Standard clinical assessment"])
+    
+    def _urgency_weight(self, urgency: UrgencyLevel) -> int:
+        """Convert urgency level to numeric weight"""
+        weights = {
+            UrgencyLevel.CRITICAL: 4,
+            UrgencyLevel.EMERGENCY: 3,
+            UrgencyLevel.URGENT: 2,
+            UrgencyLevel.ROUTINE: 1
+        }
+        return weights.get(urgency, 1)
     
     def _classify_syndrome_category(self, syndrome_name: str) -> str:
         """Classify syndrome into medical category"""
