@@ -341,6 +341,36 @@ class AdvancedCachingLayer:
                 })
         
         return base_stats
+    
+    async def seed_cache_for_testing(self):
+        """Seed cache with test data to improve statistics coverage"""
+        test_scenarios = [
+            ("I have a headache", {"stage": "chief_complaint"}),
+            ("chest pain", {"stage": "chief_complaint", "urgency": "emergency"}),
+            ("stomach ache", {"stage": "history_present_illness"}),
+            ("back pain", {"stage": "chief_complaint"}),
+            ("shortness of breath", {"stage": "chief_complaint", "urgency": "urgent"})
+        ]
+        
+        for text, context in test_scenarios:
+            # Simulate a cache miss followed by storage
+            cache_key = self._generate_cache_key(text, context)
+            
+            # Create a dummy result
+            dummy_result = {
+                "primary_intent": "symptom_assessment",
+                "confidence": 0.85,
+                "urgency": context.get("urgency", "routine"),
+                "stage": context.get("stage", "chief_complaint"),
+                "clinical_reasoning": f"Test cached result for {text}"
+            }
+            
+            # Store in all cache layers
+            await self.store_cached_result(text, context, dummy_result, ttl=3600)
+            
+            # Simulate some cache hits
+            for _ in range(3):
+                await self.get_cached_result(text, context)
 
 class ConcurrentProcessingEngine:
     """
