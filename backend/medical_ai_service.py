@@ -10198,11 +10198,11 @@ Generate the follow-up question:
         """Assess overall urgency based on multi-symptom analysis"""
         
         # Use the built-in urgency assessment from parse result
-        base_urgency = parse_result.urgency_indicators.urgency_level.value
+        base_urgency = str(parse_result.urgency_indicators.urgency_level)
         
         # Adjust based on additional factors
         if parse_result.potential_syndromes:
-            max_syndrome_urgency = max(s.urgency_level.value for s in parse_result.potential_syndromes)
+            max_syndrome_urgency = max(str(s.urgency_level) for s in parse_result.potential_syndromes)
             if max_syndrome_urgency == "emergency":
                 return "emergency"
             elif max_syndrome_urgency == "urgent" and base_urgency == "routine":
