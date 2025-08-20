@@ -1315,15 +1315,15 @@ class AdvancedSymptomRelationshipEngine:
             return {}
         
         # Sort clusters by significance
-        sorted_clusters = sorted(clusters, key=lambda c: len(c.symptom_names), reverse=True)
+        sorted_clusters = sorted(clusters, key=lambda c: len(c.symptoms_in_cluster), reverse=True)
         
         hierarchy = {
             "primary_cluster": sorted_clusters[0].cluster_name if sorted_clusters else None,
             "cluster_levels": [
                 {
                     "name": c.cluster_name,
-                    "symptoms": len(c.symptom_names),
-                    "significance": c.clinical_significance
+                    "symptoms": len(c.symptoms_in_cluster),
+                    "significance": c.urgency_implications.value if hasattr(c.urgency_implications, 'value') else str(c.urgency_implications)
                 } for c in sorted_clusters
             ],
             "total_clusters": len(clusters)
