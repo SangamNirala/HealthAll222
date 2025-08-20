@@ -91,6 +91,20 @@ class AdvancedSymptomRelationshipEngine:
             # PHASE 6: Relationship reasoning
             clinical_reasoning = self._generate_relationship_reasoning(symptoms, identified_clusters, medical_syndromes)
             
+            # PHASE 7: REVOLUTIONARY FIX - Combined urgency analysis
+            urgency_analysis = self.urgency_analyzer.analyze_combination_urgency(symptoms)
+            
+            # Update clusters and syndromes with urgency information
+            for cluster in identified_clusters:
+                if cluster.urgency_implications == UrgencyLevel.ROUTINE:
+                    # Update cluster urgency based on combination analysis
+                    cluster.urgency_implications = urgency_analysis["urgency_level"]
+            
+            for syndrome in medical_syndromes:
+                if syndrome.urgency_level == UrgencyLevel.ROUTINE:
+                    # Update syndrome urgency based on combination analysis  
+                    syndrome.urgency_level = urgency_analysis["urgency_level"]
+            
             # Assemble comprehensive relationship map
             relationship_map = SymptomRelationshipMap(
                 symptom_pairs=symptom_pairs,
@@ -104,6 +118,10 @@ class AdvancedSymptomRelationshipEngine:
                 clinical_coherence_score=clinical_coherence,
                 relationship_clinical_reasoning=clinical_reasoning
             )
+            
+            # Add urgency analysis metadata to relationship map
+            if not hasattr(relationship_map, 'urgency_analysis'):
+                relationship_map.urgency_analysis = urgency_analysis
             
             logger.info(f"Mapped relationships for {len(symptoms)} symptoms: {len(symptom_pairs)} pairs, {len(identified_clusters)} clusters, {len(medical_syndromes)} syndromes")
             
