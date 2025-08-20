@@ -571,7 +571,7 @@ def create_structured_symptom(
     location: str,
     category: SymptomCategory,
     confidence: float = 0.0,
-    severity: SeverityLevel = SeverityLevel.UNKNOWN,
+    severity: SeverityLevel = SeverityLevel.NONE,
     **kwargs
 ) -> StructuredSymptom:
     """Factory function to create structured symptom with defaults"""
