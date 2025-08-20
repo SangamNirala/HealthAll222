@@ -525,26 +525,44 @@ class MultiSymptomParseResult:
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization"""
-        return {
-            "primary_symptoms": [asdict(s) for s in self.primary_symptoms],
-            "secondary_symptoms": [asdict(s) for s in self.secondary_symptoms],
-            "associated_symptoms": [asdict(s) for s in self.associated_symptoms],
-            "temporal_data": asdict(self.temporal_data),
-            "onset_analysis": asdict(self.onset_analysis),
-            "progression_patterns": asdict(self.progression_patterns),
-            "severity_assessment": asdict(self.severity_assessment),
-            "functional_impact": asdict(self.functional_impact),
-            "urgency_indicators": asdict(self.urgency_indicators),
-            "symptom_relationships": asdict(self.symptom_relationships),
-            "clinical_clusters": [asdict(c) for c in self.clinical_clusters],
-            "potential_syndromes": [asdict(s) for s in self.potential_syndromes],
-            "confidence_metrics": asdict(self.confidence_metrics),
-            "uncertainty_indicators": asdict(self.uncertainty_indicators),
-            "clinical_reasoning": asdict(self.clinical_reasoning),
-            "parsing_metadata": asdict(self.parsing_metadata),
-            "processing_performance": asdict(self.processing_performance),
-            "integration_hooks": asdict(self.integration_hooks)
-        }
+        import logging
+        result = {}
+        
+        try:
+            result["primary_symptoms"] = [asdict(s) for s in self.primary_symptoms]
+            result["secondary_symptoms"] = [asdict(s) for s in self.secondary_symptoms]
+            result["associated_symptoms"] = [asdict(s) for s in self.associated_symptoms]
+            result["temporal_data"] = asdict(self.temporal_data)
+            result["onset_analysis"] = asdict(self.onset_analysis)
+            result["progression_patterns"] = asdict(self.progression_patterns)
+            result["severity_assessment"] = asdict(self.severity_assessment)
+            result["functional_impact"] = asdict(self.functional_impact)
+            result["urgency_indicators"] = asdict(self.urgency_indicators)
+        except Exception as e:
+            logging.error(f"Error converting basic fields to dict: {e}")
+            raise e
+        
+        try:
+            result["symptom_relationships"] = asdict(self.symptom_relationships)
+        except Exception as e:
+            logging.error(f"Error converting symptom_relationships to dict: {e}")
+            logging.error(f"symptom_relationships type: {type(self.symptom_relationships)}")
+            raise e
+            
+        try:
+            result["clinical_clusters"] = [asdict(c) for c in self.clinical_clusters]
+            result["potential_syndromes"] = [asdict(s) for s in self.potential_syndromes]
+            result["confidence_metrics"] = asdict(self.confidence_metrics)
+            result["uncertainty_indicators"] = asdict(self.uncertainty_indicators)
+            result["clinical_reasoning"] = asdict(self.clinical_reasoning)
+            result["parsing_metadata"] = asdict(self.parsing_metadata)
+            result["processing_performance"] = asdict(self.processing_performance)
+            result["integration_hooks"] = asdict(self.integration_hooks)
+        except Exception as e:
+            logging.error(f"Error converting remaining fields to dict: {e}")
+            raise e
+            
+        return result
     
     def get_summary(self) -> Dict[str, Any]:
         """Get concise summary for quick analysis"""
