@@ -47,7 +47,7 @@ class PerformanceTier(str, Enum):
 class CacheStrategy(str, Enum):
     """Caching strategy options"""
     MEMORY_ONLY = "memory_only"
-    REDIS_DISTRIBUTED = "redis_distributed"
+    MONGODB_DISTRIBUTED = "mongodb_distributed"
     HYBRID = "hybrid"
     PATTERN_PRECOMPUTE = "pattern_precompute"
 
