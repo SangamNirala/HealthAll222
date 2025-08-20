@@ -314,6 +314,33 @@ class AdvancedCachingLayer:
             stats["cleanup_operations"] = 0
         
         return stats
+    
+    async def get_detailed_cache_statistics(self) -> Dict[str, Any]:
+        """Get detailed cache statistics including async MongoDB data"""
+        base_stats = self.get_cache_statistics()
+        
+        # Get MongoDB statistics if available
+        if self.mongodb_cache and hasattr(self.mongodb_cache, 'is_connected') and self.mongodb_cache.is_connected:
+            try:
+                mongodb_stats = await self.mongodb_cache.get_cache_statistics()
+                base_stats.update({
+                    "mongodb_cache_size": mongodb_stats.get("mongodb_cache_size", 0),
+                    "storage_operations": mongodb_stats.get("storage_operations", 0),
+                    "cleanup_operations": mongodb_stats.get("cleanup_operations", 0),
+                    "mongodb_connected": mongodb_stats.get("mongodb_connected", False),
+                    "mongodb_available": mongodb_stats.get("mongodb_available", False)
+                })
+            except Exception as e:
+                logger.warning(f"Failed to get MongoDB statistics: {e}")
+                base_stats.update({
+                    "mongodb_cache_size": 0,
+                    "storage_operations": 0,
+                    "cleanup_operations": 0,
+                    "mongodb_connected": False,
+                    "mongodb_available": False
+                })
+        
+        return base_stats
 
 class ConcurrentProcessingEngine:
     """
