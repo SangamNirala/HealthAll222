@@ -15380,8 +15380,18 @@ async def parse_multi_symptom_expression(request: MultiSymptomParseRequest):
                 consultation_id=f"multisymptom_{int(time.time())}",
                 current_stage=MedicalInterviewStage.CHIEF_COMPLAINT,
                 demographics=request.context.get("demographics", {}) if request.context else {},
+                chief_complaint=request.text,
                 symptom_data=request.context.get("symptom_data", {}) if request.context else {},
-                medical_history=request.context.get("medical_history", {}) if request.context else {}
+                medical_history=request.context.get("medical_history", {}) if request.context else {},
+                medications=request.context.get("medications", []) if request.context else [],
+                allergies=request.context.get("allergies", []) if request.context else [],
+                social_history=request.context.get("social_history", {}) if request.context else {},
+                family_history=request.context.get("family_history", {}) if request.context else {},
+                risk_factors=request.context.get("risk_factors", []) if request.context else [],
+                red_flags=request.context.get("red_flags", []) if request.context else [],
+                emergency_level="routine",
+                clinical_hypotheses=request.context.get("clinical_hypotheses", []) if request.context else [],
+                confidence_score=0.0
             )
         
         # Execute revolutionary multi-symptom parsing
