@@ -558,6 +558,10 @@ class RevolutionaryMultiSymptomParser:
         severity_confidence = severity_analysis.get("severity_confidence", 0.7)
         relationship_confidence = relationship_analysis.get("relationship_confidence", 0.7)
         
+        # DEBUG: Log temporal analysis for debugging confidence issues
+        logger.info(f"TEMPORAL CONFIDENCE DEBUG - temporal_analysis: {temporal_analysis}")
+        logger.info(f"TEMPORAL CONFIDENCE DEBUG - extracted temporal_confidence: {temporal_confidence}")
+        
         overall_confidence = (symptom_confidence * 0.4 + temporal_confidence * 0.2 + 
                             severity_confidence * 0.2 + relationship_confidence * 0.2)
         
