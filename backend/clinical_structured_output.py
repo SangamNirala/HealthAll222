@@ -180,7 +180,7 @@ class SeverityAssessment:
     """Comprehensive severity assessment across multiple dimensions"""
     
     # Overall severity
-    overall_severity: SeverityLevel = SeverityLevel.UNKNOWN
+    overall_severity: SeverityLevel = SeverityLevel.NONE
     overall_severity_score: float = 0.0  # 0-10 scale
     severity_confidence: float = 0.0
     
