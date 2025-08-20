@@ -465,12 +465,22 @@ class RevolutionaryMultiSymptomParser:
             # Use existing text normalizer
             normalized_result = self.text_normalizer.normalize_medical_text(text)
             
-            return {
-                "normalized_text": normalized_result.get("normalized_text", text),
-                "confidence": normalized_result.get("confidence", 0.8),
-                "corrections_applied": normalized_result.get("corrections_applied", []),
-                "normalization_metadata": normalized_result.get("metadata", {})
-            }
+            # Check if it's a NormalizationResult object
+            if hasattr(normalized_result, 'normalized_text'):
+                return {
+                    "normalized_text": normalized_result.normalized_text,
+                    "confidence": getattr(normalized_result, 'confidence', 0.8),
+                    "corrections_applied": getattr(normalized_result, 'corrections_applied', []),
+                    "normalization_metadata": getattr(normalized_result, 'metadata', {})
+                }
+            else:
+                # Fallback for dictionary format
+                return {
+                    "normalized_text": normalized_result.get("normalized_text", text),
+                    "confidence": normalized_result.get("confidence", 0.8),
+                    "corrections_applied": normalized_result.get("corrections_applied", []),
+                    "normalization_metadata": normalized_result.get("metadata", {})
+                }
             
         except Exception as e:
             logger.warning(f"Text normalization integration failed: {e}")
