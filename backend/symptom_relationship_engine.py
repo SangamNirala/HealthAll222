@@ -17,7 +17,7 @@ import re
 import math
 
 # Import clinical data structures
-from backend.clinical_structured_output import (
+from clinical_structured_output import (
     SymptomRelationship, ClinicalCluster, MedicalSyndrome, SymptomRelationshipMap,
     StructuredSymptom, UrgencyLevel, SymptomCategory
 )
