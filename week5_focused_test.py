@@ -18,7 +18,7 @@ from datetime import datetime
 import traceback
 
 # Backend URL from environment
-BACKEND_URL = "https://redis-to-mongo.preview.emergentagent.com/api"
+BACKEND_URL = "https://health-parser.preview.emergentagent.com/api"
 
 def test_week5_integration_testing():
     """Test Week 5 Integration Testing with correct request format"""
