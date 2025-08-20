@@ -172,21 +172,20 @@ class AdvancedCachingLayer:
             logger.debug(f"Pattern cache hit for text: {text[:50]}...")
             return pattern_result
         
-        # Try Redis distributed cache
-        if self.redis_client:
+        # Try MongoDB distributed cache
+        if self.mongodb_cache:
             try:
-                redis_result = await self.redis_client.get(f"intent_cache:{cache_key}")
-                if redis_result:
-                    result = json.loads(redis_result)
+                mongodb_result = await self.mongodb_cache.get_cached_result(text, context)
+                if mongodb_result:
                     self.cache_stats["cache_hits"] += 1
-                    self.cache_stats["redis_hits"] += 1
+                    self.cache_stats["mongodb_hits"] += 1
                     # Store in memory cache for future access
-                    self.memory_cache[cache_key] = result
+                    self.memory_cache[cache_key] = mongodb_result
                     self._update_cache_access(cache_key)
-                    logger.debug(f"Redis cache hit for key: {cache_key}")
-                    return result
+                    logger.debug(f"MongoDB cache hit for key: {cache_key}")
+                    return mongodb_result
             except Exception as e:
-                logger.error(f"Redis cache access failed: {e}")
+                logger.error(f"MongoDB cache access failed: {e}")
         
         # Cache miss
         self.cache_stats["cache_misses"] += 1
