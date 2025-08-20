@@ -12000,8 +12000,8 @@ async def get_phase_d_performance_status():
     try:
         performance_status = await get_performance_status()
         
-        # Get caching system information
-        caching_info = performance_status.get("caching_layer", {})
+        # Get caching system information from components
+        caching_info = performance_status.get("components", {}).get("caching_layer", {})
         
         return {
             "status": "operational",
@@ -12010,7 +12010,10 @@ async def get_phase_d_performance_status():
                 "cache_type": "mongodb_distributed",
                 "mongodb_connected": caching_info.get("mongodb_available", False),
                 "cache_hit_rate": caching_info.get("cache_hit_rate_percentage", 0),
-                "memory_cache_size": caching_info.get("memory_cache_size", 0)
+                "memory_cache_size": caching_info.get("memory_cache_size", 0),
+                "mongodb_cache_size": caching_info.get("mongodb_cache_size", 0),
+                "total_requests": caching_info.get("total_requests", 0),
+                "cache_hits": caching_info.get("cache_hits", 0)
             },
             "phase_d_performance": performance_status,
             "optimization_active": True,
