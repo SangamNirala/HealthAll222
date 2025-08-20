@@ -10016,7 +10016,10 @@ Generate the follow-up question:
             }
             
         except Exception as e:
+            import traceback
             logger.error(f"Error in multi-symptom parsing: {str(e)}")
+            logger.error(f"Error type: {type(e)}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
             return {
                 "success": False,
                 "error": str(e),
