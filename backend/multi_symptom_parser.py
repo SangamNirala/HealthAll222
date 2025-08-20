@@ -1655,6 +1655,174 @@ class RevolutionaryMultiSymptomParser:
         
         return list(set(emergency_symptoms))
     
+    def _generate_temporal_reasoning_enhanced(self, symptoms: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Generate enhanced temporal reasoning with comprehensive clinical analysis"""
+        
+        temporal_reasoning = {
+            "clinical_logic": [],
+            "reasoning_chain": [],
+            "evidence": []
+        }
+        
+        # Analyze temporal data from symptoms
+        temporal_indicators = []
+        for symptom in symptoms:
+            temporal_data = symptom.get("temporal_data", {})
+            if temporal_data.get("duration_indicators"):
+                temporal_indicators.extend(temporal_data["duration_indicators"])
+            if symptom.get("temporal_relationships"):
+                temporal_reasoning["clinical_logic"].append(
+                    f"Temporal analysis for {symptom['symptom_name']}: {symptom['temporal_relationships'].get('temporal_urgency', 'routine')} urgency"
+                )
+        
+        if temporal_indicators:
+            temporal_reasoning["clinical_logic"].append("Temporal pattern analysis reveals important timing relationships")
+            temporal_reasoning["evidence"].append(f"Identified {len(temporal_indicators)} temporal indicators affecting clinical assessment")
+            temporal_reasoning["reasoning_chain"].append({
+                "step": "temporal_analysis",
+                "reasoning": "Symptom timing and progression patterns analyzed for clinical significance"
+            })
+        
+        return temporal_reasoning
+    
+    def _generate_severity_reasoning_enhanced(self, symptoms: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Generate enhanced severity reasoning with comprehensive assessment"""
+        
+        severity_reasoning = {
+            "clinical_logic": [],
+            "evidence": [],
+            "actions": []
+        }
+        
+        severe_symptoms = [s for s in symptoms if s.get("contextual_severity", {}).get("indicators", [])]
+        
+        if severe_symptoms:
+            severity_reasoning["clinical_logic"].append("Severity assessment identifies high-impact symptoms requiring urgent attention")
+            severity_reasoning["evidence"].append(f"Severe symptom burden affecting {len(severe_symptoms)} symptoms")
+            severity_reasoning["actions"].append("Immediate severity assessment and pain/symptom management protocols")
+        
+        return severity_reasoning
+    
+    def _generate_guidelines_reasoning(self, symptoms: List[Dict[str, Any]], emergency_symptoms: List[str]) -> Dict[str, Any]:
+        """Generate clinical guidelines and evidence-based reasoning"""
+        
+        guidelines = {
+            "guidelines": [],
+            "evidence_based": []
+        }
+        
+        if emergency_symptoms:
+            guidelines["guidelines"].extend([
+                "Emergency Medicine Clinical Guidelines for Acute Presentations",
+                "AHA/ACC Guidelines for Chest Pain Evaluation",
+                "Emergency Triage and Treatment Protocols"
+            ])
+            guidelines["evidence_based"].extend([
+                "Evidence-based emergency medicine protocols for life-threatening presentations",
+                "Clinical decision rules for emergency department triage and management"
+            ])
+        
+        return guidelines
+    
+    def _generate_differential_reasoning(self, symptoms: List[Dict[str, Any]], affected_systems: List[str]) -> Dict[str, Any]:
+        """Generate comprehensive differential diagnosis reasoning"""
+        
+        differential = {
+            "differentials": [],
+            "rule_outs": [],
+            "hypotheses": []
+        }
+        
+        symptom_names = [s["symptom_name"].lower() for s in symptoms]
+        
+        if "chest_pain" in symptom_names:
+            differential["differentials"].extend([
+                "Acute myocardial infarction",
+                "Unstable angina pectoris", 
+                "Pulmonary embolism",
+                "Aortic dissection",
+                "Pneumothorax"
+            ])
+            differential["rule_outs"].extend([
+                "Exclude STEMI via ECG and cardiac enzymes",
+                "Rule out pulmonary embolism with D-dimer and CT-PA if indicated"
+            ])
+        
+        if "headache" in symptom_names:
+            differential["differentials"].extend([
+                "Primary headache disorders (migraine, tension-type)",
+                "Secondary headache (intracranial pathology)",
+                "Medication overuse headache"
+            ])
+            differential["rule_outs"].extend([
+                "Exclude intracranial hemorrhage with neuroimaging if indicated",
+                "Rule out meningitis with CSF analysis if clinical concern"
+            ])
+        
+        return differential
+    
+    def _generate_comprehensive_recommendations(self, symptoms: List[Dict[str, Any]], emergency_symptoms: List[str], affected_systems: List[str]) -> List[str]:
+        """Generate comprehensive clinical recommendations"""
+        
+        recommendations = []
+        
+        if emergency_symptoms:
+            recommendations.extend([
+                "Immediate emergency medical evaluation required",
+                "Continuous cardiac and vital sign monitoring",
+                "Establish IV access and obtain emergency laboratory studies"
+            ])
+        
+        if len(symptoms) > 3:
+            recommendations.append("Comprehensive multi-system evaluation due to complex symptom presentation")
+        
+        if "cardiovascular" in affected_systems:
+            recommendations.append("Cardiology consultation for specialized cardiac evaluation")
+        
+        if "neurological" in affected_systems:
+            recommendations.append("Neurological assessment with focused neurological examination")
+        
+        return recommendations
+    
+    def _generate_confidence_reasoning(self, confidence_analysis: ConfidenceAnalysis) -> List[str]:
+        """Generate confidence-based clinical reasoning"""
+        
+        confidence_reasoning = []
+        
+        if confidence_analysis.overall_confidence > 0.8:
+            confidence_reasoning.append("High confidence in clinical assessment supports reliable diagnostic impressions")
+        elif confidence_analysis.overall_confidence < 0.6:
+            confidence_reasoning.append("Lower confidence assessment suggests need for additional clinical information and clarification")
+        else:
+            confidence_reasoning.append("Moderate confidence level - clinical correlation with additional history recommended")
+        
+        return confidence_reasoning
+    
+    def _calculate_reasoning_confidence_enhanced(self, symptoms: List[Dict[str, Any]], clinical_logic: List[str]) -> float:
+        """Calculate enhanced reasoning confidence"""
+        base_confidence = len(clinical_logic) / max(20, len(symptoms) * 4)  # Expect ~4 reasoning elements per symptom
+        return min(1.0, max(0.3, base_confidence))
+    
+    def _calculate_reasoning_completeness_enhanced(self, symptoms: List[Dict[str, Any]], clinical_logic: List[str], evidence_synthesis: List[str]) -> float:
+        """Calculate enhanced reasoning completeness"""
+        expected_elements = len(symptoms) * 5 + 10  # Base expectation
+        actual_elements = len(clinical_logic) + len(evidence_synthesis)
+        return min(1.0, actual_elements / expected_elements)
+    
+    def _assess_clinical_appropriateness_enhanced(self, symptoms: List[Dict[str, Any]], clinical_logic: List[str], differential_considerations: List[str]) -> float:
+        """Assess enhanced clinical appropriateness"""
+        appropriateness_score = 0.7  # Base score
+        
+        # Boost for comprehensive reasoning
+        if len(clinical_logic) > 10:
+            appropriateness_score += 0.1
+        
+        # Boost for differential considerations
+        if len(differential_considerations) > 3:
+            appropriateness_score += 0.1
+        
+        return min(1.0, appropriateness_score)
+    
     def _identify_potential_syndromes_from_symptoms(self, symptoms: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Identify potential medical syndromes from symptom patterns"""
         
