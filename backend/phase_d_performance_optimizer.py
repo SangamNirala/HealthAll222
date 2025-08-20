@@ -1087,11 +1087,14 @@ async def initialize_performance_optimization():
 
 async def get_performance_status() -> Dict[str, Any]:
     """Get comprehensive performance optimization status"""
+    # Get detailed cache statistics including MongoDB data
+    caching_stats = await advanced_caching_layer.get_detailed_cache_statistics()
+    
     return {
         "phase_d_status": "operational",
         "algorithm_version": "Phase_D_Production_Excellence_v1.0",
         "components": {
-            "caching_layer": advanced_caching_layer.get_cache_statistics(),
+            "caching_layer": caching_stats,
             "concurrent_processing": concurrent_processing_engine.get_processing_statistics(),
             "load_balancing": load_balancing_optimizer.get_scalability_metrics(),
             "benchmarking": performance_benchmarking_system.get_benchmark_summary()
