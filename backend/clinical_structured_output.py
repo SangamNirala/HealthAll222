@@ -547,7 +547,13 @@ class MultiSymptomParseResult:
         except Exception as e:
             logging.error(f"Error converting symptom_relationships to dict: {e}")
             logging.error(f"symptom_relationships type: {type(self.symptom_relationships)}")
-            raise e
+            # Temporarily use a fallback to prevent complete failure
+            result["symptom_relationships"] = {
+                "error": "Serialization failed",
+                "symptom_pairs_count": len(self.symptom_relationships.symptom_pairs),
+                "clusters_count": len(self.symptom_relationships.identified_clusters),
+                "syndromes_count": len(self.symptom_relationships.medical_syndromes)
+            }
             
         try:
             result["clinical_clusters"] = [asdict(c) for c in self.clinical_clusters]
