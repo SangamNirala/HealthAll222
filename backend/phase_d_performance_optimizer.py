@@ -29,9 +29,10 @@ import multiprocessing as mp
 from functools import lru_cache
 import numpy as np
 from enum import Enum
-import redis
-import aioredis
 from contextlib import asynccontextmanager
+
+# Import MongoDB caching system to replace Redis
+from mongodb_caching_system import MongoDBCachingSystem
 
 # Configure logging
 logger = logging.getLogger(__name__)
