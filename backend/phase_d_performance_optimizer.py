@@ -90,7 +90,7 @@ class AdvancedCachingLayer:
         self.memory_cache = {}  # In-memory cache for fastest access
         self.pattern_cache = {}  # Pre-computed pattern results
         self.confidence_cache = {}  # Cached confidence calculations
-        self.redis_client = None  # Distributed cache (when available)
+        self.mongodb_cache = None  # MongoDB distributed cache (when available)
         
         # Cache statistics
         self.cache_stats = {
@@ -98,7 +98,7 @@ class AdvancedCachingLayer:
             "cache_hits": 0,
             "memory_hits": 0,
             "pattern_hits": 0,
-            "redis_hits": 0,
+            "mongodb_hits": 0,
             "cache_misses": 0
         }
         
