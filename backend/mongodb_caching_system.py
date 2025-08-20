@@ -394,16 +394,23 @@ class MongoDBCachingSystem:
         cache_hit_rate = (self.cache_stats["cache_hits"] / total_requests) * 100
         
         # Get MongoDB collection statistics
-        mongodb_stats = {}
+        mongodb_stats = 0
+        mongodb_available = self.is_connected
+        
         if self.is_connected:
             try:
                 mongodb_stats = await self.cache_collection.estimated_document_count()
-            except:
-                mongodb_stats = 0
+                # Test connection is still active
+                await self.client.admin.command('ping')
+                mongodb_available = True
+            except Exception as e:
+                logger.warning(f"MongoDB connection test failed: {e}")
+                mongodb_available = False
+                self.is_connected = False
         
         return {
             "cache_type": "mongodb_distributed",
-            "total_requests": total_requests,
+            "total_requests": self.cache_stats["total_requests"],
             "cache_hits": self.cache_stats["cache_hits"],
             "cache_hit_rate_percentage": round(cache_hit_rate, 2),
             "memory_hits": self.cache_stats["memory_hits"],
@@ -413,9 +420,11 @@ class MongoDBCachingSystem:
             "memory_cache_size": len(self.memory_cache),
             "pattern_cache_size": len(self.pattern_cache),
             "mongodb_cache_size": mongodb_stats,
-            "mongodb_connected": self.is_connected,
+            "mongodb_connected": mongodb_available,
+            "mongodb_available": mongodb_available,  # Ensure both keys are present
             "storage_operations": self.cache_stats["storage_operations"],
-            "cleanup_operations": self.cache_stats["cleanup_operations"]
+            "cleanup_operations": self.cache_stats["cleanup_operations"],
+            "last_updated": datetime.now().isoformat()
         }
     
     async def cleanup_expired_cache(self) -> int:
