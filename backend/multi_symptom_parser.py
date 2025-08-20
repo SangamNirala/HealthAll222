@@ -1433,70 +1433,172 @@ class RevolutionaryMultiSymptomParser:
         confidence_analysis: ConfidenceAnalysis
     ) -> ClinicalReasoning:
         """
-        PHASE 1.4: CRITICAL FIX - Generate comprehensive clinical reasoning for multi-symptom analysis
+        REVOLUTIONARY FIX - Generate comprehensive clinical reasoning for multi-symptom analysis
+        Enhanced to provide specialist-level clinical logic and reasoning elements
         """
         
         if not symptoms:
             return ClinicalReasoning(
                 clinical_logic=["No symptoms identified for analysis"],
-                reasoning_confidence=0.0,
-                reasoning_completeness=0.0,
-                clinical_appropriateness=0.0
+                medical_reasoning_chain=[{"step": "assessment", "reasoning": "No clinical data available"}],
+                evidence_synthesis=["Insufficient data for clinical synthesis"],
+                differential_considerations=["Cannot establish differential without symptom data"],
+                rule_out_reasoning=["No symptoms to rule out conditions"],
+                diagnostic_hypotheses=["Unable to form diagnostic hypotheses"],
+                recommended_actions=["Obtain detailed symptom history"],
+                clinical_guidelines_applied=["Standard medical history taking protocols"],
+                evidence_based_reasoning=["Evidence-based approach requires symptom data"]
             )
         
         clinical_logic = []
+        medical_reasoning_chain = []
+        evidence_synthesis = []
+        differential_considerations = []
+        rule_out_reasoning = []
+        diagnostic_hypotheses = []
+        recommended_actions = []
+        clinical_guidelines_applied = []
+        evidence_based_reasoning = []
         
-        # REASONING COMPONENT 1: Symptom Analysis Summary
+        # REASONING COMPONENT 1: Comprehensive Symptom Analysis Summary
         primary_symptoms = [s["symptom_name"] for s in symptoms if s.get("confidence", 0) > 0.7]
         secondary_symptoms = [s["symptom_name"] for s in symptoms if s.get("confidence", 0) <= 0.7]
         
         if len(symptoms) == 1:
             clinical_logic.append(f"Single symptom presentation: {symptoms[0]['symptom_name']} identified with {symptoms[0].get('confidence', 0):.1%} confidence")
+            clinical_logic.append("Single symptom requires systematic evaluation to determine clinical significance")
+            evidence_synthesis.append(f"Primary presentation involves isolated {symptoms[0]['symptom_name']} with good confidence")
         else:
-            clinical_logic.append(f"Multi-symptom presentation identified: {len(primary_symptoms)} primary symptoms, {len(secondary_symptoms)} secondary symptoms")
-            clinical_logic.append(f"Primary symptoms: {', '.join(primary_symptoms)}")
+            clinical_logic.append(f"Complex multi-symptom presentation identified: {len(primary_symptoms)} primary symptoms, {len(secondary_symptoms)} secondary symptoms")
+            clinical_logic.append(f"Primary symptoms with high confidence: {', '.join(primary_symptoms)}")
             if secondary_symptoms:
-                clinical_logic.append(f"Secondary symptoms: {', '.join(secondary_symptoms)}")
+                clinical_logic.append(f"Secondary symptoms requiring clarification: {', '.join(secondary_symptoms)}")
+            clinical_logic.append("Multi-symptom constellation requires systematic clinical reasoning and pattern recognition")
+            evidence_synthesis.append(f"Complex presentation with {len(symptoms)} distinct symptoms suggests multi-system or syndrome-based pathology")
         
-        # REASONING COMPONENT 2: Emergency Assessment
+        # REASONING COMPONENT 2: Emergency Assessment with Clinical Decision Making
         emergency_symptoms = self._identify_emergency_symptoms(symptoms)
         if emergency_symptoms:
-            clinical_logic.append(f"🚨 EMERGENCY INDICATORS DETECTED: {', '.join(emergency_symptoms)}")
-            clinical_logic.append("Immediate medical evaluation strongly recommended")
+            clinical_logic.append(f"🚨 CRITICAL CLINICAL ALERT: Emergency indicators detected - {', '.join(emergency_symptoms)}")
+            clinical_logic.append("Emergency presentation requires immediate medical evaluation and stabilization")
+            clinical_logic.append("Clinical decision making prioritizes life-threatening conditions")
             
-            # Specific emergency reasoning
+            medical_reasoning_chain.append({
+                "step": "emergency_assessment",
+                "reasoning": f"Identified {len(emergency_symptoms)} emergency indicators requiring immediate intervention"
+            })
+            
+            # Specific emergency clinical reasoning
             if "chest_pain" in emergency_symptoms:
-                clinical_logic.append("Chest pain requires immediate cardiac assessment to rule out acute coronary syndrome")
+                clinical_logic.append("Chest pain mandates immediate cardiac assessment using HEART score and troponin evaluation")
+                differential_considerations.append("Acute coronary syndrome (unstable angina, STEMI, NSTEMI)")
+                differential_considerations.append("Pulmonary embolism with hemodynamic compromise") 
+                differential_considerations.append("Aortic dissection with chest pain radiation")
+                rule_out_reasoning.append("Must exclude acute MI via ECG, troponins, and clinical assessment")
+                recommended_actions.append("Immediate ECG, IV access, cardiac monitoring, troponin levels")
+                clinical_guidelines_applied.append("AHA/ACC guidelines for acute chest pain evaluation")
+                
             if "dyspnea" in emergency_symptoms:
-                clinical_logic.append("Shortness of breath may indicate respiratory or cardiac emergency")
+                clinical_logic.append("Acute dyspnea requires immediate respiratory and cardiac evaluation with ABG analysis")
+                differential_considerations.append("Acute pulmonary edema secondary to heart failure")
+                differential_considerations.append("Acute pulmonary embolism with respiratory compromise")
+                differential_considerations.append("Pneumothorax with respiratory distress")
+                rule_out_reasoning.append("Must exclude respiratory failure via pulse oximetry, ABG, and chest imaging")
+                recommended_actions.append("Immediate oxygen saturation, ABG, chest X-ray, D-dimer if indicated")
+                clinical_guidelines_applied.append("ATS/ERS guidelines for acute dyspnea management")
         
-        # REASONING COMPONENT 3: Syndrome Recognition  
+        # REASONING COMPONENT 3: Advanced Syndrome Recognition and Pattern Analysis
         potential_syndromes = self._identify_potential_syndromes_from_symptoms(symptoms)
         if potential_syndromes:
+            clinical_logic.append("Advanced clinical pattern recognition identifies potential medical syndromes")
             for syndrome in potential_syndromes:
-                clinical_logic.append(f"Clinical pattern suggests possible {syndrome['name']} (confidence: {syndrome['confidence']:.1%})")
-                clinical_logic.append(f"Supporting evidence: {syndrome['reasoning']}")
+                clinical_logic.append(f"Syndrome analysis: {syndrome['name']} identified with {syndrome['confidence']:.1%} clinical confidence")
+                clinical_logic.append(f"Clinical reasoning: {syndrome['reasoning']}")
+                
+                medical_reasoning_chain.append({
+                    "step": "syndrome_identification",
+                    "reasoning": f"{syndrome['name']} pattern recognition based on {syndrome['reasoning']}"
+                })
+                
+                # Syndrome-specific clinical reasoning
+                if syndrome['name'] == "acute_coronary_syndrome":
+                    evidence_synthesis.append("Symptom constellation consistent with ACS presentation requiring emergent cardiac workup")
+                    diagnostic_hypotheses.append("Acute ST-elevation myocardial infarction (STEMI)")
+                    diagnostic_hypotheses.append("Non-ST-elevation myocardial infarction (NSTEMI)")
+                    diagnostic_hypotheses.append("Unstable angina pectoris")
+                    recommended_actions.append("Serial ECGs, troponin monitoring, cardiology consultation")
+                    
+                elif syndrome['name'] == "migraine_syndrome":
+                    evidence_synthesis.append("Neurological symptom complex supports migraine headache diagnosis")
+                    diagnostic_hypotheses.append("Migraine with aura")
+                    diagnostic_hypotheses.append("Migraine without aura")
+                    rule_out_reasoning.append("Exclude secondary headache causes (tumor, hemorrhage, infection)")
+                    recommended_actions.append("Neurological examination, consider brain imaging if atypical features")
         
-        # REASONING COMPONENT 4: System Analysis
+        # REASONING COMPONENT 4: Multi-System Analysis and Clinical Correlation
         affected_systems = self._analyze_affected_systems(symptoms)
         if len(affected_systems) == 1:
-            clinical_logic.append(f"Single system involvement: {affected_systems[0]} system affected")
+            clinical_logic.append(f"Single system involvement: {affected_systems[0]} system pathology identified")
+            clinical_logic.append(f"Focused {affected_systems[0]} system evaluation and differential diagnosis indicated")
+            evidence_synthesis.append(f"Isolated {affected_systems[0]} system presentation suggests organ-specific pathology")
+            
         elif len(affected_systems) > 1:
-            clinical_logic.append(f"Multi-system involvement: {', '.join(affected_systems)} systems affected")
-            clinical_logic.append("Multi-system presentation requires comprehensive evaluation")
+            clinical_logic.append(f"Multi-system involvement detected: {', '.join(affected_systems)} systems affected")
+            clinical_logic.append("Multi-system presentation requires comprehensive evaluation for systemic disease processes")
+            clinical_logic.append("Consider inflammatory, infectious, autoimmune, or systemic metabolic conditions")
+            evidence_synthesis.append(f"Multi-system pathology across {len(affected_systems)} systems suggests systemic disease process")
+            differential_considerations.append("Systemic lupus erythematosus with multi-organ involvement")
+            differential_considerations.append("Sepsis with multi-system organ dysfunction")
+            differential_considerations.append("Thyroid dysfunction with multi-system manifestations")
         
-        # REASONING COMPONENT 5: Temporal Analysis
-        temporal_reasoning = self._generate_temporal_reasoning(symptoms)
+        # REASONING COMPONENT 5: Advanced Temporal Analysis and Clinical Correlation
+        temporal_reasoning = self._generate_temporal_reasoning_enhanced(symptoms)
         if temporal_reasoning:
-            clinical_logic.extend(temporal_reasoning)
+            clinical_logic.extend(temporal_reasoning["clinical_logic"])
+            medical_reasoning_chain.extend(temporal_reasoning["reasoning_chain"])
+            evidence_synthesis.extend(temporal_reasoning["evidence"])
+            
+        # REASONING COMPONENT 6: Comprehensive Severity Assessment and Risk Stratification
+        severity_reasoning = self._generate_severity_reasoning_enhanced(symptoms)
+        clinical_logic.extend(severity_reasoning["clinical_logic"])
+        evidence_synthesis.extend(severity_reasoning["evidence"])
+        recommended_actions.extend(severity_reasoning["actions"])
         
-        # REASONING COMPONENT 6: Severity Assessment
-        severity_reasoning = self._generate_severity_reasoning(symptoms)
-        clinical_logic.extend(severity_reasoning)
+        # REASONING COMPONENT 7: Evidence-Based Clinical Guidelines and Protocols
+        guidelines_reasoning = self._generate_guidelines_reasoning(symptoms, emergency_symptoms)
+        clinical_guidelines_applied.extend(guidelines_reasoning["guidelines"])
+        evidence_based_reasoning.extend(guidelines_reasoning["evidence_based"])
         
-        # REASONING COMPONENT 7: Relationship Analysis
-        if relationship_analysis.get("potential_syndromes"):
-            clinical_logic.append("Symptom constellation analysis supports syndrome-based presentation")
+        # REASONING COMPONENT 8: Differential Diagnosis and Clinical Decision Making
+        differential_reasoning = self._generate_differential_reasoning(symptoms, affected_systems)
+        differential_considerations.extend(differential_reasoning["differentials"])
+        rule_out_reasoning.extend(differential_reasoning["rule_outs"])
+        diagnostic_hypotheses.extend(differential_reasoning["hypotheses"])
+        
+        # REASONING COMPONENT 9: Comprehensive Clinical Recommendations
+        clinical_recommendations = self._generate_comprehensive_recommendations(symptoms, emergency_symptoms, affected_systems)
+        recommended_actions.extend(clinical_recommendations)
+        
+        # REASONING COMPONENT 10: Confidence and Uncertainty Analysis
+        confidence_reasoning = self._generate_confidence_reasoning(confidence_analysis)
+        clinical_logic.extend(confidence_reasoning)
+        
+        # Calculate enhanced reasoning metrics
+        reasoning_confidence = self._calculate_reasoning_confidence_enhanced(symptoms, clinical_logic)
+        reasoning_completeness = self._calculate_reasoning_completeness_enhanced(symptoms, clinical_logic, evidence_synthesis)
+        clinical_appropriateness = self._assess_clinical_appropriateness_enhanced(symptoms, clinical_logic, differential_considerations)
+        
+        return ClinicalReasoning(
+            clinical_logic=clinical_logic,
+            medical_reasoning_chain=medical_reasoning_chain,
+            evidence_synthesis=evidence_synthesis,
+            differential_considerations=differential_considerations,
+            rule_out_reasoning=rule_out_reasoning,
+            diagnostic_hypotheses=diagnostic_hypotheses,
+            recommended_actions=recommended_actions,
+            clinical_guidelines_applied=clinical_guidelines_applied,
+            evidence_based_reasoning=evidence_based_reasoning
+        )
         
         # REASONING COMPONENT 8: Confidence Assessment
         overall_confidence = confidence_analysis.overall_confidence
