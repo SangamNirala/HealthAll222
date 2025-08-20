@@ -19,7 +19,7 @@ import math
 # Import clinical data structures
 from clinical_structured_output import (
     SymptomRelationship, ClinicalCluster, MedicalSyndrome, SymptomRelationshipMap,
-    StructuredSymptom, UrgencyLevel, SymptomCategory
+    StructuredSymptom, UrgencyLevel, SymptomCategory, SeverityLevel
 )
 
 logger = logging.getLogger(__name__)
