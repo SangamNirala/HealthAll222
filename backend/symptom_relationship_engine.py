@@ -1175,33 +1175,53 @@ class AdvancedSymptomRelationshipEngine:
     def _perform_network_analysis(self, symptoms: List[StructuredSymptom], relationships: List[SymptomRelationship]) -> Dict[str, Any]:
         """Perform network analysis of symptom relationships"""
         
-        # Calculate centrality scores
-        symptom_connections = defaultdict(int)
+        # Create symptom network
+        symptom_connections = defaultdict(list)
         
-        for relationship in relationships:
-            symptom_connections[relationship.primary_symptom] += 1
-            symptom_connections[relationship.related_symptom] += 1
+        for rel in relationships:
+            symptom_connections[rel.symptom1_name].append({
+                "connected_to": rel.symptom2_name,
+                "strength": rel.strength,
+                "type": rel.relationship_type
+            })
+            symptom_connections[rel.symptom2_name].append({
+                "connected_to": rel.symptom1_name,
+                "strength": rel.strength,
+                "type": rel.relationship_type
+            })
         
-        # Sort by connection count
-        sorted_symptoms = sorted(symptom_connections.items(), key=lambda x: x[1], reverse=True)
+        # Find central symptoms (highly connected)
+        central_symptoms = []
+        isolated_symptoms = []
         
-        central_symptoms = [s[0] for s in sorted_symptoms[:3]] if sorted_symptoms else []
-        isolated_symptoms = [s.symptom_name for s in symptoms if symptom_connections[s.symptom_name] == 0]
+        for symptom in symptoms:
+            connections = symptom_connections.get(symptom.symptom_name, [])
+            connection_strength = sum(c["strength"] for c in connections)
+            
+            if len(connections) >= 2 and connection_strength > 1.5:
+                central_symptoms.append({
+                    "symptom": symptom.symptom_name,
+                    "connections": len(connections),
+                    "total_strength": connection_strength
+                })
+            elif len(connections) == 0:
+                isolated_symptoms.append(symptom.symptom_name)
         
-        # Identify patterns
+        # Identify network patterns
         patterns = []
+        if len(central_symptoms) > 0:
+            patterns.append("hub_and_spoke")
+        if len(isolated_symptoms) > len(symptoms) * 0.3:
+            patterns.append("fragmented")
         if len(relationships) > len(symptoms):
-            patterns.append("highly_interconnected")
-        elif len(relationships) < len(symptoms) / 2:
-            patterns.append("loosely_connected")
-        else:
-            patterns.append("moderately_connected")
+            patterns.append("highly_connected")
         
         return {
             "central_symptoms": central_symptoms,
             "isolated_symptoms": isolated_symptoms,
             "patterns": patterns,
-            "network_density": len(relationships) / (len(symptoms) * (len(symptoms) - 1) / 2) if len(symptoms) > 1 else 0.0
+            "network_density": len(relationships) / max(1, len(symptoms) * (len(symptoms) - 1) / 2),
+            "connectivity_score": len(relationships) / max(1, len(symptoms))
         }
     
     def _assess_clinical_coherence(self, symptoms: List[StructuredSymptom], relationships: List[SymptomRelationship], clusters: List[ClinicalCluster]) -> float:
