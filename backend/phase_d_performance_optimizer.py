@@ -287,7 +287,8 @@ class AdvancedCachingLayer:
         total_requests = self.cache_stats["total_requests"]
         cache_hit_rate = (self.cache_stats["cache_hits"] / total_requests * 100) if total_requests > 0 else 0
         
-        return {
+        # Base statistics
+        stats = {
             "total_requests": total_requests,
             "cache_hits": self.cache_stats["cache_hits"],
             "cache_hit_rate_percentage": round(cache_hit_rate, 2),
@@ -297,8 +298,22 @@ class AdvancedCachingLayer:
             "cache_misses": self.cache_stats["cache_misses"],
             "memory_cache_size": len(self.memory_cache),
             "pattern_cache_size": len(self.pattern_cache),
-            "mongodb_available": self.mongodb_cache is not None
+            "mongodb_available": self.mongodb_cache is not None and (hasattr(self.mongodb_cache, 'is_connected') and self.mongodb_cache.is_connected),
+            "mongodb_connected": self.mongodb_cache is not None and (hasattr(self.mongodb_cache, 'is_connected') and self.mongodb_cache.is_connected),
+            "cache_type": "mongodb_distributed"
         }
+        
+        # Add MongoDB-specific statistics if available
+        if self.mongodb_cache and hasattr(self.mongodb_cache, 'is_connected') and self.mongodb_cache.is_connected:
+            stats["mongodb_cache_size"] = 0  # Will be updated by async call if needed
+            stats["storage_operations"] = getattr(self.mongodb_cache.cache_stats, 'storage_operations', 0) if hasattr(self.mongodb_cache, 'cache_stats') else 0
+            stats["cleanup_operations"] = getattr(self.mongodb_cache.cache_stats, 'cleanup_operations', 0) if hasattr(self.mongodb_cache, 'cache_stats') else 0
+        else:
+            stats["mongodb_cache_size"] = 0
+            stats["storage_operations"] = 0
+            stats["cleanup_operations"] = 0
+        
+        return stats
 
 class ConcurrentProcessingEngine:
     """
