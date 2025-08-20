@@ -578,10 +578,21 @@ class RevolutionaryMultiSymptomParser:
         
         result.primary_symptoms = structured_symptoms
         
-        # PERFORMANCE: Fast temporal analysis assembly
+        # PERFORMANCE: Fast temporal analysis assembly  
+        # Map temporal pattern string to enum
+        temporal_pattern_str = temporal_analysis.get("temporal_pattern", "unknown")
+        temporal_pattern_mapping = {
+            "persistent": TemporalPattern.PERSISTENT,
+            "intermittent": TemporalPattern.INTERMITTENT, 
+            "acute_onset": TemporalPattern.ACUTE,
+            "gradual_onset": TemporalPattern.GRADUAL,
+            "progressive": TemporalPattern.PROGRESSIVE,
+            "unknown": TemporalPattern.UNKNOWN
+        }
+        
         result.temporal_analysis = TemporalAnalysis(
             overall_duration=temporal_analysis.get("overall_duration"),
-            temporal_pattern=TemporalPattern.UNKNOWN
+            temporal_pattern=temporal_pattern_mapping.get(temporal_pattern_str, TemporalPattern.UNKNOWN)
         )
         
         # PERFORMANCE: Fast severity assessment
