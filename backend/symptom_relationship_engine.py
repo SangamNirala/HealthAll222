@@ -1269,35 +1269,31 @@ class AdvancedSymptomRelationshipEngine:
         
         reasoning = []
         
-        # Overall assessment
-        reasoning.append(f"Analyzed {len(symptoms)} symptoms with {len(clusters)} clinical clusters identified")
+        # Reasoning about symptom count and complexity
+        if len(symptoms) == 1:
+            reasoning.append(f"Single symptom presentation: {symptoms[0].symptom_name}")
+        elif len(symptoms) <= 3:
+            reasoning.append(f"Multi-symptom presentation with {len(symptoms)} distinct symptoms suggesting focused pathology")
+        else:
+            reasoning.append(f"Complex multi-system presentation with {len(symptoms)} symptoms requiring comprehensive evaluation")
         
-        # Syndrome reasoning
+        # Reasoning about detected syndromes
         if syndromes:
-            syndrome_names = [s.syndrome_name for s in syndromes]
-            reasoning.append(f"Identified potential medical syndromes: {', '.join(syndrome_names)}")
+            high_confidence_syndromes = [s for s in syndromes if s.confidence_score > 0.75]
+            if high_confidence_syndromes:
+                reasoning.append(f"Strong evidence for {high_confidence_syndromes[0].syndrome_name} with {high_confidence_syndromes[0].confidence_score:.1%} confidence")
         
-        # Emergency combinations
-        emergency_clusters = [c for c in clusters if c.urgency_implications == UrgencyLevel.EMERGENCY]
-        if emergency_clusters:
-            reasoning.append(f"Emergency symptom combinations detected requiring immediate attention")
+        # Reasoning about emergency patterns
+        emergency_symptoms = [s for s in symptoms if self._assess_symptom_urgency_level(s) == "high"]
+        if emergency_symptoms:
+            reasoning.append(f"Emergency evaluation indicated due to {', '.join([s.symptom_name for s in emergency_symptoms])}")
         
-        # System involvement
-        systems_involved = set()
-        for symptom in symptoms:
-            system = self._get_anatomical_system(symptom.symptom_name)
-            if system:
-                systems_involved.add(system)
-        
-        if len(systems_involved) > 1:
-            reasoning.append(f"Multi-system involvement detected: {', '.join(systems_involved)}")
-        elif len(systems_involved) == 1:
-            reasoning.append(f"Single system presentation: {list(systems_involved)[0]}")
-        
-        # Cluster significance
-        high_confidence_clusters = [c for c in clusters if c.cluster_confidence > 0.8]
-        if high_confidence_clusters:
-            reasoning.append(f"High-confidence clinical patterns identified with strong evidence base")
+        # Reasoning about system involvement
+        systems = set([s.symptom_category for s in symptoms])
+        if len(systems) == 1:
+            reasoning.append(f"Single system involvement: {list(systems)[0]}")
+        elif len(systems) > 1:
+            reasoning.append(f"Multi-system involvement across {', '.join([str(s) for s in systems])}")
         
         return reasoning
     
