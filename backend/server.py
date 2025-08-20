@@ -15469,6 +15469,63 @@ async def get_multi_symptom_parser_statistics():
             "last_updated": datetime.now().isoformat()
         }
 
+@api_router.get("/medical-ai/phase-d/cache-health")
+async def get_cache_health():
+    """
+    🏥 MONGODB CACHING SYSTEM HEALTH CHECK
+    
+    Comprehensive health check for MongoDB caching system including:
+    - Connection status verification
+    - Cache statistics validation
+    - Performance metrics assessment
+    - Error monitoring
+    """
+    try:
+        # Get detailed cache statistics
+        cache_stats = await advanced_caching_layer.get_detailed_cache_statistics()
+        
+        # Perform health checks
+        health_status = {
+            "overall_health": "healthy",
+            "mongodb_connected": cache_stats.get("mongodb_connected", False),
+            "cache_statistics": cache_stats,
+            "health_checks": {
+                "mongodb_connection": "pass" if cache_stats.get("mongodb_connected", False) else "fail",
+                "cache_operations": "pass" if cache_stats.get("total_requests", 0) > 0 else "warning",
+                "hit_rate_health": "pass" if cache_stats.get("cache_hit_rate_percentage", 0) > 0 else "warning",
+                "storage_operations": "pass" if cache_stats.get("storage_operations", 0) >= 0 else "fail"
+            },
+            "recommendations": []
+        }
+        
+        # Generate recommendations based on health check results
+        if not cache_stats.get("mongodb_connected", False):
+            health_status["overall_health"] = "degraded"
+            health_status["recommendations"].append("MongoDB connection failed - operating in memory-only mode")
+        
+        if cache_stats.get("cache_hit_rate_percentage", 0) < 10:
+            health_status["recommendations"].append("Low cache hit rate - consider cache warming strategies")
+        
+        if cache_stats.get("total_requests", 0) == 0:
+            health_status["recommendations"].append("No cache requests detected - system may need initialization")
+        
+        return health_status
+        
+    except Exception as e:
+        logger.error(f"Cache health check failed: {str(e)}")
+        return {
+            "overall_health": "critical",
+            "error": str(e),
+            "mongodb_connected": False,
+            "health_checks": {
+                "mongodb_connection": "fail",
+                "cache_operations": "fail", 
+                "hit_rate_health": "fail",
+                "storage_operations": "fail"
+            },
+            "recommendations": ["System requires immediate attention - cache health check failed"]
+        }
+
 # Include the router in the main app (after all endpoints are defined)
 app.include_router(api_router)
 
