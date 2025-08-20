@@ -535,6 +535,341 @@ class RevolutionaryMultiSymptomParser:
             "consolidation_applied": len(raw_symptoms) != len(consolidated_symptoms)
         }
     
+    def _extract_direct_symptoms(self, text: str) -> List[Dict[str, Any]]:
+        """
+        REVOLUTIONARY FIX: Direct symptom extraction from comprehensive medical library
+        """
+        
+        direct_symptoms = []
+        text_lower = text.lower()
+        
+        # Comprehensive symptom library with medical precision
+        comprehensive_symptoms = {
+            # Pain symptoms
+            "headache": ["headache", "head pain", "head hurts", "head ache", "cephalgia", "head pounding"],
+            "chest_pain": ["chest pain", "chest hurt", "chest ache", "chest discomfort", "heart pain", "cardiac pain"],
+            "abdominal_pain": ["stomach pain", "stomach ache", "stomach hurt", "belly pain", "abdominal pain", 
+                              "stomach upset", "gastric pain", "tummy ache", "gut pain"],
+            "back_pain": ["back pain", "back hurt", "back ache", "backache", "spine pain", "lower back pain"],
+            "joint_pain": ["joint pain", "arthritis", "joint ache", "joint hurt", "joint stiffness"],
+            
+            # Respiratory symptoms  
+            "dyspnea": ["shortness of breath", "short of breath", "breathing difficulty", "breathing problems",
+                       "cant breathe", "can't breathe", "trouble breathing", "hard to breathe", "breath short"],
+            "cough": ["cough", "coughing", "hacking", "persistent cough", "dry cough", "wet cough"],
+            
+            # Gastrointestinal symptoms
+            "nausea": ["nausea", "nauseous", "feel sick", "feeling sick", "queasy", "stomach upset", "sick feeling"],
+            "vomiting": ["vomiting", "throwing up", "puking", "retching", "vomit"],
+            "diarrhea": ["diarrhea", "loose stools", "watery stools", "frequent bowel movements"],
+            
+            # Neurological symptoms
+            "dizziness": ["dizziness", "dizzy", "lightheaded", "light headed", "spinning", "vertigo", "unsteady"],
+            "fatigue": ["fatigue", "tired", "exhausted", "worn out", "drained", "weak", "weakness", "energy loss"],
+            "insomnia": ["insomnia", "cant sleep", "can't sleep", "trouble sleeping", "sleep problems", 
+                        "difficulty sleeping", "sleepless", "no sleep"],
+            
+            # Constitutional symptoms
+            "fever": ["fever", "temperature", "hot", "burning up", "feverish", "pyrexia", "high temp"],
+            "chills": ["chills", "chilly", "shivering", "cold", "shaking", "rigors"],
+            "sweating": ["sweating", "sweat", "perspiration", "night sweats", "diaphoresis"],
+            
+            # Other common symptoms
+            "anxiety": ["anxiety", "anxious", "worried", "nervous", "panic", "stress", "stressed"],
+            "depression": ["depression", "depressed", "sad", "down", "blue", "hopeless", "low mood"]
+        }
+        
+        # Extract symptoms with confidence scoring
+        for symptom_name, symptom_patterns in comprehensive_symptoms.items():
+            for pattern in symptom_patterns:
+                if pattern in text_lower:
+                    # Calculate confidence based on specificity and context
+                    confidence = self._calculate_direct_symptom_confidence(pattern, symptom_name, text_lower)
+                    
+                    symptom = {
+                        "symptom_name": symptom_name,
+                        "original_text": pattern,
+                        "confidence": confidence,
+                        "extraction_method": "direct_symptom_recognition",
+                        "anatomical_hints": self._extract_anatomical_hints(pattern),
+                        "severity_hints": self._extract_severity_hints(text_lower),
+                        "temporal_hints": self._extract_temporal_hints(text_lower),
+                        "quality_hints": self._extract_quality_hints(text_lower)
+                    }
+                    direct_symptoms.append(symptom)
+                    break  # Avoid duplicates for this symptom
+        
+        return direct_symptoms
+    
+    def _calculate_direct_symptom_confidence(self, pattern: str, symptom_name: str, full_text: str) -> float:
+        """Calculate confidence for direct symptom recognition"""
+        
+        base_confidence = 0.85
+        
+        # Boost confidence for medical terminology
+        medical_terms = ["pain", "ache", "difficulty", "problems", "symptoms", "disorder"]
+        if any(term in pattern for term in medical_terms):
+            base_confidence += 0.1
+        
+        # Boost for specific descriptors
+        specific_descriptors = ["shortness of breath", "chest pain", "difficulty sleeping"]
+        if pattern in specific_descriptors:
+            base_confidence += 0.1
+        
+        # Reduce for very generic terms
+        generic_terms = ["hurt", "sick", "bad"]
+        if any(term in pattern for term in generic_terms):
+            base_confidence -= 0.1
+            
+        return min(0.95, max(0.60, base_confidence))
+    
+    def _extract_symptoms_from_match_enhanced(self, match_data: Dict[str, Any], full_text: str) -> List[Dict[str, Any]]:
+        """Enhanced symptom extraction from pattern matches"""
+        
+        symptoms = []
+        
+        if match_data["category"] == "multi_symptom_conjunctions":
+            # Handle conjunction patterns with improved logic
+            groups = match_data["groups"]
+            for group in groups:
+                if group and len(group.strip()) > 2:
+                    # Try to identify the actual symptom within the group
+                    symptom_name = self._identify_symptom_in_text(group.strip())
+                    if symptom_name:
+                        symptom = self._create_raw_symptom(
+                            symptom_name, 
+                            group.strip(), 
+                            match_data["confidence"] * 0.9
+                        )
+                        symptoms.append(symptom)
+                        
+        elif match_data["category"] == "implicit_symptoms":
+            # Handle implicit patterns with enhanced mapping
+            implicit_symptom = self._infer_implicit_symptom_enhanced(match_data["match_text"])
+            if implicit_symptom:
+                symptom = self._create_raw_symptom(
+                    implicit_symptom, 
+                    match_data["match_text"], 
+                    match_data["confidence"] * 0.85
+                )
+                symptoms.append(symptom)
+                
+        else:
+            # Handle other pattern types with improved extraction
+            symptom_name = self._identify_symptom_in_text(match_data["match_text"])
+            if symptom_name:
+                symptom = self._create_raw_symptom(
+                    symptom_name, 
+                    match_data["match_text"], 
+                    match_data["confidence"]
+                )
+                symptoms.append(symptom)
+        
+        return symptoms
+    
+    def _identify_symptom_in_text(self, text: str) -> Optional[str]:
+        """Identify the primary symptom in a text fragment"""
+        
+        text_lower = text.lower()
+        
+        # Priority-ordered symptom identification
+        symptom_indicators = [
+            # High priority - specific medical terms
+            (r"\b(headache|migraine|cephalgia)\b", "headache"),
+            (r"\b(chest\s*pain|cardiac\s*pain|heart\s*pain)\b", "chest_pain"),
+            (r"\b(shortness\s*of\s*breath|dyspnea|breathing\s*difficulty)\b", "dyspnea"),
+            (r"\b(stomach\s*pain|abdominal\s*pain|belly\s*pain|stomach\s*upset)\b", "abdominal_pain"),
+            (r"\b(back\s*pain|backache|spine\s*pain)\b", "back_pain"),
+            (r"\b(nausea|nauseous|queasy)\b", "nausea"),
+            (r"\b(dizziness|dizzy|lightheaded|vertigo)\b", "dizziness"),
+            (r"\b(fatigue|exhausted|tired|weakness)\b", "fatigue"),
+            (r"\b(insomnia|can.?t\s*sleep|trouble\s*sleeping|sleep\s*problems)\b", "insomnia"),
+            (r"\b(fever|temperature|feverish|pyrexia)\b", "fever"),
+            (r"\b(anxiety|anxious|panic|worried|nervous)\b", "anxiety"),
+            (r"\b(depression|depressed|sad|down)\b", "depression"),
+            
+            # Medium priority - general pain terms with location
+            (r"\b(head|skull|cranium)\s*(hurt|pain|ache)", "headache"),
+            (r"\b(chest|heart)\s*(hurt|pain|ache)", "chest_pain"),
+            (r"\b(stomach|belly|tummy|gut|abdomen)\s*(hurt|pain|ache|upset)", "abdominal_pain"),
+            (r"\b(back|spine)\s*(hurt|pain|ache)", "back_pain"),
+            
+            # Lower priority - generic terms
+            (r"\b(hurt|hurting|hurts)\b", "pain_unspecified"),
+            (r"\b(ache|aching|aches)\b", "pain_unspecified"),
+            (r"\b(pain|painful)\b", "pain_unspecified")
+        ]
+        
+        for pattern, symptom in symptom_indicators:
+            if re.search(pattern, text_lower):
+                return symptom
+                
+        return None
+    
+    def _infer_implicit_symptom_enhanced(self, text: str) -> Optional[str]:
+        """Enhanced implicit symptom inference"""
+        
+        text_lower = text.lower()
+        
+        # Enhanced implicit mappings with better coverage
+        implicit_mappings = {
+            # Sleep-related
+            r"can.?t\s*sleep|trouble\s*sleeping|difficulty\s*sleeping|sleep\s*problems|sleepless": "insomnia",
+            r"no\s*sleep|unable\s*to\s*sleep|hard\s*to\s*sleep": "insomnia",
+            
+            # Eating-related  
+            r"can.?t\s*eat|trouble\s*eating|difficulty\s*eating|no\s*appetite": "anorexia",
+            r"food\s*won.?t\s*stay\s*down|can.?t\s*keep\s*food\s*down": "vomiting",
+            
+            # Breathing-related
+            r"can.?t\s*breathe|trouble\s*breathing|difficulty\s*breathing|hard\s*to\s*breathe": "dyspnea",
+            r"can.?t\s*catch\s*breath|short\s*of\s*breath|winded|breathless": "dyspnea",
+            
+            # Mobility-related
+            r"can.?t\s*walk|trouble\s*walking|difficulty\s*walking|hard\s*to\s*walk": "mobility_impairment",
+            r"can.?t\s*move|trouble\s*moving|stiff|rigid": "mobility_impairment",
+            
+            # Cognitive-related
+            r"can.?t\s*focus|can.?t\s*concentrate|trouble\s*focusing|difficulty\s*concentrating": "concentration_difficulty",
+            r"can.?t\s*think|brain\s*fog|mental\s*fog|confused": "cognitive_impairment",
+            
+            # General malaise
+            r"feel\s*(really|very|extremely|super)?\s*(sick|bad|awful|terrible|crappy|lousy)": "malaise",
+            r"feeling\s*(really|very|extremely)?\s*(unwell|poorly|rough)": "malaise",
+            
+            # Functional difficulties
+            r"having\s*(trouble|difficulty|problems|issues)\s*with": "functional_difficulty"
+        }
+        
+        for pattern, symptom in implicit_mappings.items():
+            if re.search(pattern, text_lower):
+                return symptom
+                
+        return None
+    
+    def _consolidate_symptoms(self, raw_symptoms: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Remove duplicates and consolidate similar symptoms"""
+        
+        if not raw_symptoms:
+            return []
+        
+        # Group symptoms by name
+        symptom_groups = defaultdict(list)
+        for symptom in raw_symptoms:
+            key = symptom["symptom_name"].lower()
+            symptom_groups[key].append(symptom)
+        
+        consolidated = []
+        for symptom_name, symptom_list in symptom_groups.items():
+            # If multiple instances, keep the one with highest confidence
+            best_symptom = max(symptom_list, key=lambda s: s["confidence"])
+            
+            # Merge hints from all instances
+            merged_symptom = best_symptom.copy()
+            all_anatomical = []
+            all_severity = []
+            all_temporal = []
+            all_quality = []
+            
+            for s in symptom_list:
+                all_anatomical.extend(s.get("anatomical_hints", []))
+                all_severity.extend(s.get("severity_hints", []))
+                all_temporal.extend(s.get("temporal_hints", []))
+                all_quality.extend(s.get("quality_hints", []))
+            
+            # Remove duplicates and update
+            merged_symptom["anatomical_hints"] = list(set(all_anatomical))
+            merged_symptom["severity_hints"] = list({str(h): h for h in all_severity}.values())
+            merged_symptom["temporal_hints"] = list({str(h): h for h in all_temporal}.values())
+            merged_symptom["quality_hints"] = list(set(all_quality))
+            
+            consolidated.append(merged_symptom)
+        
+        return consolidated
+    
+    def _enhance_symptoms_with_context(self, symptoms: List[Dict[str, Any]], text: str) -> List[Dict[str, Any]]:
+        """Enhance symptoms with contextual information"""
+        
+        enhanced = []
+        
+        for symptom in symptoms:
+            enhanced_symptom = symptom.copy()
+            
+            # Add contextual severity assessment
+            context_severity = self._assess_contextual_severity(symptom, text)
+            if context_severity:
+                enhanced_symptom["contextual_severity"] = context_severity
+                
+            # Add urgency indicators
+            urgency = self._assess_symptom_urgency(symptom, text)
+            enhanced_symptom["urgency_indicators"] = urgency
+            
+            # Add clinical category
+            clinical_category = self._determine_clinical_category(symptom["symptom_name"])
+            enhanced_symptom["clinical_category"] = clinical_category
+            
+            enhanced.append(enhanced_symptom)
+            
+        return enhanced
+    
+    def _assess_contextual_severity(self, symptom: Dict[str, Any], text: str) -> Optional[Dict[str, Any]]:
+        """Assess severity from context"""
+        
+        text_lower = text.lower()
+        severity_indicators = []
+        
+        # Check for severity modifiers
+        if any(word in text_lower for word in ["severe", "extreme", "worst", "unbearable", "agonizing"]):
+            severity_indicators.append({"level": "severe", "confidence": 0.9})
+        elif any(word in text_lower for word in ["really", "very", "extremely", "super"]):
+            severity_indicators.append({"level": "moderate_to_severe", "confidence": 0.7})
+        elif any(word in text_lower for word in ["mild", "slight", "minor", "little"]):
+            severity_indicators.append({"level": "mild", "confidence": 0.8})
+            
+        # Check for functional impact
+        if any(phrase in text_lower for phrase in ["can't work", "missed work", "bed rest", "emergency", "hospital"]):
+            severity_indicators.append({"level": "severe", "confidence": 0.85, "reason": "functional_impact"})
+            
+        return {"indicators": severity_indicators} if severity_indicators else None
+    
+    def _assess_symptom_urgency(self, symptom: Dict[str, Any], text: str) -> Dict[str, Any]:
+        """Assess urgency of individual symptom"""
+        
+        symptom_name = symptom["symptom_name"]
+        text_lower = text.lower()
+        
+        # High urgency symptoms
+        high_urgency = ["chest_pain", "dyspnea", "severe_headache", "weakness", "difficulty_breathing"]
+        
+        # Check for emergency combinations in context
+        emergency_phrases = ["emergency", "911", "hospital", "ambulance", "urgent", "severe"]
+        has_emergency_context = any(phrase in text_lower for phrase in emergency_phrases)
+        
+        if symptom_name in high_urgency or has_emergency_context:
+            return {"level": "high", "confidence": 0.8, "emergency_context": has_emergency_context}
+        else:
+            return {"level": "routine", "confidence": 0.6, "emergency_context": False}
+    
+    def _determine_clinical_category(self, symptom_name: str) -> str:
+        """Determine clinical category for symptom"""
+        
+        categories = {
+            "headache": "neurological",
+            "chest_pain": "cardiovascular", 
+            "dyspnea": "respiratory",
+            "abdominal_pain": "gastrointestinal",
+            "back_pain": "musculoskeletal",
+            "nausea": "gastrointestinal",
+            "dizziness": "neurological",
+            "fatigue": "constitutional",
+            "insomnia": "neurological",
+            "fever": "constitutional",
+            "anxiety": "psychiatric",
+            "depression": "psychiatric"
+        }
+        
+        return categories.get(symptom_name, "other")
+    
     def _extract_symptoms_from_match(self, match_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Extract individual symptoms from a pattern match"""
         
