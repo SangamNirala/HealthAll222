@@ -488,18 +488,159 @@ class AdvancedSymptomRelationshipEngine:
         }
     
     def _analyze_symptom_pairs(self, symptoms: List[StructuredSymptom]) -> List[SymptomRelationship]:
-        """Analyze pairwise relationships between symptoms"""
+        """
+        CRITICAL FIX: Analyze pairwise relationships between symptoms
+        """
         
         relationships = []
         
-        for i, symptom1 in enumerate(symptoms):
-            for j, symptom2 in enumerate(symptoms[i+1:], i+1):
+        if len(symptoms) < 2:
+            return relationships
+        
+        # Analyze all possible pairs
+        for i in range(len(symptoms)):
+            for j in range(i + 1, len(symptoms)):
+                symptom1 = symptoms[i]  
+                symptom2 = symptoms[j]
                 
-                relationship = self._analyze_symptom_pair(symptom1, symptom2)
-                if relationship and relationship.relationship_strength > 0.3:
+                # Calculate relationship strength
+                relationship_data = self._calculate_symptom_relationship(symptom1, symptom2)
+                
+                if relationship_data["strength"] > 0.3:  # Only include meaningful relationships
+                    relationship = SymptomRelationship(
+                        symptom1_name=symptom1.symptom_name,
+                        symptom2_name=symptom2.symptom_name,
+                        relationship_type=relationship_data["type"],
+                        strength=relationship_data["strength"],
+                        confidence=relationship_data["confidence"],
+                        clinical_significance=relationship_data["clinical_significance"],
+                        medical_reasoning=relationship_data["reasoning"]
+                    )
                     relationships.append(relationship)
         
         return relationships
+    
+    def _calculate_symptom_relationship(self, symptom1: StructuredSymptom, symptom2: StructuredSymptom) -> Dict[str, Any]:
+        """Calculate relationship between two symptoms"""
+        
+        s1_name = symptom1.symptom_name.lower()
+        s2_name = symptom2.symptom_name.lower()
+        
+        # Check for known medical relationships
+        known_relationships = {
+            # Cardiovascular emergencies
+            ("chest_pain", "dyspnea"): {"type": "emergency_combination", "strength": 0.95, "significance": "critical", 
+                                       "reasoning": "Chest pain with dyspnea suggests acute coronary syndrome or pulmonary embolism"},
+            ("chest_pain", "sweating"): {"type": "associated_symptoms", "strength": 0.85, "significance": "urgent",
+                                        "reasoning": "Diaphoresis with chest pain indicates possible myocardial infarction"},
+            
+            # Neurological patterns
+            ("headache", "nausea"): {"type": "syndrome_component", "strength": 0.80, "significance": "moderate",
+                                    "reasoning": "Headache with nausea suggests migraine or increased intracranial pressure"},
+            ("headache", "dizziness"): {"type": "associated_symptoms", "strength": 0.70, "significance": "moderate",
+                                       "reasoning": "Headache with dizziness may indicate vestibular or vascular etiology"},
+            ("severe_headache", "neck_stiffness"): {"type": "emergency_combination", "strength": 0.90, "significance": "critical",
+                                                   "reasoning": "Severe headache with neck stiffness suggests meningitis or SAH"},
+            
+            # Gastrointestinal patterns
+            ("nausea", "vomiting"): {"type": "progressive_symptoms", "strength": 0.85, "significance": "moderate",
+                                    "reasoning": "Nausea often progresses to vomiting in GI disorders"},
+            ("abdominal_pain", "nausea"): {"type": "associated_symptoms", "strength": 0.75, "significance": "moderate",
+                                          "reasoning": "Abdominal pain with nausea suggests GI pathology"},
+            ("abdominal_pain", "vomiting"): {"type": "associated_symptoms", "strength": 0.80, "significance": "moderate",
+                                           "reasoning": "Abdominal pain with vomiting may indicate obstruction or peritonitis"},
+            
+            # Constitutional symptoms
+            ("fatigue", "fever"): {"type": "systemic_response", "strength": 0.70, "significance": "moderate",
+                                  "reasoning": "Fatigue with fever suggests infectious or inflammatory process"},
+            ("fatigue", "weakness"): {"type": "overlapping_symptoms", "strength": 0.75, "significance": "routine",
+                                     "reasoning": "Fatigue and weakness often coexist in systemic conditions"},
+            
+            # Sleep and mental health
+            ("insomnia", "anxiety"): {"type": "bidirectional_relationship", "strength": 0.80, "significance": "moderate",
+                                     "reasoning": "Insomnia and anxiety have bidirectional relationship"},
+            ("fatigue", "insomnia"): {"type": "causal_relationship", "strength": 0.85, "significance": "routine",
+                                     "reasoning": "Insomnia commonly causes fatigue"},
+            
+            # Pain relationships
+            ("headache", "neck_pain"): {"type": "anatomical_proximity", "strength": 0.70, "significance": "routine",
+                                       "reasoning": "Tension headaches often involve cervical muscles"},
+            ("back_pain", "weakness"): {"type": "functional_impact", "strength": 0.65, "significance": "routine",
+                                       "reasoning": "Severe back pain can cause functional weakness"}
+        }
+        
+        # Check both directions
+        key1 = (s1_name, s2_name)
+        key2 = (s2_name, s1_name)
+        
+        if key1 in known_relationships:
+            rel_data = known_relationships[key1]
+            return {
+                "type": rel_data["type"],
+                "strength": rel_data["strength"],
+                "confidence": 0.90,
+                "clinical_significance": rel_data["significance"],
+                "reasoning": rel_data["reasoning"]
+            }
+        elif key2 in known_relationships:
+            rel_data = known_relationships[key2]
+            return {
+                "type": rel_data["type"],
+                "strength": rel_data["strength"],
+                "confidence": 0.90,
+                "clinical_significance": rel_data["significance"],
+                "reasoning": rel_data["reasoning"]
+            }
+        
+        # Check for anatomical system relationships
+        category_relationships = self._check_category_relationships(symptom1, symptom2)
+        if category_relationships["strength"] > 0.3:
+            return category_relationships
+        
+        # Default minimal relationship
+        return {
+            "type": "unrelated",
+            "strength": 0.1,
+            "confidence": 0.5,
+            "clinical_significance": "routine",
+            "reasoning": "No established clinical relationship identified"
+        }
+    
+    def _check_category_relationships(self, symptom1: StructuredSymptom, symptom2: StructuredSymptom) -> Dict[str, Any]:
+        """Check relationships based on symptom categories"""
+        
+        if symptom1.symptom_category == symptom2.symptom_category:
+            # Same system involvement
+            return {
+                "type": "same_system",
+                "strength": 0.60,
+                "confidence": 0.75,
+                "clinical_significance": "routine",
+                "reasoning": f"Both symptoms involve {symptom1.symptom_category} system"
+            }
+        
+        # Check for cross-system relationships
+        cross_system_relationships = {
+            ("cardiovascular", "respiratory"): 0.70,
+            ("gastrointestinal", "neurological"): 0.50,
+            ("neurological", "psychiatric"): 0.65,
+            ("constitutional", "any"): 0.40
+        }
+        
+        cat1 = symptom1.symptom_category.value if hasattr(symptom1.symptom_category, 'value') else str(symptom1.symptom_category)
+        cat2 = symptom2.symptom_category.value if hasattr(symptom2.symptom_category, 'value') else str(symptom2.symptom_category)
+        
+        for (sys1, sys2), strength in cross_system_relationships.items():
+            if (cat1 == sys1 and cat2 == sys2) or (cat1 == sys2 and cat2 == sys1) or sys2 == "any":
+                return {
+                    "type": "cross_system",
+                    "strength": strength,
+                    "confidence": 0.60,
+                    "clinical_significance": "routine",
+                    "reasoning": f"Cross-system relationship between {cat1} and {cat2}"
+                }
+        
+        return {"type": "unrelated", "strength": 0.1, "confidence": 0.50, "clinical_significance": "routine", "reasoning": "No significant relationship"}
     
     def _analyze_symptom_pair(self, symptom1: StructuredSymptom, symptom2: StructuredSymptom) -> Optional[SymptomRelationship]:
         """Analyze relationship between two specific symptoms"""
