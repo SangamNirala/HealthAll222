@@ -11999,8 +11999,19 @@ async def get_phase_d_performance_status():
     """
     try:
         performance_status = await get_performance_status()
+        
+        # Get caching system information
+        caching_info = performance_status.get("caching_layer", {})
+        
         return {
             "status": "operational",
+            "performance_tier": "routine",  # Default performance tier
+            "caching_system": {
+                "cache_type": "mongodb_distributed",
+                "mongodb_connected": caching_info.get("mongodb_available", False),
+                "cache_hit_rate": caching_info.get("cache_hit_rate_percentage", 0),
+                "memory_cache_size": caching_info.get("memory_cache_size", 0)
+            },
             "phase_d_performance": performance_status,
             "optimization_active": True,
             "last_updated": datetime.utcnow().isoformat()
