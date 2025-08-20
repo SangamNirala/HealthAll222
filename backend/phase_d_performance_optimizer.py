@@ -115,10 +115,18 @@ class AdvancedCachingLayer:
             self.mongodb_cache = MongoDBCachingSystem(db_name=db_name)
             success = await self.mongodb_cache.initialize_mongodb_cache()
             if success:
-                logger.info("MongoDB distributed caching initialized successfully")
-                return True
+                # Verify the connection with a simple test
+                test_result = await self.mongodb_cache.get_cache_statistics()
+                if test_result.get("mongodb_connected", False):
+                    logger.info("MongoDB distributed caching initialized and verified successfully")
+                    return True
+                else:
+                    logger.warning("MongoDB caching initialization succeeded but connection test failed")
+                    self.mongodb_cache = None
+                    return False
             else:
                 logger.warning("MongoDB caching initialization failed. Using memory-only caching.")
+                self.mongodb_cache = None
                 return False
         except Exception as e:
             logger.warning(f"MongoDB initialization failed: {e}. Using memory-only caching.")
