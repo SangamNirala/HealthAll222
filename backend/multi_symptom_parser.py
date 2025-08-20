@@ -452,8 +452,8 @@ class RevolutionaryMultiSymptomParser:
         # PERFORMANCE: Quick pattern detection
         text_lower = text.lower()
         
-        if re.search(r"\d+\s+(day|hour|week|month)s?", text_lower):
-            duration_match = re.search(r"(\d+)\s+(day|hour|week|month)s?", text_lower)
+        if re.search(r"\d+\s+(day|hour|week|month|night)s?", text_lower):
+            duration_match = re.search(r"(\d+)\s+(day|hour|week|month|night)s?", text_lower)
             if duration_match:
                 temporal_analysis["overall_duration"] = duration_match.group(0)
                 temporal_analysis["temporal_confidence"] = 0.85
