@@ -1244,7 +1244,7 @@ class AdvancedSymptomRelationshipEngine:
         
         # Factor 3: Cluster formation (symptoms that cluster are more coherent)
         if clusters:
-            cluster_coverage = sum(len(c.symptom_names) for c in clusters) / len(symptoms)
+            cluster_coverage = sum(len(c.symptoms_in_cluster) for c in clusters) / len(symptoms)
             coherence_factors.append(min(1.0, cluster_coverage) * 0.25)
         
         # Factor 4: Emergency vs routine consistency
