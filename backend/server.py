@@ -15486,8 +15486,17 @@ logger = logging.getLogger(__name__)
 
 @app.on_event("startup")
 async def startup_event():
-    """Initialize sample data on startup"""
+    """Initialize sample data and Phase D systems on startup"""
     try:
+        # Initialize Phase D Performance Optimization
+        logger.info("Initializing Phase D Performance Optimization...")
+        perf_success = await initialize_performance_optimization()
+        if perf_success:
+            logger.info("Phase D Performance Optimization initialized successfully")
+        else:
+            logger.warning("Phase D Performance Optimization initialization failed")
+        
+        # Initialize sample data
         await create_sample_educational_content()
         logger.info("Application startup completed successfully")
     except Exception as e:
