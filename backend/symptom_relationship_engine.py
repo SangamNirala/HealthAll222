@@ -229,6 +229,247 @@ class AdvancedSymptomRelationshipEngine:
             temporal_analysis["confidence"] = 0.0
             return temporal_analysis
     
+    def _identify_syndrome_clusters(self, symptoms: List[StructuredSymptom]) -> List[ClinicalCluster]:
+        """Identify syndrome-based clusters"""
+        
+        clusters = []
+        symptom_names = [s.symptom_name.lower() for s in symptoms]
+        
+        # Define syndrome cluster patterns
+        syndrome_clusters = {
+            "migraine_complex": {
+                "primary": ["headache"],
+                "secondary": ["nausea", "vomiting", "dizziness", "light_sensitivity"],
+                "significance": "moderate"
+            },
+            "cardiac_emergency": {
+                "primary": ["chest_pain"],
+                "secondary": ["dyspnea", "sweating", "nausea", "weakness"],
+                "significance": "critical"
+            },
+            "gi_distress": {
+                "primary": ["nausea", "abdominal_pain"],
+                "secondary": ["vomiting", "diarrhea", "fever"],
+                "significance": "moderate"
+            }
+        }
+        
+        for cluster_name, pattern in syndrome_clusters.items():
+            # Check if primary symptoms are present
+            primary_present = [s for s in pattern["primary"] if s in symptom_names]
+            secondary_present = [s for s in pattern["secondary"] if s in symptom_names]
+            
+            if primary_present and len(primary_present + secondary_present) >= 2:
+                cluster = ClinicalCluster(
+                    cluster_name=cluster_name,
+                    symptom_names=primary_present + secondary_present,
+                    cluster_type="syndrome_based",
+                    confidence_score=0.8,
+                    clinical_significance=pattern["significance"],
+                    cluster_reasoning=f"Syndrome pattern detected: {cluster_name}"
+                )
+                clusters.append(cluster)
+        
+        return clusters
+    
+    def _identify_anatomical_clusters(self, symptoms: List[StructuredSymptom]) -> List[ClinicalCluster]:
+        """Identify anatomical system-based clusters"""
+        
+        # Group symptoms by anatomical system
+        system_groups = defaultdict(list)
+        
+        for symptom in symptoms:
+            system = self._get_anatomical_system(symptom.symptom_name)
+            if system:
+                system_groups[system].append(symptom.symptom_name)
+        
+        clusters = []
+        for system, symptom_list in system_groups.items():
+            if len(symptom_list) >= 2:
+                cluster = ClinicalCluster(
+                    cluster_name=f"{system}_system_cluster",
+                    symptom_names=symptom_list,
+                    cluster_type="anatomical_system",
+                    confidence_score=0.75,
+                    clinical_significance="moderate",
+                    cluster_reasoning=f"Multiple symptoms affecting {system} system"
+                )
+                clusters.append(cluster)
+        
+        return clusters
+    
+    def _get_anatomical_system(self, symptom_name: str) -> Optional[str]:
+        """Map symptom to anatomical system"""
+        
+        system_mapping = {
+            "headache": "neurological",
+            "dizziness": "neurological",
+            "chest_pain": "cardiovascular",
+            "dyspnea": "respiratory",
+            "nausea": "gastrointestinal",
+            "vomiting": "gastrointestinal",
+            "abdominal_pain": "gastrointestinal",
+            "back_pain": "musculoskeletal",
+            "fatigue": "constitutional",
+            "fever": "constitutional",
+            "insomnia": "neurological",
+            "anxiety": "psychiatric"
+        }
+        
+        return system_mapping.get(symptom_name.lower())
+    
+    def _identify_temporal_clusters(self, symptoms: List[StructuredSymptom]) -> List[ClinicalCluster]:
+        """Identify temporal pattern-based clusters"""
+        
+        # Group symptoms by onset timing (if available)
+        temporal_groups = defaultdict(list)
+        
+        for symptom in symptoms:
+            if hasattr(symptom, 'duration') and symptom.duration:
+                if any(term in symptom.duration.lower() for term in ["acute", "sudden", "recent"]):
+                    temporal_groups["acute_onset"].append(symptom.symptom_name)
+                elif any(term in symptom.duration.lower() for term in ["chronic", "long", "months", "years"]):
+                    temporal_groups["chronic_pattern"].append(symptom.symptom_name)
+        
+        clusters = []
+        for pattern, symptom_list in temporal_groups.items():
+            if len(symptom_list) >= 2:
+                cluster = ClinicalCluster(
+                    cluster_name=f"{pattern}_temporal_cluster",
+                    symptom_names=symptom_list,
+                    cluster_type="temporal_pattern",
+                    confidence_score=0.70,
+                    clinical_significance="routine",
+                    cluster_reasoning=f"Symptoms sharing {pattern} temporal pattern"
+                )
+                clusters.append(cluster)
+        
+        return clusters
+    
+    def _identify_severity_clusters(self, symptoms: List[StructuredSymptom]) -> List[ClinicalCluster]:
+        """Identify severity-based clusters"""
+        
+        # Group symptoms by severity level
+        severity_groups = defaultdict(list)
+        
+        for symptom in symptoms:
+            severity = getattr(symptom, 'severity_level', None)
+            if severity:
+                severity_str = severity.value if hasattr(severity, 'value') else str(severity)
+                if severity_str in ["severe", "critical", "extreme"]:
+                    severity_groups["high_severity"].append(symptom.symptom_name)
+        
+        clusters = []
+        for severity_level, symptom_list in severity_groups.items():
+            if len(symptom_list) >= 2:
+                cluster = ClinicalCluster(
+                    cluster_name=f"{severity_level}_cluster",
+                    symptom_names=symptom_list,
+                    cluster_type="severity_based",
+                    confidence_score=0.75,
+                    clinical_significance="urgent" if severity_level == "high_severity" else "routine",
+                    cluster_reasoning=f"Multiple symptoms with {severity_level}"
+                )
+                clusters.append(cluster)
+        
+        return clusters
+    
+    def _identify_emergency_clusters(self, symptoms: List[StructuredSymptom]) -> List[ClinicalCluster]:
+        """Identify emergency combination clusters"""
+        
+        symptom_names = [s.symptom_name.lower() for s in symptoms]
+        
+        # Define emergency combinations
+        emergency_patterns = [
+            {
+                "name": "acute_coronary_syndrome",
+                "required": ["chest_pain"],
+                "associated": ["dyspnea", "sweating", "nausea", "weakness"],
+                "significance": "critical"
+            },
+            {
+                "name": "neurological_emergency",
+                "required": ["severe_headache"],
+                "associated": ["neck_stiffness", "confusion", "weakness"],
+                "significance": "critical"
+            }
+        ]
+        
+        clusters = []
+        for pattern in emergency_patterns:
+            required_present = [s for s in pattern["required"] if s in symptom_names]
+            associated_present = [s for s in pattern["associated"] if s in symptom_names]
+            
+            if required_present and associated_present:
+                cluster = ClinicalCluster(
+                    cluster_name=f"{pattern['name']}_emergency_cluster",
+                    symptom_names=required_present + associated_present,
+                    cluster_type="emergency_combination",
+                    confidence_score=0.90,
+                    clinical_significance=pattern["significance"],
+                    cluster_reasoning=f"Emergency pattern: {pattern['name']}"
+                )
+                clusters.append(cluster)
+        
+        return clusters
+    
+    def _merge_overlapping_clusters(self, clusters: List[ClinicalCluster]) -> List[ClinicalCluster]:
+        """Merge overlapping clusters to avoid duplication"""
+        
+        if len(clusters) <= 1:
+            return clusters
+        
+        merged = []
+        used_indices = set()
+        
+        for i, cluster1 in enumerate(clusters):
+            if i in used_indices:
+                continue
+                
+            current_cluster = cluster1
+            
+            for j, cluster2 in enumerate(clusters[i+1:], i+1):
+                if j in used_indices:
+                    continue
+                    
+                # Check for significant overlap
+                overlap = set(current_cluster.symptom_names) & set(cluster2.symptom_names)
+                overlap_ratio = len(overlap) / max(len(current_cluster.symptom_names), len(cluster2.symptom_names))
+                
+                if overlap_ratio > 0.5:  # 50% overlap threshold
+                    # Merge clusters
+                    merged_symptoms = list(set(current_cluster.symptom_names + cluster2.symptom_names))
+                    current_cluster = ClinicalCluster(
+                        cluster_name=f"merged_{current_cluster.cluster_name}_{cluster2.cluster_name}",
+                        symptom_names=merged_symptoms,
+                        cluster_type="merged_cluster",
+                        confidence_score=max(current_cluster.confidence_score, cluster2.confidence_score),
+                        clinical_significance=current_cluster.clinical_significance if current_cluster.confidence_score > cluster2.confidence_score else cluster2.clinical_significance,
+                        cluster_reasoning=f"Merged cluster: {current_cluster.cluster_reasoning}; {cluster2.cluster_reasoning}"
+                    )
+                    used_indices.add(j)
+            
+            merged.append(current_cluster)
+            used_indices.add(i)
+        
+        return merged
+    
+    def _calculate_cluster_significance(self, cluster: ClinicalCluster) -> float:
+        """Calculate numerical significance score for cluster sorting"""
+        
+        significance_weights = {
+            "critical": 4.0,
+            "urgent": 3.0,
+            "moderate": 2.0,
+            "routine": 1.0
+        }
+        
+        base_weight = significance_weights.get(cluster.clinical_significance, 1.0)
+        symptom_count_bonus = len(cluster.symptom_names) * 0.1
+        confidence_bonus = cluster.confidence_score
+        
+        return base_weight + symptom_count_bonus + confidence_bonus
+
     def _load_clinical_syndromes(self) -> Dict[str, Dict[str, Any]]:
         """Load comprehensive clinical syndrome definitions"""
         
