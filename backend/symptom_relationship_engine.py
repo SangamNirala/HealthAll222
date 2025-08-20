@@ -1179,14 +1179,14 @@ class AdvancedSymptomRelationshipEngine:
         symptom_connections = defaultdict(list)
         
         for rel in relationships:
-            symptom_connections[rel.symptom1_name].append({
-                "connected_to": rel.symptom2_name,
-                "strength": rel.strength,
+            symptom_connections[rel.primary_symptom].append({
+                "connected_to": rel.related_symptom,
+                "strength": rel.relationship_strength,
                 "type": rel.relationship_type
             })
-            symptom_connections[rel.symptom2_name].append({
-                "connected_to": rel.symptom1_name,
-                "strength": rel.strength,
+            symptom_connections[rel.related_symptom].append({
+                "connected_to": rel.primary_symptom,
+                "strength": rel.relationship_strength,
                 "type": rel.relationship_type
             })
         
