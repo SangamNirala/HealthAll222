@@ -584,6 +584,22 @@ class RevolutionaryMultiSymptomParser:
         
         return result
     
+    def _get_symptom_category(self, category_string: str) -> SymptomCategory:
+        """Convert clinical category string to SymptomCategory enum"""
+        
+        category_mapping = {
+            "neurological": SymptomCategory.NEUROLOGICAL,
+            "cardiovascular": SymptomCategory.CARDIOVASCULAR,
+            "respiratory": SymptomCategory.RESPIRATORY,
+            "gastrointestinal": SymptomCategory.GASTROINTESTINAL,
+            "musculoskeletal": SymptomCategory.MUSCULOSKELETAL,
+            "psychiatric": SymptomCategory.PSYCHIATRIC,
+            "constitutional": SymptomCategory.CONSTITUTIONAL,
+            "other": SymptomCategory.OTHER
+        }
+        
+        return category_mapping.get(category_string.lower(), SymptomCategory.OTHER)
+    
     def _create_minimal_result(self, text: str, reason: str) -> MultiSymptomParseResult:
         """Create minimal result for early returns"""
         
