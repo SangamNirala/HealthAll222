@@ -508,13 +508,13 @@ class AdvancedSymptomRelationshipEngine:
                 
                 if relationship_data["strength"] > 0.3:  # Only include meaningful relationships
                     relationship = SymptomRelationship(
-                        symptom1_name=symptom1.symptom_name,
-                        symptom2_name=symptom2.symptom_name,
+                        primary_symptom=symptom1.symptom_name,
+                        related_symptom=symptom2.symptom_name,
                         relationship_type=relationship_data["type"],
-                        strength=relationship_data["strength"],
+                        relationship_strength=relationship_data["strength"],
                         confidence=relationship_data["confidence"],
-                        clinical_significance=relationship_data["clinical_significance"],
-                        medical_reasoning=relationship_data["reasoning"]
+                        clinical_explanation=relationship_data["reasoning"],
+                        relationship_significance=relationship_data["clinical_significance"]
                     )
                     relationships.append(relationship)
         
