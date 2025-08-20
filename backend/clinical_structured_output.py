@@ -88,7 +88,7 @@ class StructuredSymptom:
     confidence_score: float = 0.0
     
     # Clinical characteristics  
-    severity_level: SeverityLevel = SeverityLevel.UNKNOWN
+    severity_level: SeverityLevel = SeverityLevel.NONE
     duration: Optional[str] = None
     frequency: Optional[str] = None
     onset_type: Optional[str] = None  # sudden, gradual, insidious
