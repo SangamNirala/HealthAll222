@@ -387,8 +387,8 @@ class RevolutionaryMultiSymptomParser:
         text_lower = text.lower()
         
         # PERFORMANCE: Fast temporal pattern matching
-        if any(word in text_lower for word in ["days", "hours", "weeks", "months"]):
-            duration_match = re.search(r"(\d+)\s+(day|hour|week|month)s?", text_lower)
+        if any(word in text_lower for word in ["days", "hours", "weeks", "months", "nights", "night"]):
+            duration_match = re.search(r"(\d+)\s+(day|hour|week|month|night)s?", text_lower)
             if duration_match:
                 temporal_data["duration_indicators"].append({
                     "matched_text": duration_match.group(0),
