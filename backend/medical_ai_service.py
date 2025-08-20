@@ -5162,7 +5162,7 @@ class AdvancedSymptomRecognizer:
                 associated_symptoms=["shortness_of_breath"],
                 syndrome_probability=0.98,
                 medical_urgency="emergency",
-                red_flag_combination=True
+                red_flag_combinations=["chest_pain_dyspnea_emergency"]
             ))
         
         return entities
