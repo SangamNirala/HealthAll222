@@ -9990,7 +9990,9 @@ Generate the follow-up question:
             
             # ENHANCE WITH EXISTING MEDICAL AI CAPABILITIES
             try:
-                enhanced_result = await self._enhance_parse_result_with_existing_ai(parse_result, text, context)
+                # Temporarily disable enhancement to isolate the issue
+                enhanced_result = parse_result  # Use original result
+                # enhanced_result = await self._enhance_parse_result_with_existing_ai(parse_result, text, context)
             except Exception as e:
                 logger.error(f"Enhancement with existing AI failed: {e}")
                 enhanced_result = parse_result  # Use original result if enhancement fails
