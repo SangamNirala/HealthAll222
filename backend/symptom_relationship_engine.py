@@ -1298,13 +1298,13 @@ class AdvancedSymptomRelationshipEngine:
         return reasoning
     
     def _build_relationship_matrix(self, relationships: List[SymptomRelationship]) -> Dict[str, Dict[str, float]]:
-        """Build relationship strength matrix"""
+        """Build symptom relationship matrix"""
         
         matrix = defaultdict(lambda: defaultdict(float))
         
-        for relationship in relationships:
-            matrix[relationship.primary_symptom][relationship.related_symptom] = relationship.relationship_strength
-            matrix[relationship.related_symptom][relationship.primary_symptom] = relationship.relationship_strength
+        for rel in relationships:
+            matrix[rel.symptom1_name][rel.symptom2_name] = rel.strength
+            matrix[rel.symptom2_name][rel.symptom1_name] = rel.strength
         
         return dict(matrix)
     
