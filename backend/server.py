@@ -15366,6 +15366,7 @@ async def parse_multi_symptom_expression(request: MultiSymptomParseRequest):
     
     Algorithm Version: 3.2_multi_symptom_excellence
     """
+    logger.info(f"Multi-symptom parsing request received: {request.text}")
     try:
         # Get medical AI service
         medical_ai_service = get_medical_ai()
