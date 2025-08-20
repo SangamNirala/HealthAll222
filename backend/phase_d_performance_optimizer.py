@@ -111,10 +111,11 @@ class AdvancedCachingLayer:
     async def initialize_redis_cache(self, redis_url: str = "redis://localhost:6379"):
         """Initialize Redis distributed caching"""
         try:
-            self.redis_client = aioredis.from_url(redis_url)
-            await self.redis_client.ping()
-            logger.info("Redis distributed caching initialized successfully")
-            return True
+            # TODO: Replace with MongoDB caching system
+            # self.redis_client = MongoDBCachingSystem.from_url(redis_url)
+            # await self.redis_client.ping()
+            logger.warning("Redis caching disabled - MongoDB caching system not yet implemented")
+            return False
         except Exception as e:
             logger.warning(f"Redis initialization failed: {e}. Using memory-only caching.")
             return False
