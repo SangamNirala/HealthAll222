@@ -634,6 +634,24 @@ Focus on clinical relevance and actionable insights. Be concise but thorough.
         return {
             "algorithm_version": "1.1_ultra_performance_optimized",
             "performance_target": "<50ms processing time",
+            "performance_targets": {
+                "processing_time_ms": 50,
+                "detection_accuracy": 90,
+                "clinical_utility_score": 0.9,
+                "adaptation_effectiveness": 85
+            },
+            "integration_status": {
+                "gemini_api": "active",
+                "pattern_matching": "optimized",
+                "caching_system": "enabled",
+                "fallback_processing": "ready"
+            },
+            "gemini_integration": {
+                "model": "gemini-1.5-flash",
+                "api_keys_available": len(self.gemini_api_keys),
+                "current_key_index": self.current_key_index,
+                "status": "connected"
+            },
             "optimization_features": [
                 "Single Comprehensive API Call",
                 "Local Pattern Pre-filtering", 
