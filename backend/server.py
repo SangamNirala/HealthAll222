@@ -17146,10 +17146,25 @@ async def expand_colloquial_medical_language(request: ColloquialLanguageRequest)
             }
         }
         
+        # Calculate generation summary
+        generation_summary = {
+            "total_patterns_generated": len(colloquial_patterns),
+            "formal_terms_processed": len(request.formal_terms),
+            "average_patterns_per_term": len(colloquial_patterns) / max(1, len(request.formal_terms)),
+            "cultural_context_applied": request.cultural_context or "general",
+            "generation_method": "ai_enhanced_with_fallback",
+            "quality_metrics": {
+                "diversity_score": pattern_diversity['categories_covered'] / max(1, pattern_diversity['total_patterns']) * 100,
+                "cultural_coverage": pattern_diversity['cultural_contexts'],
+                "sensitivity_distribution": pattern_diversity['sensitivity_levels']
+            }
+        }
+        
         response = ColloquialLanguageResponse(
             colloquial_patterns=patterns_data,
             cultural_analysis=cultural_data,
-            pattern_diversity=pattern_diversity
+            pattern_diversity=pattern_diversity,
+            generation_summary=generation_summary
         )
         
         logger.info(f"✅ Generated {len(colloquial_patterns)} colloquial patterns across {pattern_diversity['categories_covered']} categories")
