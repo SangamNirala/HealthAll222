@@ -27,7 +27,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Backend URL from environment
-BACKEND_URL = "https://healthprobe.preview.emergentagent.com/api"
+BACKEND_URL = "https://followup-testing.preview.emergentagent.com/api"
 
 class MongoDBCachingSystemTester:
     """Comprehensive tester for MongoDB Caching System improvements"""

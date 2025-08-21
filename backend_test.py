@@ -29,7 +29,7 @@ from typing import Dict, Any, List
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = "https://healthprobe.preview.emergentagent.com/api"
+BACKEND_URL = "https://followup-testing.preview.emergentagent.com/api"
 
 class Step32MultiSymptomParsingTester:
     """Comprehensive tester for Step 3.2 Revolutionary Multi-Symptom Parsing System"""
@@ -819,7 +819,7 @@ from typing import Dict, List, Any
 import sys
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://healthprobe.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://followup-testing.preview.emergentagent.com')
 BASE_URL = f"{BACKEND_URL}/api"
 
 class PhaseDBenchmarkTester:
