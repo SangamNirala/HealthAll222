@@ -8331,6 +8331,29 @@ class WorldClassMedicalAI:
         else:
             return 'general'
     
+    def _determine_temporal_context(self, user_response: str, context: MedicalContext) -> str:
+        """Determine the medical context for temporal vagueness to provide appropriate follow-up"""
+        
+        chief_complaint = context.chief_complaint or ""
+        
+        # Emergency-related temporal context
+        if any(emergency in chief_complaint.lower() for emergency in ['chest pain', 'shortness of breath', 'severe headache', 'crushing']):
+            return 'emergency_temporal'
+        
+        # Pain-related temporal context
+        if 'pain' in chief_complaint.lower() or 'hurt' in chief_complaint.lower():
+            return 'pain_temporal'
+        
+        # Neurological temporal context
+        if any(neuro in chief_complaint.lower() for neuro in ['headache', 'dizziness', 'weakness', 'numbness']):
+            return 'neurological_temporal'
+        
+        # Gastrointestinal temporal context
+        if any(gi in chief_complaint.lower() for gi in ['stomach', 'nausea', 'vomiting', 'diarrhea']):
+            return 'gastrointestinal_temporal'
+        
+        return 'general_temporal'
+    
     async def _generate_intelligent_followup_question(self, user_response: str, question_element: str, context: MedicalContext) -> str:
         """
         🧠 STEP 4.2: ENHANCED INTELLIGENT FOLLOW-UP QUESTION GENERATION
