@@ -8505,10 +8505,22 @@ class WorldClassMedicalAI:
             
         elif incompleteness_type == 'insufficient_detail_response':
             return await self._generate_elaboration_followup(user_response, question_element, context)
+        
+        elif incompleteness_type == 'medical_abbreviation_clarification':
+            return await self._generate_medical_abbreviation_followup(user_response, context)
+        
+        elif incompleteness_type == 'trigger_without_symptom_context':
+            return await self._generate_trigger_symptom_followup(user_response, context)
+        
+        elif incompleteness_type == 'family_history_elaboration':
+            return await self._generate_family_history_followup(user_response, context)
+        
+        elif incompleteness_type == 'frequency_pattern_clarification':
+            return await self._generate_frequency_pattern_followup(user_response, context)
             
         else:
-            # Fallback for any other incomplete responses
-            return f"Could you provide more specific details about what you mean by '{user_response}'? This information will help me better understand your {chief_complaint}."
+            # Enhanced fallback for any other incomplete responses
+            return f"I'd like to understand more about what you mean by '{user_response}'. Could you provide additional details or context? This will help me better assess your {chief_complaint} and provide you with more accurate guidance."
     
     async def _generate_vague_symptom_followup(self, user_response: str, chief_complaint: str, context: MedicalContext) -> str:
         """Generate follow-up for vague symptom descriptions like 'feeling bad', 'not well'"""
