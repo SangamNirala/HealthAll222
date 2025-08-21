@@ -9142,9 +9142,39 @@ Generate the follow-up question:
             return f"Can you provide more specific details about '{user_response}'? Please include exact names, doses, frequencies, and what conditions they're for."
     
     async def _generate_hpi_question_smart(self, element: str, context: MedicalContext) -> str:
-        """Generate HPI questions with enhanced chief complaint handling"""
+        """
+        🚀 PHASE 5: Generate HPI questions with enhanced template integration
+        Prioritizes symptom-specific template questions when available
+        """
         
-        # 🚀 ENHANCED: Better chief complaint extraction and handling
+        # 🚀 PHASE 5: Check for enhanced template questions first
+        if hasattr(context, 'enhanced_template_data') and context.enhanced_template_data:
+            template_questions = context.enhanced_template_data.get('questions', [])
+            
+            # Map element to appropriate template question if available
+            element_question_index = {
+                "character": 0,  # "Can you describe the chest discomfort? Is it sharp, dull, or pressure-like?"
+                "radiation": 1,  # "Does the pain radiate to your arm, jaw, neck, or back?"
+                "onset": 2,      # "When did this start, and what were you doing when it began?"
+                "severity": 3,   # "On a scale of 1-10, how severe is the pain?"
+                "alleviating": 4, # "Any shortness of breath, sweating, nausea, or other symptoms?"
+                "location": 0,   # Fall back to character question
+                "duration": 2,   # Fall back to onset question
+                "timing": 2      # Fall back to onset question
+            }
+            
+            question_index = element_question_index.get(element, 0)
+            if question_index < len(template_questions):
+                template_question = template_questions[question_index]
+                print(f"[PHASE 5 DEBUG] Using template question for {element}: {template_question[:50]}...")
+                
+                # Add clinical reasoning specific to template category
+                template_category = context.enhanced_template_data.get('category', 'general')
+                clinical_reasoning = self._get_template_clinical_reasoning(element, template_category)
+                
+                return f"{template_question}\n\n{clinical_reasoning}"
+        
+        # 🚀 ENHANCED: Fallback to standard HPI questions with better chief complaint handling
         chief_complaint = self._get_clean_chief_complaint(context)
         
         hpi_questions = {
@@ -9175,6 +9205,44 @@ Generate the follow-up question:
         clinical_reasoning = reasoning_map.get(element, "This information helps me provide better medical guidance.")
         
         return f"{base_question}\n\nI'm asking this because {clinical_reasoning.lower()}"
+    
+    def _get_template_clinical_reasoning(self, element: str, category: str) -> str:
+        """Generate clinical reasoning specific to template category and element"""
+        
+        category_reasoning = {
+            "cardiovascular": {
+                "character": "I need to assess if this could be cardiac, pulmonary, or musculoskeletal in origin based on the type of discomfort.",
+                "radiation": "Cardiac pain often radiates in specific patterns that help with diagnosis and risk assessment.",
+                "onset": "The timing and triggers can help distinguish between different cardiac conditions and their urgency.",
+                "severity": "Severity helps determine if this could be an acute coronary event requiring immediate attention.",
+                "alleviating": "Associated symptoms like shortness of breath or sweating can indicate cardiac involvement."
+            },
+            "neurological": {
+                "character": "The type of sensation helps differentiate between different neurological conditions.",
+                "onset": "Sudden onset neurological symptoms require immediate evaluation for conditions like stroke.",
+                "location": "The anatomical distribution helps localize the problem within the nervous system.",
+                "severity": "Severe headaches or sudden neurological changes may indicate serious conditions.",
+                "alleviating": "Factors that worsen or improve neurological symptoms provide important diagnostic clues."
+            },
+            "respiratory": {
+                "character": "The nature of breathing difficulty helps distinguish between cardiac, pulmonary, and other causes.",
+                "onset": "Sudden breathing problems may indicate serious conditions requiring urgent evaluation.",
+                "severity": "The degree of respiratory distress helps determine the urgency of care needed.",
+                "alleviating": "What improves or worsens breathing provides clues about the underlying cause.",
+                "radiation": "Associated chest symptoms can help determine if this is primarily respiratory or cardiac."
+            },
+            "gastrointestinal": {
+                "character": "The type of abdominal discomfort helps narrow down possible gastrointestinal conditions.",
+                "location": "The specific location guides me toward different organs and potential diagnoses.",
+                "onset": "Sudden severe abdominal pain may indicate conditions requiring emergency surgery.",
+                "severity": "Severity helps assess if this could be a surgical emergency or medical condition.",
+                "alleviating": "What affects the pain (eating, position, bowel movements) provides important diagnostic information."
+            }
+        }
+        
+        default_reasoning = f"This information helps me understand your {category} symptoms and provide appropriate medical guidance."
+        
+        return category_reasoning.get(category, {}).get(element, default_reasoning)
     
     def _get_clean_chief_complaint(self, context: MedicalContext) -> str:
         """Get a clean, properly formatted chief complaint"""
