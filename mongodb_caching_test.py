@@ -30,7 +30,7 @@ from typing import Dict, List, Any, Tuple
 import statistics
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://medtalk-genius.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://medchat-enhance-1.preview.emergentagent.com')
 BASE_URL = f"{BACKEND_URL}/api"
 
 class MongoDBCachingTester:

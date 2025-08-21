@@ -30,7 +30,7 @@ from datetime import datetime
 class IncompletenessDetectionTester:
     def __init__(self):
         # Get backend URL from environment
-        self.backend_url = os.getenv('REACT_APP_BACKEND_URL', 'https://medtalk-genius.preview.emergentagent.com')
+        self.backend_url = os.getenv('REACT_APP_BACKEND_URL', 'https://medchat-enhance-1.preview.emergentagent.com')
         if not self.backend_url.endswith('/api'):
             self.backend_url = f"{self.backend_url}/api"
         
@@ -443,7 +443,7 @@ from typing import Dict, Any, List
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = "https://medtalk-genius.preview.emergentagent.com/api"
+BACKEND_URL = "https://medchat-enhance-1.preview.emergentagent.com/api"
 
 class Step32MultiSymptomParsingTester:
     """Comprehensive tester for Step 3.2 Revolutionary Multi-Symptom Parsing System"""
@@ -1233,7 +1233,7 @@ from typing import Dict, List, Any
 import sys
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://medtalk-genius.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://medchat-enhance-1.preview.emergentagent.com')
 BASE_URL = f"{BACKEND_URL}/api"
 
 class PhaseDBenchmarkTester:
