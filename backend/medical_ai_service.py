@@ -8092,7 +8092,7 @@ class WorldClassMedicalAI:
         
     async def _detect_medical_incompleteness(self, user_response: str, question_element: str, context: MedicalContext) -> Dict[str, Any]:
         """
-        🧠 STEP 4.2: COMPREHENSIVE MEDICAL INCOMPLETENESS DETECTION ENGINE
+        🧠 STEP 4.2: ENHANCED COMPREHENSIVE MEDICAL INCOMPLETENESS DETECTION ENGINE
         
         Analyzes medical responses for missing critical information across all medical domains.
         Returns detailed incompleteness analysis with specific missing information types.
@@ -8111,79 +8111,43 @@ class WorldClassMedicalAI:
             'confidence': 0.0
         }
         
-        # 1. VAGUE SYMPTOM DESCRIPTIONS
+        print(f"[INCOMPLETENESS DEBUG] Analyzing: '{user_response}' (words: {len(words)})")
+        
+        # 1. VAGUE SYMPTOM DESCRIPTIONS (highest priority)
         vague_symptoms = [
             'feeling bad', 'not well', 'unwell', 'sick', 'not good', 'terrible', 
             'awful', 'crappy', 'horrible', 'weird', 'strange', 'off', 'wrong',
             'bothering me', 'uncomfortable', 'not right', 'concerning'
         ]
         
-        if any(vague in user_response_clean for vague in vague_symptoms):
-            incompleteness_analysis.update({
-                'needs_followup': True,
-                'incompleteness_type': 'vague_symptom_description',
-                'missing_information': ['specific_symptoms', 'anatomical_location', 'quality'],
-                'clinical_significance': 'high',
-                'confidence': 0.9
-            })
-            return incompleteness_analysis
-            
-        # 2. INCOMPLETE PAIN DESCRIPTIONS
-        pain_keywords = ['pain', 'hurt', 'hurts', 'hurting', 'ache', 'aches', 'aching', 'sore', 'tender']
-        has_pain = any(pain in user_response_clean for pain in pain_keywords)
-        
-        if has_pain:
-            # Check for missing pain characteristics
-            missing_pain_details = []
-            
-            # Check for quality descriptors
-            pain_qualities = ['sharp', 'dull', 'burning', 'throbbing', 'stabbing', 'crushing', 
-                            'pressure', 'cramping', 'shooting', 'electric', 'gnawing']
-            if not any(quality in user_response_clean for quality in pain_qualities):
-                missing_pain_details.append('pain_quality')
-                
-            # Check for severity indicators
-            severity_indicators = ['severe', 'mild', 'moderate', 'terrible', 'unbearable', 
-                                 'excruciating', 'intense', 'slight', 'minor']
-            has_severity = any(sev in user_response_clean for sev in severity_indicators)
-            
-            # Check for numerical ratings
-            has_numerical = any(char.isdigit() for char in user_response)
-            
-            if not has_severity and not has_numerical:
-                missing_pain_details.append('pain_severity')
-                
-            # Check for anatomical specificity
-            if len(words) <= 2 and ('chest' in user_response_clean or 'head' in user_response_clean or 
-                                  'stomach' in user_response_clean or 'back' in user_response_clean):
-                missing_pain_details.append('anatomical_specificity')
-                
-            if missing_pain_details:
+        for vague in vague_symptoms:
+            if vague in user_response_clean:
+                print(f"[INCOMPLETENESS DEBUG] Found vague symptom: {vague}")
                 incompleteness_analysis.update({
                     'needs_followup': True,
-                    'incompleteness_type': 'incomplete_pain_description',
-                    'missing_information': missing_pain_details,
-                    'medical_domain': self._determine_pain_domain(user_response_clean),
+                    'incompleteness_type': 'vague_symptom_description',
+                    'missing_information': ['specific_symptoms', 'anatomical_location', 'quality'],
                     'clinical_significance': 'high',
-                    'confidence': 0.85
+                    'confidence': 0.9
                 })
                 return incompleteness_analysis
                 
-        # 3. VAGUE TEMPORAL INFORMATION
-        vague_temporal = ['recently', 'lately', 'for a while', 'some time', 'long time', 
-                         'not long ago', 'past few', 'little while', 'bit ago']
+        # 2. EMOTIONAL/FEAR RESPONSES WITHOUT MEDICAL DETAILS (check early)
+        emotional_responses = ['scared', 'worried', 'anxious', 'nervous', 'frightened', 
+                             'terrified', 'panicked', 'concerned']
         
-        if any(temporal in user_response_clean for temporal in vague_temporal):
+        if len(words) <= 2 and any(emotion in user_response_clean for emotion in emotional_responses):
+            print(f"[INCOMPLETENESS DEBUG] Found emotional response: {user_response}")
             incompleteness_analysis.update({
                 'needs_followup': True,
-                'incompleteness_type': 'vague_temporal_information',
-                'missing_information': ['specific_timeframe', 'onset_details'],
-                'clinical_significance': 'medium',
+                'incompleteness_type': 'emotional_without_medical_details',
+                'missing_information': ['specific_concerns', 'underlying_symptoms'],
+                'clinical_significance': 'high',
                 'confidence': 0.8
             })
             return incompleteness_analysis
             
-        # 4. SINGLE WORD ORGAN/SYSTEM RESPONSES
+        # 3. SINGLE WORD ORGAN/SYSTEM RESPONSES
         organ_systems = {
             'chest': 'cardiovascular',
             'heart': 'cardiovascular', 
@@ -8198,6 +8162,7 @@ class WorldClassMedicalAI:
         }
         
         if len(words) == 1 and user_response_clean in organ_systems:
+            print(f"[INCOMPLETENESS DEBUG] Found single anatomical word: {user_response}")
             incompleteness_analysis.update({
                 'needs_followup': True,
                 'incompleteness_type': 'incomplete_anatomical_description',
@@ -8208,11 +8173,87 @@ class WorldClassMedicalAI:
             })
             return incompleteness_analysis
             
-        # 5. VAGUE TRIGGER RESPONSES
+        # 4. INCOMPLETE PAIN DESCRIPTIONS (enhanced detection)
+        pain_keywords = ['pain', 'hurt', 'hurts', 'hurting', 'ache', 'aches', 'aching', 'sore', 'tender']
+        has_pain = any(pain in user_response_clean for pain in pain_keywords)
+        
+        if has_pain:
+            print(f"[INCOMPLETENESS DEBUG] Pain detected in: {user_response}")
+            # Check for missing pain characteristics
+            missing_pain_details = []
+            
+            # Check for quality descriptors (more comprehensive list)
+            pain_qualities = ['sharp', 'dull', 'burning', 'throbbing', 'stabbing', 'crushing', 
+                            'pressure', 'cramping', 'shooting', 'electric', 'gnawing', 'squeezing',
+                            'tight', 'heavy', 'radiating', 'pounding', 'piercing']
+            has_quality = any(quality in user_response_clean for quality in pain_qualities)
+            
+            if not has_quality:
+                missing_pain_details.append('pain_quality')
+                print(f"[INCOMPLETENESS DEBUG] Missing pain quality")
+                
+            # Check for severity indicators (enhanced)
+            severity_indicators = ['severe', 'mild', 'moderate', 'terrible', 'unbearable', 
+                                 'excruciating', 'intense', 'slight', 'minor', 'bad', 'awful',
+                                 'horrible', 'worst', 'extreme', 'overwhelming']
+            has_severity = any(sev in user_response_clean for sev in severity_indicators)
+            
+            # Check for numerical ratings or scale references
+            has_numerical = any(char.isdigit() for char in user_response) or 'out of' in user_response_clean
+            
+            if not has_severity and not has_numerical:
+                missing_pain_details.append('pain_severity')
+                print(f"[INCOMPLETENESS DEBUG] Missing pain severity")
+                
+            # Check for anatomical specificity (relaxed criteria)
+            anatomical_areas = ['chest', 'head', 'stomach', 'back', 'abdomen', 'neck', 'shoulder', 'arm', 'leg']
+            basic_anatomical = any(area in user_response_clean for area in anatomical_areas)
+            
+            if basic_anatomical and len(words) <= 3:
+                missing_pain_details.append('anatomical_specificity')
+                print(f"[INCOMPLETENESS DEBUG] Missing anatomical specificity")
+                
+            # Trigger follow-up if any important details are missing
+            if missing_pain_details:
+                print(f"[INCOMPLETENESS DEBUG] Pain incompleteness detected: {missing_pain_details}")
+                incompleteness_analysis.update({
+                    'needs_followup': True,
+                    'incompleteness_type': 'incomplete_pain_description',
+                    'missing_information': missing_pain_details,
+                    'medical_domain': self._determine_pain_domain(user_response_clean),
+                    'clinical_significance': 'high',
+                    'confidence': 0.85
+                })
+                return incompleteness_analysis
+                
+        # 5. VAGUE TEMPORAL INFORMATION (enhanced detection)
+        vague_temporal = ['recently', 'lately', 'for a while', 'some time', 'long time', 
+                         'not long ago', 'past few', 'little while', 'bit ago', 'while back',
+                         'earlier', 'before', 'ago', 'since']
+        
+        # Check if response is ONLY temporal without specifics
+        is_temporal_only = len(words) <= 2 and any(temporal in user_response_clean for temporal in vague_temporal)
+        
+        # Also check when asked about timing specifically
+        has_vague_temporal = any(temporal in user_response_clean for temporal in vague_temporal[:9])  # More specific vague terms
+        
+        if is_temporal_only or (has_vague_temporal and len(words) <= 3):
+            print(f"[INCOMPLETENESS DEBUG] Vague temporal detected: {user_response}")
+            incompleteness_analysis.update({
+                'needs_followup': True,
+                'incompleteness_type': 'vague_temporal_information',
+                'missing_information': ['specific_timeframe', 'onset_details'],
+                'clinical_significance': 'medium',
+                'confidence': 0.8
+            })
+            return incompleteness_analysis
+            
+        # 6. VAGUE TRIGGER RESPONSES
         vague_triggers = ['things', 'stuff', 'activities', 'sometimes', 'certain things', 
-                         'when I do', 'it depends', 'various things']
+                         'when I do', 'it depends', 'various things', 'certain situations']
         
         if any(trigger in user_response_clean for trigger in vague_triggers):
+            print(f"[INCOMPLETENESS DEBUG] Vague trigger detected: {user_response}")
             incompleteness_analysis.update({
                 'needs_followup': True,
                 'incompleteness_type': 'vague_trigger_information',
@@ -8222,11 +8263,12 @@ class WorldClassMedicalAI:
             })
             return incompleteness_analysis
             
-        # 6. INCOMPLETE SEVERITY DESCRIPTIONS
+        # 7. INCOMPLETE SEVERITY DESCRIPTIONS
         vague_severity = ['really bad', 'pretty bad', 'quite bad', 'very', 'really', 
                          'extremely', 'terribly', 'horribly', 'awfully']
         
         if any(sev in user_response_clean for sev in vague_severity) and len(words) <= 3:
+            print(f"[INCOMPLETENESS DEBUG] Vague severity detected: {user_response}")
             incompleteness_analysis.update({
                 'needs_followup': True,
                 'incompleteness_type': 'vague_severity_description',
@@ -8236,25 +8278,12 @@ class WorldClassMedicalAI:
             })
             return incompleteness_analysis
             
-        # 7. EMOTIONAL/FEAR RESPONSES WITHOUT MEDICAL DETAILS
-        emotional_responses = ['scared', 'worried', 'anxious', 'nervous', 'frightened', 
-                             'terrified', 'panicked', 'concerned']
-        
-        if any(emotion in user_response_clean for emotion in emotional_responses) and len(words) <= 2:
-            incompleteness_analysis.update({
-                'needs_followup': True,
-                'incompleteness_type': 'emotional_without_medical_details',
-                'missing_information': ['specific_concerns', 'underlying_symptoms'],
-                'clinical_significance': 'high',
-                'confidence': 0.8
-            })
-            return incompleteness_analysis
-            
         # 8. SINGLE WORD RESPONSES TO COMPLEX QUESTIONS
         single_word_responses = ['yes', 'no', 'maybe', 'sometimes', 'often', 'rarely', 
                                'never', 'always', 'possibly', 'probably']
         
         if len(words) == 1 and user_response_clean in single_word_responses:
+            print(f"[INCOMPLETENESS DEBUG] Insufficient detail response: {user_response}")
             incompleteness_analysis.update({
                 'needs_followup': True,
                 'incompleteness_type': 'insufficient_detail_response',
@@ -8263,7 +8292,8 @@ class WorldClassMedicalAI:
                 'confidence': 0.75
             })
             return incompleteness_analysis
-            
+        
+        print(f"[INCOMPLETENESS DEBUG] Response appears complete: {user_response}")
         # Response appears complete
         return incompleteness_analysis
         
