@@ -9812,6 +9812,29 @@ Generate the follow-up question:
             print(f"Error generating enhanced differential diagnosis: {e}")
             return await self._generate_fallback_assessment(context)
     
+    async def _format_final_assessment_with_empathy(self, differential_data: Dict[str, Any], context: MedicalContext) -> str:
+        """
+        💝 STEP 5.2: FORMAT FINAL ASSESSMENT WITH EMPATHETIC COMMUNICATION
+        
+        Formats medical assessment with empathetic communication transformation
+        while maintaining clinical accuracy and professional standards.
+        """
+        
+        # First generate the standard technical assessment
+        technical_assessment = self._format_final_assessment(differential_data)
+        
+        # Apply empathetic communication transformation
+        empathy_result = await self._apply_empathetic_communication_transformation(
+            technical_assessment, context
+        )
+        
+        # Return empathetic version if transformation was successful
+        if empathy_result and 'empathetic_response' in empathy_result:
+            return empathy_result['empathetic_response']
+        else:
+            # Fallback to technical assessment with basic empathy
+            return f"I understand your concern about these symptoms. {technical_assessment} Please feel free to ask if you need any clarification or have additional questions."
+
     def _format_final_assessment(self, differential_data: Dict[str, Any]) -> str:
         """Format final medical assessment in professional style"""
         
