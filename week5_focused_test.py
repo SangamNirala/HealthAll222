@@ -18,7 +18,7 @@ from datetime import datetime
 import traceback
 
 # Backend URL from environment
-BACKEND_URL = "https://converse-context.preview.emergentagent.com/api"
+BACKEND_URL = "https://mediq-followup.preview.emergentagent.com/api"
 
 def test_week5_integration_testing():
     """Test Week 5 Integration Testing with correct request format"""

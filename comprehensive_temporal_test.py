@@ -17,7 +17,7 @@ EXPECTED FIXES VALIDATION:
 ✅ overall_duration should be populated (fixed from None)  
 ✅ temporal_pattern should be classified (fixed from "unknown")
 
-Backend URL: https://converse-context.preview.emergentagent.com
+Backend URL: https://mediq-followup.preview.emergentagent.com
 """
 
 import asyncio
@@ -29,7 +29,7 @@ from typing import Dict, Any, List
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = "https://converse-context.preview.emergentagent.com/api"
+BACKEND_URL = "https://mediq-followup.preview.emergentagent.com/api"
 
 class TemporalExtractionTester:
     """Comprehensive tester for temporal extraction fixes in medical AI multi-symptom parser"""
