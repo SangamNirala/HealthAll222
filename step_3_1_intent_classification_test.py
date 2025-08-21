@@ -35,7 +35,7 @@ from datetime import datetime
 sys.path.append('/app/backend')
 
 # Test configuration
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://mediq-2.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://mediq-engine.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class MedicalIntentClassificationTester:

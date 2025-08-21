@@ -11,7 +11,7 @@ import time
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://mediq-2.preview.emergentagent.com/api"
+BACKEND_URL = "https://mediq-engine.preview.emergentagent.com/api"
 
 def test_step_42_follow_up_system():
     """Test the Step 4.2 intelligent follow-up question generation system"""

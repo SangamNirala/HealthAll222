@@ -14,7 +14,7 @@ import os
 from datetime import datetime
 
 def test_medical_ai_backend():
-    backend_url = "https://mediq-2.preview.emergentagent.com/api"
+    backend_url = "https://mediq-engine.preview.emergentagent.com/api"
     
     print("🚀 MEDICAL AI BACKEND COMPREHENSIVE TESTING")
     print("=" * 60)

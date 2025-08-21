@@ -20,7 +20,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Configuration
-BACKEND_URL = "https://mediq-2.preview.emergentagent.com/api"
+BACKEND_URL = "https://mediq-engine.preview.emergentagent.com/api"
 
 class Step42FollowUpTester:
     def __init__(self):

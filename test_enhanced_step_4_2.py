@@ -7,7 +7,7 @@ import requests
 import json
 from datetime import datetime
 
-BACKEND_URL = "https://mediq-2.preview.emergentagent.com/api"
+BACKEND_URL = "https://mediq-engine.preview.emergentagent.com/api"
 
 def test_enhanced_step_4_2():
     """Test the enhanced Step 4.2 system with proper context handling"""

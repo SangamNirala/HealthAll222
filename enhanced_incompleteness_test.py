@@ -13,7 +13,7 @@ import time
 from typing import Dict, Any, List
 
 # Backend URL from frontend environment
-BACKEND_URL = "https://mediq-2.preview.emergentagent.com/api"
+BACKEND_URL = "https://mediq-engine.preview.emergentagent.com/api"
 
 class EnhancedIncompletenessDetectionTester:
     """Comprehensive tester for Enhanced Incompleteness Detection System"""
