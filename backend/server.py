@@ -16861,6 +16861,7 @@ class ColloquialLanguageResponse(BaseModel):
     colloquial_patterns: List[Dict[str, Any]]
     cultural_analysis: Optional[Dict[str, Any]] = None
     pattern_diversity: Dict[str, Any]
+    generation_summary: Dict[str, Any] = Field(default_factory=dict, description="Summary of pattern generation")
 
 class EmotionalIntelligenceRequest(BaseModel):
     patient_input: str = Field(..., description="Patient's emotionally charged input")
