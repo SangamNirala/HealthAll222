@@ -40,6 +40,14 @@ from empathetic_communication_transformer import (
 # 🧠 STEP 2.2: CONTEXT-AWARE MEDICAL REASONING ENGINE IMPORTS
 from abc import ABC, abstractmethod
 
+# 🔬 TASK 6.1: INTELLIGENT CLARIFICATION SYSTEM
+from intelligent_clarification_system import (
+    analyze_and_clarify_unclear_input, 
+    generate_clarification_response,
+    UnclearInputType,
+    ClarificationAnalysisResult
+)
+
 # 🚀 PHASE 4: REVOLUTIONARY ADVANCED ENTITY CLASSES WITH CLINICAL INTELLIGENCE
 
 @dataclass
