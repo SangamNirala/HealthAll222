@@ -585,7 +585,7 @@ class AIEmotionalIntelligenceValidator:
         fallback_emotions = [
             (EmotionalState.HIGH_ANXIETY, f"I'm really worried about this {symptom}"),
             (EmotionalState.FEAR_TERROR, f"I'm scared this {symptom} means something serious"),
-            (EmotionalState.FRUSTRATION, f"This {symptom} is driving me crazy")
+            (EmotionalState.ANGER_FRUSTRATION, f"This {symptom} is driving me crazy")
         ]
         
         for i in range(min(num_scenarios, len(fallback_emotions))):
