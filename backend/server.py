@@ -49,6 +49,19 @@ from intelligent_clarification_system import (
     UnclearInputType,
     ClarificationAnalysisResult
 )
+
+# 🚀 STEP 6.2: AI-POWERED PROGRESSIVE QUESTIONING ENGINE WITH GEMINI INTEGRATION
+from gemini_progressive_questioning_service import (
+    analyze_with_ai_progressive_questioning,
+    generate_ai_powered_progressive_question,
+    optimize_conversation_with_ai,
+    ai_progressive_questioning_service,
+    AIProgressiveQuestionResult,
+    AISymptomAnalysis,
+    AIGeneratedQuestion,
+    AIQuestionRecommendation,
+    ConversationProgressAnalysis
+)
 import time
 
 # Import Symptom Checker services
