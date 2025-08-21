@@ -16965,7 +16965,8 @@ async def generate_grammatical_error_patterns(request: GrammaticalErrorRequest) 
         response = GrammaticalErrorResponse(
             error_patterns=patterns_data,
             generation_time=generation_time,
-            pattern_types=pattern_types
+            pattern_types=pattern_types,
+            fallback_patterns_used=0  # No fallback used for successful AI generation
         )
         
         logger.info(f"✅ Generated {len(error_patterns)} grammatical error patterns in {generation_time:.3f}s")
