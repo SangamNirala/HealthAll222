@@ -25,6 +25,9 @@ from nlp_processor import IntelligentTextNormalizer, NormalizationResult
 # 🧠 ENHANCEMENT #1: ENHANCED INCOMPLETENESS DETECTION SYSTEM
 from enhanced_incompleteness_detector import EnhancedIncompletenessDetector, IncompletenessAnalysisResult
 
+# 🚀 PHASE 5: ENHANCED MEDICAL RESPONSE GENERATION SYSTEM
+from enhanced_medical_response_generator import get_enhanced_medical_response_template, EnhancedMedicalResponseGenerator
+
 # 🧠 STEP 2.2: CONTEXT-AWARE MEDICAL REASONING ENGINE IMPORTS
 from abc import ABC, abstractmethod
 
