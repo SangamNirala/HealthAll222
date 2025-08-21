@@ -17035,12 +17035,15 @@ async def validate_emotional_intelligence_responses(request: EmotionalIntelligen
         )
 
 @api_router.get("/ai-testing/phase-7-1/performance-summary")
-async def get_phase_71_performance_summary():
+async def get_phase_71_performance_summary_endpoint():
     """
     📊 Get comprehensive Phase 7.1 AI testing performance summary
     """
     try:
         logger.info("📈 Generating Phase 7.1 performance summary")
+        
+        # Import the function to avoid recursive call
+        from phase_7_1_integration_framework import get_phase_71_performance_summary
         
         # Get comprehensive performance summary
         performance_summary = await get_phase_71_performance_summary()
