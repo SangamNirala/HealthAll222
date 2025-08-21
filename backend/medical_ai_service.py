@@ -9793,7 +9793,7 @@ Generate the follow-up question:
                 overall_urgency = context.emergency_level  # Preserve emergency detection
 
             return {
-                "response": self._format_final_assessment(validated_data),
+                "response": await self._format_final_assessment_with_empathy(validated_data, context),
                 "context": asdict(context),
                 "stage": "assessment_complete", 
                 "differential_diagnoses": validated_data.get('differential_diagnoses', []),
@@ -9804,7 +9804,8 @@ Generate the follow-up question:
                 "confidence_assessment": validated_data.get('confidence_assessment', {}),
                 "urgency": overall_urgency,
                 "follow_up_plan": validated_data.get('follow_up_plan', {}),
-                "entity_extraction_metadata": validated_data.get("entity_extraction_metadata", {})
+                "entity_extraction_metadata": validated_data.get("entity_extraction_metadata", {}),
+                "empathetic_transformation": getattr(context, 'empathetic_transformation_data', {})
             }
             
         except Exception as e:
