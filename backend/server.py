@@ -49,6 +49,7 @@ from intelligent_clarification_system import (
     UnclearInputType,
     ClarificationAnalysisResult
 )
+import time
 
 # Import Symptom Checker services
 from symptom_checker_service import (
