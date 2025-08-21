@@ -71,10 +71,20 @@ class AIProgressiveQuestioningService:
     """
     
     def __init__(self):
-        # Initialize AI-powered components
+        # Initialize AI-powered components with error handling
         self.llm_symptom_analyzer = llm_symptom_analyzer
         self.ai_question_generator = ai_question_generator
         self.conversation_orchestrator = intelligent_conversation_orchestrator
+        
+        # Check if AI components are available
+        self.ai_components_available = (
+            self.llm_symptom_analyzer is not None and 
+            self.ai_question_generator is not None and
+            self.conversation_orchestrator is not None
+        )
+        
+        if not self.ai_components_available:
+            logger.warning("AI Progressive Questioning components not fully available - will use fallback mode")
         
         # Initialize existing Task 6.1 components for integration
         self.intelligent_clarification_engine = None
