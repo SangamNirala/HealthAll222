@@ -9418,6 +9418,10 @@ Generate the follow-up question:
         4. Ensure probabilities sum to 100%
         5. Prioritize based on urgency and clinical significance
         6. Leverage Phase 2 entity extraction to identify subtle patterns
+        7. PHASE 5: Incorporate template-specific questions and red flags in your assessment
+        8. PHASE 5: Use symptom-specific protocols to guide diagnostic reasoning
+        9. PHASE 5: Apply template clinical reasoning to enhance accuracy
+        10. PHASE 5: Consider template urgency indicators in risk stratification
         """
 
         try:
