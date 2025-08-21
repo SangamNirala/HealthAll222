@@ -15395,9 +15395,9 @@ async def analyze_conversation_incompleteness(request: IncompletenessAnalysisReq
     try:
         start_time = time.time()
         
-        # Initialize Enhanced Incompleteness Detector
-        from enhanced_incompleteness_detector import EnhancedIncompletenessDetector
-        detector = EnhancedIncompletenessDetector()
+        # Initialize Ultra-Performance Enhanced Incompleteness Detector
+        from enhanced_incompleteness_detector_optimized import UltraPerformanceIncompletenessDetector
+        detector = UltraPerformanceIncompletenessDetector()
         
         # Perform comprehensive incompleteness analysis
         analysis_result = await detector.analyze_conversation_completeness(
