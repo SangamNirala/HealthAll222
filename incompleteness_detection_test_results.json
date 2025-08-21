@@ -1,67 +1,177 @@
 {
   "overall_success": false,
-  "success_rate": 0.0,
-  "tests_passed": 0,
+  "success_rate": 16.666666666666664,
+  "tests_passed": 1,
   "total_tests": 6,
   "performance_summary": {
-    "error": "No performance metrics collected"
+    "total_tests": 4,
+    "performance_targets_met": 0,
+    "performance_success_rate": 0.0,
+    "average_processing_time_ms": 60.44405698776245,
+    "max_processing_time_ms": 74.4476318359375,
+    "min_processing_time_ms": 54.28194999694824,
+    "average_api_processing_time_ms": 0.4699230194091797,
+    "target_threshold_ms": 50,
+    "performance_improvement_factor": 445.03961746720927,
+    "individual_metrics": [
+      {
+        "scenario": "Complex Vague Symptoms",
+        "processing_time_ms": 74.4476318359375,
+        "api_processing_time_ms": 0.6437301635742188,
+        "target_met": false
+      },
+      {
+        "scenario": "Patient with Anxiety",
+        "processing_time_ms": 54.68559265136719,
+        "api_processing_time_ms": 0.38814544677734375,
+        "target_met": false
+      },
+      {
+        "scenario": "Multi-symptom Missing Details",
+        "processing_time_ms": 58.361053466796875,
+        "api_processing_time_ms": 0.4487037658691406,
+        "target_met": false
+      },
+      {
+        "scenario": "Temporal Pattern Analysis",
+        "processing_time_ms": 54.28194999694824,
+        "api_processing_time_ms": 0.3991127014160156,
+        "target_met": false
+      }
+    ]
   },
-  "critical_criteria_met": [],
+  "critical_criteria_met": [
+    false,
+    false,
+    false,
+    false
+  ],
   "detailed_results": [
     {
       "test_name": "Endpoint Availability Check",
-      "success": false,
-      "timestamp": "2025-08-21T06:06:29.304832",
+      "success": true,
+      "timestamp": "2025-08-21T06:08:21.389909",
       "details": {
-        "status_code": 502,
-        "error": "Unexpected status code: 502"
+        "status_code": 200,
+        "system_status": "optimal",
+        "algorithm_version": "1.1_ultra_performance_optimized",
+        "capabilities": [
+          "Multi-Dimensional Incompleteness Analysis",
+          "Adaptive Communication Intelligence",
+          "Ultra-Fast Pattern Recognition",
+          "Real-time Performance Optimization"
+        ]
       }
     },
     {
       "test_name": "Scenario 1: Complex Vague Symptoms",
       "success": false,
-      "timestamp": "2025-08-21T06:06:29.514134",
+      "timestamp": "2025-08-21T06:08:21.465646",
       "details": {
-        "status_code": 502,
-        "error": "HTTP 502: "
+        "processing_time_ms": 74.4476318359375,
+        "api_processing_time_ms": 0.6437301635742188,
+        "performance_target_met": false,
+        "missing_fields": [],
+        "incompleteness_score": 0.4,
+        "priority_gaps_count": 2,
+        "gap_types_detected": [
+          "linguistic",
+          "temporal"
+        ],
+        "follow_ups_count": 2,
+        "analysis_confidence": 0.7,
+        "patient_type": "balanced_patient",
+        "algorithm_version": "1.1_ultra_performance_optimized"
       }
     },
     {
       "test_name": "Scenario 2: Patient with Anxiety",
       "success": false,
-      "timestamp": "2025-08-21T06:06:29.704305",
+      "timestamp": "2025-08-21T06:08:21.521690",
       "details": {
-        "status_code": 502,
-        "error": "HTTP 502: "
+        "processing_time_ms": 54.68559265136719,
+        "api_processing_time_ms": 0.38814544677734375,
+        "performance_target_met": false,
+        "anxiety_indicators_detected": [
+          "anxiety_level_0.6"
+        ],
+        "anxiety_detected": true,
+        "appropriate_approach": false,
+        "recommended_approach": "standard_professional",
+        "question_style": "conversational_professional",
+        "empathy_level": "moderate",
+        "incompleteness_score": 0.2,
+        "priority_gaps_count": 1,
+        "analysis_confidence": 0.7
       }
     },
     {
       "test_name": "Scenario 3: Multi-symptom Missing Details",
       "success": false,
-      "timestamp": "2025-08-21T06:06:29.901932",
+      "timestamp": "2025-08-21T06:08:21.581276",
       "details": {
-        "status_code": 502,
-        "error": "HTTP 502: "
+        "processing_time_ms": 58.361053466796875,
+        "api_processing_time_ms": 0.4487037658691406,
+        "performance_target_met": false,
+        "total_gaps_detected": 2,
+        "oldcarts_gaps_detected": 0,
+        "multi_symptom_detected": false,
+        "follow_ups_count": 2,
+        "has_detailed_follow_ups": true,
+        "incompleteness_score": 0.4,
+        "analysis_confidence": 0.7,
+        "gap_categories": [
+          "vague_description",
+          "onset_missing"
+        ]
       }
     },
     {
       "test_name": "Scenario 4: Temporal Pattern Analysis",
       "success": false,
-      "timestamp": "2025-08-21T06:06:30.095969",
+      "timestamp": "2025-08-21T06:08:21.636900",
       "details": {
-        "status_code": 502,
-        "error": "HTTP 502: "
+        "processing_time_ms": 54.28194999694824,
+        "api_processing_time_ms": 0.3991127014160156,
+        "performance_target_met": false,
+        "temporal_gaps_detected": 1,
+        "temporal_follow_ups_detected": 1,
+        "temporal_analysis_detected": true,
+        "total_gaps": 2,
+        "total_follow_ups": 2,
+        "incompleteness_score": 0.4,
+        "analysis_confidence": 0.7,
+        "temporal_gap_details": [
+          "Additional information needed"
+        ]
       }
     },
     {
       "test_name": "Five Dimensions Detection Test",
       "success": false,
-      "timestamp": "2025-08-21T06:06:30.398702",
+      "timestamp": "2025-08-21T06:08:21.690606",
       "details": {
-        "status_code": 502,
-        "error": "HTTP 502: "
+        "processing_time_ms": 52.408695220947266,
+        "performance_target_met": false,
+        "dimensions_detected_count": 2,
+        "linguistic_detected": true,
+        "medical_detected": false,
+        "psychological_detected": true,
+        "cultural_detected": false,
+        "temporal_detected": false,
+        "gap_types": [
+          "linguistic",
+          "psychological"
+        ],
+        "gap_categories": [
+          "vague_description",
+          "anxiety_detected"
+        ],
+        "total_gaps": 2,
+        "incompleteness_score": 0.4,
+        "analysis_confidence": 0.7
       }
     }
   ],
-  "timestamp": "2025-08-21T06:06:30.480788"
+  "timestamp": "2025-08-21T06:08:21.691875"
 }
