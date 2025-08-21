@@ -7926,6 +7926,128 @@ class WorldClassMedicalAI:
                 "error": str(clarification_error)
             }
         
+        # 🚀 STEP 6.2: AI-POWERED PROGRESSIVE QUESTIONING ENGINE INTEGRATION
+        # Enhanced clarification system with AI-powered progressive questioning using Gemini LLM
+        ai_progressive_questioning_result = None
+        try:
+            # Check if we should use AI progressive questioning (mandatory examples: "sick", "pain", "bad")
+            should_use_ai_questioning = self._should_use_ai_progressive_questioning(
+                normalized_message, clarification_result if 'clarification_result' in locals() else None, conversation_history
+            )
+            
+            if should_use_ai_questioning:
+                print(f"🤖 Activating AI-powered progressive questioning for vague input: '{normalized_message}'")
+                
+                # Build enhanced medical context for AI analysis
+                ai_medical_context = {
+                    "consultation_id": getattr(context, 'consultation_id', None),
+                    "current_stage": context.current_stage.value if hasattr(context.current_stage, 'value') else str(context.current_stage),
+                    "chief_complaint": getattr(context, 'chief_complaint', ''),
+                    "symptoms_mentioned": [symptom.get('symptom') for symptom in context.symptom_data.get('symptoms', [])] if context.symptom_data and context.symptom_data.get('symptoms') else [],
+                    "medical_history": getattr(context, 'medical_history', []),
+                    "demographics": context.demographics if context.demographics else {},
+                    "intent_analysis": getattr(context, 'intent_analysis', {}),
+                    "clarification_analysis": getattr(context, 'clarification_analysis', {}),
+                    "conversation_length": len(conversation_history) if conversation_history else 0
+                }
+                
+                # Perform AI-powered progressive questioning analysis
+                ai_progressive_questioning_result = await analyze_with_ai_progressive_questioning(
+                    patient_input=normalized_message,
+                    medical_context=ai_medical_context,
+                    conversation_history=conversation_history
+                )
+                
+                # Store AI progressive questioning results in context
+                context.ai_progressive_questioning = {
+                    "symptom_analysis": {
+                        "vagueness_type": ai_progressive_questioning_result.symptom_analysis.vagueness_type,
+                        "missing_information": ai_progressive_questioning_result.symptom_analysis.missing_information,
+                        "clinical_priority": ai_progressive_questioning_result.symptom_analysis.clinical_priority,
+                        "medical_domains": ai_progressive_questioning_result.symptom_analysis.medical_domains,
+                        "confidence_score": ai_progressive_questioning_result.symptom_analysis.confidence_score,
+                        "ai_reasoning": ai_progressive_questioning_result.symptom_analysis.ai_reasoning
+                    },
+                    "generated_questions": [
+                        {
+                            "question_text": q.question_text,
+                            "medical_reasoning": q.medical_reasoning,
+                            "clinical_priority": q.clinical_priority,
+                            "empathy_level": q.empathy_level,
+                            "question_category": q.question_category
+                        } for q in ai_progressive_questioning_result.generated_questions
+                    ],
+                    "conversation_strategy": ai_progressive_questioning_result.conversation_strategy,
+                    "should_escalate": ai_progressive_questioning_result.should_escalate,
+                    "efficiency_score": ai_progressive_questioning_result.conversation_efficiency_score,
+                    "processing_time_ms": ai_progressive_questioning_result.total_processing_time_ms
+                }
+                
+                print(f"🤖 AI Progressive Questioning: Generated {len(ai_progressive_questioning_result.generated_questions)} questions with efficiency score {ai_progressive_questioning_result.conversation_efficiency_score:.3f}")
+                
+                # Check if AI recommends immediate escalation
+                if ai_progressive_questioning_result.should_escalate:
+                    print(f"🚨 AI Progressive Questioning recommends immediate escalation: {ai_progressive_questioning_result.escalation_reason}")
+                
+                # If AI generated high-quality questions, use them for response
+                if ai_progressive_questioning_result.generated_questions and ai_progressive_questioning_result.generated_questions[0].confidence_score > 0.7:
+                    primary_ai_question = ai_progressive_questioning_result.generated_questions[0]
+                    
+                    # Transform AI question using empathetic communication
+                    try:
+                        empathetic_ai_response = await self._generate_empathetic_response(primary_ai_question.question_text)
+                        
+                        return {
+                            "response": empathetic_ai_response,
+                            "context": asdict(context),
+                            "urgency": "urgent" if ai_progressive_questioning_result.should_escalate else "routine",
+                            "stage": context.current_stage.value if hasattr(context.current_stage, 'value') else str(context.current_stage),
+                            "emergency_detected": ai_progressive_questioning_result.should_escalate,
+                            "ai_progressive_questioning_active": True,
+                            "ai_question_confidence": primary_ai_question.confidence_score,
+                            "ai_medical_reasoning": primary_ai_question.medical_reasoning,
+                            "ai_conversation_strategy": ai_progressive_questioning_result.conversation_strategy,
+                            "patient_communication_style": ai_progressive_questioning_result.symptom_analysis.patient_communication_style,
+                            "ai_clinical_priority": ai_progressive_questioning_result.symptom_analysis.clinical_priority,
+                            "ai_vagueness_type": ai_progressive_questioning_result.symptom_analysis.vagueness_type,
+                            "next_questions": [q.question_text for q in ai_progressive_questioning_result.generated_questions[:2]],  # Top 2 AI questions
+                            "differential_diagnoses": [],
+                            "recommendations": [
+                                f"AI-powered progressive questioning active for {ai_progressive_questioning_result.symptom_analysis.vagueness_type} symptom",
+                                f"Gathering specific information using {ai_progressive_questioning_result.conversation_strategy}",
+                                primary_ai_question.medical_reasoning
+                            ]
+                        }
+                    
+                    except Exception as empathy_error:
+                        print(f"Empathetic AI response generation failed: {empathy_error}")
+                        # Return AI question without empathetic enhancement
+                        return {
+                            "response": primary_ai_question.question_text,
+                            "context": asdict(context),
+                            "urgency": "urgent" if ai_progressive_questioning_result.should_escalate else "routine",
+                            "stage": context.current_stage.value if hasattr(context.current_stage, 'value') else str(context.current_stage),
+                            "emergency_detected": ai_progressive_questioning_result.should_escalate,
+                            "ai_progressive_questioning_active": True,
+                            "ai_question_confidence": primary_ai_question.confidence_score,
+                            "ai_medical_reasoning": primary_ai_question.medical_reasoning,
+                            "next_questions": [q.question_text for q in ai_progressive_questioning_result.generated_questions[:2]],
+                            "differential_diagnoses": [],
+                            "recommendations": [
+                                f"AI-powered progressive questioning active for {ai_progressive_questioning_result.symptom_analysis.vagueness_type} symptom"
+                            ]
+                        }
+                
+            else:
+                print(f"🔬 Input does not require AI progressive questioning, continuing with traditional flow")
+                
+        except Exception as ai_questioning_error:
+            print(f"AI Progressive Questioning failed (continuing with traditional processing): {ai_questioning_error}")
+            context.ai_progressive_questioning = {
+                "error": str(ai_questioning_error),
+                "fallback_mode": True
+            }
+        
         # 1. Emergency Detection (highest priority) - use normalized text and intent analysis
         emergency_assessment = await self._assess_emergency_risk(normalized_message, context)
         if emergency_assessment['emergency_detected']:
