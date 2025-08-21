@@ -99,9 +99,9 @@ class Phase71AITestingSuiteTester:
         
         try:
             if method.upper() == 'GET':
-                response = requests.get(url, timeout=timeout)
+                response = requests.get(url, timeout=timeout, verify=False)  # Disable SSL verification
             elif method.upper() == 'POST':
-                response = requests.post(url, json=data, timeout=timeout)
+                response = requests.post(url, json=data, timeout=timeout, verify=False)  # Disable SSL verification
             else:
                 raise ValueError(f"Unsupported method: {method}")
             
