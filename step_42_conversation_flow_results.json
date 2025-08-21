@@ -1,0 +1,178 @@
+{
+  "summary": {
+    "total_conversations": 5,
+    "successful_conversations": 2,
+    "conversation_success_rate": 40.0,
+    "total_steps": 15,
+    "successful_steps": 11,
+    "step_success_rate": 73.33333333333333,
+    "follow_up_rate": 0,
+    "production_ready": false
+  },
+  "detailed_results": [
+    {
+      "conversation_name": "Vague Symptom Follow-up Flow",
+      "overall_success": true,
+      "steps": [
+        {
+          "step": 1,
+          "user_message": "hi",
+          "ai_response": "Hello! Thank you for reaching out. I'm here to help with your health concerns. What brings you here today? Please describe any symptoms or health concerns you're experiencing.",
+          "expected_behavior": "greeting",
+          "success": true
+        },
+        {
+          "step": 2,
+          "user_message": "I'm not feeling well",
+          "ai_response": "Could you please describe any symptoms or health concerns you're experiencing? For example, any pain, discomfort, or changes you've noticed in how you feel?",
+          "expected_behavior": "follow-up for vague symptom",
+          "success": true,
+          "found_indicators": [
+            "describe",
+            "experiencing"
+          ]
+        },
+        {
+          "step": 3,
+          "user_message": "chest pain and nausea",
+          "ai_response": "Thank you for sharing that you're experiencing chest pain and nausea. I want to gather more specific details to better understand your condition. Let's start with when exactly these symptoms began - was the onset sudden or did it develop gradually over time?",
+          "expected_behavior": "progress to detailed questioning",
+          "success": true
+        }
+      ],
+      "total_steps": 3,
+      "successful_steps": 3
+    },
+    {
+      "conversation_name": "Incomplete Pain Description Flow",
+      "overall_success": false,
+      "steps": [
+        {
+          "step": 1,
+          "user_message": "hi",
+          "ai_response": "Hello! Thank you for reaching out. I'm here to help with your health concerns. What brings you here today? Please describe any symptoms or health concerns you're experiencing.",
+          "expected_behavior": "greeting",
+          "success": true
+        },
+        {
+          "step": 2,
+          "user_message": "chest pain",
+          "ai_response": "Thank you for sharing that you're experiencing chest pain. I want to gather more specific details to better understand your condition. Let's start with when exactly these symptoms began - was the onset sudden or did it develop gradually over time?",
+          "expected_behavior": "follow-up for incomplete pain",
+          "success": false,
+          "found_indicators": []
+        }
+      ],
+      "total_steps": 3,
+      "successful_steps": 1
+    },
+    {
+      "conversation_name": "Single Word Anatomical Flow",
+      "overall_success": true,
+      "steps": [
+        {
+          "step": 1,
+          "user_message": "hi",
+          "ai_response": "Hello! Thank you for reaching out. I'm here to help with your health concerns. What brings you here today? Please describe any symptoms or health concerns you're experiencing.",
+          "expected_behavior": "greeting",
+          "success": true
+        },
+        {
+          "step": 2,
+          "user_message": "chest",
+          "ai_response": "Could you please describe any symptoms or health concerns you're experiencing? For example, any pain, discomfort, or changes you've noticed in how you feel?",
+          "expected_behavior": "follow-up for single word anatomical",
+          "success": true,
+          "found_indicators": [
+            "experiencing"
+          ]
+        },
+        {
+          "step": 3,
+          "user_message": "sharp pain when I breathe",
+          "ai_response": "Could you please describe any symptoms or health concerns you're experiencing? For example, any pain, discomfort, or changes you've noticed in how you feel?",
+          "expected_behavior": "detailed symptom collection",
+          "success": true
+        }
+      ],
+      "total_steps": 3,
+      "successful_steps": 3
+    },
+    {
+      "conversation_name": "Emotional Response Flow",
+      "overall_success": false,
+      "steps": [
+        {
+          "step": 1,
+          "user_message": "hi",
+          "ai_response": "Hello! Thank you for reaching out. I'm here to help with your health concerns. What brings you here today? Please describe any symptoms or health concerns you're experiencing.",
+          "expected_behavior": "greeting",
+          "success": true
+        },
+        {
+          "step": 2,
+          "user_message": "scared",
+          "ai_response": "Could you please describe any symptoms or health concerns you're experiencing? For example, any pain, discomfort, or changes you've noticed in how you feel?",
+          "expected_behavior": "empathetic follow-up for emotional response",
+          "success": false,
+          "found_indicators": []
+        },
+        {
+          "step": 3,
+          "user_message": "I'm worried about my heart symptoms",
+          "ai_response": "Could you please describe any symptoms or health concerns you're experiencing? For example, any pain, discomfort, or changes you've noticed in how you feel?",
+          "expected_behavior": "transition to medical symptom collection",
+          "success": true
+        }
+      ],
+      "total_steps": 3,
+      "successful_steps": 2
+    },
+    {
+      "conversation_name": "Temporal Vagueness Flow",
+      "overall_success": false,
+      "steps": [
+        {
+          "step": 1,
+          "user_message": "hi",
+          "ai_response": "Hello! Thank you for reaching out. I'm here to help with your health concerns. What brings you here today? Please describe any symptoms or health concerns you're experiencing.",
+          "expected_behavior": "greeting",
+          "success": true
+        },
+        {
+          "step": 2,
+          "user_message": "I have a headache",
+          "ai_response": "Thank you for sharing that you're experiencing headache. I want to gather more specific details to better understand your condition. Let's start with when exactly these symptoms began - was the onset sudden or did it develop gradually over time?",
+          "expected_behavior": "symptom acknowledgment",
+          "success": true
+        },
+        {
+          "step": 3,
+          "user_message": "recently",
+          "ai_response": "Could you please describe any symptoms or health concerns you're experiencing? For example, any pain, discomfort, or changes you've noticed in how you feel?",
+          "expected_behavior": "follow-up for temporal vagueness",
+          "success": false,
+          "found_indicators": []
+        }
+      ],
+      "total_steps": 3,
+      "successful_steps": 2
+    }
+  ],
+  "follow_up_categories": {
+    "totals": {
+      "Vague Symptoms": 0,
+      "Incomplete Pain": 0,
+      "Single Word Anatomical": 0,
+      "Emotional Responses": 0,
+      "Temporal Vagueness": 0
+    },
+    "successful": {
+      "Vague Symptoms": 0,
+      "Incomplete Pain": 0,
+      "Single Word Anatomical": 0,
+      "Emotional Responses": 0,
+      "Temporal Vagueness": 0
+    }
+  }
+}
