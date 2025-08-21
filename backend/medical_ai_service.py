@@ -9358,6 +9358,14 @@ Generate the follow-up question:
         EMERGENCY FLAGS: {context.red_flags}
         RISK FACTORS: {context.risk_factors}
         
+        PHASE 5 ENHANCED MEDICAL RESPONSE TEMPLATE DATA:
+        Template Category: {getattr(context, 'enhanced_template_data', {}).get('category', 'N/A')}
+        Symptom-Specific Questions: {getattr(context, 'enhanced_template_data', {}).get('questions', [])}
+        Template Red Flags: {getattr(context, 'enhanced_template_data', {}).get('red_flags', [])}
+        Follow-up Protocol: {getattr(context, 'enhanced_template_data', {}).get('follow_up_protocol', 'N/A')}
+        Assessment Timeline: {getattr(context, 'enhanced_template_data', {}).get('assessment_timeline', 'N/A')}
+        Template Clinical Reasoning: {getattr(context, 'template_clinical_reasoning', 'N/A')}
+        
         Please provide a detailed analysis in the following JSON format:
         {{
             "differential_diagnoses": [
