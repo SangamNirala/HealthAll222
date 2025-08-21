@@ -9,7 +9,7 @@ import json
 import time
 
 # Backend URL
-BACKEND_URL = "https://ai-test-suite.preview.emergentagent.com/api"
+BACKEND_URL = "https://nlptest-phase7.preview.emergentagent.com/api"
 
 def test_incompleteness_detection():
     """Test the core incompleteness detection functionality"""

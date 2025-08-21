@@ -33,7 +33,7 @@ def run_curl_command(url, data, timeout=30):
         return {"error": f"Exception: {str(e)}"}
 
 def test_empathetic_communication_final():
-    backend_url = "https://ai-test-suite.preview.emergentagent.com/api"
+    backend_url = "https://nlptest-phase7.preview.emergentagent.com/api"
     
     print("🚀 EMPATHETIC COMMUNICATION FINAL VALIDATION")
     print("=" * 60)

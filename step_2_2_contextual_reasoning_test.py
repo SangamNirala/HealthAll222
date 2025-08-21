@@ -35,7 +35,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://ai-test-suite.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://nlptest-phase7.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class Step22ContextualReasoningTester:
@@ -600,7 +600,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://ai-test-suite.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://nlptest-phase7.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class Step22ContextualReasoningTester:

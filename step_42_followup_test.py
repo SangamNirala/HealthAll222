@@ -20,7 +20,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Configuration
-BACKEND_URL = "https://ai-test-suite.preview.emergentagent.com/api"
+BACKEND_URL = "https://nlptest-phase7.preview.emergentagent.com/api"
 
 class Step42FollowUpTester:
     def __init__(self):

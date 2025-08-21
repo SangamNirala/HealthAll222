@@ -20,7 +20,7 @@ from typing import Dict, Any
 from datetime import datetime
 
 # Backend URL
-BACKEND_URL = "https://ai-test-suite.preview.emergentagent.com/api"
+BACKEND_URL = "https://nlptest-phase7.preview.emergentagent.com/api"
 
 
 class PhaseDMongoDBTester:

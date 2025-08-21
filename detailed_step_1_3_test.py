@@ -7,7 +7,7 @@ import requests
 import json
 from datetime import datetime
 
-BACKEND_URL = "https://ai-test-suite.preview.emergentagent.com"
+BACKEND_URL = "https://nlptest-phase7.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_colloquial_expression_detailed(expression: str, expected_terms: list):

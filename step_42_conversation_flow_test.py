@@ -12,7 +12,7 @@ import time
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://ai-test-suite.preview.emergentagent.com/api"
+BACKEND_URL = "https://nlptest-phase7.preview.emergentagent.com/api"
 
 def test_conversation_flow(conversation_name, conversation_steps):
     """Test a complete conversation flow"""

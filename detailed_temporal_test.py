@@ -10,7 +10,7 @@ import requests
 import json
 import pprint
 
-BACKEND_URL = "https://ai-test-suite.preview.emergentagent.com"
+BACKEND_URL = "https://nlptest-phase7.preview.emergentagent.com"
 
 def analyze_temporal_response():
     """Analyze the detailed temporal response structure"""

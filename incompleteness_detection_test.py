@@ -28,7 +28,7 @@ from typing import Dict, Any, List
 from datetime import datetime
 
 # Backend URL configuration
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://ai-test-suite.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://nlptest-phase7.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class UltraPerformanceIncompletenessDetectionTester:

@@ -13,7 +13,7 @@ import time
 from typing import Dict, Any, List
 
 # Backend URL from frontend environment
-BACKEND_URL = "https://ai-test-suite.preview.emergentagent.com/api"
+BACKEND_URL = "https://nlptest-phase7.preview.emergentagent.com/api"
 
 class EnhancedIncompletenessDetectionTester:
     """Comprehensive tester for Enhanced Incompleteness Detection System"""
