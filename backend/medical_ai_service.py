@@ -7864,11 +7864,14 @@ class WorldClassMedicalAI:
             print(f"[HPI DEBUG] Loop detected, calling recovery")
             return await self._handle_conversation_loop_recovery(message, context)
         
-        # 🧠 Intelligent response analysis for follow-up questions (simplified)
-        if context.last_question_element and message.strip():
+        # 🧠 STEP 4.2: Enhanced intelligent response analysis for follow-up questions
+        # Check for incompleteness even without a previous question element (for standalone responses)
+        question_element = context.last_question_element or "general_response"
+        
+        if message.strip():
             # Analyze if the user's response needs follow-up clarification
             needs_followup = await self._analyze_response_needs_followup(
-                message, context.last_question_element, context
+                message, question_element, context
             )
             
             if needs_followup:
