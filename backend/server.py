@@ -16828,6 +16828,7 @@ class GrammaticalErrorResponse(BaseModel):
     error_patterns: List[Dict[str, Any]]
     generation_time: float
     pattern_types: List[str]
+    fallback_patterns_used: int = Field(default=0, description="Number of fallback patterns used when AI fails")
 
 class IncompleteFragmentRequest(BaseModel):
     fragment_text: str = Field(..., description="Incomplete medical fragment to analyze")
