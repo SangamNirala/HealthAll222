@@ -11814,3 +11814,75 @@ Generate the follow-up question:
                 "error": str(e),
                 "integration_status": "partial"
             }
+
+    def _should_use_ai_progressive_questioning(self, patient_input: str, clarification_result: ClarificationAnalysisResult = None, conversation_history: List[Dict] = None) -> bool:
+        """
+        🤔 DETERMINE WHETHER TO USE AI PROGRESSIVE QUESTIONING
+        
+        Decision logic based on:
+        1. Vague expressions requiring progressive questioning
+        2. Mandatory examples ("sick", "pain", "bad")  
+        3. Conversation history and context
+        4. Clinical priority and complexity
+        """
+        
+        input_lower = patient_input.lower().strip()
+        
+        # Always use AI for mandatory examples (Step 6.2 requirement)
+        mandatory_examples = ["sick", "pain", "bad", "hurt", "feel", "ache", "sore", "terrible", "awful", "not good", "unwell"]
+        if any(example in input_lower for example in mandatory_examples):
+            return True
+        
+        # Use AI for very short, vague expressions
+        if len(input_lower.split()) <= 2:
+            vague_words = ["tired", "dizzy", "nausea", "weak", "uncomfortable", "weird", "strange", "off"]
+            if any(word in input_lower for word in vague_words):
+                return True
+        
+        # Use AI if clarification system detected high-confidence unclear input
+        if clarification_result and clarification_result.confidence_score > 0.7:
+            unclear_types_for_ai = [
+                UnclearInputType.VAGUE_EMOTIONAL,
+                UnclearInputType.SINGLE_WORD, 
+                UnclearInputType.EMOTION_ONLY,
+                UnclearInputType.BODY_PART_ONLY,
+                UnclearInputType.QUALITY_UNCLEAR,
+                UnclearInputType.FUNCTIONAL_IMPACT_VAGUE
+            ]
+            if clarification_result.input_type in unclear_types_for_ai:
+                return True
+        
+        # Use AI for complex symptom expressions that need progressive questioning
+        complex_patterns = [
+            r"\b(something\s+wrong|not\s+right|feel\s+off|weird\s+feeling|strange\s+sensation)\b",
+            r"\b(can't\s+describe|hard\s+to\s+explain|don't\s+know\s+how\s+to\s+say)\b", 
+            r"\b(everything\s+hurts|all\s+over|whole\s+body)\b",
+            r"\b(getting\s+worse|been\s+going\s+on|for\s+a\s+while)\b"
+        ]
+        
+        for pattern in complex_patterns:
+            if re.search(pattern, input_lower):
+                return True
+        
+        # Use AI for ongoing conversations where patient gives vague responses
+        if conversation_history and len(conversation_history) > 2:
+            recent_responses = [turn.get('content', '') for turn in conversation_history[-3:] if turn.get('role') == 'patient']
+            if recent_responses:
+                avg_response_length = sum(len(response.split()) for response in recent_responses) / len(recent_responses)
+                if avg_response_length < 4:  # Very short responses may indicate need for better questioning
+                    return True
+        
+        # Don't use AI for specific, detailed medical descriptions
+        specific_indicators = [
+            r"\b\d+\s*(day|week|month|year|hour|minute)s?\s+(ago|old)\b",  # Specific timeframes
+            r"\b(sharp|dull|burning|throbbing|stabbing|crushing|pressure|tight)\s+(pain|sensation)\b",  # Specific pain qualities
+            r"\b(left|right|upper|lower|front|back)\s+(chest|abdomen|leg|arm|side)\b",  # Specific locations
+            r"\b(started\s+when|began\s+after|triggered\s+by|happens\s+when)\b"  # Specific triggers
+        ]
+        
+        for pattern in specific_indicators:
+            if re.search(pattern, input_lower):
+                return False  # Input is already specific enough
+        
+        # Default decision: use AI for shorter, potentially vague inputs
+        return len(input_lower.split()) < 8  # Use AI for inputs with fewer than 8 words
