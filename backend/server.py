@@ -16996,7 +16996,8 @@ async def generate_grammatical_error_patterns(request: GrammaticalErrorRequest) 
             response = GrammaticalErrorResponse(
                 error_patterns=patterns_data,
                 generation_time=0.1,  # Fast fallback
-                pattern_types=list(set([p["error_type"] for p in fallback_patterns]))
+                pattern_types=list(set([p["error_type"] for p in fallback_patterns])),
+                fallback_patterns_used=len(fallback_patterns)  # Track how many fallback patterns used
             )
             
             logger.info(f"✅ Generated {len(fallback_patterns)} server fallback patterns")
