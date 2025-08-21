@@ -11258,6 +11258,68 @@ Generate the follow-up question:
         filtered_response = self._filter_internal_reasoning(base_response)
         return filtered_response
     
+    def _should_use_ai_progressive_questioning(self, normalized_message: str, clarification_result=None, conversation_history=None) -> bool:
+        """
+        🤖 STEP 6.2: AI PROGRESSIVE QUESTIONING ACTIVATION LOGIC
+        
+        Determines if AI-powered progressive questioning should be activated based on:
+        1. Vague symptom descriptions (mandatory triggers: "sick", "pain", "bad", "hurt", "feel")
+        2. Clarification system results
+        3. Conversation context and history
+        4. Patient communication patterns
+        
+        Returns True if AI progressive questioning should be used.
+        """
+        
+        # Mandatory trigger words that always activate AI progressive questioning
+        mandatory_triggers = [
+            "sick", "pain", "bad", "hurt", "feel", "ache", "sore", "uncomfortable", 
+            "wrong", "weird", "strange", "off", "not right", "bothering", "problem"
+        ]
+        
+        # Check for mandatory triggers (case-insensitive)
+        message_lower = normalized_message.lower()
+        has_mandatory_trigger = any(trigger in message_lower for trigger in mandatory_triggers)
+        
+        if has_mandatory_trigger:
+            print(f"🤖 AI Progressive Questioning triggered by mandatory keywords in: '{normalized_message}'")
+            return True
+        
+        # Check if clarification system detected vague input
+        if clarification_result and hasattr(clarification_result, 'input_type'):
+            vague_input_types = ["vague_symptom", "incomplete_description", "unclear_medical_concern"]
+            if clarification_result.input_type.value in vague_input_types and clarification_result.confidence_score > 0.6:
+                print(f"🤖 AI Progressive Questioning triggered by clarification system: {clarification_result.input_type.value}")
+                return True
+        
+        # Check for very short, non-specific medical inputs
+        word_count = len(normalized_message.split())
+        if word_count <= 3 and any(medical_word in message_lower for medical_word in ["pain", "hurt", "sick", "feel", "bad"]):
+            print(f"🤖 AI Progressive Questioning triggered by short vague input: '{normalized_message}' ({word_count} words)")
+            return True
+        
+        # Check conversation history for repeated vague responses
+        if conversation_history and len(conversation_history) >= 2:
+            recent_messages = [msg.get('content', '').lower() for msg in conversation_history[-3:] if msg.get('role') == 'user']
+            vague_response_count = sum(1 for msg in recent_messages if len(msg.split()) <= 4 and any(vague in msg for vague in ["yes", "no", "maybe", "sort of", "kind of"]))
+            
+            if vague_response_count >= 2:
+                print(f"🤖 AI Progressive Questioning triggered by pattern of vague responses in conversation history")
+                return True
+        
+        # Check for emotional distress indicators that need gentle probing
+        emotional_indicators = [
+            "stressed", "anxious", "worried", "scared", "frustrated", "upset", 
+            "can't handle", "overwhelming", "don't know", "confused"
+        ]
+        
+        if any(indicator in message_lower for indicator in emotional_indicators):
+            print(f"🤖 AI Progressive Questioning triggered by emotional distress indicators")
+            return True
+        
+        # Default: don't use AI progressive questioning for clear, specific inputs
+        return False
+    
     def _get_stage_questions(self, stage: MedicalInterviewStage) -> List[str]:
         """Get suggested questions for current stage"""
         stage_questions = {
