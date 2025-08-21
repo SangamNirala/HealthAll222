@@ -32,7 +32,7 @@ from datetime import datetime
 class Phase5EnhancedResponseTester:
     def __init__(self):
         # Get backend URL from environment
-        self.backend_url = os.getenv('REACT_APP_BACKEND_URL', 'https://medbot-query.preview.emergentagent.com')
+        self.backend_url = os.getenv('REACT_APP_BACKEND_URL', 'https://mediq-2.preview.emergentagent.com')
         if not self.backend_url.endswith('/api'):
             self.backend_url = f"{self.backend_url}/api"
         

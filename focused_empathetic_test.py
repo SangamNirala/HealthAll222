@@ -13,7 +13,7 @@ import os
 from datetime import datetime
 
 def test_empathetic_endpoints():
-    backend_url = "https://medbot-query.preview.emergentagent.com/api"
+    backend_url = "https://mediq-2.preview.emergentagent.com/api"
     
     print("🚀 FOCUSED EMPATHETIC COMMUNICATION TESTING")
     print("=" * 60)

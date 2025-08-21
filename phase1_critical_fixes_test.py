@@ -29,7 +29,7 @@ from typing import Dict, Any, List
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = "https://medbot-query.preview.emergentagent.com/api"
+BACKEND_URL = "https://mediq-2.preview.emergentagent.com/api"
 
 class Phase1CriticalFixesTester:
     """Comprehensive tester for Phase 1 Critical Fixes Implementation"""
