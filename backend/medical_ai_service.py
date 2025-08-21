@@ -8067,39 +8067,221 @@ class WorldClassMedicalAI:
         return None  # All elements have been asked, move to next stage
     
     async def _analyze_response_needs_followup(self, user_response: str, question_element: str, context: MedicalContext) -> bool:
-        """Analyze if a user response needs follow-up clarification - simplified and less aggressive"""
+        """
+        🧠 STEP 4.2: ENHANCED INTELLIGENT INCOMPLETENESS DETECTION
+        
+        Advanced analysis to detect incomplete medical information across all types of responses,
+        not just single words. Uses medical domain knowledge to identify missing critical details.
+        """
         
         # Get the original question that was asked
         original_question = context.questions_asked.get(question_element, "")
-        
-        # Simplified logic - only ask follow-up for extremely vague single-word responses
         user_response_clean = user_response.strip().lower()
         
-        # Don't ask follow-up if:
-        # 1. Response is detailed (more than 3 words)
-        # 2. Contains specific details, numbers, or timeframes
-        # 3. Already has qualitative descriptors
-        if len(user_response.split()) > 3:
-            return False
-            
-        if any(indicator in user_response_clean for indicator in [
-            'no', 'yes', 'none', 'nothing', 'never', 'always', 'sometimes',
-            'ago', 'yesterday', 'today', 'week', 'month', 'year', 'hours',
-            'minutes', 'sharp', 'dull', 'throbbing', 'burning', 'aching',
-            'severe', 'mild', 'moderate', 'constant', 'intermittent'
-        ]):
-            return False
-            
-        # Only ask follow-up for extremely vague single words that need clarification
-        vague_responses = ['food', 'position', 'medication', 'activity', 'stress', 'weather']
+        # 🚀 COMPREHENSIVE INCOMPLETENESS ANALYSIS
+        incompleteness_result = await self._detect_medical_incompleteness(
+            user_response, question_element, context
+        )
         
-        # Check if it's a single vague word
-        if len(user_response.split()) == 1 and user_response_clean in vague_responses:
-            print(f"[FOLLOWUP DEBUG] Single vague word detected: '{user_response}' - asking follow-up")
+        if incompleteness_result['needs_followup']:
+            print(f"[FOLLOWUP DEBUG] Incompleteness detected: {incompleteness_result['incompleteness_type']} - asking follow-up")
             return True
             
-        print(f"[FOLLOWUP DEBUG] Response '{user_response}' is sufficient - moving on")
+        print(f"[FOLLOWUP DEBUG] Response '{user_response}' is medically complete - moving on")
         return False
+        
+    async def _detect_medical_incompleteness(self, user_response: str, question_element: str, context: MedicalContext) -> Dict[str, Any]:
+        """
+        🧠 STEP 4.2: COMPREHENSIVE MEDICAL INCOMPLETENESS DETECTION ENGINE
+        
+        Analyzes medical responses for missing critical information across all medical domains.
+        Returns detailed incompleteness analysis with specific missing information types.
+        """
+        
+        user_response_clean = user_response.strip().lower()
+        words = user_response.split()
+        
+        # Initialize incompleteness analysis
+        incompleteness_analysis = {
+            'needs_followup': False,
+            'incompleteness_type': None,
+            'missing_information': [],
+            'medical_domain': None,
+            'clinical_significance': 'routine',
+            'confidence': 0.0
+        }
+        
+        # 1. VAGUE SYMPTOM DESCRIPTIONS
+        vague_symptoms = [
+            'feeling bad', 'not well', 'unwell', 'sick', 'not good', 'terrible', 
+            'awful', 'crappy', 'horrible', 'weird', 'strange', 'off', 'wrong',
+            'bothering me', 'uncomfortable', 'not right', 'concerning'
+        ]
+        
+        if any(vague in user_response_clean for vague in vague_symptoms):
+            incompleteness_analysis.update({
+                'needs_followup': True,
+                'incompleteness_type': 'vague_symptom_description',
+                'missing_information': ['specific_symptoms', 'anatomical_location', 'quality'],
+                'clinical_significance': 'high',
+                'confidence': 0.9
+            })
+            return incompleteness_analysis
+            
+        # 2. INCOMPLETE PAIN DESCRIPTIONS
+        pain_keywords = ['pain', 'hurt', 'hurts', 'hurting', 'ache', 'aches', 'aching', 'sore', 'tender']
+        has_pain = any(pain in user_response_clean for pain in pain_keywords)
+        
+        if has_pain:
+            # Check for missing pain characteristics
+            missing_pain_details = []
+            
+            # Check for quality descriptors
+            pain_qualities = ['sharp', 'dull', 'burning', 'throbbing', 'stabbing', 'crushing', 
+                            'pressure', 'cramping', 'shooting', 'electric', 'gnawing']
+            if not any(quality in user_response_clean for quality in pain_qualities):
+                missing_pain_details.append('pain_quality')
+                
+            # Check for severity indicators
+            severity_indicators = ['severe', 'mild', 'moderate', 'terrible', 'unbearable', 
+                                 'excruciating', 'intense', 'slight', 'minor']
+            has_severity = any(sev in user_response_clean for sev in severity_indicators)
+            
+            # Check for numerical ratings
+            has_numerical = any(char.isdigit() for char in user_response)
+            
+            if not has_severity and not has_numerical:
+                missing_pain_details.append('pain_severity')
+                
+            # Check for anatomical specificity
+            if len(words) <= 2 and ('chest' in user_response_clean or 'head' in user_response_clean or 
+                                  'stomach' in user_response_clean or 'back' in user_response_clean):
+                missing_pain_details.append('anatomical_specificity')
+                
+            if missing_pain_details:
+                incompleteness_analysis.update({
+                    'needs_followup': True,
+                    'incompleteness_type': 'incomplete_pain_description',
+                    'missing_information': missing_pain_details,
+                    'medical_domain': self._determine_pain_domain(user_response_clean),
+                    'clinical_significance': 'high',
+                    'confidence': 0.85
+                })
+                return incompleteness_analysis
+                
+        # 3. VAGUE TEMPORAL INFORMATION
+        vague_temporal = ['recently', 'lately', 'for a while', 'some time', 'long time', 
+                         'not long ago', 'past few', 'little while', 'bit ago']
+        
+        if any(temporal in user_response_clean for temporal in vague_temporal):
+            incompleteness_analysis.update({
+                'needs_followup': True,
+                'incompleteness_type': 'vague_temporal_information',
+                'missing_information': ['specific_timeframe', 'onset_details'],
+                'clinical_significance': 'medium',
+                'confidence': 0.8
+            })
+            return incompleteness_analysis
+            
+        # 4. SINGLE WORD ORGAN/SYSTEM RESPONSES
+        organ_systems = {
+            'chest': 'cardiovascular',
+            'heart': 'cardiovascular', 
+            'stomach': 'gastrointestinal',
+            'belly': 'gastrointestinal',
+            'head': 'neurological',
+            'brain': 'neurological',
+            'back': 'musculoskeletal',
+            'joints': 'musculoskeletal',
+            'lungs': 'pulmonary',
+            'breathing': 'pulmonary'
+        }
+        
+        if len(words) == 1 and user_response_clean in organ_systems:
+            incompleteness_analysis.update({
+                'needs_followup': True,
+                'incompleteness_type': 'incomplete_anatomical_description',
+                'missing_information': ['specific_symptoms', 'symptom_quality', 'severity'],
+                'medical_domain': organ_systems[user_response_clean],
+                'clinical_significance': 'high',
+                'confidence': 0.9
+            })
+            return incompleteness_analysis
+            
+        # 5. VAGUE TRIGGER RESPONSES
+        vague_triggers = ['things', 'stuff', 'activities', 'sometimes', 'certain things', 
+                         'when I do', 'it depends', 'various things']
+        
+        if any(trigger in user_response_clean for trigger in vague_triggers):
+            incompleteness_analysis.update({
+                'needs_followup': True,
+                'incompleteness_type': 'vague_trigger_information',
+                'missing_information': ['specific_triggers', 'trigger_patterns'],
+                'clinical_significance': 'medium',
+                'confidence': 0.75
+            })
+            return incompleteness_analysis
+            
+        # 6. INCOMPLETE SEVERITY DESCRIPTIONS
+        vague_severity = ['really bad', 'pretty bad', 'quite bad', 'very', 'really', 
+                         'extremely', 'terribly', 'horribly', 'awfully']
+        
+        if any(sev in user_response_clean for sev in vague_severity) and len(words) <= 3:
+            incompleteness_analysis.update({
+                'needs_followup': True,
+                'incompleteness_type': 'vague_severity_description',
+                'missing_information': ['specific_severity', 'functional_impact'],
+                'clinical_significance': 'medium',
+                'confidence': 0.7
+            })
+            return incompleteness_analysis
+            
+        # 7. EMOTIONAL/FEAR RESPONSES WITHOUT MEDICAL DETAILS
+        emotional_responses = ['scared', 'worried', 'anxious', 'nervous', 'frightened', 
+                             'terrified', 'panicked', 'concerned']
+        
+        if any(emotion in user_response_clean for emotion in emotional_responses) and len(words) <= 2:
+            incompleteness_analysis.update({
+                'needs_followup': True,
+                'incompleteness_type': 'emotional_without_medical_details',
+                'missing_information': ['specific_concerns', 'underlying_symptoms'],
+                'clinical_significance': 'high',
+                'confidence': 0.8
+            })
+            return incompleteness_analysis
+            
+        # 8. SINGLE WORD RESPONSES TO COMPLEX QUESTIONS
+        single_word_responses = ['yes', 'no', 'maybe', 'sometimes', 'often', 'rarely', 
+                               'never', 'always', 'possibly', 'probably']
+        
+        if len(words) == 1 and user_response_clean in single_word_responses:
+            incompleteness_analysis.update({
+                'needs_followup': True,
+                'incompleteness_type': 'insufficient_detail_response',
+                'missing_information': ['elaboration', 'specific_details'],
+                'clinical_significance': 'medium',
+                'confidence': 0.75
+            })
+            return incompleteness_analysis
+            
+        # Response appears complete
+        return incompleteness_analysis
+        
+    def _determine_pain_domain(self, pain_description: str) -> str:
+        """Determine medical domain based on pain description"""
+        
+        if any(word in pain_description for word in ['chest', 'heart', 'cardiac']):
+            return 'cardiovascular'
+        elif any(word in pain_description for word in ['head', 'headache', 'migraine']):
+            return 'neurological'  
+        elif any(word in pain_description for word in ['stomach', 'belly', 'abdomen']):
+            return 'gastrointestinal'
+        elif any(word in pain_description for word in ['back', 'joint', 'muscle']):
+            return 'musculoskeletal'
+        elif any(word in pain_description for word in ['lung', 'breath', 'respiratory']):
+            return 'pulmonary'
+        else:
+            return 'general'
     
     async def _generate_intelligent_followup_question(self, user_response: str, question_element: str, context: MedicalContext) -> str:
         """Generate intelligent follow-up questions based on user response - simplified and direct"""
