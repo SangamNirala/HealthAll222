@@ -153,15 +153,15 @@ class UltraPerformanceIncompletenessDetector:
             return self._generate_fallback_analysis(patient_message, conversation_context, start_time)
 
     def _perform_local_pattern_analysis(self, patient_message: str, conversation_context: Dict[str, Any]) -> Dict[str, Any]:
-        """Perform high-speed local pattern analysis without AI calls"""
+        """Perform high-speed local pattern analysis without AI calls - Enhanced for better performance"""
         analysis = {
             'communication_profile': self._analyze_communication_locally(patient_message),
             'detected_gaps': [],
-            'confidence': 0.7,
+            'confidence': 0.8,  # Increased confidence in local analysis
             'local_analysis_used': True
         }
         
-        # Quick gap detection using regex patterns
+        # Enhanced gap detection using regex patterns
         gaps = []
         
         # Vague description detection
@@ -170,19 +170,47 @@ class UltraPerformanceIncompletenessDetector:
                 'type': 'linguistic',
                 'category': 'vague_description',
                 'severity': 'moderate',
-                'confidence': 0.8,
-                'question': "Could you describe your symptoms more specifically?"
+                'confidence': 0.85,
+                'what_missing': 'More specific symptom description',
+                'why_missing': 'Patient using general terms',
+                'clinical_importance': 'moderate',
+                'question': "Could you describe your symptoms more specifically? For example, is the pain sharp, dull, burning, or throbbing?",
+                'approach': 'multiple_choice',
+                'timing': 'immediate'
             })
         
-        # Missing onset information
-        if self._pattern_matchers['pain_descriptors'].search(patient_message) and \
-           not self._pattern_matchers['onset_missing'].search(patient_message):
+        # Enhanced onset detection
+        pain_found = self._pattern_matchers['pain_descriptors'].search(patient_message)
+        onset_keywords = re.search(r'\b(when|started|began|first|yesterday|today|morning|evening|sudden|gradual)\b', patient_message, re.IGNORECASE)
+        
+        if pain_found and not onset_keywords:
             gaps.append({
                 'type': 'medical_reasoning',
                 'category': 'onset_missing',
                 'severity': 'high',
-                'confidence': 0.85,
-                'question': "When did this symptom first start?"
+                'confidence': 0.9,
+                'what_missing': 'Symptom onset timing and pattern',
+                'why_missing': 'Patients focus on current symptoms rather than onset',
+                'clinical_importance': 'high',
+                'question': "When did this symptom first start? Was it sudden or did it develop gradually?",
+                'approach': 'direct',
+                'timing': 'immediate'
+            })
+        
+        # Severity assessment detection
+        severity_keywords = re.search(r'\b(severe|mild|bad|terrible|awful|horrible|slight|scale|rate)\b', patient_message, re.IGNORECASE)
+        if pain_found and not severity_keywords:
+            gaps.append({
+                'type': 'medical_reasoning',
+                'category': 'severity_missing',
+                'severity': 'moderate',
+                'confidence': 0.8,
+                'what_missing': 'Pain severity assessment',
+                'why_missing': 'Patients may not quantify pain intensity',
+                'clinical_importance': 'moderate',
+                'question': "On a scale of 1-10, how would you rate the intensity of your pain?",
+                'approach': 'direct',
+                'timing': 'immediate'
             })
         
         # Anxiety indicators
@@ -191,18 +219,43 @@ class UltraPerformanceIncompletenessDetector:
                 'type': 'psychological',
                 'category': 'anxiety_detected',
                 'severity': 'moderate',
-                'confidence': 0.75,
-                'question': "How has this concern been affecting you emotionally?"
+                'confidence': 0.8,
+                'what_missing': 'Impact of anxiety on symptoms',
+                'why_missing': 'Emotional and physical symptoms often interconnected',
+                'clinical_importance': 'moderate',
+                'question': "I understand this can be concerning. How has worrying about this affected how you're feeling overall?",
+                'approach': 'gentle',
+                'timing': 'after_rapport'
             })
         
-        # Temporal vagueness
+        # Enhanced temporal vagueness
         if self._pattern_matchers['temporal_vague'].search(patient_message):
             gaps.append({
                 'type': 'temporal',
                 'category': 'vague_timing',
                 'severity': 'moderate',
+                'confidence': 0.85,
+                'what_missing': 'Specific timing and frequency patterns',
+                'why_missing': 'Patients use relative time references',
+                'clinical_importance': 'moderate',
+                'question': "When you say 'recently' or 'lately', can you be more specific? Are we talking hours, days, or weeks?",
+                'approach': 'clarifying',
+                'timing': 'immediate'
+            })
+        
+        # Location specificity for pain
+        if pain_found and not re.search(r'\b(left|right|center|upper|lower|side|back|front)\b', patient_message, re.IGNORECASE):
+            gaps.append({
+                'type': 'medical_reasoning', 
+                'category': 'location_missing',
+                'severity': 'moderate',
                 'confidence': 0.8,
-                'question': "Can you be more specific about when this happens?"
+                'what_missing': 'Specific pain location',
+                'why_missing': 'Anatomical specificity helps diagnosis',
+                'clinical_importance': 'moderate',
+                'question': "Can you point to exactly where you feel the pain? Is it more on the left, right, or center?",
+                'approach': 'direct',
+                'timing': 'immediate'
             })
         
         analysis['detected_gaps'] = gaps
