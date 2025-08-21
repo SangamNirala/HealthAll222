@@ -8663,7 +8663,66 @@ class WorldClassMedicalAI:
         }
         
         return supportive_responses.get(emotion, 
-            f"I understand you're feeling {emotion} about your health, which is completely understandable. Can you tell me what specific symptoms or health concerns are causing you to feel this way?")
+            f"I understand you're feeling {emotion}, which is completely natural when dealing with health concerns. Can you help me understand what specific symptoms or health issues are causing you to feel this way? This will help me provide you with better guidance and support.")
+    
+    async def _generate_medical_abbreviation_followup(self, user_response: str, context: MedicalContext) -> str:
+        """Generate follow-up for medical abbreviations that need clarification"""
+        
+        abbreviation_expansions = {
+            'bp': 'blood pressure',
+            'hr': 'heart rate', 
+            'temp': 'temperature',
+            'meds': 'medications',
+            'doc': 'doctor',
+            'er': 'emergency room',
+            'urgent': 'urgent care',
+            'stat': 'immediately/urgently'
+        }
+        
+        user_clean = user_response.strip().lower()
+        if user_clean in abbreviation_expansions:
+            expansion = abbreviation_expansions[user_clean]
+            return f"When you mention '{user_response}', I understand you're referring to {expansion}. Can you provide more details about this? For example, what specific concerns do you have about your {expansion}, or what happened related to it?"
+        
+        return f"I'd like to better understand what you mean by '{user_response}'. Could you explain this in more detail and how it relates to your current health concerns?"
+    
+    async def _generate_trigger_symptom_followup(self, user_response: str, context: MedicalContext) -> str:
+        """Generate follow-up for triggers mentioned without symptom context"""
+        
+        if 'ate' in user_response or 'eaten' in user_response or 'food' in user_response:
+            return f"You mentioned '{user_response}' - can you tell me how this relates to your symptoms? For example, did you experience any discomfort, nausea, pain, or other symptoms after eating? What specific symptoms did you notice?"
+        
+        elif 'took' in user_response or 'medication' in user_response or 'pill' in user_response:
+            return f"You mentioned '{user_response}' - I'd like to understand how this connects to your current health concerns. Did you experience any side effects, changes in symptoms, or reactions after taking it? What exactly happened?"
+        
+        elif 'drink' in user_response or 'drank' in user_response:
+            return f"When you say '{user_response}', can you help me understand the connection to your symptoms? Did you notice any effects, discomfort, or changes in how you felt after drinking? What symptoms did you experience?"
+        
+        return f"You mentioned '{user_response}' - can you help me understand how this relates to your current health concerns? What symptoms or effects did you notice in connection with this?"
+    
+    async def _generate_family_history_followup(self, user_response: str, context: MedicalContext) -> str:
+        """Generate follow-up for family history mentions that need elaboration"""
+        
+        chief_complaint = context.chief_complaint or "symptoms"
+        
+        return f"You mentioned something about '{user_response}' - can you tell me more about this family history and how it might relate to your current {chief_complaint}? For example, what specific medical conditions run in your family, and are you concerned about having similar symptoms?"
+    
+    async def _generate_frequency_pattern_followup(self, user_response: str, context: MedicalContext) -> str:
+        """Generate follow-up for frequency responses that need pattern clarification"""
+        
+        chief_complaint = context.chief_complaint or "symptoms"
+        frequency_word = user_response.strip()
+        
+        frequency_clarifications = {
+            'always': f"When you say your {chief_complaint} happens 'always', can you help me understand the pattern? Do you mean it's constant throughout the day, or that it happens every time you do certain activities? What specific situations trigger it?",
+            'sometimes': f"You mentioned your {chief_complaint} occurs 'sometimes'. Can you be more specific about when it happens? Is there a pattern - certain times of day, specific activities, or particular triggers that bring it on?",
+            'often': f"When you say '{frequency_word}', can you help me understand how frequently your {chief_complaint} occurs? For example, multiple times per day, daily, several times per week? Are there specific patterns or triggers?",
+            'rarely': f"You mentioned your {chief_complaint} happens 'rarely'. Can you be more specific about the frequency - once a month, a few times per year? When it does occur, are there specific triggers or patterns?",
+            'usually': f"When you say it 'usually' happens, can you describe the typical pattern of your {chief_complaint}? What are the common triggers or situations when it occurs, and how often would you estimate it happens?"
+        }
+        
+        return frequency_clarifications.get(frequency_word, 
+            f"You mentioned '{frequency_word}' regarding your {chief_complaint}. Can you be more specific about the frequency and pattern? For instance, how often does this occur, and are there specific triggers or times when it's more likely to happen?")
     
     async def _generate_elaboration_followup(self, user_response: str, question_element: str, context: MedicalContext) -> str:
         """Generate follow-up for insufficient single-word responses"""
