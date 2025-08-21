@@ -493,6 +493,45 @@ class AIProgressiveQuestioningService:
                 time_to_completion_estimate=5.0,
                 conversation_quality_score=0.5
             )
+    
+    def _create_fallback_result(self, patient_input: str, medical_context: Dict[str, Any], start_time: float) -> AIProgressiveQuestionResult:
+        """
+        Create a fallback result when AI components are not available
+        """
+        from gemini_progressive_questioning_engine import AISymptomAnalysis, AIGeneratedQuestion, AIProgressiveQuestionResult
+        
+        # Create basic symptom analysis
+        fallback_symptom_analysis = AISymptomAnalysis(
+            vagueness_type="general_vague",
+            missing_information=["location", "severity", "duration"],
+            clinical_priority="medium",
+            medical_domains=["general"],
+            confidence_score=0.5,
+            ai_reasoning="Fallback analysis - AI components not available",
+            patient_communication_style="standard"
+        )
+        
+        # Create basic question
+        fallback_question = AIGeneratedQuestion(
+            question_text="Can you tell me more specifically about what you're experiencing?",
+            medical_reasoning="Basic clarification needed for proper assessment",
+            clinical_priority="medium",
+            empathy_level="moderate",
+            question_category="clarification",
+            confidence_score=0.6
+        )
+        
+        total_processing_time = (time.time() - start_time) * 1000
+        
+        return AIProgressiveQuestionResult(
+            symptom_analysis=fallback_symptom_analysis,
+            generated_questions=[fallback_question],
+            conversation_strategy="fallback_clarification",
+            should_escalate=False,
+            escalation_reason="",
+            conversation_efficiency_score=0.5,
+            total_processing_time_ms=total_processing_time
+        )
 
 
 # Global service instance
