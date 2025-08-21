@@ -96,15 +96,10 @@ class Phase71FocusedRetester:
 
     def test_performance_summary_endpoint(self):
         """Test Performance Summary Endpoint - should be fixed from recursive call issue"""
-        print("\n📊 TESTING: Performance Summary Endpoint (POST)")
+        print("\n📊 TESTING: Performance Summary Endpoint (GET)")
         
-        # Test the POST endpoint that was mentioned in the review
-        request_data = {
-            "analysis_period": "7_days",
-            "include_detailed_metrics": True
-        }
-        
-        response, response_time, error = self.make_request('POST', '/ai-testing/phase-7-1/performance-summary', request_data, timeout=15)
+        # Test the GET endpoint (corrected from POST)
+        response, response_time, error = self.make_request('GET', '/ai-testing/phase-7-1/performance-summary', timeout=15)
         
         if error:
             self.log_test_result("Performance Summary POST", False, response_time, error)
