@@ -1595,6 +1595,81 @@ def _generate_server_fallback_grammar_patterns(base_text: str, num_variants: int
             
             pattern = {
                 "error_type": error_type["type"],
+                "original_text": error_text,  # The grammatically incorrect version
+                "corrected_text": base_text,  # The original correct version
+                "error_description": error_type["description"],
+                "medical_entities": [{"entity": "symptom", "type": "medical", "confidence": 0.6}],
+                "difficulty_level": "medium",
+                "patient_demographic": "general",
+                "confidence_level": 0.6  # Lower confidence for fallback
+            }
+            
+            fallback_patterns.append(pattern)
+            
+        except Exception as e:
+            # If even the fallback fails, create a minimal pattern
+            pattern = {
+                "error_type": "basic_error",
+                "original_text": base_text + " [error]",
+                "corrected_text": base_text,
+                "error_description": "Basic grammatical error",
+                "medical_entities": [{"entity": "medical", "type": "text", "confidence": 0.3}],
+                "difficulty_level": "medium", 
+                "patient_demographic": "general",
+                "confidence_level": 0.3
+            }
+            fallback_patterns.append(pattern)
+    
+    return fallback_patterns
+
+def _generate_server_fallback_grammar_patterns(base_text: str, num_variants: int) -> List[dict]:
+    """Generate basic grammatical error patterns as server fallback when AI fails"""
+    fallback_patterns = []
+    
+    # Basic error types with simple patterns
+    error_types = [
+        {
+            "type": "subject_verb_disagreement",
+            "description": "Subject and verb do not agree in number",
+            "pattern": lambda text: text.replace(" is ", " are ").replace(" was ", " were ")
+        },
+        {
+            "type": "article_error", 
+            "description": "Incorrect or missing articles",
+            "pattern": lambda text: text.replace(" a ", " an ").replace(" the ", " a ")
+        },
+        {
+            "type": "preposition_error",
+            "description": "Incorrect preposition usage", 
+            "pattern": lambda text: text.replace(" in ", " on ").replace(" at ", " in ")
+        },
+        {
+            "type": "tense_inconsistency",
+            "description": "Inconsistent verb tenses",
+            "pattern": lambda text: text.replace(" has ", " have ").replace(" was ", " is ")
+        },
+        {
+            "type": "word_order_error",
+            "description": "Incorrect word order",
+            "pattern": lambda text: " ".join(text.split()[::-1]) if len(text.split()) <= 8 else text
+        }
+    ]
+    
+    # Generate patterns up to requested number
+    for i in range(min(num_variants, len(error_types))):
+        error_type = error_types[i]
+        
+        try:
+            # Apply the error pattern
+            error_text = error_type["pattern"](base_text)
+            
+            # Ensure we actually created an error (text changed)
+            if error_text == base_text:
+                # Force a simple change if pattern didn't work
+                error_text = base_text.replace(".", " error.")
+            
+            pattern = {
+                "error_type": error_type["type"],
                 "original_text": base_text,
                 "corrected_text": error_text,
                 "error_description": error_type["description"],
