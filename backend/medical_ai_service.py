@@ -9388,6 +9388,271 @@ Generate the follow-up question:
         
         return context.emergency_level or "routine"
 
+    async def _apply_empathetic_communication_transformation(self, 
+                                                           medical_response: str, 
+                                                           context: MedicalContext) -> Dict[str, Any]:
+        """
+        💝 STEP 5.2: EMPATHETIC COMMUNICATION TRANSFORMATION INTEGRATION
+        
+        Transforms technical medical responses into empathetic, patient-friendly 
+        communication while maintaining clinical accuracy and adapting to patient needs.
+        """
+        
+        try:
+            # Initialize empathetic communication transformer
+            transformer = EmpathicCommunicationTransformer(self.db)
+            
+            # Determine patient communication context
+            communication_context = await self._determine_communication_context(context)
+            
+            # Apply empathetic transformation
+            transformation_result = await transformer.transform_medical_response(
+                medical_response, 
+                communication_context
+            )
+            
+            print(f"[STEP 5.2 DEBUG] Empathetic transformation applied:")
+            print(f"  - Original length: {len(transformation_result.original_text)} chars")
+            print(f"  - Transformed length: {len(transformation_result.transformed_text)} chars") 
+            print(f"  - Empathy score: {transformation_result.empathy_score}")
+            print(f"  - Readability score: {transformation_result.readability_score}")
+            print(f"  - Transformations applied: {len(transformation_result.transformations_applied)}")
+            
+            # Store transformation result in context for tracking
+            context.empathetic_transformation_data = {
+                'original_response': transformation_result.original_text,
+                'empathetic_response': transformation_result.transformed_text,
+                'empathy_score': transformation_result.empathy_score,
+                'readability_score': transformation_result.readability_score,
+                'transformations_applied': transformation_result.transformations_applied,
+                'communication_adjustments': transformation_result.communication_adjustments,
+                'cultural_adaptations': transformation_result.cultural_adaptations,
+                'emotional_support_elements': transformation_result.emotional_support_elements
+            }
+            
+            return {
+                'empathetic_response': transformation_result.transformed_text,
+                'empathy_metrics': {
+                    'empathy_score': transformation_result.empathy_score,
+                    'readability_score': transformation_result.readability_score,
+                    'transformations_count': len(transformation_result.transformations_applied)
+                },
+                'transformation_details': {
+                    'transformations_applied': transformation_result.transformations_applied,
+                    'communication_adjustments': transformation_result.communication_adjustments,
+                    'cultural_adaptations': transformation_result.cultural_adaptations,
+                    'emotional_support_elements': transformation_result.emotional_support_elements
+                },
+                'algorithm_version': '5.2_empathetic_communication_transformation'
+            }
+            
+        except Exception as e:
+            print(f"[STEP 5.2 ERROR] Empathetic transformation failed: {e}")
+            # Return enhanced fallback with basic empathy
+            empathetic_fallback = f"I understand your concern about these symptoms. {medical_response} Please let me know if you need any clarification or have additional questions."
+            
+            return {
+                'empathetic_response': empathetic_fallback,
+                'empathy_metrics': {
+                    'empathy_score': 0.6,
+                    'readability_score': 0.7,
+                    'transformations_count': 1
+                },
+                'transformation_details': {
+                    'transformations_applied': ['fallback_empathy_enhancement'],
+                    'communication_adjustments': ['empathetic_opening_added'],
+                    'cultural_adaptations': [],
+                    'emotional_support_elements': ['understanding_acknowledgment']
+                },
+                'algorithm_version': '5.2_empathetic_communication_transformation_fallback',
+                'error': str(e)
+            }
+
+    async def _determine_communication_context(self, context: MedicalContext) -> CommunicationContext:
+        """
+        🧠 INTELLIGENT COMMUNICATION CONTEXT DETERMINATION
+        
+        Analyzes patient context to determine optimal communication approach
+        including anxiety level, communication style, age group, and cultural factors.
+        """
+        
+        try:
+            # Analyze patient anxiety level from symptoms and context
+            anxiety_level = await self._assess_patient_anxiety_level(context)
+            
+            # Determine communication style preference  
+            communication_style = await self._determine_communication_style(context)
+            
+            # Determine age group for age-appropriate communication
+            age_group = await self._determine_age_group(context)
+            
+            # Assess if this is an emergency situation
+            is_emergency = context.emergency_level in ['critical', 'emergency'] or context.current_stage == MedicalInterviewStage.EMERGENCY_TRIAGE
+            
+            # Determine symptom severity
+            symptom_severity = await self._assess_symptom_severity(context)
+            
+            # Check for family involvement
+            family_present = context.demographics.get('family_present', False)
+            
+            # Assess health literacy level
+            health_literacy_level = await self._assess_health_literacy(context)
+            
+            return CommunicationContext(
+                patient_anxiety_level=anxiety_level,
+                symptom_severity=symptom_severity,
+                communication_style=communication_style,
+                age_group=age_group,
+                is_emergency=is_emergency,
+                family_present=family_present,
+                health_literacy_level=health_literacy_level,
+                previous_interactions=getattr(context, 'conversation_history', [])
+            )
+            
+        except Exception as e:
+            print(f"[COMMUNICATION CONTEXT ERROR] {e}")
+            # Return default context for fallback
+            return CommunicationContext(
+                patient_anxiety_level=0.5,
+                communication_style=CommunicationStyle.ANALYTICAL,
+                age_group=AgeGroup.ADULT
+            )
+
+    async def _assess_patient_anxiety_level(self, context: MedicalContext) -> float:
+        """Assess patient anxiety level from symptoms and context (0.0-1.0)"""
+        
+        anxiety_indicators = {
+            'high_anxiety': ['worried', 'scared', 'anxious', 'terrified', 'panic', 'afraid'],
+            'moderate_anxiety': ['concerned', 'nervous', 'uneasy', 'stressed'],
+            'emergency_symptoms': ['chest pain', 'can\'t breathe', 'severe pain', 'worst ever'],
+            'uncertainty_phrases': ['don\'t know', 'not sure', 'confused', 'unclear']
+        }
+        
+        # Extract text to analyze (chief complaint + symptom descriptions)
+        analysis_text = ' '.join([
+            str(context.chief_complaint or ''),
+            str(context.symptom_data.get('description', '')),
+            str(context.symptom_data.get('concerns', ''))
+        ]).lower()
+        
+        anxiety_score = 0.3  # Base anxiety level
+        
+        # Check for high anxiety indicators
+        if any(indicator in analysis_text for indicator in anxiety_indicators['high_anxiety']):
+            anxiety_score += 0.4
+            
+        # Check for moderate anxiety indicators  
+        if any(indicator in analysis_text for indicator in anxiety_indicators['moderate_anxiety']):
+            anxiety_score += 0.2
+            
+        # Emergency symptoms increase anxiety
+        if any(symptom in analysis_text for symptom in anxiety_indicators['emergency_symptoms']):
+            anxiety_score += 0.3
+            
+        # Uncertainty increases anxiety
+        if any(phrase in analysis_text for phrase in anxiety_indicators['uncertainty_phrases']):
+            anxiety_score += 0.1
+            
+        # Emergency context increases baseline anxiety
+        if context.emergency_level in ['critical', 'emergency']:
+            anxiety_score += 0.2
+            
+        return min(anxiety_score, 1.0)
+
+    async def _determine_communication_style(self, context: MedicalContext) -> CommunicationStyle:
+        """Determine patient's preferred communication style"""
+        
+        # Analyze communication patterns from patient inputs
+        patient_text = ' '.join([
+            str(context.chief_complaint or ''),
+            str(context.symptom_data.get('description', ''))
+        ]).lower()
+        
+        # Style indicators
+        analytical_indicators = ['specific', 'exactly', 'medical', 'technical', 'details', 'information']
+        emotional_indicators = ['feel', 'worried', 'scared', 'upset', 'emotional', 'support']
+        practical_indicators = ['what should', 'what do', 'next steps', 'plan', 'action', 'timeline']
+        anxious_indicators = ['help', 'please', 'worried', 'scared', 'not sure', 'confused']
+        
+        # Count indicators for each style
+        analytical_count = sum(1 for indicator in analytical_indicators if indicator in patient_text)
+        emotional_count = sum(1 for indicator in emotional_indicators if indicator in patient_text)
+        practical_count = sum(1 for indicator in practical_indicators if indicator in patient_text)
+        anxious_count = sum(1 for indicator in anxious_indicators if indicator in patient_text)
+        
+        # Determine dominant style
+        scores = {
+            CommunicationStyle.ANALYTICAL: analytical_count,
+            CommunicationStyle.EMOTIONAL: emotional_count,
+            CommunicationStyle.PRACTICAL: practical_count,
+            CommunicationStyle.ANXIOUS: anxious_count
+        }
+        
+        # Return style with highest score, default to analytical
+        max_style = max(scores, key=scores.get)
+        return max_style if scores[max_style] > 0 else CommunicationStyle.ANALYTICAL
+
+    async def _determine_age_group(self, context: MedicalContext) -> AgeGroup:
+        """Determine age group for age-appropriate communication"""
+        
+        age = context.demographics.get('age')
+        if age:
+            try:
+                age_int = int(age)
+                if age_int < 18:
+                    return AgeGroup.PEDIATRIC
+                elif age_int <= 30:
+                    return AgeGroup.YOUNG_ADULT
+                elif age_int <= 65:
+                    return AgeGroup.ADULT
+                else:
+                    return AgeGroup.ELDERLY
+            except (ValueError, TypeError):
+                pass
+        
+        # Default to adult if age cannot be determined
+        return AgeGroup.ADULT
+
+    async def _assess_symptom_severity(self, context: MedicalContext) -> str:
+        """Assess symptom severity level"""
+        
+        if context.emergency_level in ['critical', 'emergency']:
+            return 'critical'
+        elif context.emergency_level == 'urgent':
+            return 'severe'
+        elif any(word in str(context.chief_complaint or '').lower() 
+                for word in ['severe', 'terrible', 'worst', 'unbearable']):
+            return 'severe'
+        elif any(word in str(context.chief_complaint or '').lower() 
+                for word in ['mild', 'slight', 'minor']):
+            return 'mild'
+        else:
+            return 'moderate'
+
+    async def _assess_health_literacy(self, context: MedicalContext) -> str:
+        """Assess patient health literacy level"""
+        
+        patient_text = ' '.join([
+            str(context.chief_complaint or ''),
+            str(context.symptom_data.get('description', ''))
+        ]).lower()
+        
+        # High literacy indicators
+        high_literacy = ['medical', 'diagnosis', 'treatment', 'symptoms', 'condition', 'physician']
+        
+        # Low literacy indicators (simple language, basic descriptions)
+        low_literacy = ['hurt', 'feel bad', 'not good', 'something wrong', 'help me']
+        
+        high_count = sum(1 for indicator in high_literacy if indicator in patient_text)
+        low_count = sum(1 for indicator in low_literacy if indicator in patient_text)
+        
+        if high_count >= 2:
+            return 'high'
+        elif low_count >= 2:
+            return 'low'
+        else:
+            return 'average'
+
     async def _generate_differential_diagnosis(self, context: MedicalContext) -> Dict[str, Any]:
         """
         ENHANCED with Phase 5: Generate evidence-based differential diagnosis with enhanced response templates
