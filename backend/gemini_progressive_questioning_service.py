@@ -111,6 +111,11 @@ class AIProgressiveQuestioningService:
         start_time = time.time()
         
         try:
+            # Check if AI components are available
+            if not self.ai_components_available:
+                logger.warning("AI components not available, returning fallback result")
+                return self._create_fallback_result(patient_input, medical_context, start_time)
+            
             # Step 1: Use existing Task 6.1 system for initial analysis
             clarification_result = None
             if self.intelligent_clarification_engine:
