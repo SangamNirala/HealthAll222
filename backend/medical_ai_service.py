@@ -7699,6 +7699,83 @@ class WorldClassMedicalAI:
                 "error": str(intent_error)
             }
         
+        # 🚀 ENHANCEMENT #1: ENHANCED INCOMPLETENESS DETECTION ANALYSIS
+        # Perform advanced incompleteness detection to identify what patients don't say but should
+        try:
+            # Build conversation context for incompleteness analysis
+            conversation_context_for_incompleteness = {
+                "messages": conversation_history or [],
+                "consultation_id": getattr(context, 'consultation_id', None),
+                "current_stage": context.current_stage.value if hasattr(context.current_stage, 'value') else str(context.current_stage),
+                "symptoms_mentioned": [symptom.get('symptom') for symptom in context.symptom_data.get('symptoms', [])] if context.symptom_data and context.symptom_data.get('symptoms') else [],
+                "topic": "medical_consultation"
+            }
+            
+            # Build medical context for incompleteness analysis
+            medical_context_for_incompleteness = {
+                "chief_complaint": getattr(context, 'chief_complaint', ''),
+                "current_symptoms": context.symptom_data if context.symptom_data else {},
+                "medical_history": getattr(context, 'medical_history', []),
+                "demographics": context.demographics if context.demographics else {},
+                "conversation_stage": context.current_stage.value if hasattr(context.current_stage, 'value') else str(context.current_stage)
+            }
+            
+            # Perform incompleteness analysis
+            incompleteness_result = await self.incompleteness_detector.analyze_conversation_completeness(
+                patient_message=normalized_message,
+                conversation_context=conversation_context_for_incompleteness,
+                medical_context=medical_context_for_incompleteness
+            )
+            
+            # Store incompleteness analysis results in context for enhanced medical reasoning
+            context.incompleteness_analysis = {
+                "incompleteness_score": incompleteness_result.incompleteness_score,
+                "priority_gaps": [
+                    {
+                        "gap_type": gap.gap_type.value,
+                        "gap_category": gap.gap_category,
+                        "severity": gap.severity,
+                        "what_is_missing": gap.what_is_missing,
+                        "suggested_question": gap.suggested_question,
+                        "clinical_importance": gap.clinical_importance,
+                        "confidence": gap.confidence
+                    } for gap in incompleteness_result.priority_gaps[:3]  # Top 3 priority gaps
+                ],
+                "adaptive_strategy": {
+                    "patient_type": incompleteness_result.adaptive_strategy.patient_type,
+                    "recommended_approach": incompleteness_result.adaptive_strategy.recommended_approach,
+                    "question_style": incompleteness_result.adaptive_strategy.question_style,
+                    "empathy_level": incompleteness_result.adaptive_strategy.empathy_level,
+                    "communication_techniques": incompleteness_result.adaptive_strategy.communication_techniques[:3]  # Top 3 techniques
+                },
+                "immediate_follow_ups": incompleteness_result.immediate_follow_ups[:2],  # Top 2 immediate follow-ups
+                "processing_time_ms": incompleteness_result.processing_time_ms,
+                "analysis_confidence": incompleteness_result.analysis_confidence,
+                "algorithm_version": incompleteness_result.algorithm_version
+            }
+            
+            # Log incompleteness analysis for medical quality assurance
+            print(f"🧠 Incompleteness Analysis: Score {incompleteness_result.incompleteness_score:.2f}, {len(incompleteness_result.detected_gaps)} gaps detected, Patient Type: {incompleteness_result.adaptive_strategy.patient_type}")
+            
+            # Store patient communication profile for future reference
+            context.patient_communication_profile = {
+                "verbal_expressiveness": incompleteness_result.patient_communication_profile.verbal_expressiveness.value,
+                "medical_vocabulary_comfort": incompleteness_result.patient_communication_profile.medical_vocabulary_comfort.value,
+                "emotional_processing_style": incompleteness_result.patient_communication_profile.emotional_processing_style.value,
+                "anxiety_indicators": incompleteness_result.patient_communication_profile.anxiety_indicators,
+                "profile_confidence": incompleteness_result.patient_communication_profile.profile_confidence
+            }
+            
+        except Exception as incompleteness_error:
+            print(f"Enhanced incompleteness detection failed (continuing with medical processing): {incompleteness_error}")
+            # Continue processing even if incompleteness detection fails
+            context.incompleteness_analysis = {
+                "incompleteness_score": 0.5, 
+                "priority_gaps": [],
+                "adaptive_strategy": {"patient_type": "balanced_patient", "recommended_approach": "standard_professional"},
+                "error": str(incompleteness_error)
+            }
+        
         # 1. Emergency Detection (highest priority) - use normalized text and intent analysis
         emergency_assessment = await self._assess_emergency_risk(normalized_message, context)
         if emergency_assessment['emergency_detected']:
