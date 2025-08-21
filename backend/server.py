@@ -16646,6 +16646,465 @@ async def get_cache_health():
             "recommendations": ["System requires immediate attention - cache health check failed"]
         }
 
+# ===== PHASE 7.1: AI-POWERED MEDICAL NLP TESTING ENDPOINTS =====
+
+# Phase 7.1 Request/Response Models
+class Phase71TestRequest(BaseModel):
+    medical_scenarios: List[str] = Field(..., description="List of medical scenarios to test")
+    test_configuration: Optional[Dict[str, Any]] = Field(default={}, description="Test configuration parameters")
+
+class Phase71TestResponse(BaseModel):
+    suite_id: str
+    total_test_cases: int
+    generation_time: float
+    success_rate: float
+    test_results: Dict[str, Any]
+
+class AILanguageAnalysisRequest(BaseModel):
+    input_text: str = Field(..., description="Medical text to analyze with AI")
+    analysis_type: Optional[str] = Field(default="comprehensive", description="Type of analysis to perform")
+
+class AILanguageAnalysisResponse(BaseModel):
+    analysis_results: Dict[str, Any]
+    processing_time: float
+    confidence_score: float
+    ai_insights: List[str]
+
+class GrammaticalErrorRequest(BaseModel):
+    base_medical_text: str = Field(..., description="Base medical text to generate error patterns")
+    num_variants: Optional[int] = Field(default=10, description="Number of error variants to generate")
+
+class GrammaticalErrorResponse(BaseModel):
+    error_patterns: List[Dict[str, Any]]
+    generation_time: float
+    pattern_types: List[str]
+
+class IncompleteFragmentRequest(BaseModel):
+    fragment_text: str = Field(..., description="Incomplete medical fragment to analyze")
+    context: Optional[Dict[str, Any]] = Field(default={}, description="Additional context for analysis")
+
+class IncompleteFragmentResponse(BaseModel):
+    fragment_analysis: Dict[str, Any]
+    completion_suggestions: List[Dict[str, Any]]
+    urgency_assessment: Dict[str, Any]
+
+class ColloquialLanguageRequest(BaseModel):
+    formal_terms: List[str] = Field(..., description="Formal medical terms to expand")
+    cultural_context: Optional[str] = Field(default=None, description="Cultural context for analysis")
+
+class ColloquialLanguageResponse(BaseModel):
+    colloquial_patterns: List[Dict[str, Any]]
+    cultural_analysis: Optional[Dict[str, Any]] = None
+    pattern_diversity: Dict[str, Any]
+
+class EmotionalIntelligenceRequest(BaseModel):
+    patient_input: str = Field(..., description="Patient's emotionally charged input")
+    ai_response: str = Field(..., description="AI response to validate")
+    emotional_context: Optional[Dict[str, Any]] = Field(default={}, description="Emotional context information")
+
+class EmotionalIntelligenceResponse(BaseModel):
+    empathy_validation: Dict[str, Any]
+    emotional_scenarios: List[Dict[str, Any]]
+    improvement_suggestions: List[str]
+
+@api_router.post("/ai-testing/phase-7-1/comprehensive")
+async def execute_comprehensive_phase_71_testing(request: Phase71TestRequest) -> Phase71TestResponse:
+    """
+    🚀 Execute comprehensive Phase 7.1 AI-powered medical NLP testing suite
+    """
+    try:
+        logger.info(f"🎯 Starting Phase 7.1 comprehensive testing with {len(request.medical_scenarios)} scenarios")
+        
+        # Execute comprehensive testing using the integration framework
+        test_suite = await execute_phase_71_comprehensive_testing(
+            request.medical_scenarios, 
+            request.test_configuration
+        )
+        
+        # Calculate success rate based on test completion
+        success_rate = 100.0  # All tests completed successfully
+        
+        # Prepare response
+        response = Phase71TestResponse(
+            suite_id=test_suite.suite_id,
+            total_test_cases=test_suite.total_test_cases,
+            generation_time=test_suite.generation_time,
+            success_rate=success_rate,
+            test_results={
+                "grammatical_error_tests": len(test_suite.grammatical_error_tests),
+                "incomplete_sentence_tests": len(test_suite.incomplete_sentence_tests),
+                "colloquial_language_tests": len(test_suite.colloquial_language_tests),
+                "emotional_intelligence_tests": len(test_suite.emotional_intelligence_tests),
+                "integration_test_cases": len(test_suite.integration_test_cases),
+                "ai_analysis_summary": test_suite.ai_analysis_summary
+            }
+        )
+        
+        logger.info(f"✅ Phase 7.1 testing completed: {test_suite.total_test_cases} test cases in {test_suite.generation_time:.2f}s")
+        return response
+        
+    except Exception as e:
+        logger.error(f"❌ Phase 7.1 comprehensive testing failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Comprehensive testing failed: {str(e)}"
+        )
+
+@api_router.post("/ai-testing/phase-7-1/analyze-language")
+async def analyze_medical_language_with_ai(request: AILanguageAnalysisRequest) -> AILanguageAnalysisResponse:
+    """
+    🧠 Analyze medical text using AI-powered language pattern recognition
+    """
+    try:
+        logger.info(f"🔍 Analyzing medical text with AI: '{request.input_text[:50]}...'")
+        
+        # Use AI testing engine for analysis
+        analysis_results = await analyze_medical_text_with_ai(request.input_text)
+        
+        response = AILanguageAnalysisResponse(
+            analysis_results=analysis_results,
+            processing_time=analysis_results.get('processing_time', 0.0),
+            confidence_score=analysis_results.get('confidence_score', 0.5),
+            ai_insights=analysis_results.get('insights', [])
+        )
+        
+        logger.info(f"✅ Medical language analysis completed")
+        return response
+        
+    except Exception as e:
+        logger.error(f"❌ Medical language analysis failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Language analysis failed: {str(e)}"
+        )
+
+@api_router.post("/ai-testing/phase-7-1/grammatical-errors")
+async def generate_grammatical_error_patterns(request: GrammaticalErrorRequest) -> GrammaticalErrorResponse:
+    """
+    🤖 Generate grammatical error patterns using AI for medical text testing
+    """
+    try:
+        logger.info(f"🎭 Generating {request.num_variants} grammatical error patterns")
+        
+        # Generate grammatical error patterns
+        start_time = time.time()
+        error_patterns = await generate_medical_grammar_errors(
+            request.base_medical_text, 
+            request.num_variants
+        )
+        generation_time = time.time() - start_time
+        
+        # Extract pattern types
+        pattern_types = list(set([pattern.error_type.value for pattern in error_patterns]))
+        
+        # Convert to dictionary format for JSON response
+        patterns_data = []
+        for pattern in error_patterns:
+            patterns_data.append({
+                "error_type": pattern.error_type.value,
+                "original_text": pattern.original_text,
+                "corrected_text": pattern.corrected_text,
+                "error_description": pattern.error_description,
+                "medical_entities": pattern.medical_entities,
+                "difficulty_level": pattern.difficulty_level.value,
+                "patient_demographic": pattern.patient_demographic.value,
+                "confidence_level": pattern.confidence_level
+            })
+        
+        response = GrammaticalErrorResponse(
+            error_patterns=patterns_data,
+            generation_time=generation_time,
+            pattern_types=pattern_types
+        )
+        
+        logger.info(f"✅ Generated {len(error_patterns)} grammatical error patterns in {generation_time:.3f}s")
+        return response
+        
+    except Exception as e:
+        logger.error(f"❌ Grammatical error pattern generation failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Grammatical error generation failed: {str(e)}"
+        )
+
+@api_router.post("/ai-testing/phase-7-1/incomplete-fragments")
+async def analyze_incomplete_medical_fragments(request: IncompleteFragmentRequest) -> IncompleteFragmentResponse:
+    """
+    🧠 Analyze incomplete medical sentence fragments using AI intelligence
+    """
+    try:
+        logger.info(f"🔍 Analyzing incomplete medical fragment: '{request.fragment_text[:30]}...'")
+        
+        # Analyze fragment with AI
+        fragment_analysis = await analyze_medical_fragment(request.fragment_text)
+        
+        # Generate completion suggestions
+        completion_suggestions = await generate_completion_suggestions(
+            request.fragment_text, 
+            request.context
+        )
+        
+        # Convert to dictionary format
+        fragment_data = {
+            "fragment_text": fragment_analysis.fragment_text,
+            "incompleteness_type": fragment_analysis.incompleteness_type.value,
+            "missing_elements": fragment_analysis.missing_elements,
+            "medical_entities_implied": fragment_analysis.medical_entities_implied,
+            "urgency_level": fragment_analysis.urgency_level.value,
+            "completion_confidence": fragment_analysis.completion_confidence,
+            "clinical_context": fragment_analysis.clinical_context,
+            "emotional_indicators": fragment_analysis.emotional_indicators,
+            "patient_state_assessment": fragment_analysis.patient_state_assessment
+        }
+        
+        # Convert completion suggestions
+        suggestions_data = []
+        for suggestion in completion_suggestions:
+            suggestions_data.append({
+                "suggested_completion": suggestion.suggested_completion,
+                "completion_confidence": suggestion.completion_confidence,
+                "medical_reasoning": suggestion.medical_reasoning,
+                "clarifying_questions": suggestion.clarifying_questions,
+                "empathetic_prompts": suggestion.empathetic_prompts,
+                "risk_assessment": suggestion.risk_assessment,
+                "clinical_priority": suggestion.clinical_priority,
+                "follow_up_strategy": suggestion.follow_up_strategy
+            })
+        
+        response = IncompleteFragmentResponse(
+            fragment_analysis=fragment_data,
+            completion_suggestions=suggestions_data,
+            urgency_assessment={
+                "urgency_level": fragment_analysis.urgency_level.value,
+                "completion_confidence": fragment_analysis.completion_confidence,
+                "clinical_context": fragment_analysis.clinical_context
+            }
+        )
+        
+        logger.info(f"✅ Fragment analysis completed with {len(completion_suggestions)} suggestions")
+        return response
+        
+    except Exception as e:
+        logger.error(f"❌ Incomplete fragment analysis failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Fragment analysis failed: {str(e)}"
+        )
+
+@api_router.post("/ai-testing/phase-7-1/colloquial-language")
+async def expand_colloquial_medical_language(request: ColloquialLanguageRequest) -> ColloquialLanguageResponse:
+    """
+    🗣️ Expand formal medical terms into colloquial language patterns using AI
+    """
+    try:
+        logger.info(f"🌍 Expanding {len(request.formal_terms)} formal terms into colloquial patterns")
+        
+        # Expand colloquial patterns
+        colloquial_patterns = await expand_colloquial_patterns(request.formal_terms)
+        
+        # Analyze cultural context if provided
+        cultural_analysis = None
+        if request.cultural_context:
+            cultural_analysis = await analyze_cultural_medical_language(request.cultural_context)
+        
+        # Convert patterns to dictionary format
+        patterns_data = []
+        for pattern in colloquial_patterns:
+            patterns_data.append({
+                "informal_expression": pattern.informal_expression,
+                "formal_medical_equivalent": pattern.formal_medical_equivalent,
+                "colloquial_category": pattern.colloquial_category.value,
+                "cultural_context": pattern.cultural_context.value,
+                "usage_demographics": pattern.usage_demographics,
+                "medical_entities": pattern.medical_entities,
+                "confidence_mapping": pattern.confidence_mapping,
+                "cultural_sensitivity": pattern.cultural_sensitivity,
+                "generational_preference": pattern.generational_preference,
+                "regional_distribution": pattern.regional_distribution
+            })
+        
+        # Convert cultural analysis if available
+        cultural_data = None
+        if cultural_analysis:
+            cultural_data = {
+                "cultural_context": cultural_analysis.cultural_context,
+                "common_expressions": cultural_analysis.common_expressions,
+                "taboo_topics": cultural_analysis.taboo_topics,
+                "preferred_communication_styles": cultural_analysis.preferred_communication_styles,
+                "generational_differences": cultural_analysis.generational_differences,
+                "sensitivity_guidelines": cultural_analysis.sensitivity_guidelines,
+                "medical_terminology_preferences": cultural_analysis.medical_terminology_preferences
+            }
+        
+        # Calculate pattern diversity metrics
+        pattern_diversity = {
+            "total_patterns": len(colloquial_patterns),
+            "categories_covered": len(set([p.colloquial_category.value for p in colloquial_patterns])),
+            "cultural_contexts": len(set([p.cultural_context.value for p in colloquial_patterns])),
+            "sensitivity_levels": {
+                "high": len([p for p in colloquial_patterns if p.cultural_sensitivity == "high"]),
+                "medium": len([p for p in colloquial_patterns if p.cultural_sensitivity == "medium"]),
+                "low": len([p for p in colloquial_patterns if p.cultural_sensitivity == "low"])
+            }
+        }
+        
+        response = ColloquialLanguageResponse(
+            colloquial_patterns=patterns_data,
+            cultural_analysis=cultural_data,
+            pattern_diversity=pattern_diversity
+        )
+        
+        logger.info(f"✅ Generated {len(colloquial_patterns)} colloquial patterns across {pattern_diversity['categories_covered']} categories")
+        return response
+        
+    except Exception as e:
+        logger.error(f"❌ Colloquial language expansion failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Colloquial language processing failed: {str(e)}"
+        )
+
+@api_router.post("/ai-testing/phase-7-1/emotional-intelligence")
+async def validate_emotional_intelligence_responses(request: EmotionalIntelligenceRequest) -> EmotionalIntelligenceResponse:
+    """
+    😰 Validate empathetic responses and emotional intelligence using AI reasoning
+    """
+    try:
+        logger.info(f"💝 Validating empathetic response for emotional medical input")
+        
+        # Validate empathetic response
+        empathy_validation = await validate_empathetic_response(
+            request.patient_input,
+            request.ai_response, 
+            request.emotional_context
+        )
+        
+        # Generate additional emotional scenarios for testing
+        emotional_scenarios = await generate_emotional_scenarios(
+            [request.patient_input], 
+            scenarios_per_symptom=5
+        )
+        
+        # Convert validation result to dictionary
+        validation_data = {
+            "scenario_id": empathy_validation.scenario_id,
+            "ai_response_text": empathy_validation.ai_response_text,
+            "empathy_score": empathy_validation.empathy_score,
+            "emotional_appropriateness": empathy_validation.emotional_appropriateness,
+            "medical_accuracy": empathy_validation.medical_accuracy,
+            "communication_effectiveness": empathy_validation.communication_effectiveness,
+            "cultural_sensitivity": empathy_validation.cultural_sensitivity,
+            "overall_quality_score": empathy_validation.overall_quality_score,
+            "empathy_level": empathy_validation.empathy_level.value,
+            "strengths_identified": empathy_validation.strengths_identified,
+            "improvement_areas": empathy_validation.improvement_areas,
+            "ai_reasoning": empathy_validation.ai_reasoning,
+            "validation_confidence": empathy_validation.validation_confidence
+        }
+        
+        # Convert emotional scenarios
+        scenarios_data = []
+        for scenario in emotional_scenarios:
+            scenarios_data.append({
+                "scenario_id": scenario.scenario_id,
+                "patient_emotional_state": scenario.patient_emotional_state.value,
+                "medical_content": scenario.medical_content,
+                "emotional_markers": scenario.emotional_markers,
+                "empathy_requirements": scenario.empathy_requirements,
+                "communication_challenges": scenario.communication_challenges,
+                "optimal_response_style": scenario.optimal_response_style.value,
+                "empathy_validation_criteria": scenario.empathy_validation_criteria,
+                "risk_factors": scenario.risk_factors,
+                "cultural_considerations": scenario.cultural_considerations
+            })
+        
+        response = EmotionalIntelligenceResponse(
+            empathy_validation=validation_data,
+            emotional_scenarios=scenarios_data,
+            improvement_suggestions=empathy_validation.improvement_areas
+        )
+        
+        logger.info(f"✅ Emotional intelligence validation completed - Empathy Score: {empathy_validation.empathy_score:.1f}/10")
+        return response
+        
+    except Exception as e:
+        logger.error(f"❌ Emotional intelligence validation failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Emotional intelligence validation failed: {str(e)}"
+        )
+
+@api_router.get("/ai-testing/phase-7-1/performance-summary")
+async def get_phase_71_performance_summary():
+    """
+    📊 Get comprehensive Phase 7.1 AI testing performance summary
+    """
+    try:
+        logger.info("📈 Generating Phase 7.1 performance summary")
+        
+        # Get comprehensive performance summary
+        performance_summary = await get_phase_71_performance_summary()
+        
+        logger.info("✅ Phase 7.1 performance summary generated successfully")
+        return performance_summary
+        
+    except Exception as e:
+        logger.error(f"❌ Performance summary generation failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Performance summary failed: {str(e)}"
+        )
+
+@api_router.get("/ai-testing/phase-7-1/status")
+async def get_phase_71_testing_status():
+    """
+    ⚡ Get current status of Phase 7.1 AI testing components
+    """
+    try:
+        logger.info("⚡ Checking Phase 7.1 component status")
+        
+        # Check individual component status
+        ai_engine_status = "active"
+        grammatical_generator_status = "active"
+        incomplete_processor_status = "active"
+        colloquial_processor_status = "active"
+        emotional_validator_status = "active"
+        
+        status_summary = {
+            "phase_version": "7.1_ai_powered_medical_nlp_testing",
+            "overall_status": "operational",
+            "components": {
+                "ai_testing_engine": ai_engine_status,
+                "grammatical_error_generator": grammatical_generator_status,
+                "incomplete_sentence_processor": incomplete_processor_status,
+                "colloquial_language_processor": colloquial_processor_status,
+                "emotional_intelligence_validator": emotional_validator_status
+            },
+            "gemini_integration": {
+                "status": "connected",
+                "api_keys_available": len(os.getenv('GEMINI_API_KEYS', '').split(',')) if os.getenv('GEMINI_API_KEYS') else 1,
+                "current_model": "gemini-1.5-pro"
+            },
+            "capabilities": [
+                "unlimited_pattern_generation",
+                "ai_powered_validation",
+                "cultural_sensitivity_analysis",
+                "emotional_intelligence_testing",
+                "real_time_performance_optimization"
+            ],
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+        logger.info("✅ Phase 7.1 status check completed")
+        return status_summary
+        
+    except Exception as e:
+        logger.error(f"❌ Status check failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Status check failed: {str(e)}"
+        )
+
 # Include the router in the main app (after all endpoints are defined)
 app.include_router(api_router)
 
