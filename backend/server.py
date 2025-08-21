@@ -15468,8 +15468,8 @@ async def get_incompleteness_detection_performance():
     - Algorithm version and capabilities
     """
     try:
-        from enhanced_incompleteness_detector import EnhancedIncompletenessDetector
-        detector = EnhancedIncompletenessDetector()
+        from enhanced_incompleteness_detector_optimized import UltraPerformanceIncompletenessDetector
+        detector = UltraPerformanceIncompletenessDetector()
         
         # Get system information
         system_info = detector.get_system_info()
