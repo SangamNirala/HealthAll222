@@ -12,7 +12,7 @@ import time
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://mediq-followup.preview.emergentagent.com/api"
+BACKEND_URL = "https://healthprobe.preview.emergentagent.com/api"
 
 def test_conversation_flow(conversation_name, conversation_steps):
     """Test a complete conversation flow"""

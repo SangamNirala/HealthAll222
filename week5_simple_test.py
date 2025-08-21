@@ -12,7 +12,7 @@ import time
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = "https://mediq-followup.preview.emergentagent.com/api"
+BACKEND_URL = "https://healthprobe.preview.emergentagent.com/api"
 
 def test_basic_endpoint_availability():
     """Test basic endpoint availability"""

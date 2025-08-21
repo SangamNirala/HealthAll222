@@ -24,7 +24,7 @@ from typing import Dict, Any, List
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = "https://mediq-followup.preview.emergentagent.com/api"
+BACKEND_URL = "https://healthprobe.preview.emergentagent.com/api"
 
 class Step42FollowUpTester:
     """Focused tester for Step 4.2 Intelligent Follow-up System"""
