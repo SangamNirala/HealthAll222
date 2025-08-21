@@ -325,7 +325,7 @@ class AIProgressiveQuestioningService:
         
         return base_score
     
-    async def _handle_traditional_clarification(self, patient_input: str, medical_context: Dict[str, Any], clarification_result: ClarificationAnalysisResult = None, start_time: float) -> AIProgressiveQuestionResult:
+    async def _handle_traditional_clarification(self, patient_input: str, medical_context: Dict[str, Any], start_time: float, clarification_result: ClarificationAnalysisResult = None) -> AIProgressiveQuestionResult:
         """Handle cases using traditional Task 6.1 approach with AI enhancement"""
         
         if not clarification_result and self.intelligent_clarification_engine:
