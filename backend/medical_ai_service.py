@@ -8176,56 +8176,73 @@ class WorldClassMedicalAI:
             })
             return incompleteness_analysis
             
-        # 4. INCOMPLETE PAIN DESCRIPTIONS (enhanced detection)
+        # 4. ENHANCED INCOMPLETE PAIN DESCRIPTIONS DETECTION
+        # Comprehensive pain keyword detection
         pain_keywords = ['pain', 'hurt', 'hurts', 'hurting', 'ache', 'aches', 'aching', 'sore', 'tender']
-        has_pain = any(pain in user_response_clean for pain in pain_keywords)
+        pain_synonyms = ['discomfort', 'soreness', 'throbbing', 'pounding', 'burning', 'stinging']
+        all_pain_terms = pain_keywords + pain_synonyms
+        
+        has_pain = any(pain in user_response_clean for pain in all_pain_terms)
         
         if has_pain:
-            print(f"[INCOMPLETENESS DEBUG] Pain detected in: {user_response}")
-            # Check for missing pain characteristics
+            print(f"[INCOMPLETENESS DEBUG] Enhanced pain analysis for: {user_response}")
+            # Advanced pain characteristic analysis
             missing_pain_details = []
             
-            # Check for quality descriptors (more comprehensive list)
+            # Comprehensive pain quality descriptors
             pain_qualities = ['sharp', 'dull', 'burning', 'throbbing', 'stabbing', 'crushing', 
                             'pressure', 'cramping', 'shooting', 'electric', 'gnawing', 'squeezing',
-                            'tight', 'heavy', 'radiating', 'pounding', 'piercing']
+                            'tight', 'heavy', 'radiating', 'pounding', 'piercing', 'nagging',
+                            'constant', 'intermittent', 'pulsing', 'aching', 'raw', 'tender']
             has_quality = any(quality in user_response_clean for quality in pain_qualities)
             
-            if not has_quality:
-                missing_pain_details.append('pain_quality')
-                print(f"[INCOMPLETENESS DEBUG] Missing pain quality")
-                
-            # Check for severity indicators (enhanced)
+            # Enhanced severity detection
             severity_indicators = ['severe', 'mild', 'moderate', 'terrible', 'unbearable', 
                                  'excruciating', 'intense', 'slight', 'minor', 'bad', 'awful',
-                                 'horrible', 'worst', 'extreme', 'overwhelming']
+                                 'horrible', 'worst', 'extreme', 'overwhelming', 'bearable',
+                                 'tolerable', 'intolerable', 'manageable', 'unmanageable']
             has_severity = any(sev in user_response_clean for sev in severity_indicators)
             
-            # Check for numerical ratings or scale references
-            has_numerical = any(char.isdigit() for char in user_response) or 'out of' in user_response_clean
+            # Enhanced numerical scale detection
+            has_numerical = any(char.isdigit() for char in user_response) or \
+                          any(scale in user_response_clean for scale in ['out of', 'scale', '/10', 'ten'])
             
-            if not has_severity and not has_numerical:
+            # Enhanced anatomical specificity check
+            detailed_anatomy = ['upper chest', 'lower chest', 'left chest', 'right chest', 
+                              'center chest', 'side of head', 'back of head', 'front of head',
+                              'upper back', 'lower back', 'middle back', 'left side', 'right side']
+            general_anatomy = ['chest', 'head', 'stomach', 'back', 'abdomen', 'neck', 'shoulder', 'arm', 'leg']
+            
+            has_detailed_anatomy = any(detail in user_response_clean for detail in detailed_anatomy)
+            has_general_anatomy = any(area in user_response_clean for area in general_anatomy)
+            
+            # Analysis for missing characteristics
+            if not has_quality and len(words) <= 3:
+                missing_pain_details.append('pain_quality')
+                print(f"[INCOMPLETENESS DEBUG] Missing pain quality descriptors")
+                
+            if not has_severity and not has_numerical and len(words) <= 4:
                 missing_pain_details.append('pain_severity')
-                print(f"[INCOMPLETENESS DEBUG] Missing pain severity")
+                print(f"[INCOMPLETENESS DEBUG] Missing pain severity indicators")
                 
-            # Check for anatomical specificity (relaxed criteria)
-            anatomical_areas = ['chest', 'head', 'stomach', 'back', 'abdomen', 'neck', 'shoulder', 'arm', 'leg']
-            basic_anatomical = any(area in user_response_clean for area in anatomical_areas)
-            
-            if basic_anatomical and len(words) <= 3:
+            if has_general_anatomy and not has_detailed_anatomy and len(words) <= 3:
                 missing_pain_details.append('anatomical_specificity')
-                print(f"[INCOMPLETENESS DEBUG] Missing anatomical specificity")
-                
-            # Trigger follow-up if any important details are missing
-            if missing_pain_details:
-                print(f"[INCOMPLETENESS DEBUG] Pain incompleteness detected: {missing_pain_details}")
+                print(f"[INCOMPLETENESS DEBUG] Missing detailed anatomical specificity")
+            
+            # Check for basic pain statements that need elaboration
+            basic_pain_statements = ['chest pain', 'head pain', 'stomach pain', 'back pain', 
+                                   'pain in chest', 'pain in head', 'pain in stomach', 'my chest hurts']
+            is_basic_pain = any(basic in user_response_clean for basic in basic_pain_statements)
+            
+            if is_basic_pain or missing_pain_details:
+                print(f"[INCOMPLETENESS DEBUG] Enhanced pain incompleteness detected: {missing_pain_details}")
                 incompleteness_analysis.update({
                     'needs_followup': True,
                     'incompleteness_type': 'incomplete_pain_description',
-                    'missing_information': missing_pain_details,
+                    'missing_information': missing_pain_details or ['pain_elaboration'],
                     'medical_domain': self._determine_pain_domain(user_response_clean),
                     'clinical_significance': 'high',
-                    'confidence': 0.85
+                    'confidence': 0.9  # Higher confidence for enhanced detection
                 })
                 return incompleteness_analysis
                 
