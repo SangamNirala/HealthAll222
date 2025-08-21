@@ -8229,25 +8229,40 @@ class WorldClassMedicalAI:
                 })
                 return incompleteness_analysis
                 
-        # 5. VAGUE TEMPORAL INFORMATION (enhanced detection)
-        vague_temporal = ['recently', 'lately', 'for a while', 'some time', 'long time', 
-                         'not long ago', 'past few', 'little while', 'bit ago', 'while back',
-                         'earlier', 'before', 'ago', 'since']
+        # 5. ENHANCED VAGUE TEMPORAL INFORMATION DETECTION
+        # Comprehensive temporal vagueness patterns for robust detection
+        vague_temporal_primary = ['recently', 'lately', 'for a while', 'some time', 'long time', 
+                                 'not long ago', 'past few', 'little while', 'bit ago', 'while back']
         
-        # Check if response is ONLY temporal without specifics
-        is_temporal_only = len(words) <= 2 and any(temporal in user_response_clean for temporal in vague_temporal)
+        vague_temporal_secondary = ['earlier', 'before', 'ago', 'since', 'a bit', 'somewhat',
+                                   'kind of recently', 'sort of lately', 'not too long',
+                                   'while now', 'few days', 'couple days', 'some days']
         
-        # Also check when asked about timing specifically
-        has_vague_temporal = any(temporal in user_response_clean for temporal in vague_temporal[:9])  # More specific vague terms
+        vague_temporal_modifiers = ['about', 'around', 'maybe', 'approximately', 'roughly',
+                                   'or so', 'give or take', 'more or less']
         
-        if is_temporal_only or (has_vague_temporal and len(words) <= 3):
-            print(f"[INCOMPLETENESS DEBUG] Vague temporal detected: {user_response}")
+        # Enhanced detection logic - catches more temporal vagueness patterns
+        is_temporal_only = len(words) <= 2 and any(temporal in user_response_clean for temporal in vague_temporal_primary)
+        
+        # Check for vague temporal with modifiers (e.g., "about recently", "maybe lately")
+        has_modified_temporal = any(mod in user_response_clean for mod in vague_temporal_modifiers) and \
+                               any(temp in user_response_clean for temp in vague_temporal_primary)
+        
+        # Check for compound vague temporal expressions
+        has_compound_vague = any(temp in user_response_clean for temp in vague_temporal_secondary) and len(words) <= 4
+        
+        # Check for standalone temporal vagueness (enhanced criteria)
+        standalone_vague_temporal = len(words) <= 3 and any(temporal in user_response_clean for temporal in vague_temporal_primary)
+        
+        if is_temporal_only or has_modified_temporal or has_compound_vague or standalone_vague_temporal:
+            print(f"[INCOMPLETENESS DEBUG] Enhanced vague temporal detected: {user_response}")
             incompleteness_analysis.update({
                 'needs_followup': True,
                 'incompleteness_type': 'vague_temporal_information',
-                'missing_information': ['specific_timeframe', 'onset_details'],
-                'clinical_significance': 'medium',
-                'confidence': 0.8
+                'missing_information': ['specific_timeframe', 'onset_details', 'temporal_precision'],
+                'medical_domain': self._determine_temporal_context(user_response_clean, context),
+                'clinical_significance': 'high',  # Upgraded significance for temporal precision
+                'confidence': 0.9  # Higher confidence for enhanced detection
             })
             return incompleteness_analysis
             
