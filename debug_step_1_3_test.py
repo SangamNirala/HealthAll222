@@ -7,7 +7,7 @@ import requests
 import json
 from datetime import datetime
 
-BACKEND_URL = "https://medchat-enhance-1.preview.emergentagent.com"
+BACKEND_URL = "https://empathcare-ai.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_single_colloquial_expression(expression: str, expected: str):

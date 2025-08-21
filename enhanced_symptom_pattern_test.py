@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import uuid
 
 class EnhancedSymptomPatternTester:
-    def __init__(self, base_url="https://medchat-enhance-1.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://empathcare-ai.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0

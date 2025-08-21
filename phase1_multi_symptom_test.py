@@ -35,7 +35,7 @@ from typing import Dict, Any, List
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = "https://medchat-enhance-1.preview.emergentagent.com/api"
+BACKEND_URL = "https://empathcare-ai.preview.emergentagent.com/api"
 
 class Phase1MultiSymptomTester:
     """Comprehensive tester for Phase 1 Multi-Symptom Parsing System"""
