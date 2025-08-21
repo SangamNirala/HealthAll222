@@ -28,6 +28,15 @@ from enhanced_incompleteness_detector import EnhancedIncompletenessDetector, Inc
 # 🚀 PHASE 5: ENHANCED MEDICAL RESPONSE GENERATION SYSTEM
 from enhanced_medical_response_generator import get_enhanced_medical_response_template, EnhancedMedicalResponseGenerator
 
+# 💝 STEP 5.2: EMPATHETIC COMMUNICATION TRANSFORMATION ENGINE
+from empathetic_communication_transformer import (
+    transform_medical_text_to_empathetic, 
+    EmpathicCommunicationTransformer,
+    CommunicationContext,
+    CommunicationStyle,
+    AgeGroup
+)
+
 # 🧠 STEP 2.2: CONTEXT-AWARE MEDICAL REASONING ENGINE IMPORTS
 from abc import ABC, abstractmethod
 
