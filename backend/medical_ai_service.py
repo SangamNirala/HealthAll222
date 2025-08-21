@@ -8463,9 +8463,33 @@ class WorldClassMedicalAI:
         return f"Can you tell me more details about your {pain_type}? Specifically, what does it feel like and how severe is it?"
     
     async def _generate_temporal_followup(self, user_response: str, chief_complaint: str, context: MedicalContext) -> str:
-        """Generate follow-up for vague temporal information"""
+        """Generate enhanced, context-aware follow-up for vague temporal information"""
         
-        return f"When you say '{user_response.strip()}', can you be more specific about the timing? For example, did your {chief_complaint} start hours ago, days ago, weeks ago, or months ago? Was the onset sudden (came on quickly) or gradual (developed slowly over time)?"
+        temporal_context = self._determine_temporal_context(user_response, context)
+        user_response_clean = user_response.strip()
+        
+        # Context-specific temporal follow-ups
+        if temporal_context == 'emergency_temporal':
+            return f"When you say '{user_response_clean}', I need to understand the exact timing as this could be important for your safety. Did your {chief_complaint} start within the last hour, within the last few hours, or longer ago? Was the onset sudden and severe, or did it develop gradually?"
+        
+        elif temporal_context == 'pain_temporal':
+            return f"To better understand your {chief_complaint}, can you be more specific about when you say '{user_response_clean}'? For example, did the pain start minutes ago, hours ago, days ago, or weeks ago? Also, did it come on suddenly or gradually build up over time?"
+        
+        elif temporal_context == 'neurological_temporal':
+            return f"For neurological symptoms like {chief_complaint}, timing is very important. When you say '{user_response_clean}', can you tell me more precisely when this started? Was it within the last few hours, yesterday, several days ago, or longer? Did the symptoms appear suddenly or develop slowly?"
+        
+        elif temporal_context == 'gastrointestinal_temporal':
+            return f"To help assess your {chief_complaint}, I need more specific timing. When you mention '{user_response_clean}', can you tell me if this started within the last few hours, yesterday, a few days ago, or longer? Has it been constant or come and go?"
+        
+        else:
+            # Enhanced general temporal follow-up with multiple clarification approaches
+            clarification_options = [
+                f"When you say '{user_response_clean}', can you help me understand the exact timeframe? For instance, did your {chief_complaint} begin within the last few hours, yesterday, several days ago, weeks ago, or months ago?",
+                f"I'd like to better understand the timing of your {chief_complaint}. When you mention '{user_response_clean}', are we talking about something that started today, within the past few days, or has it been going on for weeks or months?",
+                f"To provide you with the best guidance, can you be more specific about '{user_response_clean}'? Did your {chief_complaint} start suddenly within hours, develop over days, or has it been present for weeks or longer?"
+            ]
+            
+            return clarification_options[0]  # Use first option for consistency
     
     async def _generate_anatomical_followup(self, user_response: str, medical_domain: str, context: MedicalContext) -> str:
         """Generate follow-up for single-word anatomical responses"""
