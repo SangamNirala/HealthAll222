@@ -7803,6 +7803,122 @@ class WorldClassMedicalAI:
                 "error": str(incompleteness_error)
             }
         
+        # 🔬 TASK 6.1: INTELLIGENT CLARIFICATION SYSTEM ANALYSIS
+        # Apply intelligent clarification analysis to detect and handle unclear medical inputs
+        try:
+            # Build medical context for clarification analysis
+            clarification_medical_context = {
+                "consultation_id": getattr(context, 'consultation_id', None),
+                "current_stage": context.current_stage.value if hasattr(context.current_stage, 'value') else str(context.current_stage),
+                "chief_complaint": getattr(context, 'chief_complaint', ''),
+                "previous_symptoms": [symptom.get('symptom') for symptom in context.symptom_data.get('symptoms', [])] if context.symptom_data and context.symptom_data.get('symptoms') else [],
+                "conversation_length": len(conversation_history) if conversation_history else 0,
+                "patient_communication_profile": getattr(context, 'patient_communication_profile', {}),
+                "intent_analysis": getattr(context, 'intent_analysis', {})
+            }
+            
+            # Perform intelligent clarification analysis
+            clarification_result = await analyze_and_clarify_unclear_input(
+                patient_input=normalized_message,
+                medical_context=clarification_medical_context
+            )
+            
+            # Store clarification analysis results in context for medical reasoning
+            context.clarification_analysis = {
+                "input_type": clarification_result.input_type.value,
+                "confidence_score": clarification_result.confidence_score,
+                "detected_elements": clarification_result.detected_elements,
+                "missing_critical_info": clarification_result.missing_critical_info,
+                "clarification_priority": clarification_result.clarification_priority,
+                "medical_context_clues": clarification_result.medical_context_clues,
+                "urgency_indicators": clarification_result.urgency_indicators,
+                "patient_communication_style": clarification_result.patient_communication_style,
+                "processing_time_ms": clarification_result.processing_time_ms
+            }
+            
+            # Log clarification analysis for medical quality assurance
+            print(f"🔬 Intelligent Clarification Analysis: Type {clarification_result.input_type.value} (confidence: {clarification_result.confidence_score:.3f}, priority: {clarification_result.clarification_priority})")
+            
+            # Check if input requires immediate clarification (high confidence unclear input)
+            if (clarification_result.confidence_score > 0.75 and 
+                clarification_result.clarification_priority in ["high", "medium"] and
+                len(clarification_result.suggested_questions) > 0):
+                
+                # Generate intelligent clarification response
+                clarification_response = await generate_clarification_response(
+                    clarification_result, normalized_message
+                )
+                
+                print(f"🔬 Generating clarification response for unclear input: {clarification_result.input_type.value}")
+                
+                # Store clarification in context for conversation continuity
+                context.pending_clarification = {
+                    "original_input": message,
+                    "normalized_input": normalized_message,
+                    "clarification_type": clarification_result.input_type.value,
+                    "suggested_questions": clarification_result.suggested_questions,
+                    "medical_context_clues": clarification_result.medical_context_clues
+                }
+                
+                # Transform response using empathetic communication if available
+                try:
+                    empathetic_response = await self._generate_empathetic_response(clarification_response)
+                    
+                    return {
+                        "response": empathetic_response,
+                        "context": asdict(context),
+                        "urgency": "routine" if not clarification_result.urgency_indicators else "urgent",
+                        "stage": context.current_stage.value if hasattr(context.current_stage, 'value') else str(context.current_stage),
+                        "emergency_detected": bool(clarification_result.urgency_indicators),
+                        "clarification_needed": True,
+                        "clarification_type": clarification_result.input_type.value,
+                        "clarification_confidence": clarification_result.confidence_score,
+                        "patient_communication_style": clarification_result.patient_communication_style,
+                        "medical_context_clues": clarification_result.medical_context_clues,
+                        "next_questions": clarification_result.suggested_questions[:2],  # Top 2 questions
+                        "differential_diagnoses": [],
+                        "recommendations": [
+                            f"Clarification needed for {clarification_result.input_type.value} input",
+                            "Specific symptoms and details required for proper medical assessment"
+                        ]
+                    }
+                
+                except Exception as empathy_error:
+                    print(f"Empathetic response generation failed for clarification: {empathy_error}")
+                    # Return clarification response without empathetic enhancement
+                    return {
+                        "response": clarification_response,
+                        "context": asdict(context),
+                        "urgency": "routine" if not clarification_result.urgency_indicators else "urgent",
+                        "stage": context.current_stage.value if hasattr(context.current_stage, 'value') else str(context.current_stage),
+                        "emergency_detected": bool(clarification_result.urgency_indicators),
+                        "clarification_needed": True,
+                        "clarification_type": clarification_result.input_type.value,
+                        "clarification_confidence": clarification_result.confidence_score,
+                        "patient_communication_style": clarification_result.patient_communication_style,
+                        "medical_context_clues": clarification_result.medical_context_clues,
+                        "next_questions": clarification_result.suggested_questions[:2],
+                        "differential_diagnoses": [],
+                        "recommendations": [
+                            f"Clarification needed for {clarification_result.input_type.value} input",
+                            "Specific symptoms and details required for proper medical assessment"
+                        ]
+                    }
+            
+            else:
+                # Input is clear enough to proceed with normal medical processing
+                print(f"🔬 Input sufficiently clear (confidence: {clarification_result.confidence_score:.3f}), proceeding with medical analysis")
+                
+        except Exception as clarification_error:
+            print(f"Intelligent clarification analysis failed (continuing with medical processing): {clarification_error}")
+            # Continue processing even if clarification analysis fails
+            context.clarification_analysis = {
+                "input_type": "analysis_unavailable",
+                "confidence_score": 0.0,
+                "clarification_priority": "low",
+                "error": str(clarification_error)
+            }
+        
         # 1. Emergency Detection (highest priority) - use normalized text and intent analysis
         emergency_assessment = await self._assess_emergency_risk(normalized_message, context)
         if emergency_assessment['emergency_detected']:
