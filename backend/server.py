@@ -11095,6 +11095,94 @@ async def process_medical_message(request: MedicalConsultationRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to process message: {str(e)}")
 
+# 🚀 PHASE 5: ENHANCED MEDICAL RESPONSE TEMPLATE ENDPOINTS
+
+class EnhancedMedicalTemplateRequest(BaseModel):
+    """Request model for enhanced medical response template generation"""
+    symptom_description: str = Field(..., description="Patient symptom description or chief complaint")
+    patient_context: Optional[Dict[str, Any]] = Field(None, description="Additional patient context (demographics, history, etc.)")
+
+class EnhancedMedicalTemplateResponse(BaseModel):
+    """Response model for enhanced medical response template"""
+    symptom_name: str = Field(..., description="Identified symptom name")
+    category: str = Field(..., description="Medical category (cardiovascular, neurological, etc.)")
+    questions: List[str] = Field(..., description="Symptom-specific assessment questions")
+    red_flags: List[str] = Field(..., description="Warning signs requiring immediate attention")
+    follow_up_protocol: str = Field(..., description="Recommended follow-up protocol")
+    urgency_indicators: Dict[str, str] = Field(..., description="Urgency level indicators for different conditions")
+    differential_considerations: List[str] = Field(..., description="Differential diagnosis considerations")
+    assessment_timeline: str = Field(..., description="Recommended assessment timeline")
+    patient_education: List[str] = Field(..., description="Patient education points")
+    when_to_seek_care: Dict[str, str] = Field(..., description="Guidelines for when to seek different levels of care")
+    clinical_reasoning: str = Field(..., description="Clinical reasoning for this symptom category")
+    confidence_score: float = Field(..., description="Confidence in template generation")
+    algorithm_version: str = Field(..., description="Algorithm version used")
+
+@api_router.post("/medical-ai/enhanced-response-template", response_model=EnhancedMedicalTemplateResponse)
+async def generate_enhanced_medical_response_template(request: EnhancedMedicalTemplateRequest):
+    """
+    🚀 PHASE 5: ENHANCED MEDICAL RESPONSE TEMPLATE GENERATION
+    
+    Generate comprehensive, symptom-specific response templates for any medical condition
+    using advanced medical knowledge and clinical reasoning.
+    """
+    try:
+        from enhanced_medical_response_generator import get_enhanced_medical_response_template
+        
+        # Generate enhanced medical response template
+        template_result = get_enhanced_medical_response_template(
+            request.symptom_description,
+            request.patient_context
+        )
+        
+        return EnhancedMedicalTemplateResponse(**template_result)
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Enhanced template generation failed: {str(e)}")
+
+class SymptomCategoryAnalysisRequest(BaseModel):
+    """Request model for symptom category analysis"""
+    symptom_description: str = Field(..., description="Symptom description to categorize")
+
+class SymptomCategoryAnalysisResponse(BaseModel):
+    """Response model for symptom category analysis"""
+    identified_symptom: str = Field(..., description="Identified primary symptom")
+    category: str = Field(..., description="Medical category")
+    confidence: float = Field(..., description="Confidence in categorization")
+    related_symptoms: List[str] = Field(..., description="Related or similar symptoms")
+    category_description: str = Field(..., description="Description of the medical category")
+
+@api_router.post("/medical-ai/symptom-category-analysis", response_model=SymptomCategoryAnalysisResponse)
+async def analyze_symptom_category(request: SymptomCategoryAnalysisRequest):
+    """
+    🧠 PHASE 5: INTELLIGENT SYMPTOM CATEGORIZATION ANALYSIS
+    
+    Analyze and categorize symptoms using advanced medical pattern recognition
+    for template selection and clinical reasoning enhancement.
+    """
+    try:
+        from enhanced_medical_response_generator import EnhancedMedicalResponseGenerator
+        
+        generator = EnhancedMedicalResponseGenerator()
+        symptom_name, category, confidence = generator.identify_symptom_category(request.symptom_description)
+        
+        # Get related symptoms from the same category
+        category_symptoms = [
+            name for name, data in generator.symptom_patterns.items() 
+            if data["category"] == category
+        ]
+        
+        return SymptomCategoryAnalysisResponse(
+            identified_symptom=symptom_name,
+            category=category.value,
+            confidence=confidence,
+            related_symptoms=category_symptoms[:5],  # Top 5 related symptoms
+            category_description=f"Medical conditions and symptoms related to the {category.value} system"
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Symptom categorization analysis failed: {str(e)}")
+
 # 🧠 PHASE 3: CONTEXTUAL ANALYSIS ENDPOINT FOR VALIDATION 🧠
 
 class ContextualAnalysisRequest(BaseModel):
