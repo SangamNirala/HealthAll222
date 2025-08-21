@@ -236,13 +236,12 @@ class UltraPerformanceIncompletenessDetector:
 
     def _needs_ai_analysis(self, local_analysis: Dict[str, Any], patient_message: str) -> bool:
         """Determine if AI analysis is needed or if local analysis is sufficient"""
-        # Use AI analysis for complex cases
+        # More aggressive local analysis to reduce AI calls for better performance
         complexity_factors = [
-            len(patient_message) > 300,  # Very long messages
-            len(local_analysis['detected_gaps']) > 4,  # Many gaps detected
-            'medication' in patient_message.lower(),  # Medication mentions
-            'family history' in patient_message.lower(),  # Family history
-            any(word in patient_message.lower() for word in ['depression', 'anxiety', 'trauma', 'abuse'])  # Mental health
+            len(patient_message) > 500,  # Only very long messages
+            len(local_analysis['detected_gaps']) > 6,  # Only if many gaps detected
+            'family history' in patient_message.lower() and 'genetic' in patient_message.lower(),  # Specific genetic history
+            all(word in patient_message.lower() for word in ['severe', 'depression', 'suicidal'])  # High-risk mental health only
         ]
         
         return sum(complexity_factors) >= 2  # Need AI if 2+ complexity factors
