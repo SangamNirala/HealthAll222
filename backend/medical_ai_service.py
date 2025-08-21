@@ -8371,6 +8371,39 @@ class WorldClassMedicalAI:
         
         return 'general_temporal'
     
+    def _extract_pain_location(self, user_response: str) -> str:
+        """Extract and return the pain location from user response for follow-up generation"""
+        
+        user_response_clean = user_response.lower().strip()
+        
+        # Map specific anatomical terms to cleaner descriptions
+        location_mapping = {
+            'chest': 'chest pain',
+            'head': 'headache', 
+            'stomach': 'stomach pain',
+            'abdomen': 'abdominal pain',
+            'belly': 'abdominal pain',
+            'back': 'back pain',
+            'neck': 'neck pain',
+            'shoulder': 'shoulder pain',
+            'arm': 'arm pain',
+            'leg': 'leg pain',
+            'joint': 'joint pain',
+            'muscle': 'muscle pain'
+        }
+        
+        # Find the most specific location mentioned
+        for location, description in location_mapping.items():
+            if location in user_response_clean:
+                return description
+        
+        # Check for pain keywords and return generic description
+        pain_keywords = ['pain', 'hurt', 'ache', 'sore', 'tender', 'discomfort']
+        if any(pain in user_response_clean for pain in pain_keywords):
+            return 'pain'
+        
+        return 'discomfort'
+    
     async def _generate_intelligent_followup_question(self, user_response: str, question_element: str, context: MedicalContext) -> str:
         """
         🧠 STEP 4.2: ENHANCED INTELLIGENT FOLLOW-UP QUESTION GENERATION
