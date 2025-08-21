@@ -10505,6 +10505,10 @@ Generate the follow-up question:
             
             context.current_stage = MedicalInterviewStage.HISTORY_PRESENT_ILLNESS
             
+            # 🚀 PHASE 5: Generate enhanced medical response template for the chief complaint
+            template_result = await self._apply_enhanced_medical_response_template(context)
+            print(f"[PHASE 5 DEBUG] Template generated for chief complaint '{context.chief_complaint}': {template_result}")
+            
             # 🧠 STEP 4.2: USE INTELLIGENT FOLLOW-UP SYSTEM FOR CHIEF COMPLAINT
             # Check if the chief complaint response needs intelligent follow-up
             incompleteness_result = await self._detect_medical_incompleteness(
