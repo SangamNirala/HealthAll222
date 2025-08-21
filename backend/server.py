@@ -103,6 +103,39 @@ from services.medical_knowledge_database import ComprehensiveMedicalKnowledgeDat
 from services.pdf_report_generator import MedicalReportPDFGenerator
 from services.soap_generator import ProfessionalSOAPGenerator
 
+# 🚀 PHASE 7.1: AI-POWERED MEDICAL NLP TESTING SUITE IMPORTS
+from phase_7_1_integration_framework import (
+    Phase71AIIntegrationFramework,
+    get_phase_71_framework,
+    execute_phase_71_comprehensive_testing,
+    get_phase_71_performance_summary
+)
+from ai_powered_medical_nlp_test_suite import (
+    get_ai_testing_engine,
+    analyze_medical_text_with_ai,
+    get_testing_performance_summary
+)
+from gemini_grammatical_error_generator import (
+    get_ai_grammatical_generator,
+    generate_medical_grammar_errors,
+    analyze_grammar_error_complexity
+)
+from ai_enhanced_incomplete_sentence_processor import (
+    get_ai_incomplete_processor,
+    analyze_medical_fragment,
+    generate_completion_suggestions
+)
+from ai_powered_colloquial_language_processor import (
+    get_ai_colloquial_processor,
+    expand_colloquial_patterns,
+    analyze_cultural_medical_language
+)
+from ai_emotional_intelligence_validator import (
+    get_ai_emotional_validator,
+    generate_emotional_scenarios,
+    validate_empathetic_response
+)
+
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
