@@ -1,5 +1,640 @@
 #!/usr/bin/env python3
 """
+🧠 STEP 4.2 INTELLIGENT FOLLOW-UP QUESTION GENERATION SYSTEM TESTING
+
+This test suite specifically validates the Step 4.2 intelligent follow-up question generation system
+for the two failing scenarios reported by the testing agent:
+
+1. INCOMPLETE PAIN DESCRIPTION SCENARIO: Test "chest pain" input to verify if it properly detects 
+   missing pain_quality and pain_severity characteristics and generates appropriate follow-up questions.
+
+2. TEMPORAL VAGUENESS SCENARIO: Test "recently" input to verify if it triggers specific timeframe 
+   clarification requests.
+
+TESTING METHODOLOGY:
+- Use POST /api/medical-ai/initialize with patient_id='anonymous' to start conversation
+- Send the specific test input using POST /api/medical-ai/message with proper context
+- Verify that the incompleteness detection system triggers and generates appropriate follow-up questions
+- Check debug logs for INCOMPLETENESS DEBUG messages to understand the detection logic
+- Confirm the response structure includes proper follow-up questions addressing the missing information
+"""
+
+import asyncio
+import json
+import time
+import requests
+import sys
+from typing import Dict, Any, List
+from datetime import datetime
+
+# Backend URL from environment
+BACKEND_URL = "https://healthprobe.preview.emergentagent.com/api"
+
+class Step42FollowUpTester:
+    """Focused tester for Step 4.2 Intelligent Follow-up Question Generation System"""
+    
+    def __init__(self):
+        self.backend_url = BACKEND_URL
+        self.test_results = []
+        self.total_tests = 0
+        self.passed_tests = 0
+        
+    def log_test_result(self, test_name: str, success: bool, details: str, response_time: float = 0):
+        """Log individual test results"""
+        self.total_tests += 1
+        if success:
+            self.passed_tests += 1
+            
+        result = {
+            "test_name": test_name,
+            "success": success,
+            "details": details,
+            "response_time_ms": response_time,
+            "timestamp": datetime.now().isoformat()
+        }
+        self.test_results.append(result)
+        
+        status = "✅ PASS" if success else "❌ FAIL"
+        print(f"{status} - {test_name}")
+        print(f"   Details: {details}")
+        if response_time > 0:
+            print(f"   Response Time: {response_time:.2f}ms")
+        print()
+
+    async def initialize_conversation(self) -> Dict[str, Any]:
+        """Initialize a new medical conversation with anonymous patient"""
+        try:
+            request_data = {
+                "patient_id": "anonymous",
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            start_time = time.time()
+            response = requests.post(
+                f"{self.backend_url}/medical-ai/initialize",
+                json=request_data,
+                timeout=30
+            )
+            response_time = (time.time() - start_time) * 1000
+            
+            if response.status_code == 200:
+                result = response.json()
+                print(f"[INIT] Conversation initialized: {result.get('consultation_id', 'N/A')}")
+                return result
+            else:
+                print(f"[INIT ERROR] HTTP {response.status_code}: {response.text}")
+                return None
+                
+        except Exception as e:
+            print(f"[INIT ERROR] Exception: {str(e)}")
+            return None
+
+    async def send_message(self, message: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Send a message to the medical AI and get response"""
+        try:
+            request_data = {
+                "message": message,
+                "patient_id": "anonymous"
+            }
+            
+            # Add context if provided
+            if context:
+                request_data["context"] = context
+                if "consultation_id" in context:
+                    request_data["consultation_id"] = context["consultation_id"]
+            
+            start_time = time.time()
+            response = requests.post(
+                f"{self.backend_url}/medical-ai/message",
+                json=request_data,
+                timeout=30
+            )
+            response_time = (time.time() - start_time) * 1000
+            
+            if response.status_code == 200:
+                result = response.json()
+                print(f"[MESSAGE] Response received ({response_time:.2f}ms)")
+                return result
+            else:
+                print(f"[MESSAGE ERROR] HTTP {response.status_code}: {response.text}")
+                return None
+                
+        except Exception as e:
+            print(f"[MESSAGE ERROR] Exception: {str(e)}")
+            return None
+
+    async def test_incomplete_pain_description_scenario(self):
+        """
+        TEST SCENARIO 1: INCOMPLETE PAIN DESCRIPTION
+        Test "chest pain" input to verify if it properly detects missing pain_quality 
+        and pain_severity characteristics and generates appropriate follow-up questions.
+        """
+        print("🧠 TESTING SCENARIO 1: INCOMPLETE PAIN DESCRIPTION")
+        print("=" * 80)
+        
+        # Initialize conversation
+        init_result = await self.initialize_conversation()
+        if not init_result:
+            self.log_test_result(
+                "Incomplete Pain Description - Initialization",
+                False,
+                "Failed to initialize conversation",
+                0
+            )
+            return
+        
+        # Extract context for follow-up messages
+        context = init_result.get("context", {})
+        consultation_id = init_result.get("consultation_id")
+        if consultation_id:
+            context["consultation_id"] = consultation_id
+        
+        # Send the incomplete pain description
+        test_message = "chest pain"
+        
+        start_time = time.time()
+        response = await self.send_message(test_message, context)
+        response_time = (time.time() - start_time) * 1000
+        
+        if not response:
+            self.log_test_result(
+                "Incomplete Pain Description - Message Processing",
+                False,
+                "Failed to get response from medical AI",
+                response_time
+            )
+            return
+        
+        # Analyze the response for follow-up question generation
+        response_text = response.get("response", "")
+        
+        # Check if the response contains follow-up questions about pain characteristics
+        pain_quality_indicators = [
+            "what does it feel like", "describe", "sharp", "dull", "burning", 
+            "crushing", "pressure", "quality", "type of pain", "kind of pain"
+        ]
+        
+        pain_severity_indicators = [
+            "scale of 1 to 10", "how severe", "rate", "intensity", "how bad",
+            "interfere", "daily activities", "severity"
+        ]
+        
+        has_pain_quality_followup = any(indicator in response_text.lower() for indicator in pain_quality_indicators)
+        has_pain_severity_followup = any(indicator in response_text.lower() for indicator in pain_severity_indicators)
+        
+        # Check if it's asking for more specific information (not just generic response)
+        is_followup_question = "?" in response_text and len(response_text) > 50
+        
+        # Validate that it detected incompleteness and generated appropriate follow-up
+        if has_pain_quality_followup or has_pain_severity_followup:
+            details = f"Follow-up generated successfully. Quality followup: {has_pain_quality_followup}, Severity followup: {has_pain_severity_followup}"
+            self.log_test_result(
+                "Incomplete Pain Description - Follow-up Generation",
+                True,
+                details,
+                response_time
+            )
+            
+            # Test the specific follow-up content
+            if has_pain_quality_followup:
+                self.log_test_result(
+                    "Pain Quality Detection & Follow-up",
+                    True,
+                    "System correctly detected missing pain quality and generated appropriate follow-up question",
+                    0
+                )
+            
+            if has_pain_severity_followup:
+                self.log_test_result(
+                    "Pain Severity Detection & Follow-up",
+                    True,
+                    "System correctly detected missing pain severity and generated appropriate follow-up question",
+                    0
+                )
+                
+        else:
+            self.log_test_result(
+                "Incomplete Pain Description - Follow-up Generation",
+                False,
+                f"No appropriate follow-up detected. Response: {response_text[:200]}",
+                response_time
+            )
+        
+        # Check response structure
+        required_fields = ["response", "context", "stage", "urgency"]
+        missing_fields = [field for field in required_fields if field not in response]
+        
+        if not missing_fields:
+            self.log_test_result(
+                "Pain Description Response Structure",
+                True,
+                "All required response fields present",
+                0
+            )
+        else:
+            self.log_test_result(
+                "Pain Description Response Structure",
+                False,
+                f"Missing fields: {missing_fields}",
+                0
+            )
+
+    async def test_temporal_vagueness_scenario(self):
+        """
+        TEST SCENARIO 2: TEMPORAL VAGUENESS
+        Test "recently" input to verify if it triggers specific timeframe clarification requests.
+        """
+        print("🕐 TESTING SCENARIO 2: TEMPORAL VAGUENESS")
+        print("=" * 80)
+        
+        # Initialize conversation
+        init_result = await self.initialize_conversation()
+        if not init_result:
+            self.log_test_result(
+                "Temporal Vagueness - Initialization",
+                False,
+                "Failed to initialize conversation",
+                0
+            )
+            return
+        
+        # Extract context for follow-up messages
+        context = init_result.get("context", {})
+        consultation_id = init_result.get("consultation_id")
+        if consultation_id:
+            context["consultation_id"] = consultation_id
+        
+        # First, establish a symptom context by sending a symptom
+        symptom_response = await self.send_message("I have a headache", context)
+        if symptom_response:
+            context = symptom_response.get("context", context)
+        
+        # Now send the vague temporal response
+        test_message = "recently"
+        
+        start_time = time.time()
+        response = await self.send_message(test_message, context)
+        response_time = (time.time() - start_time) * 1000
+        
+        if not response:
+            self.log_test_result(
+                "Temporal Vagueness - Message Processing",
+                False,
+                "Failed to get response from medical AI",
+                response_time
+            )
+            return
+        
+        # Analyze the response for temporal clarification
+        response_text = response.get("response", "")
+        
+        # Check if the response contains temporal clarification requests
+        temporal_clarification_indicators = [
+            "when you say", "more specific", "hours ago", "days ago", "weeks ago", 
+            "months ago", "sudden", "gradual", "exactly when", "specific about the timing",
+            "came on quickly", "developed slowly", "timing"
+        ]
+        
+        has_temporal_clarification = any(indicator in response_text.lower() for indicator in temporal_clarification_indicators)
+        
+        # Check if it's asking for more specific timing information
+        is_timing_question = "?" in response_text and ("when" in response_text.lower() or "timing" in response_text.lower())
+        
+        # Validate that it detected temporal vagueness and generated appropriate follow-up
+        if has_temporal_clarification and is_timing_question:
+            self.log_test_result(
+                "Temporal Vagueness - Clarification Generation",
+                True,
+                "System correctly detected temporal vagueness and generated appropriate clarification request",
+                response_time
+            )
+            
+            # Check for specific temporal clarification elements
+            has_timeframe_options = any(option in response_text.lower() for option in ["hours", "days", "weeks", "months"])
+            has_onset_clarification = any(onset in response_text.lower() for onset in ["sudden", "gradual", "quickly", "slowly"])
+            
+            if has_timeframe_options:
+                self.log_test_result(
+                    "Timeframe Options Provided",
+                    True,
+                    "System provided specific timeframe options (hours, days, weeks, months)",
+                    0
+                )
+            
+            if has_onset_clarification:
+                self.log_test_result(
+                    "Onset Clarification Provided",
+                    True,
+                    "System asked about onset characteristics (sudden vs gradual)",
+                    0
+                )
+                
+        else:
+            self.log_test_result(
+                "Temporal Vagueness - Clarification Generation",
+                False,
+                f"No appropriate temporal clarification detected. Response: {response_text[:200]}",
+                response_time
+            )
+        
+        # Check response structure
+        required_fields = ["response", "context", "stage", "urgency"]
+        missing_fields = [field for field in required_fields if field not in response]
+        
+        if not missing_fields:
+            self.log_test_result(
+                "Temporal Response Structure",
+                True,
+                "All required response fields present",
+                0
+            )
+        else:
+            self.log_test_result(
+                "Temporal Response Structure",
+                False,
+                f"Missing fields: {missing_fields}",
+                0
+            )
+
+    async def test_incompleteness_detection_debug_logging(self):
+        """
+        TEST SCENARIO 3: INCOMPLETENESS DETECTION DEBUG LOGGING
+        Verify that the system generates proper debug logs for incompleteness detection
+        """
+        print("🔍 TESTING SCENARIO 3: INCOMPLETENESS DETECTION DEBUG LOGGING")
+        print("=" * 80)
+        
+        # Test both scenarios and check for debug information in responses
+        test_cases = [
+            {
+                "name": "Pain Incompleteness Debug",
+                "message": "chest pain",
+                "expected_debug_type": "incomplete_pain_description"
+            },
+            {
+                "name": "Temporal Incompleteness Debug", 
+                "message": "recently",
+                "expected_debug_type": "vague_temporal_information"
+            }
+        ]
+        
+        for test_case in test_cases:
+            # Initialize conversation
+            init_result = await self.initialize_conversation()
+            if not init_result:
+                continue
+                
+            context = init_result.get("context", {})
+            consultation_id = init_result.get("consultation_id")
+            if consultation_id:
+                context["consultation_id"] = consultation_id
+            
+            # Send test message
+            response = await self.send_message(test_case["message"], context)
+            
+            if response:
+                # Check if the response indicates incompleteness detection was triggered
+                response_text = response.get("response", "")
+                
+                # Look for indicators that incompleteness detection worked
+                incompleteness_indicators = [
+                    "more specific", "can you describe", "help me understand", 
+                    "provide more details", "tell me more", "be more specific"
+                ]
+                
+                has_incompleteness_response = any(indicator in response_text.lower() for indicator in incompleteness_indicators)
+                
+                if has_incompleteness_response:
+                    self.log_test_result(
+                        test_case["name"],
+                        True,
+                        f"Incompleteness detection appears to be working - generated appropriate follow-up",
+                        0
+                    )
+                else:
+                    self.log_test_result(
+                        test_case["name"],
+                        False,
+                        f"No clear incompleteness detection response. Got: {response_text[:100]}",
+                        0
+                    )
+
+    async def test_follow_up_question_quality(self):
+        """
+        TEST SCENARIO 4: FOLLOW-UP QUESTION QUALITY ASSESSMENT
+        Evaluate the quality and medical appropriateness of generated follow-up questions
+        """
+        print("⚕️ TESTING SCENARIO 4: FOLLOW-UP QUESTION QUALITY ASSESSMENT")
+        print("=" * 80)
+        
+        quality_test_cases = [
+            {
+                "name": "Chest Pain Quality Assessment",
+                "message": "chest pain",
+                "quality_criteria": [
+                    "asks about pain characteristics",
+                    "mentions specific pain qualities",
+                    "medically appropriate language",
+                    "empathetic tone"
+                ]
+            },
+            {
+                "name": "Temporal Vagueness Quality Assessment", 
+                "message": "recently",
+                "quality_criteria": [
+                    "asks for specific timeframe",
+                    "provides timeframe options",
+                    "asks about onset characteristics",
+                    "clear and understandable"
+                ]
+            }
+        ]
+        
+        for test_case in quality_test_cases:
+            # Initialize conversation
+            init_result = await self.initialize_conversation()
+            if not init_result:
+                continue
+                
+            context = init_result.get("context", {})
+            consultation_id = init_result.get("consultation_id")
+            if consultation_id:
+                context["consultation_id"] = consultation_id
+            
+            # For temporal test, first establish symptom context
+            if "recently" in test_case["message"]:
+                symptom_response = await self.send_message("I have symptoms", context)
+                if symptom_response:
+                    context = symptom_response.get("context", context)
+            
+            # Send test message
+            response = await self.send_message(test_case["message"], context)
+            
+            if response:
+                response_text = response.get("response", "")
+                
+                # Evaluate quality criteria
+                quality_score = 0
+                quality_details = []
+                
+                if "chest pain" in test_case["message"]:
+                    # Pain-specific quality checks
+                    if any(word in response_text.lower() for word in ["describe", "feel like", "quality"]):
+                        quality_score += 1
+                        quality_details.append("✅ Asks about pain characteristics")
+                    
+                    if any(word in response_text.lower() for word in ["sharp", "dull", "burning", "crushing", "pressure"]):
+                        quality_score += 1
+                        quality_details.append("✅ Mentions specific pain qualities")
+                    
+                    if any(word in response_text.lower() for word in ["understand", "help", "better"]):
+                        quality_score += 1
+                        quality_details.append("✅ Empathetic tone")
+                        
+                elif "recently" in test_case["message"]:
+                    # Temporal-specific quality checks
+                    if any(word in response_text.lower() for word in ["specific", "exactly when", "timing"]):
+                        quality_score += 1
+                        quality_details.append("✅ Asks for specific timeframe")
+                    
+                    if any(word in response_text.lower() for word in ["hours", "days", "weeks", "months"]):
+                        quality_score += 1
+                        quality_details.append("✅ Provides timeframe options")
+                    
+                    if any(word in response_text.lower() for word in ["sudden", "gradual", "quickly", "slowly"]):
+                        quality_score += 1
+                        quality_details.append("✅ Asks about onset characteristics")
+                
+                # General quality checks
+                if len(response_text) > 30 and "?" in response_text:
+                    quality_score += 1
+                    quality_details.append("✅ Clear and understandable question format")
+                
+                # Assess overall quality
+                total_criteria = len(test_case["quality_criteria"])
+                quality_percentage = (quality_score / total_criteria) * 100 if total_criteria > 0 else 0
+                
+                success = quality_percentage >= 75  # 75% quality threshold
+                
+                details = f"Quality score: {quality_score}/{total_criteria} ({quality_percentage:.1f}%). " + "; ".join(quality_details)
+                
+                self.log_test_result(
+                    test_case["name"],
+                    success,
+                    details,
+                    0
+                )
+
+    async def run_comprehensive_tests(self):
+        """Run all comprehensive tests for Step 4.2 Follow-up Question Generation System"""
+        print("🧠 STEP 4.2 INTELLIGENT FOLLOW-UP QUESTION GENERATION SYSTEM TESTING")
+        print("=" * 100)
+        print(f"Backend URL: {self.backend_url}")
+        print(f"Test Start Time: {datetime.now().isoformat()}")
+        print("=" * 100)
+        print()
+        
+        # Run all test scenarios
+        await self.test_incomplete_pain_description_scenario()
+        await self.test_temporal_vagueness_scenario()
+        await self.test_incompleteness_detection_debug_logging()
+        await self.test_follow_up_question_quality()
+        
+        # Generate final report
+        self.generate_final_report()
+
+    def generate_final_report(self):
+        """Generate comprehensive final test report"""
+        print("=" * 100)
+        print("🎯 STEP 4.2 FOLLOW-UP QUESTION GENERATION SYSTEM - FINAL TEST REPORT")
+        print("=" * 100)
+        
+        success_rate = (self.passed_tests / self.total_tests) * 100 if self.total_tests > 0 else 0
+        
+        print(f"📊 OVERALL RESULTS:")
+        print(f"   Total Tests: {self.total_tests}")
+        print(f"   Passed Tests: {self.passed_tests}")
+        print(f"   Failed Tests: {self.total_tests - self.passed_tests}")
+        print(f"   Success Rate: {success_rate:.1f}%")
+        print()
+        
+        # Categorize results by test scenario
+        scenarios = {
+            "Incomplete Pain Description": [],
+            "Temporal Vagueness": [],
+            "Debug Logging": [],
+            "Question Quality": []
+        }
+        
+        for result in self.test_results:
+            test_name = result["test_name"]
+            if "Pain" in test_name:
+                scenarios["Incomplete Pain Description"].append(result)
+            elif "Temporal" in test_name:
+                scenarios["Temporal Vagueness"].append(result)
+            elif "Debug" in test_name:
+                scenarios["Debug Logging"].append(result)
+            elif "Quality" in test_name:
+                scenarios["Question Quality"].append(result)
+        
+        # Report by scenario
+        for scenario_name, results in scenarios.items():
+            if results:
+                passed = sum(1 for r in results if r["success"])
+                total = len(results)
+                rate = (passed / total) * 100 if total > 0 else 0
+                
+                print(f"📋 {scenario_name.upper()}: {passed}/{total} passed ({rate:.1f}%)")
+                for result in results:
+                    status = "✅" if result["success"] else "❌"
+                    print(f"   {status} {result['test_name']}")
+                print()
+        
+        # Critical success criteria assessment
+        print("🎯 CRITICAL SUCCESS CRITERIA ASSESSMENT:")
+        
+        # Check if pain incompleteness detection is working
+        pain_detection_working = any("Pain" in r["test_name"] and r["success"] for r in self.test_results)
+        print(f"   ✅ Pain Incompleteness Detection: {'WORKING' if pain_detection_working else 'NOT WORKING'}")
+        
+        # Check if temporal vagueness detection is working
+        temporal_detection_working = any("Temporal" in r["test_name"] and r["success"] for r in self.test_results)
+        print(f"   ✅ Temporal Vagueness Detection: {'WORKING' if temporal_detection_working else 'NOT WORKING'}")
+        
+        # Check if follow-up questions are being generated
+        followup_generation_working = any("Follow-up" in r["test_name"] and r["success"] for r in self.test_results)
+        print(f"   ✅ Follow-up Question Generation: {'WORKING' if followup_generation_working else 'NOT WORKING'}")
+        
+        # Check if question quality is acceptable
+        quality_acceptable = any("Quality" in r["test_name"] and r["success"] for r in self.test_results)
+        print(f"   ✅ Question Quality: {'ACCEPTABLE' if quality_acceptable else 'NEEDS IMPROVEMENT'}")
+        
+        print()
+        
+        # Final assessment
+        if success_rate >= 80 and pain_detection_working and temporal_detection_working:
+            print("🎉 ASSESSMENT: STEP 4.2 INTELLIGENT FOLLOW-UP QUESTION GENERATION SYSTEM IS WORKING!")
+            print("   Both critical scenarios (incomplete pain description and temporal vagueness)")
+            print("   are being detected and appropriate follow-up questions are being generated.")
+        elif success_rate >= 60:
+            print("⚠️  ASSESSMENT: STEP 4.2 SYSTEM IS PARTIALLY WORKING")
+            print("   Some functionality is working but improvements needed for full effectiveness.")
+        else:
+            print("❌ ASSESSMENT: STEP 4.2 SYSTEM NEEDS SIGNIFICANT WORK")
+            print("   Critical incompleteness detection and follow-up generation issues detected.")
+        
+        print()
+        print(f"Test Completion Time: {datetime.now().isoformat()}")
+        print("=" * 100)
+
+async def main():
+    """Main test execution function"""
+    tester = Step42FollowUpTester()
+    await tester.run_comprehensive_tests()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+"""
 🎯 STEP 4.2 INTELLIGENT FOLLOW-UP SYSTEM FOCUSED TESTING
 
 This test suite validates the enhanced Step 4.2 incompleteness detection system
