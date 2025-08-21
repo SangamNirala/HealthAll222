@@ -1,0 +1,67 @@
+{
+  "overall_success": false,
+  "success_rate": 0.0,
+  "tests_passed": 0,
+  "total_tests": 6,
+  "performance_summary": {
+    "error": "No performance metrics collected"
+  },
+  "critical_criteria_met": [],
+  "detailed_results": [
+    {
+      "test_name": "Endpoint Availability Check",
+      "success": false,
+      "timestamp": "2025-08-21T06:06:29.304832",
+      "details": {
+        "status_code": 502,
+        "error": "Unexpected status code: 502"
+      }
+    },
+    {
+      "test_name": "Scenario 1: Complex Vague Symptoms",
+      "success": false,
+      "timestamp": "2025-08-21T06:06:29.514134",
+      "details": {
+        "status_code": 502,
+        "error": "HTTP 502: "
+      }
+    },
+    {
+      "test_name": "Scenario 2: Patient with Anxiety",
+      "success": false,
+      "timestamp": "2025-08-21T06:06:29.704305",
+      "details": {
+        "status_code": 502,
+        "error": "HTTP 502: "
+      }
+    },
+    {
+      "test_name": "Scenario 3: Multi-symptom Missing Details",
+      "success": false,
+      "timestamp": "2025-08-21T06:06:29.901932",
+      "details": {
+        "status_code": 502,
+        "error": "HTTP 502: "
+      }
+    },
+    {
+      "test_name": "Scenario 4: Temporal Pattern Analysis",
+      "success": false,
+      "timestamp": "2025-08-21T06:06:30.095969",
+      "details": {
+        "status_code": 502,
+        "error": "HTTP 502: "
+      }
+    },
+    {
+      "test_name": "Five Dimensions Detection Test",
+      "success": false,
+      "timestamp": "2025-08-21T06:06:30.398702",
+      "details": {
+        "status_code": 502,
+        "error": "HTTP 502: "
+      }
+    }
+  ],
+  "timestamp": "2025-08-21T06:06:30.480788"
+}
