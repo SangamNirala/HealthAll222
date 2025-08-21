@@ -137,7 +137,7 @@ class Phase71FocusedRetester:
                     if not metrics_ok: issues.append("No metrics")
                     if not components_ok: issues.append("No components")
                     details = ", ".join(issues)
-                    self.log_test_result("Performance Summary POST", False, response_time, details)
+                    self.log_test_result("Performance Summary GET", False, response_time, details)
                     return False
                     
             except json.JSONDecodeError:
