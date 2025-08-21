@@ -144,7 +144,7 @@ class Phase71FocusedRetester:
                 self.log_test_result("Performance Summary JSON", False, response_time, "Invalid JSON response")
                 return False
         else:
-            self.log_test_result("Performance Summary HTTP", False, response_time, f"HTTP {response.status_code}")
+            self.log_test_result("Performance Summary GET", False, response_time, f"HTTP {response.status_code}")
             return False
 
     def test_colloquial_language_processing(self):
