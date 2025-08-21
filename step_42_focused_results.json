@@ -1,10 +1,103 @@
 {
   "summary": {
-    "total_tests": 0,
-    "passed_tests": 0,
-    "success_rate": 0,
+    "total_tests": 7,
+    "passed_tests": 3,
+    "success_rate": 42.857142857142854,
     "production_ready": false
   },
-  "detailed_results": [],
-  "categories": {}
+  "detailed_results": [
+    {
+      "scenario": "Vague Symptom - 'feeling bad'",
+      "message": "feeling bad",
+      "category": "vague_symptom",
+      "success": true,
+      "response_length": 156,
+      "found_indicators": [
+        "describe",
+        "for example"
+      ],
+      "response_preview": "could you please describe any symptoms or health concerns you're experiencing? for example, any pain, discomfort, or changes you've noticed in how you feel?"
+    },
+    {
+      "scenario": "Vague Symptom - 'not well'",
+      "message": "not well",
+      "category": "vague_symptom",
+      "success": true,
+      "response_length": 156,
+      "found_indicators": [
+        "describe",
+        "experiencing"
+      ],
+      "response_preview": "could you please describe any symptoms or health concerns you're experiencing? for example, any pain, discomfort, or changes you've noticed in how you feel?"
+    },
+    {
+      "scenario": "Incomplete Pain - 'chest pain'",
+      "message": "chest pain",
+      "category": "incomplete_pain",
+      "success": false,
+      "response_length": 247,
+      "found_indicators": [],
+      "response_preview": "thank you for sharing that you're experiencing chest pain. i want to gather more specific details to better understand your condition. let's start with when exactly these symptoms began - was the onse..."
+    },
+    {
+      "scenario": "Incomplete Pain - 'my head hurts'",
+      "message": "my head hurts",
+      "category": "incomplete_pain",
+      "success": false,
+      "response_length": 245,
+      "found_indicators": [],
+      "response_preview": "thank you for sharing that you're experiencing headache. i want to gather more specific details to better understand your condition. let's start with when exactly these symptoms began - was the onset ..."
+    },
+    {
+      "scenario": "Vague Temporal - 'recently'",
+      "message": "recently",
+      "category": "vague_temporal",
+      "success": false,
+      "response_length": 156,
+      "found_indicators": [],
+      "response_preview": "could you please describe any symptoms or health concerns you're experiencing? for example, any pain, discomfort, or changes you've noticed in how you feel?"
+    },
+    {
+      "scenario": "Single Word Anatomical - 'chest'",
+      "message": "chest",
+      "category": "single_word",
+      "success": true,
+      "response_length": 156,
+      "found_indicators": [
+        "experiencing"
+      ],
+      "response_preview": "could you please describe any symptoms or health concerns you're experiencing? for example, any pain, discomfort, or changes you've noticed in how you feel?"
+    },
+    {
+      "scenario": "Emotional Response - 'scared'",
+      "message": "scared",
+      "category": "emotional",
+      "success": false,
+      "response_length": 156,
+      "found_indicators": [],
+      "response_preview": "could you please describe any symptoms or health concerns you're experiencing? for example, any pain, discomfort, or changes you've noticed in how you feel?"
+    }
+  ],
+  "categories": {
+    "vague_symptom": {
+      "total": 2,
+      "passed": 2
+    },
+    "incomplete_pain": {
+      "total": 2,
+      "passed": 0
+    },
+    "vague_temporal": {
+      "total": 1,
+      "passed": 0
+    },
+    "single_word": {
+      "total": 1,
+      "passed": 1
+    },
+    "emotional": {
+      "total": 1,
+      "passed": 0
+    }
+  }
 }
