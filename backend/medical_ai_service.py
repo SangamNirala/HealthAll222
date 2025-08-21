@@ -22,6 +22,9 @@ logger = logging.getLogger(__name__)
 # Import the new intelligent text normalizer
 from nlp_processor import IntelligentTextNormalizer, NormalizationResult
 
+# 🧠 ENHANCEMENT #1: ENHANCED INCOMPLETENESS DETECTION SYSTEM
+from enhanced_incompleteness_detector import EnhancedIncompletenessDetector, IncompletenessAnalysisResult
+
 # 🧠 STEP 2.2: CONTEXT-AWARE MEDICAL REASONING ENGINE IMPORTS
 from abc import ABC, abstractmethod
 
