@@ -9202,11 +9202,123 @@ Generate the follow-up question:
         
         return "symptoms"
     
+    async def _apply_enhanced_medical_response_template(self, context: MedicalContext) -> Dict[str, Any]:
+        """
+        🚀 PHASE 5: ENHANCED MEDICAL RESPONSE GENERATION INTEGRATION
+        
+        Applies symptom-specific response templates to enhance diagnostic accuracy,
+        clinical reasoning, and response quality using dynamic template generation.
+        """
+        
+        try:
+            # Extract chief complaint for template generation
+            chief_complaint = context.chief_complaint or "general symptoms"
+            
+            # Generate enhanced medical response template
+            template_result = get_enhanced_medical_response_template(
+                chief_complaint, 
+                patient_context={
+                    "demographics": context.demographics,
+                    "symptom_data": context.symptom_data,
+                    "medical_history": context.medical_history,
+                    "emergency_level": context.emergency_level
+                }
+            )
+            
+            print(f"[PHASE 5 DEBUG] Generated template for '{chief_complaint}':")
+            print(f"  - Category: {template_result['category']}")
+            print(f"  - Questions: {len(template_result['questions'])}")
+            print(f"  - Red Flags: {len(template_result['red_flags'])}")
+            print(f"  - Protocol: {template_result['follow_up_protocol']}")
+            
+            # Enhance context with template insights
+            context.enhanced_template_data = template_result
+            
+            # Update urgency level based on template assessment
+            template_urgency = self._assess_template_urgency(template_result, context)
+            if template_urgency in ["critical", "emergency"] and context.emergency_level == "routine":
+                context.emergency_level = template_urgency
+                print(f"[PHASE 5 DEBUG] Updated urgency to {template_urgency} based on template assessment")
+            
+            # Integrate red flags from template
+            template_red_flags = template_result.get('red_flags', [])
+            context.red_flags.extend(template_red_flags)
+            
+            # Store template-specific clinical reasoning
+            context.template_clinical_reasoning = template_result.get('clinical_reasoning', '')
+            
+            return {
+                "template_applied": True,
+                "template_category": template_result['category'],
+                "enhanced_urgency": template_urgency,
+                "additional_red_flags": len(template_red_flags),
+                "follow_up_protocol": template_result['follow_up_protocol']
+            }
+            
+        except Exception as e:
+            print(f"[PHASE 5 ERROR] Enhanced template generation failed: {e}")
+            return {
+                "template_applied": False,
+                "error": str(e)
+            }
+    
+    def _assess_template_urgency(self, template_result: Dict[str, Any], context: MedicalContext) -> str:
+        """Assess urgency level based on template analysis and patient context"""
+        
+        urgency_indicators = template_result.get('urgency_indicators', {})
+        red_flags = template_result.get('red_flags', [])
+        
+        # Check for critical conditions based on symptoms and context
+        chief_complaint_lower = (context.chief_complaint or "").lower()
+        
+        # High-priority urgent keywords
+        urgent_keywords = ["chest pain", "shortness of breath", "severe headache", 
+                          "crushing", "radiating", "sudden onset", "worst ever"]
+        
+        # Critical emergency keywords
+        critical_keywords = ["crushing chest pain", "can't breathe", "thunderclap", 
+                           "worst headache ever", "loss of consciousness"]
+        
+        # Check for critical symptoms
+        for keyword in critical_keywords:
+            if keyword in chief_complaint_lower:
+                return "critical"
+        
+        # Check template urgency indicators
+        for condition, urgency in urgency_indicators.items():
+            if urgency == "critical" and any(word in chief_complaint_lower for word in condition.split("_")):
+                return "critical"
+            elif urgency == "urgent" and any(word in chief_complaint_lower for word in condition.split("_")):
+                return "urgent"
+        
+        # Check for urgent symptoms
+        for keyword in urgent_keywords:
+            if keyword in chief_complaint_lower:
+                return "urgent"
+        
+        # Check red flags presence
+        patient_description = f"{context.chief_complaint} {context.symptom_data}".lower()
+        red_flag_matches = sum(1 for flag in red_flags if flag.lower() in patient_description)
+        
+        if red_flag_matches >= 3:
+            return "urgent"
+        elif red_flag_matches >= 1:
+            return "moderate"
+        
+        return context.emergency_level or "routine"
+
     async def _generate_differential_diagnosis(self, context: MedicalContext) -> Dict[str, Any]:
         """
-        ENHANCED with Phase 2: Generate evidence-based differential diagnosis with advanced entity extraction
-        Integrates comprehensive medical entity recognition for superior AI reasoning
+        ENHANCED with Phase 5: Generate evidence-based differential diagnosis with enhanced response templates
+        Integrates comprehensive medical entity recognition and symptom-specific response templates
         """
+        
+        # 🚀 PHASE 5: Apply enhanced medical response template
+        template_result = await self._apply_enhanced_medical_response_template(context)
+        print(f"[PHASE 5 DEBUG] Template application result: {template_result}")
+        
+        # PHASE 2: Pre-process clinical data with advanced entity extraction
+        clinical_summary = self._prepare_clinical_summary(context)
         
         # PHASE 2: Pre-process clinical data with advanced entity extraction
         clinical_summary = self._prepare_clinical_summary(context)
