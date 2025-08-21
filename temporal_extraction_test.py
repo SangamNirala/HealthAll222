@@ -9,7 +9,7 @@ Testing the specific temporal extraction fixes requested in the review:
 4. Multi-symptom with Temporal API endpoint
 5. Temporal Analysis Structure validation
 
-Using backend URL from review request: https://mediq-engine.preview.emergentagent.com
+Using backend URL from review request: https://medchattest.preview.emergentagent.com
 """
 
 import requests
@@ -18,7 +18,7 @@ import time
 import sys
 
 # Backend URL from environment
-BACKEND_URL = "https://mediq-engine.preview.emergentagent.com"
+BACKEND_URL = "https://medchattest.preview.emergentagent.com"
 
 def test_temporal_extraction():
     """Test the specific temporal extraction fixes"""

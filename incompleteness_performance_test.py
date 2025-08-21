@@ -15,7 +15,7 @@ from typing import Dict, Any, List
 
 class IncompletenessPerformanceTester:
     def __init__(self):
-        self.backend_url = "https://mediq-engine.preview.emergentagent.com/api"
+        self.backend_url = "https://medchattest.preview.emergentagent.com/api"
         self.test_results = []
         self.performance_metrics = []
         

@@ -9,7 +9,7 @@ import json
 import time
 
 # Backend URL
-BACKEND_URL = "https://mediq-engine.preview.emergentagent.com/api"
+BACKEND_URL = "https://medchattest.preview.emergentagent.com/api"
 
 def test_incompleteness_detection():
     """Test the core incompleteness detection functionality"""

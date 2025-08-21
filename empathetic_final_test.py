@@ -33,7 +33,7 @@ def run_curl_command(url, data, timeout=30):
         return {"error": f"Exception: {str(e)}"}
 
 def test_empathetic_communication_final():
-    backend_url = "https://mediq-engine.preview.emergentagent.com/api"
+    backend_url = "https://medchattest.preview.emergentagent.com/api"
     
     print("🚀 EMPATHETIC COMMUNICATION FINAL VALIDATION")
     print("=" * 60)

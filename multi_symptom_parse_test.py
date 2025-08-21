@@ -25,7 +25,7 @@ from typing import Dict, Any, List
 from datetime import datetime
 
 # Backend URL from environment
-BACKEND_URL = "https://mediq-engine.preview.emergentagent.com/api"
+BACKEND_URL = "https://medchattest.preview.emergentagent.com/api"
 
 class MultiSymptomParseErrorTester:
     """Focused tester for multi-symptom parsing error diagnosis"""
