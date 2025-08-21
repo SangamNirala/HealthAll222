@@ -8284,31 +8284,181 @@ class WorldClassMedicalAI:
             return 'general'
     
     async def _generate_intelligent_followup_question(self, user_response: str, question_element: str, context: MedicalContext) -> str:
-        """Generate intelligent follow-up questions based on user response - simplified and direct"""
+        """
+        🧠 STEP 4.2: ENHANCED INTELLIGENT FOLLOW-UP QUESTION GENERATION
         
-        # Get the original question and symptom context
-        original_question = context.questions_asked.get(question_element, "")
+        Generates contextual, medically-appropriate follow-up questions based on comprehensive
+        incompleteness analysis. Uses medical domain knowledge and conversation context.
+        """
+        
+        # Get comprehensive incompleteness analysis
+        incompleteness_result = await self._detect_medical_incompleteness(
+            user_response, question_element, context
+        )
+        
+        # Get context information
         chief_complaint = context.chief_complaint or "symptoms"
         user_response_clean = user_response.strip().lower()
         
-        # Generate direct, simple follow-up questions without LLM complexity
-        followup_templates = {
-            'food': f"Can you tell me more about how food relates to your {chief_complaint}? For example, do you experience {chief_complaint} immediately after eating, or is it more of a delayed reaction?",
-            'position': f"Which specific positions help or worsen your {chief_complaint}? For example, lying down, sitting up, bending over?",
-            'medication': f"Which specific medications seem to affect your {chief_complaint}? Are these prescription medications, over-the-counter drugs, or supplements?",
-            'activity': f"What specific activities tend to trigger your {chief_complaint}? For example, physical exercise, reading, computer work, or certain movements?",
-            'stress': f"How does stress relate to your {chief_complaint}? Does it make it worse, better, or doesn't seem to have an effect?",
-            'weather': f"How does weather affect your {chief_complaint}? For example, does it get worse with changes in temperature, humidity, or pressure?"
+        # Generate context-aware follow-up questions based on incompleteness type
+        incompleteness_type = incompleteness_result.get('incompleteness_type')
+        missing_info = incompleteness_result.get('missing_information', [])
+        medical_domain = incompleteness_result.get('medical_domain')
+        
+        if incompleteness_type == 'vague_symptom_description':
+            return await self._generate_vague_symptom_followup(user_response, chief_complaint, context)
+            
+        elif incompleteness_type == 'incomplete_pain_description':
+            return await self._generate_pain_followup(user_response, missing_info, medical_domain, context)
+            
+        elif incompleteness_type == 'vague_temporal_information':
+            return await self._generate_temporal_followup(user_response, chief_complaint, context)
+            
+        elif incompleteness_type == 'incomplete_anatomical_description':
+            return await self._generate_anatomical_followup(user_response, medical_domain, context)
+            
+        elif incompleteness_type == 'vague_trigger_information':
+            return await self._generate_trigger_followup(user_response, chief_complaint, context)
+            
+        elif incompleteness_type == 'vague_severity_description':
+            return await self._generate_severity_followup(user_response, chief_complaint, context)
+            
+        elif incompleteness_type == 'emotional_without_medical_details':
+            return await self._generate_emotional_followup(user_response, context)
+            
+        elif incompleteness_type == 'insufficient_detail_response':
+            return await self._generate_elaboration_followup(user_response, question_element, context)
+            
+        else:
+            # Fallback for any other incomplete responses
+            return f"Could you provide more specific details about what you mean by '{user_response}'? This information will help me better understand your {chief_complaint}."
+    
+    async def _generate_vague_symptom_followup(self, user_response: str, chief_complaint: str, context: MedicalContext) -> str:
+        """Generate follow-up for vague symptom descriptions like 'feeling bad', 'not well'"""
+        
+        empathetic_responses = [
+            f"I understand you're not feeling well. Can you help me understand what specific symptoms you're experiencing? For example, do you have any pain, nausea, fatigue, dizziness, or other particular discomfort?",
+            f"I hear that you're feeling unwell. To better help you, could you describe what exactly is bothering you? Are there specific areas of your body that hurt, or particular symptoms like headache, stomach issues, or breathing problems?",
+            f"I understand this is concerning for you. Can you tell me more about what specific symptoms you're experiencing? For instance, are you having pain anywhere, feeling nauseous, having trouble sleeping, or experiencing other specific issues?"
+        ]
+        
+        return empathetic_responses[0]  # Use first option for consistency
+    
+    async def _generate_pain_followup(self, user_response: str, missing_info: List[str], medical_domain: str, context: MedicalContext) -> str:
+        """Generate follow-up for incomplete pain descriptions"""
+        
+        pain_type = self._extract_pain_location(user_response)
+        
+        if 'pain_quality' in missing_info:
+            domain_examples = {
+                'cardiovascular': 'crushing, pressure-like, sharp, or burning',
+                'neurological': 'throbbing, pounding, sharp, or pressure-like', 
+                'gastrointestinal': 'cramping, gnawing, burning, or stabbing',
+                'musculoskeletal': 'aching, sharp, stiff, or throbbing',
+                'pulmonary': 'sharp, stabbing, or pressure-like'
+            }
+            
+            quality_examples = domain_examples.get(medical_domain, 'sharp, dull, burning, throbbing, or pressure-like')
+            return f"Can you describe what your {pain_type} feels like? For example, is it {quality_examples}? This helps me understand what might be causing it."
+            
+        elif 'pain_severity' in missing_info:
+            return f"How would you rate your {pain_type} on a scale of 1 to 10, where 10 is the worst pain you can imagine? Also, does it interfere with your daily activities like sleeping, working, or moving around?"
+            
+        elif 'anatomical_specificity' in missing_info:
+            if 'chest' in user_response:
+                return "Can you point to or describe exactly where in your chest the pain is located? Is it more towards your heart, in the center, on one side, or does it seem to spread to other areas like your arm, jaw, or back?"
+            elif 'head' in user_response:
+                return "Where exactly in your head do you feel the pain? Is it on one side, both sides, in the front, back, or all over? Does it feel like it's behind your eyes, at your temples, or elsewhere?"
+            elif 'stomach' in user_response:
+                return "Can you point to where exactly in your stomach or abdomen the pain is? Is it in the upper part, lower part, on one side, or around your belly button?"
+                
+        return f"Can you tell me more details about your {pain_type}? Specifically, what does it feel like and how severe is it?"
+    
+    async def _generate_temporal_followup(self, user_response: str, chief_complaint: str, context: MedicalContext) -> str:
+        """Generate follow-up for vague temporal information"""
+        
+        return f"When you say '{user_response.strip()}', can you be more specific about the timing? For example, did your {chief_complaint} start hours ago, days ago, weeks ago, or months ago? Was the onset sudden (came on quickly) or gradual (developed slowly over time)?"
+    
+    async def _generate_anatomical_followup(self, user_response: str, medical_domain: str, context: MedicalContext) -> str:
+        """Generate follow-up for single-word anatomical responses"""
+        
+        organ_followups = {
+            'chest': "What specific symptoms are you experiencing in your chest? For example, do you have pain, tightness, pressure, difficulty breathing, or other sensations? Can you describe what it feels like?",
+            'heart': "What symptoms are you experiencing related to your heart? Do you feel chest pain, palpitations (irregular heartbeat), shortness of breath, or other heart-related symptoms?",
+            'stomach': "What stomach-related symptoms are you having? For example, are you experiencing pain, nausea, vomiting, bloating, changes in appetite, or digestive issues?",
+            'head': "What head-related symptoms are you experiencing? Do you have a headache, dizziness, vision changes, or other neurological symptoms? Can you describe what you're feeling?",
+            'back': "What back symptoms are you experiencing? Is it back pain, stiffness, muscle spasms, or other issues? Where exactly in your back do you feel it?",
+            'breathing': "What breathing problems are you having? Are you experiencing shortness of breath, wheezing, chest tightness, or difficulty catching your breath?",
+            'joints': "Which joints are bothering you and what symptoms are you experiencing? Is it joint pain, stiffness, swelling, or limited movement?"
         }
         
-        # Get the appropriate follow-up question
-        if user_response_clean in followup_templates:
-            followup_question = followup_templates[user_response_clean]
-            print(f"[FOLLOWUP DEBUG] Using template for '{user_response_clean}'")
-            return followup_question
+        return organ_followups.get(user_response.strip().lower(), 
+            f"Can you describe what specific symptoms you're experiencing with your {user_response}? What exactly are you feeling?")
+    
+    async def _generate_trigger_followup(self, user_response: str, chief_complaint: str, context: MedicalContext) -> str:
+        """Generate follow-up for vague trigger information"""
+        
+        return f"When you mention '{user_response.strip()}', can you be more specific about what exactly triggers or affects your {chief_complaint}? For example, is it specific foods, physical activities, positions, times of day, stress, or other particular situations?"
+    
+    async def _generate_severity_followup(self, user_response: str, chief_complaint: str, context: MedicalContext) -> str:
+        """Generate follow-up for vague severity descriptions"""
+        
+        return f"When you say your {chief_complaint} is '{user_response.strip()}', can you help me understand the severity better? How would you rate it on a scale of 1 to 10? Also, how much does it interfere with your daily activities like work, sleep, or movement?"
+    
+    async def _generate_emotional_followup(self, user_response: str, context: MedicalContext) -> str:
+        """Generate follow-up for emotional responses without medical details"""
+        
+        emotion = user_response.strip().lower()
+        
+        supportive_responses = {
+            'scared': "I understand you're feeling scared, and that's completely natural when dealing with health concerns. Can you help me understand what specifically is worrying you? Are there particular symptoms or changes you've noticed that are causing this fear?",
+            'worried': "It's normal to feel worried about your health. Can you tell me what specific symptoms or changes you're experiencing that are causing you concern? This will help me better understand how to help you.",
+            'anxious': "I can understand feeling anxious about health issues. What specific symptoms or health concerns are making you feel this way? Describing what you're experiencing will help me provide you with better guidance.",
+            'nervous': "Feeling nervous about health concerns is very understandable. Can you describe what specific symptoms or changes you've noticed that are making you feel this way?"
+        }
+        
+        return supportive_responses.get(emotion, 
+            f"I understand you're feeling {emotion} about your health, which is completely understandable. Can you tell me what specific symptoms or health concerns are causing you to feel this way?")
+    
+    async def _generate_elaboration_followup(self, user_response: str, question_element: str, context: MedicalContext) -> str:
+        """Generate follow-up for insufficient single-word responses"""
+        
+        # Get the original question context
+        original_question = context.questions_asked.get(question_element, "")
+        chief_complaint = context.chief_complaint or "symptoms"
+        
+        # Generate appropriate elaboration request based on question element
+        element_elaborations = {
+            'onset': f"Can you provide more details about when your {chief_complaint} started? For example, was it sudden or gradual? What were you doing when it began?",
+            'location': f"Can you be more specific about where exactly you feel the {chief_complaint}? Can you point to the specific area or describe the location in more detail?",
+            'duration': f"Can you give me more details about how long your {chief_complaint} lasts? For example, does it come and go, or is it constant? How long do episodes typically last?",
+            'character': f"Can you describe in more detail what your {chief_complaint} feels like? What are the specific characteristics or qualities you notice?",
+            'alleviating': f"Can you provide more specific information about what helps your {chief_complaint}? For example, specific positions, medications, activities, or other remedies?",
+            'radiation': f"Can you describe more specifically if your {chief_complaint} spreads or moves to other areas? Where exactly does it go?",
+            'timing': f"Can you give me more details about the timing of your {chief_complaint}? For example, what times of day, or what situations make it happen?",
+            'severity': f"Can you provide more specific information about how severe your {chief_complaint} is? For example, on a scale of 1-10, or how it affects your daily activities?"
+        }
+        
+        return element_elaborations.get(question_element, 
+            f"Can you provide more detailed information about your response? This will help me better understand your {chief_complaint}.")
+    
+    def _extract_pain_location(self, pain_description: str) -> str:
+        """Extract pain location for generating appropriate follow-up questions"""
+        
+        pain_description_lower = pain_description.lower()
+        
+        if 'chest' in pain_description_lower:
+            return 'chest pain'
+        elif 'head' in pain_description_lower or 'headache' in pain_description_lower:
+            return 'headache'
+        elif 'stomach' in pain_description_lower or 'abdom' in pain_description_lower:
+            return 'stomach pain'
+        elif 'back' in pain_description_lower:
+            return 'back pain'
+        elif 'joint' in pain_description_lower:
+            return 'joint pain'
         else:
-            # Generic follow-up for other cases
-            return f"Can you provide more specific details about '{user_response}'? What exactly do you mean by that?"
+            return 'pain'
 
     def _filter_internal_reasoning(self, response_text: str) -> str:
         """Filter out internal reasoning text from AI responses to keep them user-friendly"""
