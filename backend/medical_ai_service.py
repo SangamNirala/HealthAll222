@@ -8433,34 +8433,66 @@ class WorldClassMedicalAI:
         return empathetic_responses[0]  # Use first option for consistency
     
     async def _generate_pain_followup(self, user_response: str, missing_info: List[str], medical_domain: str, context: MedicalContext) -> str:
-        """Generate follow-up for incomplete pain descriptions"""
+        """Generate enhanced, comprehensive follow-up for incomplete pain descriptions"""
         
         pain_type = self._extract_pain_location(user_response)
         
+        # Handle general pain elaboration requests
+        if 'pain_elaboration' in missing_info:
+            return await self._generate_comprehensive_pain_followup(user_response, medical_domain, context)
+        
+        # Handle specific missing pain characteristics
         if 'pain_quality' in missing_info:
             domain_examples = {
-                'cardiovascular': 'crushing, pressure-like, sharp, or burning',
-                'neurological': 'throbbing, pounding, sharp, or pressure-like', 
-                'gastrointestinal': 'cramping, gnawing, burning, or stabbing',
-                'musculoskeletal': 'aching, sharp, stiff, or throbbing',
-                'pulmonary': 'sharp, stabbing, or pressure-like'
+                'cardiovascular': 'crushing, pressure-like, sharp, squeezing, or burning',
+                'neurological': 'throbbing, pounding, sharp, stabbing, or pressure-like', 
+                'gastrointestinal': 'cramping, gnawing, burning, stabbing, or sharp',
+                'musculoskeletal': 'aching, sharp, stiff, throbbing, or dull',
+                'pulmonary': 'sharp, stabbing, pressure-like, or tight'
             }
             
-            quality_examples = domain_examples.get(medical_domain, 'sharp, dull, burning, throbbing, or pressure-like')
-            return f"Can you describe what your {pain_type} feels like? For example, is it {quality_examples}? This helps me understand what might be causing it."
+            quality_examples = domain_examples.get(medical_domain, 'sharp, dull, burning, throbbing, stabbing, or pressure-like')
+            
+            if medical_domain == 'cardiovascular':
+                return f"I need to understand exactly what your {pain_type} feels like. Can you describe it? For example, is it {quality_examples}? Also, does it spread to your arm, jaw, neck, or back? This information is very important for determining the cause."
+            else:
+                return f"Can you help me understand the character of your {pain_type}? What does it feel like - is it {quality_examples}? The specific quality of pain helps me understand what might be causing it."
             
         elif 'pain_severity' in missing_info:
-            return f"How would you rate your {pain_type} on a scale of 1 to 10, where 10 is the worst pain you can imagine? Also, does it interfere with your daily activities like sleeping, working, or moving around?"
+            if medical_domain == 'cardiovascular':
+                return f"How severe is your {pain_type}? On a scale of 1 to 10, where 10 is the worst pain imaginable, how would you rate it? Also, does the pain prevent you from normal activities or make you feel like you need immediate medical attention?"
+            else:
+                return f"I need to understand how severe your {pain_type} is. On a scale of 1 to 10, where 10 is unbearable pain, how would you rate it? Does it interfere with your daily activities like sleeping, working, or moving around?"
             
         elif 'anatomical_specificity' in missing_info:
             if 'chest' in user_response:
-                return "Can you point to or describe exactly where in your chest the pain is located? Is it more towards your heart, in the center, on one side, or does it seem to spread to other areas like your arm, jaw, or back?"
+                return "Can you point to or describe exactly where in your chest you feel the pain? Is it in the center, on the left side, right side, or upper/lower chest? Does the pain stay in one spot or does it spread to your arm, jaw, neck, or back?"
             elif 'head' in user_response:
-                return "Where exactly in your head do you feel the pain? Is it on one side, both sides, in the front, back, or all over? Does it feel like it's behind your eyes, at your temples, or elsewhere?"
-            elif 'stomach' in user_response:
-                return "Can you point to where exactly in your stomach or abdomen the pain is? Is it in the upper part, lower part, on one side, or around your belly button?"
+                return "Where exactly in your head do you feel the pain? Is it on one side, both sides, in the front (forehead), back (occipital), temples, or all over? Is it more like a band around your head or focused in one area?"
+            elif 'stomach' in user_response or 'abdomen' in user_response:
+                return "Can you be more specific about where in your abdomen the pain is located? Is it in the upper part (under your ribs), lower part (below your belly button), on one side, or around your belly button? Can you point to the exact area?"
+            elif 'back' in user_response:
+                return "Where exactly in your back do you feel the pain? Is it in your upper back (between shoulder blades), middle back, lower back, or does it go into your side? Does the pain stay in your back or radiate anywhere else?"
                 
-        return f"Can you tell me more details about your {pain_type}? Specifically, what does it feel like and how severe is it?"
+        return f"Can you provide more details about your {pain_type}? I need to understand what it feels like, how severe it is, and exactly where you feel it to help assess your condition properly."
+    
+    async def _generate_comprehensive_pain_followup(self, user_response: str, medical_domain: str, context: MedicalContext) -> str:
+        """Generate comprehensive follow-up for basic pain statements needing full elaboration"""
+        
+        if medical_domain == 'cardiovascular':
+            return "I need to gather important details about your chest pain for your safety. Can you describe: 1) What does it feel like (crushing, sharp, pressure, burning)? 2) How severe is it on a scale of 1-10? 3) Exactly where in your chest do you feel it? 4) Does it spread to your arm, jaw, neck, or back?"
+        
+        elif medical_domain == 'neurological':
+            return "To properly assess your headache, I need more specific information. Can you tell me: 1) What type of pain is it (throbbing, sharp, pressure, pounding)? 2) How severe on a scale of 1-10? 3) Where exactly in your head (one side, both sides, front, back)? 4) Did it come on suddenly or gradually?"
+        
+        elif medical_domain == 'gastrointestinal':
+            return "To understand your abdominal pain better, please describe: 1) What does it feel like (cramping, sharp, gnawing, burning)? 2) How severe is it (1-10 scale)? 3) Exactly where in your abdomen is it located? 4) Does it come and go or is it constant?"
+        
+        elif medical_domain == 'musculoskeletal':
+            return "To assess your back/joint pain, I need to know: 1) What type of pain is it (aching, sharp, stiff, throbbing)? 2) How would you rate the severity (1-10)? 3) Exactly where do you feel it? 4) What makes it better or worse?"
+        
+        else:
+            return "To better understand your pain, can you provide these details: 1) What does the pain feel like (sharp, dull, burning, aching)? 2) How severe is it on a scale of 1 to 10? 3) Where exactly do you feel it? 4) When did it start and how has it changed?"
     
     async def _generate_temporal_followup(self, user_response: str, chief_complaint: str, context: MedicalContext) -> str:
         """Generate enhanced, context-aware follow-up for vague temporal information"""
