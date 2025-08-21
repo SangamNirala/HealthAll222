@@ -13,7 +13,7 @@ import time
 from datetime import datetime
 
 # Backend URL
-BACKEND_URL = "https://med-ai-debug.preview.emergentagent.com/api"
+BACKEND_URL = "https://converse-context.preview.emergentagent.com/api"
 
 class FocusedPhase4Tester:
     """Focused Phase 4 testing with proper consultation flow"""

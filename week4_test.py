@@ -12,7 +12,7 @@ import time
 from typing import Dict, List, Any
 
 # Test configuration
-BACKEND_URL = "https://med-ai-debug.preview.emergentagent.com/api"
+BACKEND_URL = "https://converse-context.preview.emergentagent.com/api"
 TEST_TIMEOUT = 30
 
 class Week4TestSuite:

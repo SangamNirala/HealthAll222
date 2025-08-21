@@ -10,7 +10,7 @@ import requests
 import json
 import pprint
 
-BACKEND_URL = "https://symptom-analyzer-6.preview.emergentagent.com"
+BACKEND_URL = "https://converse-context.preview.emergentagent.com"
 
 def analyze_temporal_response():
     """Analyze the detailed temporal response structure"""

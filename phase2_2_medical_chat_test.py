@@ -19,7 +19,7 @@ class Phase22MedicalChatTester:
     5. Medical Context Persistence across conversation turns
     """
     
-    def __init__(self, base_url="https://med-ai-debug.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://converse-context.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0

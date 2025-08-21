@@ -43,7 +43,7 @@ import uuid
 sys.path.append('/app/backend')
 
 # Test configuration
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://med-ai-debug.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://converse-context.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class AdaptiveLearningTester:
