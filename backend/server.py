@@ -11494,6 +11494,288 @@ async def analyze_empathy_metrics(request: EmpathyMetricsRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Empathy metrics analysis failed: {str(e)}")
 
+# 🔬 TASK 6.1: INTELLIGENT CLARIFICATION SYSTEM ENDPOINTS 🔬
+
+class ClarificationAnalysisRequest(BaseModel):
+    """Request model for intelligent clarification analysis"""
+    patient_input: str = Field(..., description="Patient input that may need clarification")
+    medical_context: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Medical context for analysis")
+    consultation_stage: Optional[str] = Field(None, description="Current consultation stage")
+    previous_symptoms: Optional[List[str]] = Field(default_factory=list, description="Previously mentioned symptoms")
+
+class ClarificationAnalysisResponse(BaseModel):
+    """Response model for intelligent clarification analysis"""
+    input_type: str = Field(..., description="Type of unclear input detected")
+    confidence_score: float = Field(..., description="Confidence in unclear input detection (0.0-1.0)")
+    detected_elements: List[str] = Field(..., description="Medical elements detected in unclear input")
+    missing_critical_info: List[str] = Field(..., description="Critical medical information that is missing")
+    clarification_priority: str = Field(..., description="Priority level for clarification (high, medium, low)")
+    suggested_questions: List[str] = Field(..., description="Intelligent clarifying questions")
+    medical_context_clues: Dict[str, Any] = Field(..., description="Medical context clues extracted")
+    urgency_indicators: List[str] = Field(..., description="Urgency indicators detected")
+    patient_communication_style: str = Field(..., description="Assessed patient communication style")
+    clarification_needed: bool = Field(..., description="Whether immediate clarification is needed")
+    processing_time_ms: float = Field(..., description="Processing time in milliseconds")
+    algorithm_version: str = Field(..., description="Algorithm version used")
+
+@api_router.post("/medical-ai/clarification-analysis", response_model=ClarificationAnalysisResponse)
+async def analyze_unclear_medical_input(request: ClarificationAnalysisRequest):
+    """
+    🔬 TASK 6.1: INTELLIGENT CLARIFICATION ANALYSIS ENDPOINT
+    
+    Analyze unclear, vague, or ambiguous patient medical inputs and determine
+    the best clarification approach with intelligent question generation.
+    """
+    try:
+        # Perform intelligent clarification analysis
+        clarification_result = await analyze_and_clarify_unclear_input(
+            patient_input=request.patient_input,
+            medical_context=request.medical_context
+        )
+        
+        # Determine if immediate clarification is needed (high confidence + priority)
+        clarification_needed = (
+            clarification_result.confidence_score > 0.75 and
+            clarification_result.clarification_priority in ["high", "medium"]
+        )
+        
+        return ClarificationAnalysisResponse(
+            input_type=clarification_result.input_type.value,
+            confidence_score=clarification_result.confidence_score,
+            detected_elements=clarification_result.detected_elements,
+            missing_critical_info=clarification_result.missing_critical_info,
+            clarification_priority=clarification_result.clarification_priority,
+            suggested_questions=clarification_result.suggested_questions,
+            medical_context_clues=clarification_result.medical_context_clues,
+            urgency_indicators=clarification_result.urgency_indicators,
+            patient_communication_style=clarification_result.patient_communication_style,
+            clarification_needed=clarification_needed,
+            processing_time_ms=clarification_result.processing_time_ms,
+            algorithm_version="6.1_intelligent_clarification_engine"
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Clarification analysis failed: {str(e)}")
+
+class ClarificationResponseRequest(BaseModel):
+    """Request model for generating clarification response"""
+    patient_input: str = Field(..., description="Original unclear patient input")
+    input_type: str = Field(..., description="Type of unclear input")
+    confidence_score: float = Field(..., description="Confidence score from analysis")
+    detected_elements: List[str] = Field(..., description="Detected medical elements")
+    missing_critical_info: List[str] = Field(..., description="Missing critical information")
+    urgency_indicators: List[str] = Field(..., description="Urgency indicators")
+    patient_communication_style: str = Field(..., description="Patient communication style")
+
+class ClarificationResponseResponse(BaseModel):
+    """Response model for clarification response generation"""
+    clarification_response: str = Field(..., description="Generated clarification response")
+    empathetic_response: str = Field(..., description="Empathetically enhanced response")
+    response_type: str = Field(..., description="Type of clarification response")
+    empathy_score: float = Field(..., description="Empathy score of response")
+    question_priority_order: List[str] = Field(..., description="Priority order of questions asked")
+    medical_reasoning: str = Field(..., description="Medical reasoning behind clarification")
+    urgency_acknowledgment: bool = Field(..., description="Whether urgency was acknowledged")
+    communication_adaptations: List[str] = Field(..., description="Communication adaptations made")
+    algorithm_version: str = Field(..., description="Algorithm version used")
+
+@api_router.post("/medical-ai/generate-clarification-response", response_model=ClarificationResponseResponse)
+async def generate_intelligent_clarification_response(request: ClarificationResponseRequest):
+    """
+    🔬 TASK 6.1: INTELLIGENT CLARIFICATION RESPONSE GENERATOR
+    
+    Generate intelligent, empathetic clarification responses for unclear medical inputs
+    based on analysis results and patient communication style.
+    """
+    try:
+        # Create clarification result object for response generation
+        from intelligent_clarification_system import ClarificationAnalysisResult, UnclearInputType
+        
+        # Convert string back to enum
+        input_type_enum = UnclearInputType(request.input_type)
+        
+        clarification_result = ClarificationAnalysisResult(
+            input_type=input_type_enum,
+            confidence_score=request.confidence_score,
+            detected_elements=request.detected_elements,
+            missing_critical_info=request.missing_critical_info,
+            clarification_priority="high",  # Assume high since we're generating response
+            suggested_questions=[],  # Will be generated
+            medical_context_clues={},
+            urgency_indicators=request.urgency_indicators,
+            patient_communication_style=request.patient_communication_style,
+            processing_time_ms=0.0
+        )
+        
+        # Generate clarification response
+        clarification_response = await generate_clarification_response(
+            clarification_result, request.patient_input
+        )
+        
+        # Try to enhance with empathetic communication
+        try:
+            medical_ai_service = get_medical_ai()
+            empathetic_response = await medical_ai_service._generate_empathetic_response(clarification_response)
+        except Exception:
+            empathetic_response = clarification_response
+        
+        # Analyze response for metadata
+        urgency_acknowledgment = any(
+            word in clarification_response.lower() 
+            for word in ["urgent", "emergency", "immediate", "chest", "breathing"]
+        )
+        
+        # Determine adaptations made
+        communication_adaptations = []
+        if request.patient_communication_style == "emotional_expressive":
+            communication_adaptations.append("Added empathetic validation and emotional support")
+        elif request.patient_communication_style == "minimal_communicator":
+            communication_adaptations.append("Used clear, direct language to encourage detailed responses")
+        elif request.patient_communication_style == "uncertain_vague":
+            communication_adaptations.append("Provided reassurance and structured guidance")
+        
+        # Extract question priority from response
+        question_priority_order = []
+        if "specific symptoms" in clarification_response.lower():
+            question_priority_order.append("symptom_specification")
+        if "where" in clarification_response.lower() or "location" in clarification_response.lower():
+            question_priority_order.append("anatomical_location")
+        if "when" in clarification_response.lower() or "timing" in clarification_response.lower():
+            question_priority_order.append("temporal_details")
+        
+        return ClarificationResponseResponse(
+            clarification_response=clarification_response,
+            empathetic_response=empathetic_response,
+            response_type=f"clarification_for_{request.input_type}",
+            empathy_score=0.8 if empathetic_response != clarification_response else 0.6,
+            question_priority_order=question_priority_order,
+            medical_reasoning=f"Clarification needed for {request.input_type} input to gather critical medical information",
+            urgency_acknowledgment=urgency_acknowledgment,
+            communication_adaptations=communication_adaptations,
+            algorithm_version="6.1_intelligent_clarification_response_generator"
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Clarification response generation failed: {str(e)}")
+
+class ClarificationTestRequest(BaseModel):
+    """Request model for testing clarification system with multiple inputs"""
+    test_inputs: List[str] = Field(..., description="List of unclear medical inputs to test")
+    medical_context: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Medical context for testing")
+    generate_responses: bool = Field(True, description="Whether to generate responses for each input")
+
+class ClarificationTestResponse(BaseModel):
+    """Response model for clarification system testing"""
+    test_results: List[Dict[str, Any]] = Field(..., description="Results for each test input")
+    overall_performance: Dict[str, Any] = Field(..., description="Overall performance metrics")
+    system_recommendations: List[str] = Field(..., description="System performance recommendations")
+    testing_metadata: Dict[str, Any] = Field(..., description="Testing process metadata")
+
+@api_router.post("/medical-ai/test-clarification-system", response_model=ClarificationTestResponse)
+async def test_intelligent_clarification_system(request: ClarificationTestRequest):
+    """
+    🔬 TASK 6.1: INTELLIGENT CLARIFICATION SYSTEM COMPREHENSIVE TESTING
+    
+    Comprehensive testing endpoint for the intelligent clarification system
+    with multiple unclear medical inputs and performance analysis.
+    """
+    try:
+        test_results = []
+        total_processing_time = 0
+        successful_analyses = 0
+        high_confidence_results = 0
+        
+        for i, test_input in enumerate(request.test_inputs):
+            try:
+                start_time = time.time()
+                
+                # Perform clarification analysis
+                clarification_result = await analyze_and_clarify_unclear_input(
+                    patient_input=test_input,
+                    medical_context=request.medical_context
+                )
+                
+                analysis_time = (time.time() - start_time) * 1000
+                total_processing_time += analysis_time
+                successful_analyses += 1
+                
+                if clarification_result.confidence_score > 0.75:
+                    high_confidence_results += 1
+                
+                result_data = {
+                    "test_input": test_input,
+                    "input_number": i + 1,
+                    "analysis_successful": True,
+                    "input_type": clarification_result.input_type.value,
+                    "confidence_score": clarification_result.confidence_score,
+                    "clarification_priority": clarification_result.clarification_priority,
+                    "suggested_questions_count": len(clarification_result.suggested_questions),
+                    "urgency_indicators_count": len(clarification_result.urgency_indicators),
+                    "processing_time_ms": analysis_time,
+                    "patient_communication_style": clarification_result.patient_communication_style
+                }
+                
+                # Generate response if requested
+                if request.generate_responses and clarification_result.suggested_questions:
+                    response = await generate_clarification_response(
+                        clarification_result, test_input
+                    )
+                    result_data["generated_response"] = response
+                    result_data["response_length"] = len(response)
+                
+                test_results.append(result_data)
+                
+            except Exception as test_error:
+                test_results.append({
+                    "test_input": test_input,
+                    "input_number": i + 1,
+                    "analysis_successful": False,
+                    "error": str(test_error),
+                    "processing_time_ms": 0
+                })
+        
+        # Calculate overall performance metrics
+        total_inputs = len(request.test_inputs)
+        success_rate = (successful_analyses / total_inputs * 100) if total_inputs > 0 else 0
+        high_confidence_rate = (high_confidence_results / successful_analyses * 100) if successful_analyses > 0 else 0
+        average_processing_time = total_processing_time / successful_analyses if successful_analyses > 0 else 0
+        
+        overall_performance = {
+            "total_inputs_tested": total_inputs,
+            "successful_analyses": successful_analyses,
+            "success_rate_percentage": round(success_rate, 2),
+            "high_confidence_results": high_confidence_results,
+            "high_confidence_rate_percentage": round(high_confidence_rate, 2),
+            "average_processing_time_ms": round(average_processing_time, 2),
+            "total_processing_time_ms": round(total_processing_time, 2)
+        }
+        
+        # Generate system recommendations
+        system_recommendations = []
+        if success_rate < 90:
+            system_recommendations.append("System success rate below 90% - review error handling")
+        if high_confidence_rate < 70:
+            system_recommendations.append("Low high-confidence detection rate - consider pattern refinement")
+        if average_processing_time > 100:
+            system_recommendations.append("Processing time above 100ms - optimize performance")
+        if not system_recommendations:
+            system_recommendations.append("Excellent system performance - continue current implementation")
+        
+        return ClarificationTestResponse(
+            test_results=test_results,
+            overall_performance=overall_performance,
+            system_recommendations=system_recommendations,
+            testing_metadata={
+                "test_timestamp": datetime.now().isoformat(),
+                "responses_generated": request.generate_responses,
+                "medical_context_provided": bool(request.medical_context),
+                "algorithm_version": "6.1_intelligent_clarification_system_test"
+            }
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Clarification system testing failed: {str(e)}")
+
 @api_router.post("/medical-ai/report", response_model=MedicalReportResponse)
 async def generate_medical_report(request: MedicalReportRequest):
     """Generate professional medical report with PDF generation"""
