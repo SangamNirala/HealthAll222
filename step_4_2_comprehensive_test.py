@@ -10,7 +10,7 @@ import requests
 import json
 from datetime import datetime
 
-BACKEND_URL = "https://empathcare-ai.preview.emergentagent.com/api"
+BACKEND_URL = "https://medbot-query.preview.emergentagent.com/api"
 
 def test_step_42_system():
     """Comprehensive test of Step 4.2 system behavior"""

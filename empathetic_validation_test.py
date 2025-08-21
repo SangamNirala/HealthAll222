@@ -14,7 +14,7 @@ import os
 from datetime import datetime
 
 def test_empathetic_communication_comprehensive():
-    backend_url = "https://empathcare-ai.preview.emergentagent.com/api"
+    backend_url = "https://medbot-query.preview.emergentagent.com/api"
     
     print("🚀 EMPATHETIC COMMUNICATION COMPREHENSIVE VALIDATION")
     print("=" * 70)
