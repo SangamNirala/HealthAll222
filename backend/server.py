@@ -11219,6 +11219,273 @@ async def analyze_contextual_medical_reasoning(request: ContextualAnalysisReques
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Contextual analysis failed: {str(e)}")
 
+# 💝 STEP 5.2: EMPATHETIC COMMUNICATION TRANSFORMATION ENDPOINTS 💝
+
+class EmpathicCommunicationRequest(BaseModel):
+    """Request model for empathetic communication transformation"""
+    medical_text: str = Field(..., description="Technical medical text to transform")
+    patient_anxiety_level: float = Field(0.5, ge=0.0, le=1.0, description="Patient anxiety level (0.0-1.0)")
+    communication_style: str = Field("analytical", description="Patient communication style (analytical, emotional, practical, anxious)")
+    age_group: str = Field("adult", description="Patient age group (pediatric, young_adult, adult, elderly)")
+    is_emergency: bool = Field(False, description="Whether this is an emergency situation")
+    symptom_severity: str = Field("moderate", description="Symptom severity level (mild, moderate, severe, critical)")
+    family_present: bool = Field(False, description="Whether family members are present")
+    health_literacy_level: str = Field("average", description="Patient health literacy (low, average, high)")
+    cultural_background: Optional[str] = Field(None, description="Cultural background considerations")
+
+class EmpathicCommunicationResponse(BaseModel):
+    """Response model for empathetic communication transformation"""
+    original_text: str = Field(..., description="Original technical medical text")
+    empathetic_text: str = Field(..., description="Transformed empathetic patient-friendly text")
+    empathy_score: float = Field(..., description="Empathy score of transformed text (0.0-1.0)")
+    readability_score: float = Field(..., description="Readability score of transformed text (0.0-1.0)")
+    transformations_applied: List[str] = Field(..., description="List of transformations applied")
+    communication_adjustments: List[str] = Field(..., description="Communication style adjustments made")
+    cultural_adaptations: List[str] = Field(..., description="Cultural sensitivity adaptations")
+    emotional_support_elements: List[str] = Field(..., description="Emotional support elements added")
+    transformation_metadata: Dict[str, Any] = Field(..., description="Transformation process metadata")
+    algorithm_version: str = Field(..., description="Algorithm version used")
+
+@api_router.post("/medical-ai/empathetic-communication-transform", response_model=EmpathicCommunicationResponse)
+async def transform_empathetic_communication(request: EmpathicCommunicationRequest):
+    """
+    💝 STEP 5.2: EMPATHETIC COMMUNICATION TRANSFORMATION ENGINE
+    
+    Transform technical medical language into empathetic, patient-friendly 
+    communication while maintaining clinical accuracy and adapting to individual 
+    patient needs and communication preferences.
+    """
+    try:
+        from empathetic_communication_transformer import transform_medical_text_to_empathetic
+        
+        # Perform empathetic communication transformation
+        result = await transform_medical_text_to_empathetic(
+            medical_text=request.medical_text,
+            patient_anxiety_level=request.patient_anxiety_level,
+            communication_style=request.communication_style,
+            age_group=request.age_group,
+            is_emergency=request.is_emergency,
+            db=None  # Can be passed if database integration is needed
+        )
+        
+        # Calculate additional metadata
+        transformation_metadata = {
+            "original_length": len(request.medical_text),
+            "transformed_length": len(result['empathetic_text']),
+            "length_ratio": len(result['empathetic_text']) / len(request.medical_text) if len(request.medical_text) > 0 else 1.0,
+            "transformation_timestamp": datetime.now().isoformat(),
+            "patient_context": {
+                "anxiety_level": request.patient_anxiety_level,
+                "communication_style": request.communication_style,
+                "age_group": request.age_group,
+                "emergency_status": request.is_emergency,
+                "symptom_severity": request.symptom_severity
+            }
+        }
+        
+        return EmpathicCommunicationResponse(
+            original_text=result['original_text'],
+            empathetic_text=result['empathetic_text'],
+            empathy_score=result['empathy_score'],
+            readability_score=result['readability_score'],
+            transformations_applied=result['transformations_applied'],
+            communication_adjustments=result['communication_adjustments'],
+            cultural_adaptations=result['cultural_adaptations'],
+            emotional_support_elements=result['emotional_support_elements'],
+            transformation_metadata=transformation_metadata,
+            algorithm_version=result['algorithm_version']
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Empathetic communication transformation failed: {str(e)}")
+
+class PatientFriendlyExplanationRequest(BaseModel):
+    """Request model for patient-friendly medical explanations"""
+    medical_concepts: List[str] = Field(..., description="List of medical concepts to explain")
+    patient_context: Dict[str, Any] = Field(default_factory=dict, description="Patient context information")
+    explanation_depth: str = Field("moderate", description="Depth of explanation (simple, moderate, detailed)")
+    include_analogies: bool = Field(True, description="Whether to include helpful analogies")
+
+class PatientFriendlyExplanationResponse(BaseModel):
+    """Response model for patient-friendly medical explanations"""
+    explanations: Dict[str, Dict[str, Any]] = Field(..., description="Medical concept explanations")
+    overall_empathy_score: float = Field(..., description="Overall empathy score of explanations")
+    readability_metrics: Dict[str, float] = Field(..., description="Readability metrics")
+    explanation_metadata: Dict[str, Any] = Field(..., description="Explanation generation metadata")
+
+@api_router.post("/medical-ai/patient-friendly-explanation", response_model=PatientFriendlyExplanationResponse)
+async def generate_patient_friendly_explanation(request: PatientFriendlyExplanationRequest):
+    """
+    🧠 STEP 5.2: PATIENT-FRIENDLY MEDICAL EXPLANATION GENERATOR
+    
+    Generate comprehensive, patient-friendly explanations for medical concepts
+    with analogies, simplified language, and empathetic communication.
+    """
+    try:
+        from empathetic_communication_transformer import EmpathicCommunicationTransformer, CommunicationContext, CommunicationStyle, AgeGroup
+        
+        # Initialize transformer
+        transformer = EmpathicCommunicationTransformer()
+        
+        explanations = {}
+        total_empathy_score = 0
+        total_readability_score = 0
+        
+        # Generate explanations for each medical concept
+        for concept in request.medical_concepts:
+            # Create technical explanation prompt
+            technical_explanation = f"Medical concept: {concept}. This refers to {concept.replace('_', ' ')} which is a medical condition or term that requires professional medical evaluation and treatment."
+            
+            # Create communication context from request
+            context = CommunicationContext(
+                patient_anxiety_level=request.patient_context.get('anxiety_level', 0.5),
+                communication_style=CommunicationStyle(request.patient_context.get('communication_style', 'analytical')),
+                age_group=AgeGroup(request.patient_context.get('age_group', 'adult')),
+                health_literacy_level=request.explanation_depth
+            )
+            
+            # Transform to patient-friendly explanation
+            transformation_result = await transformer.transform_medical_response(technical_explanation, context)
+            
+            explanations[concept] = {
+                "patient_friendly_term": concept.replace('_', ' ').title(),
+                "simple_explanation": transformation_result.transformed_text,
+                "empathy_score": transformation_result.empathy_score,
+                "readability_score": transformation_result.readability_score,
+                "transformations_applied": transformation_result.transformations_applied,
+                "emotional_support_elements": transformation_result.emotional_support_elements
+            }
+            
+            total_empathy_score += transformation_result.empathy_score
+            total_readability_score += transformation_result.readability_score
+        
+        # Calculate overall metrics
+        concept_count = len(request.medical_concepts)
+        overall_empathy_score = total_empathy_score / concept_count if concept_count > 0 else 0
+        overall_readability_score = total_readability_score / concept_count if concept_count > 0 else 0
+        
+        return PatientFriendlyExplanationResponse(
+            explanations=explanations,
+            overall_empathy_score=overall_empathy_score,
+            readability_metrics={
+                "overall_readability": overall_readability_score,
+                "average_explanation_length": sum(len(exp["simple_explanation"]) for exp in explanations.values()) / concept_count if concept_count > 0 else 0
+            },
+            explanation_metadata={
+                "concepts_explained": concept_count,
+                "explanation_depth": request.explanation_depth,
+                "analogies_included": request.include_analogies,
+                "generation_timestamp": datetime.now().isoformat(),
+                "algorithm_version": "5.2_patient_friendly_explanation_generator"
+            }
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Patient-friendly explanation generation failed: {str(e)}")
+
+class EmpathyMetricsRequest(BaseModel):
+    """Request model for empathy metrics analysis"""
+    text_samples: List[str] = Field(..., description="List of text samples to analyze for empathy")
+    baseline_comparison: Optional[str] = Field(None, description="Optional baseline text for comparison")
+
+class EmpathyMetricsResponse(BaseModel):
+    """Response model for empathy metrics analysis"""
+    empathy_scores: List[Dict[str, Any]] = Field(..., description="Empathy scores for each text sample")
+    comparative_analysis: Dict[str, Any] = Field(..., description="Comparative analysis if baseline provided")
+    overall_metrics: Dict[str, float] = Field(..., description="Overall empathy metrics")
+    recommendations: List[str] = Field(..., description="Recommendations for improving empathy")
+
+@api_router.post("/medical-ai/empathy-metrics", response_model=EmpathyMetricsResponse)
+async def analyze_empathy_metrics(request: EmpathyMetricsRequest):
+    """
+    📊 STEP 5.2: EMPATHY METRICS ANALYSIS ENGINE
+    
+    Analyze text samples for empathy levels and provide detailed metrics
+    and recommendations for improving empathetic communication.
+    """
+    try:
+        from empathetic_communication_transformer import EmpathicCommunicationTransformer
+        
+        transformer = EmpathicCommunicationTransformer()
+        empathy_scores = []
+        total_empathy = 0
+        
+        # Analyze each text sample
+        for i, text in enumerate(request.text_samples):
+            empathy_score = await transformer._calculate_empathy_score(text, None)  # Pass None for context as we're just analyzing
+            readability_score = await transformer._calculate_readability_score(text)
+            
+            # Count empathy indicators
+            empathy_indicators = ['understand', 'feel', 'concern', 'support', 'help', 'care', 'worry', 'comfort']
+            empathy_count = sum(1 for indicator in empathy_indicators if indicator.lower() in text.lower())
+            
+            # Calculate word statistics
+            word_count = len(text.split())
+            empathy_density = empathy_count / word_count if word_count > 0 else 0
+            
+            sample_analysis = {
+                "sample_index": i + 1,
+                "text_preview": text[:100] + "..." if len(text) > 100 else text,
+                "empathy_score": empathy_score,
+                "readability_score": readability_score,
+                "empathy_indicators_count": empathy_count,
+                "empathy_density": round(empathy_density, 3),
+                "word_count": word_count,
+                "character_count": len(text)
+            }
+            
+            empathy_scores.append(sample_analysis)
+            total_empathy += empathy_score
+        
+        # Calculate overall metrics
+        sample_count = len(request.text_samples)
+        average_empathy = total_empathy / sample_count if sample_count > 0 else 0
+        average_readability = sum(score["readability_score"] for score in empathy_scores) / sample_count if sample_count > 0 else 0
+        
+        # Generate recommendations
+        recommendations = []
+        if average_empathy < 0.5:
+            recommendations.append("Consider adding more empathetic language and validation phrases")
+            recommendations.append("Include expressions of understanding and support")
+        if average_empathy < 0.3:
+            recommendations.append("Text appears quite clinical - add emotional warmth and patient-centered language")
+        if average_readability < 0.7:
+            recommendations.append("Simplify sentence structure and use more accessible language")
+        if not recommendations:
+            recommendations.append("Excellent empathetic communication - continue current approach")
+        
+        # Comparative analysis if baseline provided
+        comparative_analysis = {}
+        if request.baseline_comparison:
+            baseline_empathy = await transformer._calculate_empathy_score(request.baseline_comparison, None)
+            baseline_readability = await transformer._calculate_readability_score(request.baseline_comparison)
+            
+            comparative_analysis = {
+                "baseline_empathy_score": baseline_empathy,
+                "baseline_readability_score": baseline_readability,
+                "empathy_improvement": average_empathy - baseline_empathy,
+                "readability_improvement": average_readability - baseline_readability,
+                "improvement_percentage": ((average_empathy - baseline_empathy) / baseline_empathy * 100) if baseline_empathy > 0 else 0
+            }
+        
+        return EmpathyMetricsResponse(
+            empathy_scores=empathy_scores,
+            comparative_analysis=comparative_analysis,
+            overall_metrics={
+                "average_empathy_score": round(average_empathy, 3),
+                "average_readability_score": round(average_readability, 3),
+                "empathy_score_range": {
+                    "min": min(score["empathy_score"] for score in empathy_scores) if empathy_scores else 0,
+                    "max": max(score["empathy_score"] for score in empathy_scores) if empathy_scores else 0
+                },
+                "total_samples_analyzed": sample_count
+            },
+            recommendations=recommendations
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Empathy metrics analysis failed: {str(e)}")
+
 @api_router.post("/medical-ai/report", response_model=MedicalReportResponse)
 async def generate_medical_report(request: MedicalReportRequest):
     """Generate professional medical report with PDF generation"""
