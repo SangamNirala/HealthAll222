@@ -578,6 +578,16 @@ Focus on efficient information gathering with clinical reasoning.
             return self._create_fallback_questions_simple()
 
 
-# Global instances for easy access
-llm_symptom_analyzer = LLMSymptomAnalyzer()
-ai_question_generator = AIQuestionGenerator()
+# Global instances for easy access (with graceful error handling)
+try:
+    llm_symptom_analyzer = LLMSymptomAnalyzer()
+    ai_question_generator = AIQuestionGenerator()
+    print("✅ Gemini AI Progressive Questioning Engine initialized successfully")
+except ValueError as e:
+    print(f"⚠️ Gemini AI Progressive Questioning Engine not available: {e}")
+    llm_symptom_analyzer = None
+    ai_question_generator = None
+except Exception as e:
+    print(f"⚠️ Gemini AI Progressive Questioning Engine initialization failed: {e}")
+    llm_symptom_analyzer = None
+    ai_question_generator = None
