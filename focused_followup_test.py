@@ -8,7 +8,7 @@ import json
 import os
 from datetime import datetime
 
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://healthchat-genius.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://medtalk-genius.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_followup_scenarios():
