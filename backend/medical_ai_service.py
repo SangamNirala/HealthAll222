@@ -9944,30 +9944,46 @@ Generate the follow-up question:
             
             context.current_stage = MedicalInterviewStage.HISTORY_PRESENT_ILLNESS
             
-            # Real doctor approach - ask clarifying questions first
-            if "chest_pain" in symptoms_detected and "headache" in symptoms_detected:
-                response = await self._generate_empathetic_response(
-                    f"You're experiencing both headache and chest discomfort. Let me help you with this. "
-                    f"Can you describe the chest discomfort for me? Is it a sharp pain, pressure, or squeezing sensation? "
-                    f"And when did these symptoms first start?"
+            # 🧠 STEP 4.2: USE INTELLIGENT FOLLOW-UP SYSTEM FOR CHIEF COMPLAINT
+            # Check if the chief complaint response needs intelligent follow-up
+            incompleteness_result = await self._detect_medical_incompleteness(
+                message, "chief_complaint", context
+            )
+            
+            if incompleteness_result['needs_followup']:
+                print(f"[CHIEF COMPLAINT DEBUG] Incompleteness detected: {incompleteness_result['incompleteness_type']} - generating intelligent follow-up")
+                
+                # Generate intelligent follow-up question using Step 4.2 system
+                followup_question = await self._generate_intelligent_followup_question(
+                    message, "chief_complaint", context
                 )
-            elif "chest_pain" in symptoms_detected:
-                response = await self._generate_empathetic_response(
-                    f"You're having chest discomfort. Can you describe what it feels like? "
-                    f"Is it a sharp, stabbing pain, or more of a pressure or squeezing sensation? "
-                    f"When did this start, and does anything make it better or worse?"
-                )
-            elif "fever" in symptoms_detected:
-                response = await self._generate_empathetic_response(
-                    f"You're experiencing a fever. How long have you had the fever? "
-                    f"Have you taken your temperature, and do you have any other symptoms along with it?"
-                )
+                
+                response = await self._generate_empathetic_response(followup_question)
             else:
-                response = await self._generate_empathetic_response(
-                    f"Thank you for sharing that you're experiencing {symptom_response}. "
-                    f"Can you tell me more about when this started and how it's been progressing? "
-                    f"Any specific details about the symptoms would be helpful for my assessment."
-                )
+                # Use original logic as fallback for complete responses
+                if "chest_pain" in symptoms_detected and "headache" in symptoms_detected:
+                    response = await self._generate_empathetic_response(
+                        f"You're experiencing both headache and chest discomfort. Let me help you with this. "
+                        f"Can you describe the chest discomfort for me? Is it a sharp pain, pressure, or squeezing sensation? "
+                        f"And when did these symptoms first start?"
+                    )
+                elif "chest_pain" in symptoms_detected:
+                    response = await self._generate_empathetic_response(
+                        f"You're having chest discomfort. Can you describe what it feels like? "
+                        f"Is it a sharp, stabbing pain, or more of a pressure or squeezing sensation? "
+                        f"When did this start, and does anything make it better or worse?"
+                    )
+                elif "fever" in symptoms_detected:
+                    response = await self._generate_empathetic_response(
+                        f"You're experiencing a fever. How long have you had the fever? "
+                        f"Have you taken your temperature, and do you have any other symptoms along with it?"
+                    )
+                else:
+                    response = await self._generate_empathetic_response(
+                        f"Thank you for sharing that you're experiencing {symptom_response}. "
+                        f"Can you tell me more about when this started and how it's been progressing? "
+                        f"Any specific details about the symptoms would be helpful for my assessment."
+                    )
             
             return {
                 "response": response,
