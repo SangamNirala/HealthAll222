@@ -48,6 +48,13 @@ from intelligent_clarification_system import (
     ClarificationAnalysisResult
 )
 
+# 🚀 STEP 6.2: AI-POWERED PROGRESSIVE QUESTIONING ENGINE WITH GEMINI INTEGRATION
+from gemini_progressive_questioning_service import (
+    analyze_with_ai_progressive_questioning,
+    AIProgressiveQuestionResult,
+    ai_progressive_questioning_service
+)
+
 # 🚀 PHASE 4: REVOLUTIONARY ADVANCED ENTITY CLASSES WITH CLINICAL INTELLIGENCE
 
 @dataclass
