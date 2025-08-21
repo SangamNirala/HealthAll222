@@ -1581,27 +1581,41 @@ def _generate_server_fallback_grammar_patterns(base_text: str, num_variants: int
     ]
     
     # Generate patterns up to requested number
-    for i in range(min(num_variants, len(error_types))):
-        error_type = error_types[i]
+    for i in range(min(num_variants, 15)):  # Generate more patterns up to 15
+        error_type = error_types[i % len(error_types)]  # Cycle through error types if needed
         
         try:
             # Apply the error pattern
             error_text = error_type["pattern"](base_text)
             
+            # Add variation to make each pattern unique
+            if i >= len(error_types):
+                # Add additional variations for extra patterns
+                variations = [
+                    lambda t: t.replace("I ", "Me "),
+                    lambda t: t.replace(" is ", " are "),
+                    lambda t: t.replace(" the ", " "),
+                    lambda t: t.replace(".", " very much."),
+                    lambda t: "Me think " + t.lower()
+                ]
+                if i - len(error_types) < len(variations):
+                    variation = variations[i - len(error_types)]
+                    error_text = variation(error_text)
+            
             # Ensure we actually created an error (text changed)
             if error_text == base_text:
                 # Force a simple change if pattern didn't work
-                error_text = base_text.replace(".", " error.")
+                error_text = base_text.replace(".", f" error {i+1}.")
             
             pattern = {
                 "error_type": error_type["type"],
                 "original_text": error_text,  # The grammatically incorrect version
                 "corrected_text": base_text,  # The original correct version
-                "error_description": error_type["description"],
+                "error_description": f"{error_type['description']} (pattern {i+1})",
                 "medical_entities": [{"entity": "symptom", "type": "medical", "confidence": 0.6}],
                 "difficulty_level": "medium",
                 "patient_demographic": "general",
-                "confidence_level": 0.6  # Lower confidence for fallback
+                "confidence_level": max(0.3, 0.8 - i * 0.05)  # Decreasing confidence for later patterns
             }
             
             fallback_patterns.append(pattern)
