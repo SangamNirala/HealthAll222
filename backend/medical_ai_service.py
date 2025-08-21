@@ -5239,6 +5239,10 @@ class MedicalContext:
     clinical_hypotheses: List[Dict[str, Any]]
     confidence_score: float
     
+    # 🚀 PHASE 5: ENHANCED MEDICAL RESPONSE TEMPLATE DATA
+    enhanced_template_data: Optional[Dict[str, Any]] = None
+    template_clinical_reasoning: Optional[str] = None
+    
     # 🚀 ENHANCED CONVERSATION TRACKING
     questions_asked: Dict[str, str] = None  # element -> question asked
     questions_answered: Dict[str, str] = None  # element -> user response
