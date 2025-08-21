@@ -129,7 +129,7 @@ class Phase71FocusedRetester:
                 
                 if version_ok and metrics_ok and components_ok:
                     details = f"Version: {algorithm_version}, Metrics: {len(performance_metrics)}, Components: {len(component_analysis)}"
-                    self.log_test_result("Performance Summary POST", True, response_time, details)
+                    self.log_test_result("Performance Summary GET", True, response_time, details)
                     return True
                 else:
                     issues = []
