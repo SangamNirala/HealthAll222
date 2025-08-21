@@ -9394,7 +9394,9 @@ Generate the follow-up question:
                 "primary_concern": "Main clinical concern",
                 "key_findings": ["Finding 1", "Finding 2"],
                 "entity_analysis": "How advanced entity extraction influenced the diagnosis",
-                "pattern_significance": "Significance of detected patterns and relationships"
+                "pattern_significance": "Significance of detected patterns and relationships",
+                "template_integration": "How Phase 5 template data enhanced diagnostic accuracy",
+                "symptom_specific_assessment": "Template-guided symptom evaluation insights"
             }},
             "confidence_assessment": {{
                 "diagnostic_confidence": 0.85,
