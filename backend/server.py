@@ -11790,6 +11790,224 @@ async def test_intelligent_clarification_system(request: ClarificationTestReques
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Clarification system testing failed: {str(e)}")
 
+
+# 🚀 STEP 6.2: AI-POWERED PROGRESSIVE QUESTIONING ENGINE API ENDPOINTS
+# ============================================================================
+
+class AIProgressiveQuestioningRequest(BaseModel):
+    """Request model for AI-powered progressive questioning analysis"""
+    patient_input: str = Field(..., description="Patient's vague medical input")
+    medical_context: Optional[Dict[str, Any]] = Field(None, description="Additional medical context")
+    conversation_history: Optional[List[Dict[str, Any]]] = Field(None, description="Previous conversation turns")
+
+class AIProgressiveQuestioningResponse(BaseModel):
+    """Response model for AI-powered progressive questioning analysis"""
+    symptom_analysis: Dict[str, Any] = Field(..., description="Comprehensive AI symptom analysis")
+    generated_questions: List[Dict[str, Any]] = Field(..., description="AI-generated progressive questions")
+    conversation_strategy: str = Field(..., description="Recommended conversation strategy")
+    recommended_next_action: str = Field(..., description="Recommended next action")
+    should_escalate: bool = Field(..., description="Whether to escalate to emergency assessment")
+    escalation_reason: Optional[str] = Field(None, description="Reason for escalation if applicable")
+    conversation_efficiency_score: float = Field(..., description="Conversation efficiency score 0-1")
+    total_processing_time_ms: float = Field(..., description="Total processing time in milliseconds")
+    algorithm_version: str = Field(default="6.2_ai_powered_progressive_questioning", description="Algorithm version")
+
+class AIQuestionGenerationRequest(BaseModel):
+    """Request model for AI-powered question generation"""
+    symptom_analysis: Dict[str, Any] = Field(..., description="AI symptom analysis result")
+    conversation_state: Optional[Dict[str, Any]] = Field(None, description="Current conversation state")
+    patient_profile: Optional[Dict[str, Any]] = Field(None, description="Patient communication profile")
+
+class AIQuestionGenerationResponse(BaseModel):
+    """Response model for AI-powered question generation"""
+    generated_questions: List[Dict[str, Any]] = Field(..., description="AI-generated progressive questions")
+    total_questions: int = Field(..., description="Total number of questions generated")
+    highest_priority_question: Dict[str, Any] = Field(..., description="Highest priority question")
+    generation_reasoning: str = Field(..., description="AI reasoning for question generation")
+    processing_time_ms: float = Field(..., description="Processing time in milliseconds")
+
+class AIConversationOptimizationRequest(BaseModel):
+    """Request model for AI-powered conversation optimization"""
+    conversation_history: List[Dict[str, Any]] = Field(..., description="Complete conversation history")
+    patient_response: str = Field(..., description="Latest patient response")
+    medical_objectives: List[str] = Field(..., description="Medical information objectives")
+
+class AIConversationOptimizationResponse(BaseModel):
+    """Response model for AI-powered conversation optimization"""
+    recommended_question: str = Field(..., description="AI-recommended next question")
+    reasoning: str = Field(..., description="AI reasoning for recommendation")
+    conversation_efficiency_score: float = Field(..., description="Conversation efficiency score 0-1")
+    patient_engagement_level: str = Field(..., description="Patient engagement level assessment")
+    information_completeness: float = Field(..., description="Information completeness score 0-1")
+    should_continue_questioning: bool = Field(..., description="Whether to continue questioning")
+    should_escalate_to_assessment: bool = Field(..., description="Whether to escalate to medical assessment")
+    estimated_questions_remaining: int = Field(..., description="Estimated questions remaining")
+    conversation_quality_indicators: List[str] = Field(..., description="Conversation quality indicators")
+
+@api_router.post("/medical-ai/ai-progressive-questioning-analysis", response_model=AIProgressiveQuestioningResponse)
+async def analyze_with_ai_progressive_questioning_endpoint(request: AIProgressiveQuestioningRequest):
+    """
+    🤖 AI-POWERED ANALYSIS OF VAGUE SYMPTOMS WITH GEMINI LLM INTEGRATION
+    
+    Uses Gemini to analyze ANY vague medical expression and generate contextually
+    appropriate progressive questions without being limited to predefined patterns.
+    
+    Revolutionary enhancement that handles unlimited variations of vague medical
+    expressions with human-like medical reasoning and clinical intelligence.
+    """
+    try:
+        # Process using AI-powered progressive questioning
+        result = await analyze_with_ai_progressive_questioning(
+            patient_input=request.patient_input,
+            medical_context=request.medical_context,
+            conversation_history=request.conversation_history
+        )
+        
+        # Convert dataclass to dict for response
+        symptom_analysis_dict = {
+            "original_input": result.symptom_analysis.original_input,
+            "vagueness_type": result.symptom_analysis.vagueness_type,
+            "missing_information": result.symptom_analysis.missing_information,
+            "clinical_priority": result.symptom_analysis.clinical_priority,
+            "medical_domains": result.symptom_analysis.medical_domains,
+            "urgency_indicators": result.symptom_analysis.urgency_indicators,
+            "patient_communication_style": result.symptom_analysis.patient_communication_style,
+            "confidence_score": result.symptom_analysis.confidence_score,
+            "ai_reasoning": result.symptom_analysis.ai_reasoning,
+            "processing_time_ms": result.symptom_analysis.processing_time_ms,
+            "gemini_model_used": result.symptom_analysis.gemini_model_used
+        }
+        
+        generated_questions_list = []
+        for question in result.generated_questions:
+            generated_questions_list.append({
+                "question_text": question.question_text,
+                "medical_reasoning": question.medical_reasoning,
+                "expected_information_type": question.expected_information_type,
+                "clinical_priority": question.clinical_priority,
+                "empathy_level": question.empathy_level,
+                "follow_up_strategy": question.follow_up_strategy,
+                "confidence_score": question.confidence_score,
+                "question_category": question.question_category,
+                "estimated_information_gain": question.estimated_information_gain
+            })
+        
+        return AIProgressiveQuestioningResponse(
+            symptom_analysis=symptom_analysis_dict,
+            generated_questions=generated_questions_list,
+            conversation_strategy=result.conversation_strategy,
+            recommended_next_action=result.recommended_next_action,
+            should_escalate=result.should_escalate,
+            escalation_reason=result.escalation_reason,
+            conversation_efficiency_score=result.conversation_efficiency_score,
+            total_processing_time_ms=result.total_processing_time_ms
+        )
+        
+    except Exception as e:
+        logger.error(f"AI progressive questioning analysis failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"AI progressive questioning analysis failed: {str(e)}")
+
+@api_router.post("/medical-ai/generate-ai-progressive-question", response_model=AIQuestionGenerationResponse)
+async def generate_ai_powered_progressive_question_endpoint(request: AIQuestionGenerationRequest):
+    """
+    🧠 GENERATE NEXT PROGRESSIVE QUESTION USING AI ANALYSIS
+    
+    Leverages Gemini LLM to determine the most appropriate next question based on
+    conversation context, medical priorities, and patient communication style.
+    """
+    try:
+        start_time = time.time()
+        
+        # Convert dict back to dataclass for processing
+        symptom_analysis = AISymptomAnalysis(
+            original_input=request.symptom_analysis.get("original_input", ""),
+            vagueness_type=request.symptom_analysis.get("vagueness_type", "general_vague"),
+            missing_information=request.symptom_analysis.get("missing_information", []),
+            clinical_priority=request.symptom_analysis.get("clinical_priority", "routine"),
+            medical_domains=request.symptom_analysis.get("medical_domains", []),
+            urgency_indicators=request.symptom_analysis.get("urgency_indicators", []),
+            patient_communication_style=request.symptom_analysis.get("patient_communication_style", "balanced"),
+            confidence_score=float(request.symptom_analysis.get("confidence_score", 0.7)),
+            ai_reasoning=request.symptom_analysis.get("ai_reasoning", ""),
+            processing_time_ms=0.0,
+            gemini_model_used="gemini-1.5-flash"
+        )
+        
+        # Generate AI-powered questions
+        generated_questions = await generate_ai_powered_progressive_question(
+            symptom_analysis=symptom_analysis,
+            conversation_state=request.conversation_state,
+            patient_profile=request.patient_profile
+        )
+        
+        processing_time = (time.time() - start_time) * 1000
+        
+        # Convert to response format
+        questions_list = []
+        for question in generated_questions:
+            questions_list.append({
+                "question_text": question.question_text,
+                "medical_reasoning": question.medical_reasoning,
+                "expected_information_type": question.expected_information_type,
+                "clinical_priority": question.clinical_priority,
+                "empathy_level": question.empathy_level,
+                "follow_up_strategy": question.follow_up_strategy,
+                "confidence_score": question.confidence_score,
+                "question_category": question.question_category,
+                "estimated_information_gain": question.estimated_information_gain
+            })
+        
+        highest_priority_question = questions_list[0] if questions_list else {
+            "question_text": "Can you tell me more about your symptoms?",
+            "medical_reasoning": "Basic information gathering",
+            "clinical_priority": 1
+        }
+        
+        return AIQuestionGenerationResponse(
+            generated_questions=questions_list,
+            total_questions=len(questions_list),
+            highest_priority_question=highest_priority_question,
+            generation_reasoning="AI-powered progressive question generation using Gemini LLM",
+            processing_time_ms=processing_time
+        )
+        
+    except Exception as e:
+        logger.error(f"AI question generation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"AI question generation failed: {str(e)}")
+
+@api_router.post("/medical-ai/ai-conversation-optimization", response_model=AIConversationOptimizationResponse)
+async def optimize_conversation_with_ai_endpoint(request: AIConversationOptimizationRequest):
+    """
+    🎯 AI-POWERED CONVERSATION FLOW OPTIMIZATION
+    
+    Uses Gemini to analyze conversation effectiveness and recommend optimal next steps
+    for gathering specific medical information from vague initial symptoms.
+    """
+    try:
+        # Get AI conversation optimization recommendation
+        recommendation = await optimize_conversation_with_ai(
+            conversation_history=request.conversation_history,
+            patient_response=request.patient_response,
+            medical_objectives=request.medical_objectives
+        )
+        
+        return AIConversationOptimizationResponse(
+            recommended_question=recommendation.recommended_question,
+            reasoning=recommendation.reasoning,
+            conversation_efficiency_score=recommendation.conversation_efficiency_score,
+            patient_engagement_level=recommendation.patient_engagement_level,
+            information_completeness=recommendation.information_completeness,
+            should_continue_questioning=recommendation.should_continue_questioning,
+            should_escalate_to_assessment=recommendation.should_escalate_to_assessment,
+            estimated_questions_remaining=recommendation.estimated_questions_remaining,
+            conversation_quality_indicators=recommendation.conversation_quality_indicators
+        )
+        
+    except Exception as e:
+        logger.error(f"AI conversation optimization failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"AI conversation optimization failed: {str(e)}")
+
+
 @api_router.post("/medical-ai/report", response_model=MedicalReportResponse)
 async def generate_medical_report(request: MedicalReportRequest):
     """Generate professional medical report with PDF generation"""
