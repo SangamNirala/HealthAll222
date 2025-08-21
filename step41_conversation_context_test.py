@@ -25,7 +25,7 @@ from typing import Dict, Any, List, Tuple, Optional
 sys.path.append('/app/backend')
 
 # Test configuration
-BACKEND_URL = "https://followup-testing.preview.emergentagent.com/api"
+BACKEND_URL = "https://healthchat-genius.preview.emergentagent.com/api"
 TEST_PATIENT_ID = "test-patient-step41-001"
 
 def print_test_header(test_name: str):

@@ -22,7 +22,7 @@ from datetime import datetime
 import uuid
 
 # Test configuration
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://followup-testing.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://healthchat-genius.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class AdaptiveLearningTester:
