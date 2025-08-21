@@ -222,7 +222,8 @@ def main():
     
     for flow in conversation_flows:
         result = test_conversation_flow(flow["name"], flow["steps"])
-        all_results.append(result)
+        if result:  # Only add if result is not False
+            all_results.append(result)
     
     # Generate comprehensive summary
     print("\n" + "=" * 80)
