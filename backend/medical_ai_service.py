@@ -8313,9 +8313,10 @@ class WorldClassMedicalAI:
             })
             return incompleteness_analysis
             
-        # 8. SINGLE WORD RESPONSES TO COMPLEX QUESTIONS
+        # 8. ENHANCED SINGLE WORD RESPONSES TO COMPLEX QUESTIONS
         single_word_responses = ['yes', 'no', 'maybe', 'sometimes', 'often', 'rarely', 
-                               'never', 'always', 'possibly', 'probably']
+                               'never', 'always', 'possibly', 'probably', 'kinda', 'sorta',
+                               'perhaps', 'occasionally', 'frequently', 'hardly', 'barely']
         
         if len(words) == 1 and user_response_clean in single_word_responses:
             print(f"[INCOMPLETENESS DEBUG] Insufficient detail response: {user_response}")
@@ -8324,7 +8325,62 @@ class WorldClassMedicalAI:
                 'incompleteness_type': 'insufficient_detail_response',
                 'missing_information': ['elaboration', 'specific_details'],
                 'clinical_significance': 'medium',
+                'confidence': 0.8
+            })
+            return incompleteness_analysis
+        
+        # 9. MEDICAL ABBREVIATIONS OR JARGON WITHOUT CONTEXT
+        medical_abbreviations = ['bp', 'hr', 'temp', 'meds', 'doc', 'er', 'urgent', 'stat']
+        if len(words) <= 2 and any(abbrev in user_response_clean for abbrev in medical_abbreviations):
+            print(f"[INCOMPLETENESS DEBUG] Medical abbreviation needs clarification: {user_response}")
+            incompleteness_analysis.update({
+                'needs_followup': True,
+                'incompleteness_type': 'medical_abbreviation_clarification',
+                'missing_information': ['full_explanation', 'context_details'],
+                'clinical_significance': 'medium',
                 'confidence': 0.75
+            })
+            return incompleteness_analysis
+        
+        # 10. FOOD/MEDICATION NAMES WITHOUT SYMPTOM CONTEXT
+        if len(words) <= 3 and not any(symptom in user_response_clean for symptom in 
+                                      ['pain', 'hurt', 'sick', 'nausea', 'dizzy', 'tired', 'fever']):
+            # Check if it might be a food or medication name
+            potential_triggers = ['eaten', 'took', 'medication', 'pill', 'food', 'ate', 'drink', 'drank']
+            if any(trigger in user_response_clean for trigger in potential_triggers):
+                print(f"[INCOMPLETENESS DEBUG] Potential trigger without symptom context: {user_response}")
+                incompleteness_analysis.update({
+                    'needs_followup': True,
+                    'incompleteness_type': 'trigger_without_symptom_context',
+                    'missing_information': ['symptom_relation', 'specific_effects'],
+                    'clinical_significance': 'medium',
+                    'confidence': 0.7
+                })
+                return incompleteness_analysis
+        
+        # 11. FAMILY HISTORY MENTIONS WITHOUT SPECIFICS
+        family_terms = ['family', 'mom', 'dad', 'mother', 'father', 'parent', 'sibling', 'brother', 'sister', 'grandmother', 'grandfather']
+        if len(words) <= 4 and any(family in user_response_clean for family in family_terms):
+            print(f"[INCOMPLETENESS DEBUG] Family history needs elaboration: {user_response}")
+            incompleteness_analysis.update({
+                'needs_followup': True,
+                'incompleteness_type': 'family_history_elaboration',
+                'missing_information': ['specific_conditions', 'relevance_to_symptoms'],
+                'clinical_significance': 'medium',
+                'confidence': 0.75
+            })
+            return incompleteness_analysis
+        
+        # 12. SYMPTOM FREQUENCY WITHOUT PATTERN DETAILS
+        frequency_terms = ['always', 'never', 'sometimes', 'often', 'rarely', 'usually', 'typically']
+        if len(words) <= 2 and any(freq in user_response_clean for freq in frequency_terms):
+            print(f"[INCOMPLETENESS DEBUG] Frequency needs pattern details: {user_response}")
+            incompleteness_analysis.update({
+                'needs_followup': True,
+                'incompleteness_type': 'frequency_pattern_clarification',
+                'missing_information': ['specific_pattern', 'triggering_factors'],
+                'clinical_significance': 'medium',
+                'confidence': 0.8
             })
             return incompleteness_analysis
         
