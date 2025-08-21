@@ -42,6 +42,14 @@ from food_recognition_service import FoodRecognitionService
 # Import Medical AI services
 from services.soap_generator import ProfessionalSOAPGenerator
 
+# 🔬 TASK 6.1: INTELLIGENT CLARIFICATION SYSTEM
+from intelligent_clarification_system import (
+    analyze_and_clarify_unclear_input, 
+    generate_clarification_response,
+    UnclearInputType,
+    ClarificationAnalysisResult
+)
+
 # Import Symptom Checker services
 from symptom_checker_service import (
     SymptomAssessmentEngine, 
