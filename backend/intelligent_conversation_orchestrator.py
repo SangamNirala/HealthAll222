@@ -422,5 +422,13 @@ Provide comprehensive progress analysis in JSON format:
         )
 
 
-# Global instance for easy access
-intelligent_conversation_orchestrator = IntelligentConversationOrchestrator()
+# Global instance for easy access (with graceful error handling)
+try:
+    intelligent_conversation_orchestrator = IntelligentConversationOrchestrator()
+    print("✅ Intelligent Conversation Orchestrator initialized successfully")
+except ValueError as e:
+    print(f"⚠️ Intelligent Conversation Orchestrator not available: {e}")
+    intelligent_conversation_orchestrator = None
+except Exception as e:
+    print(f"⚠️ Intelligent Conversation Orchestrator initialization failed: {e}")
+    intelligent_conversation_orchestrator = None
